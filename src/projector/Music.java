@@ -5,6 +5,7 @@
  */
 package projector;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -13,6 +14,16 @@ import java.util.List;
  */
 public class Music {
     private List<String> phrases;
+    private String name;
+    private File file;
+
+    public File getFile() {
+        return file;
+    }
+
+    public void setFile(File file) {
+        this.file = file;
+    }
 
     public List<String> getPhrases() {
         return phrases;
@@ -29,5 +40,4 @@ public class Music {
     public void setName(String name) {
         this.name = name;
     }
-    private String name;
 }

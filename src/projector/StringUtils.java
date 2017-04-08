@@ -81,14 +81,22 @@ public class StringUtils {
 
       width = fm.stringWidth(before);
       int pos;
-      if (width > maxWidth) // Too long
+      if (width > maxWidth) { 
+        // Too long
         pos = findBreakBefore(line, guess);
-      else { // Too short or possibly just right
+      } else { 
+        // Too short or possibly just right
         pos = findBreakAfter(line, guess);
-        if (pos != -1) { // Make sure this doesn't make us too long
+        if (pos != -1) { 
+          // Make sure this doesn't make us too long
           before = line.substring(0, pos).trim();
           if (fm.stringWidth(before) > maxWidth)
             pos = findBreakBefore(line, guess);
+        } else {
+            int breakBefore = findBreakBefore(line, guess);
+            if (breakBefore > 0) {
+                pos = breakBefore;
+            }
         }
       }
       if (pos == -1)

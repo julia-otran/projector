@@ -5,8 +5,10 @@
  */
 package projector;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.swing.DefaultListModel;
 import javax.swing.ListModel;
 import javax.swing.event.ListDataListener;
@@ -16,8 +18,12 @@ import javax.swing.event.ListDataListener;
  * @author guilherme
  */
 public class MusicRepository {
-    private List<Music> musics = new ArrayList<>();
-    private DefaultListModel<String> musicsListModel = new DefaultListModel<>();
+    private final List<Music> musics = new ArrayList<>();
+    private final DefaultListModel<String> musicsListModel;
+
+    public MusicRepository() {
+        this.musicsListModel = new DefaultListModel<>();
+    }
     
     public void add(Music m) {
         musics.add(m);
@@ -54,5 +60,25 @@ public class MusicRepository {
             @Override
             public void removeListDataListener(ListDataListener l) { }
         };
+    }
+
+    String getPhrasesUnion(int music, int[] selected) {
+        Music m = musics.get(music);
+        
+        StringBuilder phrases = new StringBuilder();
+        for (int l : selected) {
+            phrases.append(m.getPhrases().get(l)).append("\n");
+        }
+        
+        return phrases.toString();
+    }
+
+    void clear() {
+        musics.clear();
+        musicsListModel.clear();
+    }
+
+    List<File> openFiles() {
+        return musics.stream().map(Music::getFile).collect(Collectors.toList());
     }
 }

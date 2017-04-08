@@ -6,6 +6,8 @@
 package projector;
 
 import java.io.File;
+import java.util.List;
+import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import say.swing.JFontChooser;
 
@@ -45,6 +47,7 @@ public class MainFrame extends javax.swing.JFrame {
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItemLoadMusic = new javax.swing.JMenuItem();
+        jMenuItemUpdateMusics = new javax.swing.JMenuItem();
         jMenuItem1 = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         jMenuItemChangeFont = new javax.swing.JMenuItem();
@@ -61,7 +64,6 @@ public class MainFrame extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(jListMusics);
 
-        jListPhrases.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jListPhrases.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
             public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
                 phraseChanged(evt);
@@ -78,6 +80,14 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
         jMenu1.add(jMenuItemLoadMusic);
+
+        jMenuItemUpdateMusics.setText("Atualizar Letras");
+        jMenuItemUpdateMusics.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemUpdateMusicsActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItemUpdateMusics);
 
         jMenuItem1.setText("Limpar Tela");
         jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
@@ -132,14 +142,15 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jMenuItemChangeFontActionPerformed
 
     private void phraseChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_phraseChanged
-        int selected = jListPhrases.getSelectedIndex();
+        int musicIndex = jListMusics.getSelectedIndex();
+        int selected[] = jListPhrases.getSelectedIndices();
         
-        if (selected < 0) {
+        if (musicIndex < 0 || selected.length <= 0) {
             projectionWindow.setText("");
             return;
         }
         
-        projectionWindow.setText(jListPhrases.getModel().getElementAt(selected));
+        projectionWindow.setText(musicRepo.getPhrasesUnion(musicIndex, selected));
     }//GEN-LAST:event_phraseChanged
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
@@ -169,8 +180,20 @@ public class MainFrame extends javax.swing.JFrame {
         int selectedMusic = jListMusics.getSelectedIndex();
         if (selectedMusic >= 0) {
             jListPhrases.setModel(musicRepo.getPhrasesModel(selectedMusic));
+        } else {
+            jListPhrases.setModel(new DefaultListModel<>());
         }
     }//GEN-LAST:event_jListMusicsValueChanged
+
+    private void jMenuItemUpdateMusicsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemUpdateMusicsActionPerformed
+        jListMusics.clearSelection();
+        jListPhrases.clearSelection();
+        
+        List<File> openFiles = musicRepo.openFiles();
+        musicRepo.clear();
+        
+        MusicLoader.loadFilesToRepository(openFiles, musicRepo);
+    }//GEN-LAST:event_jMenuItemUpdateMusicsActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JList<String> jListMusics;
@@ -182,6 +205,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItemChangeFont;
     private javax.swing.JMenuItem jMenuItemLoadMusic;
+    private javax.swing.JMenuItem jMenuItemUpdateMusics;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     // End of variables declaration//GEN-END:variables

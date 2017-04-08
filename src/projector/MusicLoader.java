@@ -20,28 +20,41 @@ import javax.swing.JOptionPane;
  */
 public class MusicLoader {
     public static Music loadFromFile(File file) {
-        Music m = new Music();
-        m.setName(file.getName().replace(".txt", ""));
-        
         try {
+            Music m = new Music();
+            m.setName(file.getName().replace(".txt", ""));
+            m.setFile(file);
+
             List<String> lines = Files.readAllLines(file.toPath());
             m.setPhrases(lines);
-        } catch (IOException ex) {
+            
+            return m;
+        } catch (Exception ex) {
             Logger.getLogger(MusicLoader.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
+    }
+    
+    public static void loadFileToRepository(File source, MusicRepository destination) {
+        Music loaded = loadFromFile(source);
         
-        return m;
+        if (loaded == null) {
+            JOptionPane.showMessageDialog(null, source.getAbsolutePath(), "Erro ao carregar arquivo", JOptionPane.ERROR_MESSAGE);
+        } else {
+            destination.add(loaded);
+        }
     }
     
     public static void loadFilesToRepository(File sources[], MusicRepository destination) {
         for (File f : sources) {
-            Music loaded = loadFromFile(f);
-            if (loaded == null) {
-                JOptionPane.showMessageDialog(null, f.getAbsolutePath(), "Erro ao carregar arquivo", JOptionPane.ERROR_MESSAGE);
-            } else {
-                destination.add(loaded);
-            }
+            loadFileToRepository(f, destination);
         }
     }
+
+    public static void loadFilesToRepository(List<File> sources, MusicRepository destination) {
+        for (File f : sources) {
+            loadFileToRepository(f, destination);
+        }
+    }
+    
 }
