@@ -5,6 +5,9 @@
  */
 package projector;
 
+import java.awt.AWTEvent;
+import java.awt.Font;
+
 /**
  *
  * @author 15096134
@@ -32,21 +35,23 @@ public class ProjectionFrame extends javax.swing.JFrame implements ProjectionWin
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(0, 0, 0));
+        setMinimumSize(new java.awt.Dimension(640, 480));
         setUndecorated(true);
+        setSize(new java.awt.Dimension(640, 480));
 
-        textLabel.setForeground(new java.awt.Color(255, 255, 255));
-        textLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        textLabel.setName("textLabel"); // NOI18N
+        textLabel.setFont(new java.awt.Font("SansSerif", 0, 98)); // NOI18N
+        textLabel.setForeground(java.awt.Color.white);
+        textLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(textLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(textLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 640, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(textLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(textLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 480, Short.MAX_VALUE)
         );
 
         pack();
@@ -54,10 +59,29 @@ public class ProjectionFrame extends javax.swing.JFrame implements ProjectionWin
 
     @Override
     public void setText(String string) {
-        textLabel.setText(string);
+        textLabel.setText("<html><p></p></html>");
+        String ht = "<html><p>" + string + "</p></html>";
+        
+        java.awt.EventQueue.invokeLater(new Runnable(){
+            @Override
+            public void run() {
+                textLabel.setText(ht);
+            }
+        });
+
+    }
+    
+    @Override
+    public Font getFont() {
+        return textLabel.getFont();
+    }
+    
+    public void setFont(Font font) {
+        textLabel.setFont(font);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel textLabel;
     // End of variables declaration//GEN-END:variables
+
 }

@@ -10,7 +10,14 @@ import java.awt.DisplayMode;
 import java.awt.Frame;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
 import java.awt.Window;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -45,18 +52,53 @@ public class Projector {
         }
         //</editor-fold>
 
+        
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice devices[] = ge.getScreenDevices();
-        GraphicsDevice dev = devices[0];
         
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 ProjectionFrame projectionFrame = new ProjectionFrame();
-                dev.setFullScreenWindow(projectionFrame);
+                projectionFrame.setVisible(false);
                 
-                new MainFrame(projectionFrame).setVisible(true);
+                MainFrame controlFrame = new MainFrame(projectionFrame);
+                controlFrame.setVisible(false);
+               
+                // Prevent panes from displaying in wrong screen
+                JOptionPane.setRootFrame(controlFrame);
+               
+                GraphicsDevice dev = findProjectionDevice(devices);
+                // When no device to output, no output.
+                if (dev != null) {
+                    Rectangle bounds = dev.getDefaultConfiguration().getBounds();
+                    projectionFrame.setBounds(bounds);
+                    projectionFrame.setVisible(true);
+                }
+                
+                controlFrame.setVisible(true);
             }
         });
+    }
+    
+    private static GraphicsDevice findProjectionDevice(GraphicsDevice allDevices[]) {
+        List<GraphicsDevice> devices = Arrays.asList(allDevices)
+                .stream()
+                .filter(GraphicsDevice::isFullScreenSupported)
+                .collect(Collectors.toList());
+        
+        long count = devices.size();
+        if (count <= 0) {
+            return null;
+        }
+        
+        Object names[] = devices.stream().map(GraphicsDevice::getIDstring).toArray();
+        int selected = JOptionPane.showOptionDialog(null, "Em qual tela a letra deve ser projetada?", "Selecionar tela", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, names, null);
+        
+        if (selected < 0 || selected >= count) {
+            return null;
+        } 
+        
+        return devices.get(selected);
     }
 }

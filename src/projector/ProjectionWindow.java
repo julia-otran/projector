@@ -5,10 +5,14 @@
  */
 package projector;
 
+import java.awt.Font;
+
 /**
  *
  * @author 15096134
  */
 public interface ProjectionWindow {
     void setText(String string);
+    void setFont(Font font);
+    Font getFont();
 }

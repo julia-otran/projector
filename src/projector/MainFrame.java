@@ -5,12 +5,18 @@
  */
 package projector;
 
+import java.io.File;
+import javax.swing.JFileChooser;
+import say.swing.JFontChooser;
+
 /**
  *
  * @author 15096134
  */
 public class MainFrame extends javax.swing.JFrame {
     private ProjectionWindow projectionWindow;
+    private File lastDirectory;
+    private MusicRepository musicRepo;
     
     /**
      * Creates new form MainFrame
@@ -18,6 +24,8 @@ public class MainFrame extends javax.swing.JFrame {
     public MainFrame(ProjectionWindow projectionWindow) {
         this.projectionWindow = projectionWindow;
         initComponents();
+        musicRepo = new MusicRepository();
+        jListMusics.setModel(musicRepo.getMusicsModel());
     }
 
     /**
@@ -29,43 +37,152 @@ public class MainFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jButton1 = new javax.swing.JButton();
+        jMenu3 = new javax.swing.JMenu();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jListMusics = new javax.swing.JList<>();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jListPhrases = new javax.swing.JList<>();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        jMenu1 = new javax.swing.JMenu();
+        jMenuItemLoadMusic = new javax.swing.JMenuItem();
+        jMenuItem1 = new javax.swing.JMenuItem();
+        jMenu2 = new javax.swing.JMenu();
+        jMenuItemChangeFont = new javax.swing.JMenuItem();
+
+        jMenu3.setText("jMenu3");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jButton1.setText("jButton1");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+        jListMusics.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jListMusics.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                jListMusicsValueChanged(evt);
             }
         });
+        jScrollPane1.setViewportView(jListMusics);
+
+        jListPhrases.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jListPhrases.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                phraseChanged(evt);
+            }
+        });
+        jScrollPane2.setViewportView(jListPhrases);
+
+        jMenu1.setText("Arquivo");
+
+        jMenuItemLoadMusic.setText("Carregar Letra");
+        jMenuItemLoadMusic.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemLoadMusicActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItemLoadMusic);
+
+        jMenuItem1.setText("Limpar Tela");
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem1ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem1);
+
+        jMenuBar1.add(jMenu1);
+
+        jMenu2.setText("Configurações");
+
+        jMenuItemChangeFont.setText("Trocar fonte");
+        jMenuItemChangeFont.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemChangeFontActionPerformed(evt);
+            }
+        });
+        jMenu2.add(jMenuItemChangeFont);
+
+        jMenuBar1.add(jMenu2);
+
+        setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(124, 124, 124)
-                .addComponent(jButton1)
-                .addContainerGap(203, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 409, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(110, 110, 110)
-                .addComponent(jButton1)
-                .addContainerGap(167, Short.MAX_VALUE))
+            .addComponent(jScrollPane2)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 432, Short.MAX_VALUE)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-        projectionWindow.setText("asdf");
-    }//GEN-LAST:event_jButton1ActionPerformed
+    private void jMenuItemChangeFontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemChangeFontActionPerformed
+        JFontChooser fontChooser = new JFontChooser();
+        fontChooser.setSelectedFont(projectionWindow.getFont());
+        
+        int result = fontChooser.showDialog(this);
+        if (result == JFontChooser.OK_OPTION) {
+             projectionWindow.setFont(fontChooser.getSelectedFont());
+        }
+    }//GEN-LAST:event_jMenuItemChangeFontActionPerformed
+
+    private void phraseChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_phraseChanged
+        int selected = jListPhrases.getSelectedIndex();
+        
+        if (selected < 0) {
+            projectionWindow.setText("");
+            return;
+        }
+        
+        projectionWindow.setText(jListPhrases.getModel().getElementAt(selected));
+    }//GEN-LAST:event_phraseChanged
+
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+        jListPhrases.clearSelection();
+    }//GEN-LAST:event_jMenuItem1ActionPerformed
+
+    private void jMenuItemLoadMusicActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemLoadMusicActionPerformed
+        final JFileChooser fc = new JFileChooser();
+        fc.setFileFilter(new TextFileFilter());
+        fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fc.setMultiSelectionEnabled(true);
+        
+        if (lastDirectory != null) {
+            fc.setCurrentDirectory(lastDirectory);
+        }
+        
+        int returnVal = fc.showOpenDialog(this);
+        
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            lastDirectory = fc.getCurrentDirectory();
+            MusicLoader.loadFilesToRepository(fc.getSelectedFiles(), musicRepo);
+        }
+        
+    }//GEN-LAST:event_jMenuItemLoadMusicActionPerformed
+
+    private void jListMusicsValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_jListMusicsValueChanged
+        int selectedMusic = jListMusics.getSelectedIndex();
+        if (selectedMusic >= 0) {
+            jListPhrases.setModel(musicRepo.getPhrasesModel(selectedMusic));
+        }
+    }//GEN-LAST:event_jListMusicsValueChanged
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
+    private javax.swing.JList<String> jListMusics;
+    private javax.swing.JList<String> jListPhrases;
+    private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenu jMenu3;
+    private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItemChangeFont;
+    private javax.swing.JMenuItem jMenuItemLoadMusic;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     // End of variables declaration//GEN-END:variables
 }
