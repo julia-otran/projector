@@ -7,6 +7,7 @@ package projector;
 
 import java.awt.FontMetrics;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -151,34 +152,64 @@ public class StringUtils {
    * @return a non-empty list of strings
    */
   public static List<String> splitIntoLines(String str) {
-    ArrayList<String> strings = new ArrayList<>();
+    final List<String> strings = new ArrayList<>();
 
-    int len = str.length();
-    if (len == 0) {
-      strings.add("");
-      return strings;
+    Arrays.asList(str.replace("\r\n", "\n").replace("\r", "\n").split("\n"))
+            .stream()
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .forEach(line -> {
+                int countCommas = countCommas(line);
+                if (countCommas > 0) {
+                    StringBuilder builder = new StringBuilder();
+                    
+                    int halfCommas = countCommas / 2;
+                    int current = 0;
+                    int l = line.length();
+                    for (int i = 0; i<l; i++) {
+                        char c = line.charAt(i);
+                        builder.append(c);
+                        if (c == ',') {
+                            current++;
+                        }
+                        if ((countCommas == 1 && current == 1) ||
+                            (halfCommas > 0 && current >= halfCommas)) {
+                            current = 0;
+                            strings.add(builder.toString());
+                            builder = new StringBuilder();
+                        }
+                    }
+                    
+                    if (builder.length() > 0) {
+                        strings.add(builder.toString());
+                    }
+                } else {
+                    strings.add(line);
+                }
+            });
+    
+
+    List<String> splited = strings.stream()
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .collect(Collectors.toList());
+    
+    if (splited.isEmpty()) {
+        return Collections.singletonList("");
     }
-
-    int lineStart = 0;
-
-    for (int i = 0; i < len; ++i) {
-      char c = str.charAt(i);
-      if (c == '\r') {
-        int newlineLength = 1;
-        if ((i + 1) < len && str.charAt(i + 1) == '\n')
-          newlineLength = 2;
-        strings.add(str.substring(lineStart, i));
-        lineStart = i + newlineLength;
-        if (newlineLength == 2) // skip \n next time through loop
-          ++i;
-      } else if (c == '\n') {
-        strings.add(str.substring(lineStart, i));
-        lineStart = i + 1;
+    
+    return splited;
+  }
+  
+  private static int countCommas(String s) {
+      int l = s.length();
+      int c = 0;
+      for (int i=0; i<l; i++) {
+          if (s.charAt(i) == ',') {
+              c++;
+          }
       }
-    }
-    if (lineStart < len)
-      strings.add(str.substring(lineStart));
-
-    return strings;
+      
+      return c;
   }
 }
