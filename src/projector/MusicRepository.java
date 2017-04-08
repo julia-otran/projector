@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.DefaultListModel;
 import javax.swing.ListModel;
-import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
 /**
@@ -40,7 +39,13 @@ public class MusicRepository {
 
             @Override
             public String getElementAt(int index) {
-                return selected.getPhrases().get(index);
+                String phrase = selected.getPhrases().get(index);
+                
+                if (phrase.isEmpty()) {
+                    return " ";
+                }
+                
+                return phrase;
             }
 
             @Override

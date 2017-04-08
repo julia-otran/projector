@@ -7,17 +7,15 @@ package projector;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.swing.JComponent;
-import javax.swing.JPanel;
 
 /**
  *
@@ -25,8 +23,8 @@ import javax.swing.JPanel;
  */
 public class CenterLabel extends JComponent {
     private static final int PADDING = 20;
+    private static final int DEFAULT_FONT_SIZE = 110;
 
-    
     class PrintingText {
         int x;
         String text;
@@ -38,10 +36,18 @@ public class CenterLabel extends JComponent {
     }
     
     private String text;
-    private List<PrintingText> drawLines = new ArrayList<>();
+    private final List<PrintingText> drawLines = new ArrayList<>();
     private int fontHeight;
     private int translateY;
-
+    
+    public void checkDefaultFontSize() {
+        Font font = getFont();
+        
+        if (font.getSize() < DEFAULT_FONT_SIZE) {
+            setFont(new java.awt.Font(font.getName(), 0, DEFAULT_FONT_SIZE));
+        }
+    }
+    
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(640, 480);
@@ -99,7 +105,6 @@ public class CenterLabel extends JComponent {
     }
     
     private int getFreeWidth() {
-        return getWidth() - 2*PADDING;
+        return getWidth() - 2 * PADDING;
     }
-    
 }

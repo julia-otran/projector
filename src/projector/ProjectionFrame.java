@@ -5,7 +5,6 @@
  */
 package projector;
 
-import java.awt.AWTEvent;
 import java.awt.Font;
 
 /**
@@ -19,7 +18,6 @@ public class ProjectionFrame extends javax.swing.JFrame implements ProjectionWin
      */
     public ProjectionFrame() {
         initComponents();
-        getContentPane().setBackground(getBackground());
     }
 
     /**
@@ -38,6 +36,11 @@ public class ProjectionFrame extends javax.swing.JFrame implements ProjectionWin
         setMinimumSize(new java.awt.Dimension(640, 480));
         setUndecorated(true);
         setSize(new java.awt.Dimension(640, 480));
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                formWindowOpened(evt);
+            }
+        });
 
         textLabel.setForeground(java.awt.Color.black);
         textLabel.setFont(new java.awt.Font("SansSerif", 0, 120)); // NOI18N
@@ -47,15 +50,20 @@ public class ProjectionFrame extends javax.swing.JFrame implements ProjectionWin
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(textLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 640, Short.MAX_VALUE)
+            .addComponent(textLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(textLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 480, Short.MAX_VALUE)
+            .addComponent(textLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+        getContentPane().setBackground(getBackground());
+        textLabel.checkDefaultFontSize();
+    }//GEN-LAST:event_formWindowOpened
 
     @Override
     public void setText(String string) {
@@ -67,6 +75,7 @@ public class ProjectionFrame extends javax.swing.JFrame implements ProjectionWin
         return textLabel.getFont();
     }
     
+    @Override
     public void setFont(Font font) {
         textLabel.setFont(font);
     }
