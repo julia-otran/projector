@@ -31,7 +31,7 @@ public class ProjectionFrame extends javax.swing.JFrame implements ProjectionWin
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        textLabel = new javax.swing.JLabel();
+        textLabel = new projector.CenterLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(0, 0, 0));
@@ -39,9 +39,9 @@ public class ProjectionFrame extends javax.swing.JFrame implements ProjectionWin
         setUndecorated(true);
         setSize(new java.awt.Dimension(640, 480));
 
-        textLabel.setFont(new java.awt.Font("SansSerif", 0, 98)); // NOI18N
-        textLabel.setForeground(java.awt.Color.white);
-        textLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        textLabel.setForeground(java.awt.Color.black);
+        textLabel.setFont(new java.awt.Font("SansSerif", 0, 120)); // NOI18N
+        textLabel.setMinimumSize(new java.awt.Dimension(640, 480));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -59,16 +59,7 @@ public class ProjectionFrame extends javax.swing.JFrame implements ProjectionWin
 
     @Override
     public void setText(String string) {
-        textLabel.setText("<html><p></p></html>");
-        String ht = "<html><p>" + string + "</p></html>";
-        
-        java.awt.EventQueue.invokeLater(new Runnable(){
-            @Override
-            public void run() {
-                textLabel.setText(ht);
-            }
-        });
-
+        textLabel.setText(string);
     }
     
     @Override
@@ -81,7 +72,7 @@ public class ProjectionFrame extends javax.swing.JFrame implements ProjectionWin
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel textLabel;
+    private projector.CenterLabel textLabel;
     // End of variables declaration//GEN-END:variables
 
 }
