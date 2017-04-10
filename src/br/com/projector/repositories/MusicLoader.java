@@ -3,8 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package projector;
+package br.com.projector.repositories;
 
+import br.com.projector.repositories.MusicRepository;
+import br.com.projector.models.Music;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;

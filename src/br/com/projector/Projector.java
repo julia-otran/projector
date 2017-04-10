@@ -3,20 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package projector;
+package br.com.projector;
 
-import java.awt.Color;
-import java.awt.DisplayMode;
-import java.awt.Frame;
+import br.com.projector.projection.ProjectionFrame;
+import br.com.projector.forms.MainFrame;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
-import java.awt.Window;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.swing.JOptionPane;
 
 /**
@@ -58,6 +54,7 @@ public class Projector {
         
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 ProjectionFrame projectionFrame = new ProjectionFrame();
                 projectionFrame.setVisible(false);
@@ -74,6 +71,7 @@ public class Projector {
                     Rectangle bounds = dev.getDefaultConfiguration().getBounds();
                     projectionFrame.setBounds(bounds);
                     projectionFrame.setVisible(true);
+                    //dev.setFullScreenWindow(controlFrame);
                 }
                 
                 controlFrame.setVisible(true);
@@ -92,7 +90,7 @@ public class Projector {
             return null;
         }
         
-        Object names[] = devices.stream().map(GraphicsDevice::getIDstring).toArray();
+        Object names[] = devices.stream().map(d -> getDeviceName(d)).toArray();
         int selected = JOptionPane.showOptionDialog(null, "Em qual tela a letra deve ser projetada?", "Selecionar tela", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, names, null);
         
         if (selected < 0 || selected >= count) {
@@ -100,5 +98,20 @@ public class Projector {
         } 
         
         return devices.get(selected);
+    }
+    
+    private static String getDeviceName(GraphicsDevice dev) {
+        StringBuilder builder = new StringBuilder();
+        
+        int width = dev.getDisplayMode().getWidth();
+        int height = dev.getDisplayMode().getHeight();
+        
+        return builder.append(dev.getIDstring())
+                .append(" (")
+                .append(width)
+                .append("x")
+                .append(height)
+                .append(")")
+                .toString();
     }
 }

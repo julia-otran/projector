@@ -3,12 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package projector;
+package br.com.projector.forms;
 
 import java.io.File;
 import java.util.List;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
+import br.com.projector.repositories.MusicLoader;
+import br.com.projector.repositories.MusicRepository;
+import br.com.projector.projection.ProjectionWindow;
+import br.com.projector.other.TextFileFilter;
 import say.swing.JFontChooser;
 
 /**
@@ -16,9 +20,9 @@ import say.swing.JFontChooser;
  * @author 15096134
  */
 public class MainFrame extends javax.swing.JFrame {
-    private ProjectionWindow projectionWindow;
+    private final ProjectionWindow projectionWindow;
     private File lastDirectory;
-    private MusicRepository musicRepo;
+    private final MusicRepository musicRepo;
     
     /**
      * Creates new form MainFrame

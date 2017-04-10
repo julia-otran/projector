@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package projector;
+package br.com.projector.repositories;
 
+import br.com.projector.models.Music;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,11 +31,11 @@ public class MusicRepository {
         musicsListModel.addElement(m.getName());
     }
     
-    ListModel<String> getMusicsModel() {
+    public ListModel<String> getMusicsModel() {
         return musicsListModel;
     }
 
-    ListModel<String> getPhrasesModel(int selectedMusic) {
+    public ListModel<String> getPhrasesModel(int selectedMusic) {
         final Music selected = musics.get(selectedMusic);
         
         return new ListModel<String>() {
@@ -62,7 +63,7 @@ public class MusicRepository {
         };
     }
 
-    String getPhrasesUnion(int music, int[] selected) {
+    public String getPhrasesUnion(int music, int[] selected) {
         Music m = musics.get(music);
         
         StringBuilder phrases = new StringBuilder();
@@ -73,12 +74,12 @@ public class MusicRepository {
         return phrases.toString();
     }
 
-    void clear() {
+    public void clear() {
         musics.clear();
         musicsListModel.clear();
     }
 
-    List<File> openFiles() {
+    public List<File> openFiles() {
         return musics.stream().map(Music::getFile).collect(Collectors.toList());
     }
 }

@@ -3,10 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package projector;
+package br.com.projector.other;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import javax.swing.filechooser.FileFilter;
 
 /**

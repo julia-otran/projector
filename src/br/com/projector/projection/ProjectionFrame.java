@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package projector;
+package br.com.projector.projection;
 
+import br.com.projector.projection.ProjectionWindow;
 import java.awt.Font;
 
 /**
@@ -29,7 +30,7 @@ public class ProjectionFrame extends javax.swing.JFrame implements ProjectionWin
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        textLabel = new projector.CenterLabel();
+        textLabel = new br.com.projector.projection.CenterLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(0, 0, 0));
@@ -62,7 +63,7 @@ public class ProjectionFrame extends javax.swing.JFrame implements ProjectionWin
 
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
         getContentPane().setBackground(getBackground());
-        textLabel.checkDefaultFontSize();
+        textLabel.initialize();
     }//GEN-LAST:event_formWindowOpened
 
     @Override
@@ -81,7 +82,7 @@ public class ProjectionFrame extends javax.swing.JFrame implements ProjectionWin
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private projector.CenterLabel textLabel;
+    private br.com.projector.projection.CenterLabel textLabel;
     // End of variables declaration//GEN-END:variables
 
 }
