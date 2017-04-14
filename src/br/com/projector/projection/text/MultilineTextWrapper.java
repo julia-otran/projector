@@ -5,7 +5,6 @@
  */
 package br.com.projector.projection.text;
 
-import br.com.projector.projection.models.StringWithWidth;
 import java.awt.FontMetrics;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,20 +17,77 @@ import java.util.stream.Collectors;
  *
  * @author guilherme
  */
-public class NormalTextWrapper implements TextWrapper {
+public class MultilineTextWrapper implements TextWrapper {
     private final FontMetrics fontMetrics;
     private final int maxWidth;
     private final int maxHeight;
+    private final int lineLimit;
     
-    NormalTextWrapper(FontMetrics fontMetrics, int maxWidth, int maxHeight) {
+    MultilineTextWrapper(FontMetrics fontMetrics, int maxWidth, int maxHeight) {
         this.fontMetrics = fontMetrics;
         this.maxWidth = maxWidth;
         this.maxHeight = maxHeight;
+        
+        int lines = maxHeight / fontMetrics.getHeight();
+        
+        // This may occur with gigant font sizes.
+        // TODO: Fix this workaround
+        // Beware! zero lines may bugs lot of things!
+        if (lines <= 0) {
+            lines = 1;
+        }
+        
+        this.lineLimit = lines;
     }
     
     @Override
-    public List<List<String>> fitGroups(List<String> phrases) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public FontMetrics getFontMetrics() {
+        return fontMetrics;
+    }
+
+    @Override
+    public int getMaxWidth() {
+        return maxWidth;
+    }
+
+    @Override
+    public int getMaxHeight() {
+        return maxHeight;
+    }
+    
+    @Override
+    public List<WrappedText> fitGroups(List<String> phrases) {
+        List<WrappedText> groups = new ArrayList<>();
+        List<String> buildingGroup = new ArrayList<>();
+        
+        for (String phrase : phrases) {
+            if (phrase.trim().isEmpty()) {
+                if (!buildingGroup.isEmpty()) {
+                    groups.add(new WrappedText(buildingGroup));
+                    buildingGroup = new ArrayList<>();
+                }
+                
+                groups.add(WrappedText.blankText());
+                
+                continue;
+            }
+            
+            List<String> breaks = wrap(phrase).getLines();
+            for (String breaked : breaks) {
+                buildingGroup.add(breaked);
+                
+                if (buildingGroup.size() >= lineLimit) {
+                    groups.add(new WrappedText(buildingGroup));
+                    buildingGroup = new ArrayList<>();
+                }
+            }
+        }
+        
+        if (!buildingGroup.isEmpty()) {
+            groups.add(new WrappedText(buildingGroup));
+        }
+        
+        return groups;
     }
     
     /**
@@ -46,21 +102,18 @@ public class NormalTextWrapper implements TextWrapper {
      *          the string to split
      * @return a list of strings
      */
-    @Override
-    public List<StringWithWidth> wrap(String str) {
+    public WrappedText wrap(String str) {
         List<String> lines = splitIntoLines(str);
         
         if (lines.isEmpty())
-            return Collections.emptyList();
+            return new WrappedText(Collections.emptyList());
 
         ArrayList<String> strings = new ArrayList<>();
         
         for (Iterator<String> iter = lines.iterator(); iter.hasNext();)
             wrapLineInto(iter.next(), strings);
-
-        return strings.stream()
-                .map(s -> new StringWithWidth(s, fontMetrics.stringWidth(s)))
-                .collect(Collectors.toList());
+        
+        return new WrappedText(strings);
     }
     
     protected boolean isSeparator(char c) {

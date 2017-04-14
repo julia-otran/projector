@@ -14,17 +14,27 @@ import java.awt.FontMetrics;
 public class WrapperFactory {
     private final int maxWidth; 
     private final int maxHeight;
+    private final FontMetrics fontMetrics;
             
-    public WrapperFactory(int maxWidth, int maxHeight) {
+    public WrapperFactory(int maxWidth, int maxHeight, FontMetrics fontMetrics) {
         this.maxWidth = maxWidth;
         this.maxHeight = maxHeight;
+        this.fontMetrics = fontMetrics;
     }
     
-    public TextWrapper getTextWrapper(FontMetrics fontMetrics, boolean multiPhrases) {
+    public int getMaxWidth() {
+        return maxWidth;
+    }
+
+    public int getMaxHeight() {
+        return maxHeight;
+    }
+    
+    public TextWrapper getTextWrapper(boolean multiPhrases) {
         if (multiPhrases) {
-            return new NormalTextWrapper(fontMetrics, maxWidth, maxHeight);
+            return new MultilineTextWrapper(fontMetrics, maxWidth, maxHeight);
         }
         
-        return new CommaTextWrapper(fontMetrics, maxWidth, maxHeight);
+        return new SingleLineTextWrapper(fontMetrics, maxWidth, maxHeight);
     }
 }

@@ -11,23 +11,24 @@ import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import br.com.projector.repositories.MusicLoader;
 import br.com.projector.repositories.MusicRepository;
-import br.com.projector.projection.ProjectionWindow;
 import br.com.projector.other.TextFileFilter;
 import say.swing.JFontChooser;
+import br.com.projector.projection.ProjectionManager;
+import br.com.projector.projection.text.WrappedText;
 
 /**
  *
  * @author 15096134
  */
 public class MainFrame extends javax.swing.JFrame {
-    private final ProjectionWindow projectionWindow;
+    private final ProjectionManager projectionWindow;
     private File lastDirectory;
     private final MusicRepository musicRepo;
     
     /**
      * Creates new form MainFrame
      */
-    public MainFrame(ProjectionWindow projectionWindow) {
+    public MainFrame(ProjectionManager projectionWindow) {
         this.projectionWindow = projectionWindow;
         initComponents();
         musicRepo = new MusicRepository();
@@ -137,11 +138,11 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void jMenuItemChangeFontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemChangeFontActionPerformed
         JFontChooser fontChooser = new JFontChooser();
-        fontChooser.setSelectedFont(projectionWindow.getFont());
+        fontChooser.setSelectedFont(projectionWindow.getTextFont());
         
         int result = fontChooser.showDialog(this);
         if (result == JFontChooser.OK_OPTION) {
-             projectionWindow.setFont(fontChooser.getSelectedFont());
+             projectionWindow.setTextFont(fontChooser.getSelectedFont());
         }
     }//GEN-LAST:event_jMenuItemChangeFontActionPerformed
 
@@ -150,7 +151,7 @@ public class MainFrame extends javax.swing.JFrame {
         int selected[] = jListPhrases.getSelectedIndices();
         
         if (musicIndex < 0 || selected.length <= 0) {
-            projectionWindow.setText("");
+            projectionWindow.setText(WrappedText.blankText());
             return;
         }
         

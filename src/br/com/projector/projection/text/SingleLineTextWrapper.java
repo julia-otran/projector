@@ -14,11 +14,22 @@ import java.util.stream.Collectors;
  *
  * @author guilherme
  */
-public class CommaTextWrapper extends NormalTextWrapper {
-    public CommaTextWrapper(FontMetrics fontMetrics, int maxWidth, int maxHeight) {
+public class SingleLineTextWrapper extends MultilineTextWrapper {
+    public SingleLineTextWrapper(FontMetrics fontMetrics, int maxWidth, int maxHeight) {
         super(fontMetrics, maxWidth, maxHeight);
     }
 
+    @Override
+    public List<WrappedText> fitGroups(List<String> phrases) {
+        List<WrappedText> groups = new ArrayList<>();
+        
+        for (String phrase : phrases) {
+            groups.add(wrap(phrase));
+        }
+        
+        return groups;
+    }
+    
     @Override
     protected List<String> splitIntoLines(String str) {
         List<String> strings = new ArrayList<>();

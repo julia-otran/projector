@@ -5,20 +5,22 @@
  */
 package br.com.projector.projection;
 
-import br.com.projector.projection.ProjectionWindow;
+import br.com.projector.projection.text.WrappedText;
 import java.awt.Font;
 
 /**
  *
  * @author 15096134
  */
-public class ProjectionFrame extends javax.swing.JFrame implements ProjectionWindow {
-
+public class ProjectionFrame extends javax.swing.JFrame implements ProjectionManager {
+    private final ProjectionLabel textLabel;
+    
     /**
      * Creates new form ProjectionFrame
      */
     public ProjectionFrame() {
         initComponents();
+        textLabel = new ProjectionLabel(projectionCanvas);
     }
 
     /**
@@ -30,7 +32,7 @@ public class ProjectionFrame extends javax.swing.JFrame implements ProjectionWin
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        textLabel = new br.com.projector.projection.CenterLabel();
+        projectionCanvas = new br.com.projector.projection.ProjectionCanvas();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(0, 0, 0));
@@ -43,19 +45,19 @@ public class ProjectionFrame extends javax.swing.JFrame implements ProjectionWin
             }
         });
 
-        textLabel.setForeground(java.awt.Color.black);
-        textLabel.setFont(new java.awt.Font("SansSerif", 0, 120)); // NOI18N
-        textLabel.setMinimumSize(new java.awt.Dimension(640, 480));
+        projectionCanvas.setForeground(java.awt.Color.black);
+        projectionCanvas.setFont(new java.awt.Font("SansSerif", 0, 120)); // NOI18N
+        projectionCanvas.setMinimumSize(new java.awt.Dimension(640, 480));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(textLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(projectionCanvas, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(textLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(projectionCanvas, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();
@@ -63,26 +65,36 @@ public class ProjectionFrame extends javax.swing.JFrame implements ProjectionWin
 
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
         getContentPane().setBackground(getBackground());
-        textLabel.initialize();
+        projectionCanvas.addProjectable(textLabel);
     }//GEN-LAST:event_formWindowOpened
 
     @Override
-    public void setText(String string) {
+    public void setText(WrappedText string) {
         textLabel.setText(string);
     }
     
     @Override
-    public Font getFont() {
+    public Font getTextFont() {
         return textLabel.getFont();
     }
     
     @Override
-    public void setFont(Font font) {
+    public void setTextFont(Font font) {
         textLabel.setFont(font);
     }
 
+    @Override
+    public TextWrapperFactoryChangeListener getTextWrapperChangeListener() {
+        return textLabel.getWrapperChangeListener();
+    }
+
+    @Override
+    public void setTextWrapperChangeListener(TextWrapperFactoryChangeListener wrapperChangeListener) {
+        textLabel.setWrapperChangeListener(wrapperChangeListener);
+    }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private br.com.projector.projection.CenterLabel textLabel;
+    private br.com.projector.projection.ProjectionCanvas projectionCanvas;
     // End of variables declaration//GEN-END:variables
 
 }

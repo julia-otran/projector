@@ -35,45 +35,6 @@ public class MusicRepository {
         return musicsListModel;
     }
 
-    public ListModel<String> getPhrasesModel(int selectedMusic) {
-        final Music selected = musics.get(selectedMusic);
-        
-        return new ListModel<String>() {
-            @Override
-            public int getSize() {
-                return selected.getPhrases().size();
-            }
-
-            @Override
-            public String getElementAt(int index) {
-                String phrase = selected.getPhrases().get(index);
-                
-                if (phrase.isEmpty()) {
-                    return " ";
-                }
-                
-                return phrase;
-            }
-
-            @Override
-            public void addListDataListener(ListDataListener l) { }
-
-            @Override
-            public void removeListDataListener(ListDataListener l) { }
-        };
-    }
-
-    public String getPhrasesUnion(int music, int[] selected) {
-        Music m = musics.get(music);
-        
-        StringBuilder phrases = new StringBuilder();
-        for (int l : selected) {
-            phrases.append(m.getPhrases().get(l)).append("\n");
-        }
-        
-        return phrases.toString();
-    }
-
     public void clear() {
         musics.clear();
         musicsListModel.clear();

@@ -36,17 +36,17 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Component id="textLabel" alignment="0" max="32767" attributes="0"/>
+          <Component id="projectionCanvas" alignment="0" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Component id="textLabel" alignment="0" max="32767" attributes="0"/>
+          <Component id="projectionCanvas" alignment="0" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
   </Layout>
   <SubComponents>
-    <Container class="br.com.projector.projection.CenterLabel" name="textLabel">
+    <Container class="br.com.projector.projection.ProjectionCanvas" name="projectionCanvas">
       <Properties>
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="0" green="0" id="black" palette="1" red="0" type="palette"/>

@@ -3,19 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.com.projector.projection.text;
+package br.com.projector.projection;
 
+import java.awt.Font;
 import java.awt.FontMetrics;
-import java.util.List;
 
 /**
  *
  * @author guilherme
  */
-public interface TextWrapper {
-    List<WrappedText> fitGroups(List<String> phrases);
-    
-    int getMaxWidth();
-    int getMaxHeight();
-    FontMetrics getFontMetrics();
+public interface CanvasDelegate {
+    public FontMetrics getFontMetrics(Font font);
+    public void repaint();
+    public int getWidth();
+    public int getHeight();
 }
