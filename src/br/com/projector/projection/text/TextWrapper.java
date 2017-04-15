@@ -5,7 +5,6 @@
  */
 package br.com.projector.projection.text;
 
-import java.awt.FontMetrics;
 import java.util.List;
 
 /**
@@ -13,9 +12,6 @@ import java.util.List;
  * @author guilherme
  */
 public interface TextWrapper {
+
     List<WrappedText> fitGroups(List<String> phrases);
-    
-    int getMaxWidth();
-    int getMaxHeight();
-    FontMetrics getFontMetrics();
 }

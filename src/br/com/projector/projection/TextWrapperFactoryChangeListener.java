@@ -12,5 +12,6 @@ import br.com.projector.projection.text.WrapperFactory;
  * @author guilherme
  */
 public interface TextWrapperFactoryChangeListener {
-    void onWrapperFactoryChanged();
+
+    void onWrapperFactoryChanged(WrapperFactory factory);
 }

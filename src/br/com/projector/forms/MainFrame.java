@@ -5,34 +5,45 @@
  */
 package br.com.projector.forms;
 
-import java.io.File;
-import java.util.List;
-import javax.swing.DefaultListModel;
-import javax.swing.JFileChooser;
+import br.com.projector.other.ImageFileFilter;
+import br.com.projector.other.TextFileFilter;
+import br.com.projector.other.WrappedTextCellRenderer;
+import br.com.projector.projection.ProjectionManager;
+import br.com.projector.projection.TextWrapperFactoryChangeListener;
+import br.com.projector.projection.text.WrappedText;
+import br.com.projector.projection.text.WrapperFactory;
 import br.com.projector.repositories.MusicLoader;
 import br.com.projector.repositories.MusicRepository;
-import br.com.projector.other.TextFileFilter;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.io.File;
+import java.util.List;
+import javax.swing.JFileChooser;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
 import say.swing.JFontChooser;
-import br.com.projector.projection.ProjectionManager;
-import br.com.projector.projection.text.WrappedText;
 
 /**
  *
  * @author 15096134
  */
-public class MainFrame extends javax.swing.JFrame {
+public class MainFrame extends javax.swing.JFrame implements ListSelectionListener {
+
     private final ProjectionManager projectionWindow;
     private File lastDirectory;
     private final MusicRepository musicRepo;
-    
+    private boolean multiline;
+
     /**
      * Creates new form MainFrame
      */
     public MainFrame(ProjectionManager projectionWindow) {
         this.projectionWindow = projectionWindow;
+        this.musicRepo = new MusicRepository();
         initComponents();
-        musicRepo = new MusicRepository();
-        jListMusics.setModel(musicRepo.getMusicsModel());
     }
 
     /**
@@ -44,20 +55,19 @@ public class MainFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jMenu3 = new javax.swing.JMenu();
         jScrollPane1 = new javax.swing.JScrollPane();
         jListMusics = new javax.swing.JList<>();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jListPhrases = new javax.swing.JList<>();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jTablePhrases = new javax.swing.JTable();
+        jButtonClearScreen = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItemLoadMusic = new javax.swing.JMenuItem();
         jMenuItemUpdateMusics = new javax.swing.JMenuItem();
-        jMenuItem1 = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         jMenuItemChangeFont = new javax.swing.JMenuItem();
-
-        jMenu3.setText("jMenu3");
+        jCheckBoxMenuItemMultiline = new javax.swing.JCheckBoxMenuItem();
+        jMenuItemChangeBackground = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -69,12 +79,23 @@ public class MainFrame extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(jListMusics);
 
-        jListPhrases.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
-            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
-                phraseChanged(evt);
+        jTablePhrases.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+
+            }
+        ));
+        jTablePhrases.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jScrollPane3.setViewportView(jTablePhrases);
+
+        jButtonClearScreen.setText("Limpar Tela");
+        jButtonClearScreen.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonClearScreenActionPerformed(evt);
             }
         });
-        jScrollPane2.setViewportView(jListPhrases);
 
         jMenu1.setText("Arquivo");
 
@@ -94,14 +115,6 @@ public class MainFrame extends javax.swing.JFrame {
         });
         jMenu1.add(jMenuItemUpdateMusics);
 
-        jMenuItem1.setText("Limpar Tela");
-        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem1ActionPerformed(evt);
-            }
-        });
-        jMenu1.add(jMenuItem1);
-
         jMenuBar1.add(jMenu1);
 
         jMenu2.setText("Configurações");
@@ -114,6 +127,22 @@ public class MainFrame extends javax.swing.JFrame {
         });
         jMenu2.add(jMenuItemChangeFont);
 
+        jCheckBoxMenuItemMultiline.setText("Multiline");
+        jCheckBoxMenuItemMultiline.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                jCheckBoxMenuItemMultilineStateChanged(evt);
+            }
+        });
+        jMenu2.add(jCheckBoxMenuItemMultiline);
+
+        jMenuItemChangeBackground.setText("Alterar fundo");
+        jMenuItemChangeBackground.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemChangeBackgroundActionPerformed(evt);
+            }
+        });
+        jMenu2.add(jMenuItemChangeBackground);
+
         jMenuBar1.add(jMenu2);
 
         setJMenuBar(jMenuBar1);
@@ -123,14 +152,19 @@ public class MainFrame extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(jButtonClearScreen, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 409, Short.MAX_VALUE))
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 426, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 432, Short.MAX_VALUE)
+            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 432, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jButtonClearScreen, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pack();
@@ -139,79 +173,179 @@ public class MainFrame extends javax.swing.JFrame {
     private void jMenuItemChangeFontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemChangeFontActionPerformed
         JFontChooser fontChooser = new JFontChooser();
         fontChooser.setSelectedFont(projectionWindow.getTextFont());
-        
+
         int result = fontChooser.showDialog(this);
         if (result == JFontChooser.OK_OPTION) {
-             projectionWindow.setTextFont(fontChooser.getSelectedFont());
+            projectionWindow.setTextFont(fontChooser.getSelectedFont());
         }
     }//GEN-LAST:event_jMenuItemChangeFontActionPerformed
-
-    private void phraseChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_phraseChanged
-        int musicIndex = jListMusics.getSelectedIndex();
-        int selected[] = jListPhrases.getSelectedIndices();
-        
-        if (musicIndex < 0 || selected.length <= 0) {
-            projectionWindow.setText(WrappedText.blankText());
-            return;
-        }
-        
-        projectionWindow.setText(musicRepo.getPhrasesUnion(musicIndex, selected));
-    }//GEN-LAST:event_phraseChanged
-
-    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
-        jListPhrases.clearSelection();
-    }//GEN-LAST:event_jMenuItem1ActionPerformed
 
     private void jMenuItemLoadMusicActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemLoadMusicActionPerformed
         final JFileChooser fc = new JFileChooser();
         fc.setFileFilter(new TextFileFilter());
         fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
         fc.setMultiSelectionEnabled(true);
-        
+
         if (lastDirectory != null) {
             fc.setCurrentDirectory(lastDirectory);
         }
-        
+
         int returnVal = fc.showOpenDialog(this);
-        
+
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             lastDirectory = fc.getCurrentDirectory();
             MusicLoader.loadFilesToRepository(fc.getSelectedFiles(), musicRepo);
         }
-        
+
     }//GEN-LAST:event_jMenuItemLoadMusicActionPerformed
 
     private void jListMusicsValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_jListMusicsValueChanged
         int selectedMusic = jListMusics.getSelectedIndex();
         if (selectedMusic >= 0) {
-            jListPhrases.setModel(musicRepo.getPhrasesModel(selectedMusic));
+            jTablePhrases.setModel(musicRepo.getPhrasesModel(selectedMusic));
         } else {
-            jListPhrases.setModel(new DefaultListModel<>());
+            jTablePhrases.setModel(new DefaultTableModel(0, 0));
         }
+        updateRowHeights();
     }//GEN-LAST:event_jListMusicsValueChanged
 
     private void jMenuItemUpdateMusicsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemUpdateMusicsActionPerformed
         jListMusics.clearSelection();
-        jListPhrases.clearSelection();
-        
+        jTablePhrases.clearSelection();
+
         List<File> openFiles = musicRepo.openFiles();
         musicRepo.clear();
-        
+
         MusicLoader.loadFilesToRepository(openFiles, musicRepo);
     }//GEN-LAST:event_jMenuItemUpdateMusicsActionPerformed
 
+    private void jCheckBoxMenuItemMultilineStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jCheckBoxMenuItemMultilineStateChanged
+        if (multiline == jCheckBoxMenuItemMultiline.isSelected()) {
+            return;
+        } else {
+            multiline = jCheckBoxMenuItemMultiline.isSelected();
+        }
+
+        ListSelectionModel lsm = jTablePhrases.getSelectionModel();
+        int position = lsm.getAnchorSelectionIndex();
+
+        musicRepo.getGrouper().setWrapper(projectionWindow.getWrapperFactory().getTextWrapper(multiline));
+        musicRepo.regroupPhrases();
+        updateRowHeights();
+
+        if (lsm.isSelectionEmpty()) {
+            return;
+        }
+
+        if (position < 0) {
+            return;
+        }
+
+        lsm.setSelectionInterval(position, position);
+    }//GEN-LAST:event_jCheckBoxMenuItemMultilineStateChanged
+
+    private void jMenuItemChangeBackgroundActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemChangeBackgroundActionPerformed
+        final JFileChooser fc = new JFileChooser();
+        fc.setFileFilter(new ImageFileFilter());
+        fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fc.setMultiSelectionEnabled(false);
+
+        if (lastDirectory != null) {
+            fc.setCurrentDirectory(lastDirectory);
+        }
+
+        int returnVal = fc.showOpenDialog(this);
+
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            lastDirectory = fc.getCurrentDirectory();
+            projectionWindow.setBackgroundImageFile(fc.getSelectedFile());
+        }
+    }//GEN-LAST:event_jMenuItemChangeBackgroundActionPerformed
+
+    private void jButtonClearScreenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonClearScreenActionPerformed
+        jTablePhrases.clearSelection();
+    }//GEN-LAST:event_jButtonClearScreenActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButtonClearScreen;
+    private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItemMultiline;
     private javax.swing.JList<String> jListMusics;
-    private javax.swing.JList<String> jListPhrases;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
-    private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItemChangeBackground;
     private javax.swing.JMenuItem jMenuItemChangeFont;
     private javax.swing.JMenuItem jMenuItemLoadMusic;
     private javax.swing.JMenuItem jMenuItemUpdateMusics;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JTable jTablePhrases;
     // End of variables declaration//GEN-END:variables
+
+    public void init() {
+        multiline = jCheckBoxMenuItemMultiline.isSelected();
+
+        projectionWindow.setTextWrapperChangeListener(new TextWrapperFactoryChangeListener() {
+            @Override
+            public void onWrapperFactoryChanged(WrapperFactory factory) {
+                musicRepo.getGrouper().setWrapper(factory.getTextWrapper(multiline));
+                musicRepo.regroupPhrases();
+                updateRowHeights();
+            }
+        });
+
+        jListMusics.setModel(musicRepo.getMusicsModel());
+
+        jTablePhrases.setDefaultRenderer(WrappedText.class, new WrappedTextCellRenderer());
+        jTablePhrases.getSelectionModel().addListSelectionListener(this);
+        setVisible(true);
+    }
+
+    @Override
+    public void valueChanged(ListSelectionEvent e) {
+        ListSelectionModel lsm = jTablePhrases.getSelectionModel();
+
+        if (lsm.isSelectionEmpty()) {
+            projectionWindow.setText(WrappedText.blankText());
+            return;
+        }
+
+        int music = jListMusics.getSelectedIndex();
+        int selected = lsm.getAnchorSelectionIndex();
+
+        WrappedText text = musicRepo.getTextFor(music, selected);
+        projectionWindow.setText(text);
+
+        if (music >= 0 && selected >= 0 && text.isEmpty()) {
+            int newLine = selected;
+
+            if (e.getFirstIndex() < selected) {
+                newLine++;
+            } else {
+                newLine--;
+            }
+
+            if (newLine >= 0 && newLine < jTablePhrases.getRowCount()) {
+                lsm.setSelectionInterval(selected, newLine);
+            }
+        }
+    }
+
+    private void updateRowHeights() {
+        JTable table = jTablePhrases;
+        for (int col = 0; col < table.getColumnCount(); col++) {
+            for (int row = 0; row < table.getRowCount(); row++) {
+                int rowHeight = table.getRowHeight();
+                Component comp = table.prepareRenderer(table.getCellRenderer(row, col), row, col);
+                Dimension d = comp.getPreferredSize();
+                // first set the size to the new width
+                comp.setSize(new Dimension(table.getWidth(), d.height));
+                // then get the preferred size
+                d = comp.getPreferredSize();
+                rowHeight = Math.max(rowHeight, d.height);
+                // finally set the height of the table
+                table.setRowHeight(row, rowHeight);
+            }
+        }
+    }
 }

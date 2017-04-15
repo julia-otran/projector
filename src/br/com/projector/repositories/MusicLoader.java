@@ -5,12 +5,9 @@
  */
 package br.com.projector.repositories;
 
-import br.com.projector.repositories.MusicRepository;
 import br.com.projector.models.Music;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,6 +18,7 @@ import javax.swing.JOptionPane;
  * @author guilherme
  */
 public class MusicLoader {
+
     public static Music loadFromFile(File file) {
         try {
             Music m = new Music();
@@ -29,24 +27,24 @@ public class MusicLoader {
 
             List<String> lines = Files.readAllLines(file.toPath());
             m.setPhrases(lines);
-            
+
             return m;
         } catch (Exception ex) {
             Logger.getLogger(MusicLoader.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
     }
-    
+
     public static void loadFileToRepository(File source, MusicRepository destination) {
         Music loaded = loadFromFile(source);
-        
+
         if (loaded == null) {
             JOptionPane.showMessageDialog(null, source.getAbsolutePath(), "Erro ao carregar arquivo", JOptionPane.ERROR_MESSAGE);
         } else {
             destination.add(loaded);
         }
     }
-    
+
     public static void loadFilesToRepository(File sources[], MusicRepository destination) {
         for (File f : sources) {
             loadFileToRepository(f, destination);
@@ -54,9 +52,6 @@ public class MusicLoader {
     }
 
     public static void loadFilesToRepository(List<File> sources, MusicRepository destination) {
-        for (File f : sources) {
-            loadFileToRepository(f, destination);
-        }
+        sources.stream().forEach(f -> loadFileToRepository(f, destination));
     }
-    
 }

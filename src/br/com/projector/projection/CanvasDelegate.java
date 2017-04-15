@@ -5,16 +5,15 @@
  */
 package br.com.projector.projection;
 
-import java.awt.Font;
-import java.awt.FontMetrics;
-
 /**
  *
  * @author guilherme
  */
 public interface CanvasDelegate {
-    public FontMetrics getFontMetrics(Font font);
+
     public void repaint();
+
     public int getWidth();
+
     public int getHeight();
 }

@@ -6,21 +6,31 @@
 package br.com.projector.projection;
 
 import br.com.projector.projection.text.WrappedText;
+import br.com.projector.projection.text.WrapperFactory;
 import java.awt.Font;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 
 /**
  *
  * @author 15096134
  */
 public class ProjectionFrame extends javax.swing.JFrame implements ProjectionManager {
+
     private final ProjectionLabel textLabel;
-    
+    private final ProjectionBackground background;
+
     /**
      * Creates new form ProjectionFrame
      */
     public ProjectionFrame() {
         initComponents();
         textLabel = new ProjectionLabel(projectionCanvas);
+        background = new ProjectionBackground(projectionCanvas);
     }
 
     /**
@@ -36,6 +46,7 @@ public class ProjectionFrame extends javax.swing.JFrame implements ProjectionMan
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(0, 0, 0));
+        setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setMinimumSize(new java.awt.Dimension(640, 480));
         setUndecorated(true);
         setSize(new java.awt.Dimension(640, 480));
@@ -65,6 +76,7 @@ public class ProjectionFrame extends javax.swing.JFrame implements ProjectionMan
 
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
         getContentPane().setBackground(getBackground());
+        projectionCanvas.addProjectable(background);
         projectionCanvas.addProjectable(textLabel);
     }//GEN-LAST:event_formWindowOpened
 
@@ -72,12 +84,12 @@ public class ProjectionFrame extends javax.swing.JFrame implements ProjectionMan
     public void setText(WrappedText string) {
         textLabel.setText(string);
     }
-    
+
     @Override
     public Font getTextFont() {
         return textLabel.getFont();
     }
-    
+
     @Override
     public void setTextFont(Font font) {
         textLabel.setFont(font);
@@ -92,9 +104,24 @@ public class ProjectionFrame extends javax.swing.JFrame implements ProjectionMan
     public void setTextWrapperChangeListener(TextWrapperFactoryChangeListener wrapperChangeListener) {
         textLabel.setWrapperChangeListener(wrapperChangeListener);
     }
-    
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private br.com.projector.projection.ProjectionCanvas projectionCanvas;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public WrapperFactory getWrapperFactory() {
+        return textLabel.getWrapperFactory();
+    }
+
+    @Override
+    public void setBackgroundImageFile(File selectedFile) {
+        try {
+            BufferedImage img = ImageIO.read(selectedFile);
+            background.setImage(img);
+        } catch (IOException ex) {
+            Logger.getLogger(ProjectionFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 
 }

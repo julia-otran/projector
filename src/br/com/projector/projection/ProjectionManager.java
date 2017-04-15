@@ -6,19 +6,28 @@
 package br.com.projector.projection;
 
 import br.com.projector.projection.text.WrappedText;
+import br.com.projector.projection.text.WrapperFactory;
 import java.awt.Font;
+import java.io.File;
 
 /**
  *
  * @author 15096134
  */
 public interface ProjectionManager {
+
     void setText(WrappedText text);
-    
+
     Font getTextFont();
+
     void setTextFont(Font font);
-    
+
     TextWrapperFactoryChangeListener getTextWrapperChangeListener();
+
     void setTextWrapperChangeListener(TextWrapperFactoryChangeListener wrapperChangeListener);
-    
+
+    public WrapperFactory getWrapperFactory();
+
+    public void setBackgroundImageFile(File selectedFile);
+
 }

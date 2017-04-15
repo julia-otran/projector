@@ -12,8 +12,12 @@ import java.awt.Graphics;
  * @author guilherme
  */
 public interface Projectable {
+
     public void paintComponent(Graphics g);
+
     public CanvasDelegate getCanvasDelegate();
-    public void setCanvasDelegate(CanvasDelegate canvasDelegate);
+
     public void rebuildLayout();
+
+    public void init(ProjectionCanvas sourceCanvas);
 }
