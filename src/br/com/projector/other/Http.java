@@ -23,14 +23,31 @@ public class Http {
         public void onLoad(Music music);
     }
 
-    public void doRequest(final String url, final Callback content) {
-        new Thread(new Runnable() {
+    public interface CancelSource {
+
+        public void cancel();
+    }
+
+    public static CancelSource doRequest(final String url, final Callback content) {
+        final Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
                 String result = executePost(url);
-
             }
-        }).start();
+        });
+
+        t.start();
+
+        return new CancelSource() {
+            @Override
+            public void cancel() {
+                try {
+                    t.interrupt();
+                } catch (SecurityException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        };
     }
 
     public static String executePost(String targetURL) {
@@ -57,8 +74,8 @@ public class Http {
             StringBuilder response = new StringBuilder(); // or StringBuffer if Java version 5+
             String line;
             while ((line = rd.readLine()) != null) {
-                response.append(line);
-                response.append('\r');
+                response.append(line.replace("\r\n", "").replace("\n", ""));
+                response.append("\r\n");
             }
             rd.close();
             return response.toString();

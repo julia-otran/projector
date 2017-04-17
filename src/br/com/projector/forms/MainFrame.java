@@ -5,8 +5,12 @@
  */
 package br.com.projector.forms;
 
+import br.com.projector.models.Music;
+import br.com.projector.other.Http;
 import br.com.projector.other.ImageFileFilter;
+import br.com.projector.other.ProgressDialog;
 import br.com.projector.other.TextFileFilter;
+import br.com.projector.other.UrlMusicLoader;
 import br.com.projector.other.WrappedTextCellRenderer;
 import br.com.projector.projection.ProjectionManager;
 import br.com.projector.projection.TextWrapperFactoryChangeListener;
@@ -17,8 +21,8 @@ import br.com.projector.repositories.MusicRepository;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.io.File;
-import java.util.List;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
@@ -62,8 +66,9 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
         jButtonClearScreen = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
-        jMenuItemLoadMusic = new javax.swing.JMenuItem();
-        jMenuItemUpdateMusics = new javax.swing.JMenuItem();
+        jMenu3 = new javax.swing.JMenu();
+        jMenuItemLoadFromFile = new javax.swing.JMenuItem();
+        jMenuItemLoadFromLink = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         jMenuItemChangeFont = new javax.swing.JMenuItem();
         jCheckBoxMenuItemMultiline = new javax.swing.JCheckBoxMenuItem();
@@ -99,21 +104,25 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
 
         jMenu1.setText("Arquivo");
 
-        jMenuItemLoadMusic.setText("Carregar Letra");
-        jMenuItemLoadMusic.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItemLoadMusicActionPerformed(evt);
-            }
-        });
-        jMenu1.add(jMenuItemLoadMusic);
+        jMenu3.setText("Carregar Letras");
 
-        jMenuItemUpdateMusics.setText("Atualizar Letras");
-        jMenuItemUpdateMusics.addActionListener(new java.awt.event.ActionListener() {
+        jMenuItemLoadFromFile.setText("Arquivo texto");
+        jMenuItemLoadFromFile.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItemUpdateMusicsActionPerformed(evt);
+                jMenuItemLoadFromFileActionPerformed(evt);
             }
         });
-        jMenu1.add(jMenuItemUpdateMusics);
+        jMenu3.add(jMenuItemLoadFromFile);
+
+        jMenuItemLoadFromLink.setText("Inserir URL");
+        jMenuItemLoadFromLink.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemLoadFromLinkActionPerformed(evt);
+            }
+        });
+        jMenu3.add(jMenuItemLoadFromLink);
+
+        jMenu1.add(jMenu3);
 
         jMenuBar1.add(jMenu1);
 
@@ -180,7 +189,7 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
         }
     }//GEN-LAST:event_jMenuItemChangeFontActionPerformed
 
-    private void jMenuItemLoadMusicActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemLoadMusicActionPerformed
+    private void jMenuItemLoadFromFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemLoadFromFileActionPerformed
         final JFileChooser fc = new JFileChooser();
         fc.setFileFilter(new TextFileFilter());
         fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -197,7 +206,7 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
             MusicLoader.loadFilesToRepository(fc.getSelectedFiles(), musicRepo);
         }
 
-    }//GEN-LAST:event_jMenuItemLoadMusicActionPerformed
+    }//GEN-LAST:event_jMenuItemLoadFromFileActionPerformed
 
     private void jListMusicsValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_jListMusicsValueChanged
         int selectedMusic = jListMusics.getSelectedIndex();
@@ -208,16 +217,6 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
         }
         updateRowHeights();
     }//GEN-LAST:event_jListMusicsValueChanged
-
-    private void jMenuItemUpdateMusicsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemUpdateMusicsActionPerformed
-        jListMusics.clearSelection();
-        jTablePhrases.clearSelection();
-
-        List<File> openFiles = musicRepo.openFiles();
-        musicRepo.clear();
-
-        MusicLoader.loadFilesToRepository(openFiles, musicRepo);
-    }//GEN-LAST:event_jMenuItemUpdateMusicsActionPerformed
 
     private void jCheckBoxMenuItemMultilineStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jCheckBoxMenuItemMultilineStateChanged
         if (multiline == jCheckBoxMenuItemMultiline.isSelected()) {
@@ -266,17 +265,34 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
         jTablePhrases.clearSelection();
     }//GEN-LAST:event_jButtonClearScreenActionPerformed
 
+    private void jMenuItemLoadFromLinkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemLoadFromLinkActionPerformed
+        final String url = JOptionPane.showInputDialog(this, "Digite a URL:");
+
+        Runnable start = new Runnable() {
+            @Override
+            public void run() {
+                String data = Http.executePost(url);
+                Music m = UrlMusicLoader.extractData(data);
+                musicRepo.add(m);
+            }
+        };
+
+        ProgressDialog pd = new ProgressDialog(this, start, "Carregando...");
+        pd.setVisible(true);
+    }//GEN-LAST:event_jMenuItemLoadFromLinkActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonClearScreen;
     private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItemMultiline;
     private javax.swing.JList<String> jListMusics;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItemChangeBackground;
     private javax.swing.JMenuItem jMenuItemChangeFont;
-    private javax.swing.JMenuItem jMenuItemLoadMusic;
-    private javax.swing.JMenuItem jMenuItemUpdateMusics;
+    private javax.swing.JMenuItem jMenuItemLoadFromFile;
+    private javax.swing.JMenuItem jMenuItemLoadFromLink;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JTable jTablePhrases;
