@@ -40,13 +40,15 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
     private File lastDirectory;
     private final MusicRepository musicRepo;
     private boolean multiline;
-
+    private final WrappedTextCellRenderer cellRenderer;
+    
     /**
      * Creates new form MainFrame
      */
     public MainFrame(ProjectionManager projectionWindow) {
         this.projectionWindow = projectionWindow;
         this.musicRepo = new MusicRepository();
+        this.cellRenderer = new WrappedTextCellRenderer();
         initComponents();
     }
 
@@ -262,7 +264,21 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
     }//GEN-LAST:event_jMenuItemChangeBackgroundActionPerformed
 
     private void jButtonClearScreenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonClearScreenActionPerformed
+        int selected = jTablePhrases.getSelectionModel().getAnchorSelectionIndex();
+        int rowCount = jTablePhrases.getRowCount();
+        
         jTablePhrases.clearSelection();
+        
+        if (selected < 0 || selected >= rowCount) {
+            return;
+        }
+        
+        // TODO: Fix this.
+//        if (selected + 1 < rowCount) {
+//            selected++;
+//        }
+//        
+        cellRenderer.setMarker(selected);
     }//GEN-LAST:event_jButtonClearScreenActionPerformed
 
     private void jMenuItemLoadFromLinkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemLoadFromLinkActionPerformed
@@ -312,7 +328,7 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
 
         jListMusics.setModel(musicRepo.getMusicsModel());
 
-        jTablePhrases.setDefaultRenderer(WrappedText.class, new WrappedTextCellRenderer());
+        jTablePhrases.setDefaultRenderer(WrappedText.class, cellRenderer);
         jTablePhrases.getSelectionModel().addListSelectionListener(this);
         setVisible(true);
     }
@@ -325,6 +341,8 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
             projectionWindow.setText(WrappedText.blankText());
             return;
         }
+        
+        cellRenderer.setMarker(-1);
 
         int music = jListMusics.getSelectedIndex();
         int selected = lsm.getAnchorSelectionIndex();

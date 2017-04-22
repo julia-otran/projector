@@ -6,7 +6,9 @@
 package br.com.projector.other;
 
 import br.com.projector.projection.text.WrappedText;
+import java.awt.Color;
 import java.awt.Component;
+
 import javax.swing.JList;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -16,8 +18,9 @@ import javax.swing.table.TableCellRenderer;
  *
  * @author guilherme
  */
-public class WrappedTextCellRenderer extends JList implements TableCellRenderer {
-
+public class WrappedTextCellRenderer extends JList<String> implements TableCellRenderer {
+    private int marker;
+    
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         JList<String> list = this;
@@ -31,6 +34,9 @@ public class WrappedTextCellRenderer extends JList implements TableCellRenderer 
         if (isSelected) {
             list.setBackground(table.getSelectionBackground());
             list.setForeground(table.getSelectionForeground());
+        } else if (row == marker) {
+            list.setBackground(Color.yellow);
+            list.setForeground(table.getForeground());
         } else if (row % 2 == 0) {
             list.setBackground(table.getBackground());
             list.setForeground(table.getForeground());
@@ -49,4 +55,11 @@ public class WrappedTextCellRenderer extends JList implements TableCellRenderer 
         return list;
     }
 
+    public int getMarker() {
+        return marker;
+    }
+    
+    public void setMarker(int row) {
+        this.marker = row;
+    }
 }
