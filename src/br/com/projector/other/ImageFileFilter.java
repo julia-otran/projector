@@ -26,11 +26,7 @@ public class ImageFileFilter extends FileFilter {
             return false;
         }
 
-        if (name.endsWith(".jpg") || name.endsWith(".png") || name.endsWith(".jpeg")) {
-            return true;
-        }
-
-        return false;
+        return name.endsWith(".jpg") || name.endsWith(".png") || name.endsWith(".jpeg");
     }
 
     @Override

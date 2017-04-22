@@ -29,5 +29,7 @@ public interface ProjectionManager {
     public WrapperFactory getWrapperFactory();
 
     public void setBackgroundImageFile(File selectedFile);
+    
+    public void setFullScreen(boolean fullScreen);
 
 }

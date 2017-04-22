@@ -7,7 +7,12 @@ package br.com.projector.projection;
 
 import br.com.projector.projection.text.WrappedText;
 import br.com.projector.projection.text.WrapperFactory;
+import java.awt.Cursor;
 import java.awt.Font;
+import java.awt.GraphicsDevice;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +28,7 @@ public class ProjectionFrame extends javax.swing.JFrame implements ProjectionMan
 
     private final ProjectionLabel textLabel;
     private final ProjectionBackground background;
+    private GraphicsDevice outputDevice;
 
     /**
      * Creates new form ProjectionFrame
@@ -124,4 +130,31 @@ public class ProjectionFrame extends javax.swing.JFrame implements ProjectionMan
         }
     }
 
+    public void setDevice(GraphicsDevice dev) {
+        this.outputDevice = dev;
+        
+        Rectangle bounds = dev.getDefaultConfiguration().getBounds();
+        this.setBounds(bounds);
+        this.setVisible(true);
+    }
+    
+    @Override
+    public void setFullScreen(boolean fullScreen) {
+        if (fullScreen) {
+            outputDevice.setFullScreenWindow(this);
+            
+            // Transparent 16 x 16 pixel cursor image.
+            BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+
+            // Create a new blank cursor.
+            Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(
+                cursorImg, new Point(0, 0), "blank cursor");
+
+            // Set the blank cursor to the JFrame.
+            this.getContentPane().setCursor(blankCursor);
+        } else {
+            outputDevice.setFullScreenWindow(null);
+            getContentPane().setCursor(Cursor.getDefaultCursor());
+        }
+    }
 }

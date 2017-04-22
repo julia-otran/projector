@@ -9,7 +9,6 @@ import br.com.projector.forms.MainFrame;
 import br.com.projector.projection.ProjectionFrame;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -67,10 +66,7 @@ public class Projector {
                 GraphicsDevice dev = findProjectionDevice(devices);
                 // When no device to output, no output.
                 if (dev != null) {
-                    Rectangle bounds = dev.getDefaultConfiguration().getBounds();
-                    projectionFrame.setBounds(bounds);
-                    projectionFrame.setVisible(true);
-                    //dev.setFullScreenWindow(controlFrame);
+                    projectionFrame.setDevice(dev);
                 }
 
                 controlFrame.init();

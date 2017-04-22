@@ -47,6 +47,14 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemChangeFontActionPerformed"/>
               </Events>
             </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemChangeBackground">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Alterar fundo"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemChangeBackgroundActionPerformed"/>
+              </Events>
+            </MenuItem>
             <MenuItem class="javax.swing.JCheckBoxMenuItem" name="jCheckBoxMenuItemMultiline">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Multiline"/>
@@ -55,12 +63,12 @@
                 <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="jCheckBoxMenuItemMultilineStateChanged"/>
               </Events>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemChangeBackground">
+            <MenuItem class="javax.swing.JCheckBoxMenuItem" name="jCheckBoxMenuItemFullScreen">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Alterar fundo"/>
+                <Property name="text" type="java.lang.String" value="Tela inteira"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemChangeBackgroundActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jCheckBoxMenuItemFullScreenActionPerformed"/>
               </Events>
             </MenuItem>
           </SubComponents>

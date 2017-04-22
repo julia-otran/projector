@@ -73,8 +73,9 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
         jMenuItemLoadFromLink = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         jMenuItemChangeFont = new javax.swing.JMenuItem();
-        jCheckBoxMenuItemMultiline = new javax.swing.JCheckBoxMenuItem();
         jMenuItemChangeBackground = new javax.swing.JMenuItem();
+        jCheckBoxMenuItemMultiline = new javax.swing.JCheckBoxMenuItem();
+        jCheckBoxMenuItemFullScreen = new javax.swing.JCheckBoxMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -138,6 +139,14 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
         });
         jMenu2.add(jMenuItemChangeFont);
 
+        jMenuItemChangeBackground.setText("Alterar fundo");
+        jMenuItemChangeBackground.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemChangeBackgroundActionPerformed(evt);
+            }
+        });
+        jMenu2.add(jMenuItemChangeBackground);
+
         jCheckBoxMenuItemMultiline.setText("Multiline");
         jCheckBoxMenuItemMultiline.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -146,13 +155,13 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
         });
         jMenu2.add(jCheckBoxMenuItemMultiline);
 
-        jMenuItemChangeBackground.setText("Alterar fundo");
-        jMenuItemChangeBackground.addActionListener(new java.awt.event.ActionListener() {
+        jCheckBoxMenuItemFullScreen.setText("Tela inteira");
+        jCheckBoxMenuItemFullScreen.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItemChangeBackgroundActionPerformed(evt);
+                jCheckBoxMenuItemFullScreenActionPerformed(evt);
             }
         });
-        jMenu2.add(jMenuItemChangeBackground);
+        jMenu2.add(jCheckBoxMenuItemFullScreen);
 
         jMenuBar1.add(jMenu2);
 
@@ -274,11 +283,12 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
         }
         
         // TODO: Fix this.
-//        if (selected + 1 < rowCount) {
-//            selected++;
-//        }
-//        
+        if (selected + 1 < rowCount) {
+            selected++;
+        }
+  
         cellRenderer.setMarker(selected);
+        jTablePhrases.repaint();
     }//GEN-LAST:event_jButtonClearScreenActionPerformed
 
     private void jMenuItemLoadFromLinkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemLoadFromLinkActionPerformed
@@ -297,8 +307,13 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
         pd.setVisible(true);
     }//GEN-LAST:event_jMenuItemLoadFromLinkActionPerformed
 
+    private void jCheckBoxMenuItemFullScreenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxMenuItemFullScreenActionPerformed
+        projectionWindow.setFullScreen(jCheckBoxMenuItemFullScreen.isSelected());
+    }//GEN-LAST:event_jCheckBoxMenuItemFullScreenActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonClearScreen;
+    private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItemFullScreen;
     private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItemMultiline;
     private javax.swing.JList<String> jListMusics;
     private javax.swing.JMenu jMenu1;
