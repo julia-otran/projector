@@ -63,7 +63,18 @@ public class Projector {
                 // Prevent panes from displaying in wrong screen
                 JOptionPane.setRootFrame(controlFrame);
 
-                GraphicsDevice dev = findProjectionDevice(devices);
+                GraphicsDevice dev;
+
+                if (devices.length == 0) {
+                    throw new IllegalStateException();
+                }
+
+                if (devices.length == 1) {
+                    dev = devices[0];
+                } else {
+                    dev = findProjectionDevice(devices);
+                }
+
                 // When no device to output, no output.
                 if (dev != null) {
                     projectionFrame.setDevice(dev);

@@ -9,9 +9,9 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
-    
+
     <name>Projector</name>
-    
+
     <repositories>
         <repository>
             <id>say.swing</id>
@@ -19,7 +19,7 @@
             <url>http://jfontchooser.osdn.jp/repository/</url>
         </repository>
     </repositories>
-    
+
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
         <dependency>
@@ -34,4 +34,20 @@
             <version>1.0.5</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>br.com.projector.projector.Projector</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

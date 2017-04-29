@@ -6,6 +6,7 @@
 package br.com.projector.projector.forms;
 
 import br.com.projector.projector.models.Music;
+import br.com.projector.projector.other.GeneralKeyboardDispatcher;
 import br.com.projector.projector.other.Http;
 import br.com.projector.projector.other.ImageFileFilter;
 import br.com.projector.projector.other.ProgressDialog;
@@ -20,6 +21,7 @@ import br.com.projector.projector.repositories.MusicLoader;
 import br.com.projector.projector.repositories.MusicRepository;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.KeyboardFocusManager;
 import java.io.File;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -34,16 +36,18 @@ import say.swing.JFontChooser;
  *
  * @author 15096134
  */
-public class MainFrame extends javax.swing.JFrame implements ListSelectionListener {
+public class MainFrame extends javax.swing.JFrame implements ListSelectionListener, GeneralKeyboardDispatcher.Listener {
 
     private final ProjectionManager projectionWindow;
     private File lastDirectory;
     private final MusicRepository musicRepo;
     private boolean multiline;
     private final WrappedTextCellRenderer cellRenderer;
-    
+
     /**
      * Creates new form MainFrame
+     *
+     * @param projectionWindow output window
      */
     public MainFrame(ProjectionManager projectionWindow) {
         this.projectionWindow = projectionWindow;
@@ -98,7 +102,8 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
         jTablePhrases.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane3.setViewportView(jTablePhrases);
 
-        jButtonClearScreen.setText("Limpar Tela");
+        jButtonClearScreen.setText("Limpar Tela (ESC)");
+        jButtonClearScreen.setToolTipText("");
         jButtonClearScreen.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonClearScreenActionPerformed(evt);
@@ -172,19 +177,25 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(jButtonClearScreen, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE))
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonClearScreen, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 426, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 557, Short.MAX_VALUE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 432, Short.MAX_VALUE)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jButtonClearScreen, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jScrollPane3)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButtonClearScreen, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
 
         pack();
@@ -273,22 +284,7 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
     }//GEN-LAST:event_jMenuItemChangeBackgroundActionPerformed
 
     private void jButtonClearScreenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonClearScreenActionPerformed
-        int selected = jTablePhrases.getSelectionModel().getAnchorSelectionIndex();
-        int rowCount = jTablePhrases.getRowCount();
-        
-        jTablePhrases.clearSelection();
-        
-        if (selected < 0 || selected >= rowCount) {
-            return;
-        }
-        
-        // TODO: Fix this.
-        if (selected + 1 < rowCount) {
-            selected++;
-        }
-  
-        cellRenderer.setMarker(selected);
-        jTablePhrases.repaint();
+        clearScreen();
     }//GEN-LAST:event_jButtonClearScreenActionPerformed
 
     private void jMenuItemLoadFromLinkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemLoadFromLinkActionPerformed
@@ -346,6 +342,9 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
         jTablePhrases.setDefaultRenderer(WrappedText.class, cellRenderer);
         jTablePhrases.getSelectionModel().addListSelectionListener(this);
         setVisible(true);
+
+        KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+        manager.addKeyEventDispatcher(new GeneralKeyboardDispatcher(this));
     }
 
     @Override
@@ -356,7 +355,7 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
             projectionWindow.setText(WrappedText.blankText());
             return;
         }
-        
+
         cellRenderer.setMarker(-1);
 
         int music = jListMusics.getSelectedIndex();
@@ -396,5 +395,24 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
                 table.setRowHeight(row, rowHeight);
             }
         }
+    }
+
+    @Override
+    public void onKeyboardEscPressed() {
+        clearScreen();
+    }
+
+    private void clearScreen() {
+        int selected = jTablePhrases.getSelectionModel().getAnchorSelectionIndex();
+        int rowCount = jTablePhrases.getRowCount();
+
+        jTablePhrases.clearSelection();
+
+        if (selected < 0 || selected >= rowCount) {
+            return;
+        }
+
+        cellRenderer.setMarker(selected);
+        jTablePhrases.repaint();
     }
 }
