@@ -5,9 +5,9 @@
  */
 package br.com.projector.projector.other;
 
-import com.sun.istack.internal.NotNull;
 import java.awt.KeyEventDispatcher;
 import java.awt.event.KeyEvent;
+import lombok.NonNull;
 
 /**
  *
@@ -22,7 +22,7 @@ public class GeneralKeyboardDispatcher implements KeyEventDispatcher {
 
     private final Listener listener;
 
-    public GeneralKeyboardDispatcher(@NotNull Listener listener) {
+    public GeneralKeyboardDispatcher(@NonNull Listener listener) {
         this.listener = listener;
     }
 

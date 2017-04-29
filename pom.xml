@@ -33,6 +33,13 @@
             <artifactId>jfontchooser</artifactId>
             <version>1.0.5</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.16.16</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -40,6 +47,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>3.0.2</version>
                 <configuration>
                     <archive>
                         <manifest>
