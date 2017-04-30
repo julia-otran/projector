@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.com.projector.projector.other;
+package br.com.projector.projector.music_importing;
 
 import br.com.projector.projector.models.Music;
 import java.util.ArrayList;
@@ -18,9 +18,14 @@ import org.jsoup.select.Elements;
  *
  * @author guilherme
  */
-public class UrlMusicLoader {
+public class LetrasMusImporter extends MusicUrlImporter {
 
-    public static Music extractData(String data) {
+    LetrasMusImporter(String url) {
+        super(url);
+    }
+
+    @Override
+    protected Music parseMusic(String data) throws ImportError {
         Music music = new Music();
 
         Document doc = Jsoup.parse(data);
@@ -28,7 +33,8 @@ public class UrlMusicLoader {
         Elements artist = doc.select(".cnt-head_title h2");
         Elements stanzasElm = doc.select(".cnt-letra article p");
 
-        music.setName(title.text() + " - " + artist.text());
+        music.setName(title.text());
+        music.setArtist(artist.text());
         List<String> phrases = new ArrayList<>();
 
         for (Element stanza : stanzasElm) {
@@ -41,7 +47,12 @@ public class UrlMusicLoader {
             phrases.add("");
         }
 
+        if (phrases.isEmpty()) {
+            throw new ImportError("Cannot read phrases");
+        }
+
         music.setPhrases(phrases);
         return music;
     }
+
 }

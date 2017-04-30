@@ -7,6 +7,8 @@ package br.com.projector.projector.other;
     version 2 of the license, or (at your option) any later version.
  */
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import javax.swing.*;
@@ -22,9 +24,11 @@ public class ProgressDialog extends JDialog {
     private static final int PROGRESS_BAR_WIDTH = 200;
 
     private Runnable runnable;
+    private Thread task;
 
     private JProgressBar progressBar;
     private JLabel lblMessage;
+    private JButton cancelButton;
 
     /**
      * Constructor.
@@ -61,6 +65,10 @@ public class ProgressDialog extends JDialog {
         lblMessage.setText(message);
     }
 
+    public JButton getCancelButton() {
+        return cancelButton;
+    }
+
     /**
      * Set the  <tt>Runnable</tt> to be started on <tt>setVisible</tt>.
      *
@@ -95,6 +103,15 @@ public class ProgressDialog extends JDialog {
         preferredSize.width = PROGRESS_BAR_WIDTH;
         progressBar.setPreferredSize(preferredSize);
         lblMessage = new JLabel(" ");
+        cancelButton = new JButton();
+        cancelButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (task != null) {
+                    task.interrupt();
+                }
+            }
+        });
     }
 
     private void setupComponent() {
@@ -110,7 +127,8 @@ public class ProgressDialog extends JDialog {
         gc.weightx = 1;
         gc.fill = GridBagConstraints.HORIZONTAL;
         contentPane.add(progressBar, gc);
-
+        gc.fill = GridBagConstraints.NONE;
+        contentPane.add(cancelButton, gc);
         setTitle("");
         setModal(true);
         pack();
@@ -120,18 +138,23 @@ public class ProgressDialog extends JDialog {
     private void setupEventHandlers() {
 
         addComponentListener(new ComponentAdapter() {
+            @Override
             public void componentShown(ComponentEvent event) {
-                final Thread task = new Thread(runnable);
+                task = new Thread(runnable);
                 task.start();
+
                 new Thread() {
+                    @Override
                     public void run() {
                         try {
                             task.join();
                         } catch (InterruptedException e) {
                         }
                         SwingUtilities.invokeLater(new Runnable() {
+                            @Override
                             public void run() {
                                 setVisible(false);
+                                task = null;
                             }
                         });
                     }

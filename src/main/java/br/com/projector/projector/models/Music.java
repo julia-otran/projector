@@ -13,8 +13,10 @@ import java.util.List;
  * @author guilherme
  */
 public class Music {
+
     private List<String> phrases;
     private String name;
+    private String artist;
     private File file;
 
     public File getFile() {
@@ -40,4 +42,13 @@ public class Music {
     public void setName(String name) {
         this.name = name;
     }
+
+    public String getArtist() {
+        return artist;
+    }
+
+    public void setArtist(String artist) {
+        this.artist = artist;
+    }
+
 }

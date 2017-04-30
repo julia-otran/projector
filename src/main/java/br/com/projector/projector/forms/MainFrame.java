@@ -6,12 +6,13 @@
 package br.com.projector.projector.forms;
 
 import br.com.projector.projector.models.Music;
+import br.com.projector.projector.music_importing.ImportCallback;
+import br.com.projector.projector.music_importing.ImporterFactory;
+import br.com.projector.projector.music_importing.MusicUrlImporter;
 import br.com.projector.projector.other.GeneralKeyboardDispatcher;
-import br.com.projector.projector.other.Http;
 import br.com.projector.projector.other.ImageFileFilter;
 import br.com.projector.projector.other.ProgressDialog;
 import br.com.projector.projector.other.TextFileFilter;
-import br.com.projector.projector.other.UrlMusicLoader;
 import br.com.projector.projector.other.WrappedTextCellRenderer;
 import br.com.projector.projector.projection.ProjectionManager;
 import br.com.projector.projector.projection.TextWrapperFactoryChangeListener;
@@ -290,16 +291,27 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
     private void jMenuItemLoadFromLinkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemLoadFromLinkActionPerformed
         final String url = JOptionPane.showInputDialog(this, "Digite a URL:");
 
-        Runnable start = new Runnable() {
+        MusicUrlImporter importer = ImporterFactory.getFactory().getImporter(url);
+
+        if (importer == null) {
+            JOptionPane.showMessageDialog(null, "Falha: Site não suportado.");
+            return;
+        }
+
+        Runnable start = importer.getExecutor(new ImportCallback() {
             @Override
-            public void run() {
-                String data = Http.executePost(url);
-                Music m = UrlMusicLoader.extractData(data);
-                musicRepo.add(m);
+            public void onImportSuccess(Music music) {
+                musicRepo.add(music);
             }
-        };
+
+            @Override
+            public void onImportError() {
+                JOptionPane.showMessageDialog(null, "Ocorreu um erro ao importar a música.");
+            }
+        });
 
         ProgressDialog pd = new ProgressDialog(this, start, "Carregando...");
+        pd.getCancelButton().setText("Cancelar");
         pd.setVisible(true);
     }//GEN-LAST:event_jMenuItemLoadFromLinkActionPerformed
 
