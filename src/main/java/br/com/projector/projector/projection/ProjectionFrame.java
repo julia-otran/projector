@@ -157,4 +157,9 @@ public class ProjectionFrame extends javax.swing.JFrame implements ProjectionMan
             getContentPane().setCursor(Cursor.getDefaultCursor());
         }
     }
+
+    @Override
+    public void setCropBackground(boolean selected) {
+        background.setCropBackground(selected);
+    }
 }

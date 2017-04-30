@@ -21,6 +21,7 @@ public class ProjectionBackground implements Projectable {
     private final CanvasDelegate canvasDelegate;
     private BufferedImage img;
     private BufferedImage scaled;
+    private boolean cropBackground;
 
     public ProjectionBackground(CanvasDelegate canvasDelegate) {
         this.canvasDelegate = canvasDelegate;
@@ -58,7 +59,13 @@ public class ProjectionBackground implements Projectable {
 
         double scaleX = width / (double) imgW;
         double scaleY = height / (double) imgH;
-        double scale = Math.max(scaleX, scaleY);
+        double scale;
+        
+        if (cropBackground) {
+            scale = Math.max(scaleX, scaleY);
+        } else {
+            scale = Math.min(scaleX, scaleY);
+        }
 
         int newW = (int) Math.round(imgW * scale);
         int newH = (int) Math.round(imgH * scale);
@@ -88,5 +95,13 @@ public class ProjectionBackground implements Projectable {
         this.img = img;
         rebuildLayout();
         canvasDelegate.repaint();
+    }
+
+    void setCropBackground(boolean cropBackground) {
+        if (this.cropBackground != cropBackground) {
+            this.cropBackground = cropBackground;
+            rebuildLayout();
+            canvasDelegate.repaint();
+        }
     }
 }

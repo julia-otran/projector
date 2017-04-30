@@ -32,4 +32,6 @@ public interface ProjectionManager {
     
     public void setFullScreen(boolean fullScreen);
 
+    public void setCropBackground(boolean selected);
+
 }

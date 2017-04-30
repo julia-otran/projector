@@ -79,6 +79,7 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
         jMenu2 = new javax.swing.JMenu();
         jMenuItemChangeFont = new javax.swing.JMenuItem();
         jMenuItemChangeBackground = new javax.swing.JMenuItem();
+        jCheckBoxMenuItemCropBackground = new javax.swing.JCheckBoxMenuItem();
         jCheckBoxMenuItemMultiline = new javax.swing.JCheckBoxMenuItem();
         jCheckBoxMenuItemFullScreen = new javax.swing.JCheckBoxMenuItem();
 
@@ -152,6 +153,15 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
             }
         });
         jMenu2.add(jMenuItemChangeBackground);
+
+        jCheckBoxMenuItemCropBackground.setSelected(true);
+        jCheckBoxMenuItemCropBackground.setText("Cortar Fundo");
+        jCheckBoxMenuItemCropBackground.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBoxMenuItemCropBackgroundActionPerformed(evt);
+            }
+        });
+        jMenu2.add(jCheckBoxMenuItemCropBackground);
 
         jCheckBoxMenuItemMultiline.setText("Multiline");
         jCheckBoxMenuItemMultiline.addChangeListener(new javax.swing.event.ChangeListener() {
@@ -319,8 +329,13 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
         projectionWindow.setFullScreen(jCheckBoxMenuItemFullScreen.isSelected());
     }//GEN-LAST:event_jCheckBoxMenuItemFullScreenActionPerformed
 
+    private void jCheckBoxMenuItemCropBackgroundActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxMenuItemCropBackgroundActionPerformed
+        projectionWindow.setCropBackground(jCheckBoxMenuItemCropBackground.isSelected());
+    }//GEN-LAST:event_jCheckBoxMenuItemCropBackgroundActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonClearScreen;
+    private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItemCropBackground;
     private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItemFullScreen;
     private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItemMultiline;
     private javax.swing.JList<String> jListMusics;
@@ -354,6 +369,8 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
         jTablePhrases.setDefaultRenderer(WrappedText.class, cellRenderer);
         jTablePhrases.getSelectionModel().addListSelectionListener(this);
         setVisible(true);
+        
+        projectionWindow.setCropBackground(jCheckBoxMenuItemCropBackground.isSelected());
 
         KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
         manager.addKeyEventDispatcher(new GeneralKeyboardDispatcher(this));
