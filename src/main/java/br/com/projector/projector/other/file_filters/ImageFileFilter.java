@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.com.projector.projector.other;
+package br.com.projector.projector.other.file_filters;
 
 import java.io.File;
 import javax.swing.filechooser.FileFilter;

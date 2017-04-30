@@ -10,16 +10,16 @@ import br.com.projector.projector.music_importing.ImportCallback;
 import br.com.projector.projector.music_importing.ImporterFactory;
 import br.com.projector.projector.music_importing.MusicUrlImporter;
 import br.com.projector.projector.other.GeneralKeyboardDispatcher;
-import br.com.projector.projector.other.ImageFileFilter;
 import br.com.projector.projector.other.ProgressDialog;
-import br.com.projector.projector.other.TextFileFilter;
 import br.com.projector.projector.other.WrappedTextCellRenderer;
+import br.com.projector.projector.other.file_filters.ImageFileFilter;
+import br.com.projector.projector.other.file_filters.TextFileFilter;
 import br.com.projector.projector.projection.ProjectionManager;
 import br.com.projector.projector.projection.TextWrapperFactoryChangeListener;
 import br.com.projector.projector.projection.text.WrappedText;
 import br.com.projector.projector.projection.text.WrapperFactory;
 import br.com.projector.projector.repositories.MusicLoader;
-import br.com.projector.projector.repositories.MusicRepository;
+import br.com.projector.projector.repositories.OpenMusicRepository;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.KeyboardFocusManager;
@@ -41,7 +41,7 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
 
     private final ProjectionManager projectionWindow;
     private File lastDirectory;
-    private final MusicRepository musicRepo;
+    private final OpenMusicRepository musicRepo;
     private boolean multiline;
     private final WrappedTextCellRenderer cellRenderer;
 
@@ -52,7 +52,7 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
      */
     public MainFrame(ProjectionManager projectionWindow) {
         this.projectionWindow = projectionWindow;
-        this.musicRepo = new MusicRepository();
+        this.musicRepo = new OpenMusicRepository();
         this.cellRenderer = new WrappedTextCellRenderer();
         initComponents();
     }

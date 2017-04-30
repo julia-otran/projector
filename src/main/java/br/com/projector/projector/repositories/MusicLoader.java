@@ -35,7 +35,7 @@ public class MusicLoader {
         }
     }
 
-    public static void loadFileToRepository(File source, MusicRepository destination) {
+    public static void loadFileToRepository(File source, OpenMusicRepository destination) {
         Music loaded = loadFromFile(source);
 
         if (loaded == null) {
@@ -45,13 +45,13 @@ public class MusicLoader {
         }
     }
 
-    public static void loadFilesToRepository(File sources[], MusicRepository destination) {
+    public static void loadFilesToRepository(File sources[], OpenMusicRepository destination) {
         for (File f : sources) {
             loadFileToRepository(f, destination);
         }
     }
 
-    public static void loadFilesToRepository(List<File> sources, MusicRepository destination) {
+    public static void loadFilesToRepository(List<File> sources, OpenMusicRepository destination) {
         sources.stream().forEach(f -> loadFileToRepository(f, destination));
     }
 }

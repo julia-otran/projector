@@ -51,4 +51,8 @@ public class Music {
         this.artist = artist;
     }
 
+    public String getNameWithArtist() {
+        return name + " - " + artist;
+    }
+
 }

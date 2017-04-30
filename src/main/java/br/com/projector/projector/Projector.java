@@ -6,6 +6,7 @@
 package br.com.projector.projector;
 
 import br.com.projector.projector.forms.MainFrame;
+import br.com.projector.projector.other.SQLiteJDBCDriverConnection;
 import br.com.projector.projector.projection.ProjectionFrame;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -58,10 +59,12 @@ public class Projector {
                 projectionFrame.setVisible(false);
 
                 MainFrame controlFrame = new MainFrame(projectionFrame);
-                controlFrame.setVisible(false);
+                controlFrame.setVisible(true);
 
                 // Prevent panes from displaying in wrong screen
                 JOptionPane.setRootFrame(controlFrame);
+                SQLiteJDBCDriverConnection.connect();
+                SQLiteJDBCDriverConnection.migrate();
 
                 GraphicsDevice dev;
 
@@ -77,6 +80,7 @@ public class Projector {
 
                 // When no device to output, no output.
                 if (dev != null) {
+                    controlFrame.setVisible(false);
                     projectionFrame.setDevice(dev);
                 }
 
