@@ -23,7 +23,14 @@ public class ProgressDialog extends JDialog {
 
     private static final int PROGRESS_BAR_WIDTH = 200;
 
-    private Runnable runnable;
+    public interface Executor {
+
+        void doInBackground();
+
+        void done();
+    }
+
+    private Executor executor;
     private Thread task;
 
     private JProgressBar progressBar;
@@ -34,26 +41,26 @@ public class ProgressDialog extends JDialog {
      * Constructor.
      *
      * @param parent the parent frame.
-     * @param runnable the <tt>Runnable</tt> to be started on
+     * @param executor the <tt>Executor</tt> to be started on
      * <tt>setVisible</tt>.
      * @param message the initial status message.
      */
-    public ProgressDialog(JFrame parent, Runnable runnable, String message) {
+    public ProgressDialog(JFrame parent, Executor executor, String message) {
         super(parent);
-        init(runnable, message);
+        init(executor, message);
     }
 
     /**
      * Constructor.
      *
      * @param parent the parent dialog.
-     * @param runnable the <tt>Runnable</tt> to be started on
+     * @param executor the <tt>Executor</tt> to be started on
      * <tt>setVisible</tt>.
      * @param message the initial status message.
      */
-    public ProgressDialog(JDialog parent, Runnable runnable, String message) {
+    public ProgressDialog(JDialog parent, Executor executor, String message) {
         super(parent);
-        init(runnable, message);
+        init(executor, message);
     }
 
     /**
@@ -70,12 +77,12 @@ public class ProgressDialog extends JDialog {
     }
 
     /**
-     * Set the  <tt>Runnable</tt> to be started on <tt>setVisible</tt>.
+     * Set the  <tt>Executor</tt> to be started on <tt>setVisible</tt>.
      *
-     * @param runnable the <tt>Runnable</tt>.
+     * @param runnable the <tt>Executor</tt>.
      */
-    public void setRunnable(Runnable runnable) {
-        this.runnable = runnable;
+    public void setExecutor(Executor executor) {
+        this.executor = executor;
     }
 
     @Override
@@ -88,12 +95,12 @@ public class ProgressDialog extends JDialog {
         super.setVisible(visible);
     }
 
-    private void init(Runnable runnable, String message) {
+    private void init(Executor runnable, String message) {
         setupControls();
         setupComponent();
         setupEventHandlers();
         setMessage(message);
-        setRunnable(runnable);
+        setExecutor(runnable);
     }
 
     private void setupControls() {
@@ -140,25 +147,26 @@ public class ProgressDialog extends JDialog {
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentShown(ComponentEvent event) {
-                task = new Thread(runnable);
-                task.start();
-
-                new Thread() {
+                task = new Thread() {
                     @Override
                     public void run() {
+                        super.run();
                         try {
-                            task.join();
-                        } catch (InterruptedException e) {
+                            executor.doInBackground();
+                        } finally {
+                            java.awt.EventQueue.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    setVisible(false);
+                                    task = null;
+                                    executor.done();
+                                }
+                            });
                         }
-                        SwingUtilities.invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                setVisible(false);
-                                task = null;
-                            }
-                        });
                     }
-                }.start();
+                };
+
+                task.start();
             }
         });
     }

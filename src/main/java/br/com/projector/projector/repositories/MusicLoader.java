@@ -23,7 +23,6 @@ public class MusicLoader {
         try {
             Music m = new Music();
             m.setName(file.getName().replace(".txt", ""));
-            m.setFile(file);
 
             List<String> lines = Files.readAllLines(file.toPath());
             m.setPhrases(lines);

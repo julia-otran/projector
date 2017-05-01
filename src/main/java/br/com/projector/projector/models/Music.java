@@ -5,7 +5,6 @@
  */
 package br.com.projector.projector.models;
 
-import java.io.File;
 import java.util.List;
 
 /**
@@ -15,16 +14,16 @@ import java.util.List;
 public class Music {
 
     private List<String> phrases;
+    private int id;
     private String name;
-    private String artist;
-    private File file;
+    private Artist artist;
 
-    public File getFile() {
-        return file;
+    public int getId() {
+        return id;
     }
 
-    public void setFile(File file) {
-        this.file = file;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public List<String> getPhrases() {
@@ -43,16 +42,20 @@ public class Music {
         this.name = name;
     }
 
-    public String getArtist() {
+    public Artist getArtist() {
         return artist;
     }
 
-    public void setArtist(String artist) {
+    public void setArtist(Artist artist) {
         this.artist = artist;
     }
 
     public String getNameWithArtist() {
-        return name + " - " + artist;
+        if (artist == null) {
+            return name;
+        }
+
+        return name + " - " + artist.getName();
     }
 
 }

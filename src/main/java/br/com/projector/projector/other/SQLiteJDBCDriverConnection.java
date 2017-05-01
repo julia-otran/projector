@@ -124,11 +124,13 @@ public class SQLiteJDBCDriverConnection {
                     + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
                     + "name VARCHAR NOT NULL, "
                     + "artist_id INTEGER, "
+                    + "phrases TEXT, "
                     + "FOREIGN KEY(artist_id) REFERENCES artists(artist_id)"
                     + ");";
 
             stmt.execute(query);
             stmt.execute("CREATE UNIQUE INDEX IF NOT EXISTS UQ_MUSIC ON musics(artist_id, name);");
+
             stmt.close();
 
         } catch (SQLException ex) {

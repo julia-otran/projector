@@ -7,10 +7,8 @@ package br.com.projector.projector.repositories;
 
 import br.com.projector.projector.models.Music;
 import br.com.projector.projector.projection.text.WrappedText;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.swing.DefaultListModel;
 import javax.swing.ListModel;
 import javax.swing.table.TableModel;
@@ -64,10 +62,6 @@ public class OpenMusicRepository {
         musics.clear();
         musicsListModel.clear();
         phrasesRepos.clear();
-    }
-
-    public List<File> openFiles() {
-        return musics.stream().map(Music::getFile).collect(Collectors.toList());
     }
 
     public TableModel getPhrasesModel(int selectedMusic) {

@@ -5,7 +5,7 @@
  */
 package br.com.projector.projector.music_importing;
 
-import br.com.projector.projector.models.Music;
+import br.com.projector.projector.dtos.ImportingMusicDTO;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,8 +25,8 @@ public class LetrasMusImporter extends MusicUrlImporter {
     }
 
     @Override
-    protected Music parseMusic(String data) throws ImportError {
-        Music music = new Music();
+    protected ImportingMusicDTO parseMusic(String data) throws ImportError {
+        ImportingMusicDTO music = new ImportingMusicDTO();
 
         Document doc = Jsoup.parse(data);
         Elements title = doc.select(".cnt-head_title h1");
@@ -35,6 +35,7 @@ public class LetrasMusImporter extends MusicUrlImporter {
 
         music.setName(title.text());
         music.setArtist(artist.text());
+
         List<String> phrases = new ArrayList<>();
 
         for (Element stanza : stanzasElm) {

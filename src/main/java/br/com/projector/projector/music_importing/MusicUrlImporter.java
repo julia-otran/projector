@@ -5,7 +5,8 @@
  */
 package br.com.projector.projector.music_importing;
 
-import br.com.projector.projector.models.Music;
+import br.com.projector.projector.dtos.ImportingMusicDTO;
+import br.com.projector.projector.other.ProgressDialog.Executor;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import java.util.logging.Level;
@@ -23,17 +24,29 @@ public abstract class MusicUrlImporter {
         this.url = url;
     }
 
-    public Runnable getExecutor(final ImportCallback callback) {
-        return new Runnable() {
+    public Executor getExecutor(final ImportCallback callback) {
+        return new Executor() {
+            ImportingMusicDTO parsed;
+            boolean success;
+
             @Override
-            public void run() {
+            public void doInBackground() {
                 try {
                     String data = doRequest();
-                    final Music parsed = parseMusic(data);
-                    dispatchSuccess(parsed, callback);
+                    parsed = parseMusic(data);
+                    success = true;
                 } catch (ImportError ex) {
                     Logger.getLogger(MusicUrlImporter.class.getName()).log(Level.SEVERE, null, ex);
-                    dispatchError(callback);
+                    success = false;
+                }
+            }
+
+            @Override
+            public void done() {
+                if (success) {
+                    callback.onImportSuccess(parsed);
+                } else {
+                    callback.onImportError();
                 }
             }
 
@@ -44,7 +57,7 @@ public abstract class MusicUrlImporter {
         return url;
     }
 
-    protected abstract Music parseMusic(String data) throws ImportError;
+    protected abstract ImportingMusicDTO parseMusic(String data) throws ImportError;
 
     private String doRequest() throws ImportError {
         try {
@@ -56,23 +69,5 @@ public abstract class MusicUrlImporter {
             Logger.getLogger(MusicUrlImporter.class.getName()).log(Level.SEVERE, null, ex);
             throw new ImportError(ex);
         }
-    }
-
-    private void dispatchSuccess(final Music music, final ImportCallback callback) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                callback.onImportSuccess(music);
-            }
-        });
-    }
-
-    private void dispatchError(final ImportCallback callback) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                callback.onImportError();
-            }
-        });
     }
 }

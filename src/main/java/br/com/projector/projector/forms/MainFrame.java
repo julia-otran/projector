@@ -5,12 +5,13 @@
  */
 package br.com.projector.projector.forms;
 
-import br.com.projector.projector.models.Music;
+import br.com.projector.projector.dtos.ImportingMusicDTO;
 import br.com.projector.projector.music_importing.ImportCallback;
 import br.com.projector.projector.music_importing.ImporterFactory;
 import br.com.projector.projector.music_importing.MusicUrlImporter;
 import br.com.projector.projector.other.GeneralKeyboardDispatcher;
 import br.com.projector.projector.other.ProgressDialog;
+import br.com.projector.projector.other.ProgressDialog.Executor;
 import br.com.projector.projector.other.WrappedTextCellRenderer;
 import br.com.projector.projector.other.file_filters.ImageFileFilter;
 import br.com.projector.projector.other.file_filters.TextFileFilter;
@@ -73,6 +74,7 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
         jButtonClearScreen = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
+        jMenuItemCreateMusic = new javax.swing.JMenuItem();
         jMenu3 = new javax.swing.JMenu();
         jMenuItemLoadFromFile = new javax.swing.JMenuItem();
         jMenuItemLoadFromLink = new javax.swing.JMenuItem();
@@ -84,6 +86,7 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
         jCheckBoxMenuItemFullScreen = new javax.swing.JCheckBoxMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Projector");
 
         jListMusics.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jListMusics.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
@@ -114,7 +117,15 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
 
         jMenu1.setText("Arquivo");
 
-        jMenu3.setText("Carregar Letras");
+        jMenuItemCreateMusic.setText("Criar Letra");
+        jMenuItemCreateMusic.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemCreateMusicActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItemCreateMusic);
+
+        jMenu3.setText("Importar Letra");
 
         jMenuItemLoadFromFile.setText("Arquivo texto");
         jMenuItemLoadFromFile.addActionListener(new java.awt.event.ActionListener() {
@@ -308,10 +319,13 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
             return;
         }
 
-        Runnable start = importer.getExecutor(new ImportCallback() {
+        Executor start = importer.getExecutor(new ImportCallback() {
             @Override
-            public void onImportSuccess(Music music) {
-                musicRepo.add(music);
+            public void onImportSuccess(ImportingMusicDTO music) {
+                ManageMusicFrame frame = new ManageMusicFrame(music);
+                frame.setOpenMusicRepository(musicRepo);
+                frame.setVisible(true);
+                frame.requestFocusInWindow();
             }
 
             @Override
@@ -333,6 +347,13 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
         projectionWindow.setCropBackground(jCheckBoxMenuItemCropBackground.isSelected());
     }//GEN-LAST:event_jCheckBoxMenuItemCropBackgroundActionPerformed
 
+    private void jMenuItemCreateMusicActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemCreateMusicActionPerformed
+        ManageMusicFrame frame = new ManageMusicFrame();
+        frame.setOpenMusicRepository(musicRepo);
+        frame.setVisible(true);
+        frame.requestFocusInWindow();
+    }//GEN-LAST:event_jMenuItemCreateMusicActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonClearScreen;
     private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItemCropBackground;
@@ -345,6 +366,7 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItemChangeBackground;
     private javax.swing.JMenuItem jMenuItemChangeFont;
+    private javax.swing.JMenuItem jMenuItemCreateMusic;
     private javax.swing.JMenuItem jMenuItemLoadFromFile;
     private javax.swing.JMenuItem jMenuItemLoadFromLink;
     private javax.swing.JScrollPane jScrollPane1;
@@ -369,7 +391,7 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
         jTablePhrases.setDefaultRenderer(WrappedText.class, cellRenderer);
         jTablePhrases.getSelectionModel().addListSelectionListener(this);
         setVisible(true);
-        
+
         projectionWindow.setCropBackground(jCheckBoxMenuItemCropBackground.isSelected());
 
         KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();

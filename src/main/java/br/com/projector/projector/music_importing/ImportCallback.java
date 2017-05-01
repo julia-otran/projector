@@ -5,7 +5,7 @@
  */
 package br.com.projector.projector.music_importing;
 
-import br.com.projector.projector.models.Music;
+import br.com.projector.projector.dtos.ImportingMusicDTO;
 
 /**
  *
@@ -13,7 +13,7 @@ import br.com.projector.projector.models.Music;
  */
 public interface ImportCallback {
 
-    void onImportSuccess(Music music);
+    void onImportSuccess(ImportingMusicDTO music);
 
     void onImportError();
 }
