@@ -16,6 +16,15 @@ public class Artist {
     private int id;
     private String name;
 
+    public Artist(Artist artist) {
+        this.id = artist.id;
+        this.name = artist.name;
+    }
+
+    public Artist() {
+
+    }
+
     public int getId() {
         return id;
     }

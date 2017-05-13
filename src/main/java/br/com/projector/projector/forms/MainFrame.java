@@ -67,14 +67,20 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jSplitPane1 = new javax.swing.JSplitPane();
+        jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jListMusics = new javax.swing.JList<>();
+        jButtonClearScreen = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
+        jPanel2 = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
         jTablePhrases = new javax.swing.JTable();
-        jButtonClearScreen = new javax.swing.JButton();
+        jLabel2 = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItemCreateMusic = new javax.swing.JMenuItem();
+        jMenuItemSearchMusic = new javax.swing.JMenuItem();
         jMenu3 = new javax.swing.JMenu();
         jMenuItemLoadFromFile = new javax.swing.JMenuItem();
         jMenuItemLoadFromLink = new javax.swing.JMenuItem();
@@ -88,6 +94,8 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Projector");
 
+        jSplitPane1.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
+
         jListMusics.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jListMusics.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
             public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
@@ -95,6 +103,36 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
             }
         });
         jScrollPane1.setViewportView(jListMusics);
+
+        jButtonClearScreen.setText("Limpar Tela (ESC)");
+        jButtonClearScreen.setToolTipText("");
+        jButtonClearScreen.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonClearScreenActionPerformed(evt);
+            }
+        });
+
+        jLabel1.setText("Lista de projeção:");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jButtonClearScreen, javax.swing.GroupLayout.DEFAULT_SIZE, 190, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 327, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButtonClearScreen, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+
+        jSplitPane1.setLeftComponent(jPanel1);
 
         jTablePhrases.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -107,13 +145,26 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
         jTablePhrases.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane3.setViewportView(jTablePhrases);
 
-        jButtonClearScreen.setText("Limpar Tela (ESC)");
-        jButtonClearScreen.setToolTipText("");
-        jButtonClearScreen.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonClearScreenActionPerformed(evt);
-            }
-        });
+        jLabel2.setText("Letra selecionada:");
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addComponent(jLabel2)
+                .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 545, Short.MAX_VALUE)
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 362, Short.MAX_VALUE))
+        );
+
+        jSplitPane1.setRightComponent(jPanel2);
 
         jMenu1.setText("Arquivo");
 
@@ -124,6 +175,14 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
             }
         });
         jMenu1.add(jMenuItemCreateMusic);
+
+        jMenuItemSearchMusic.setText("Procurar letras");
+        jMenuItemSearchMusic.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemSearchMusicActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItemSearchMusic);
 
         jMenu3.setText("Importar Letra");
 
@@ -198,25 +257,16 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonClearScreen, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 557, Short.MAX_VALUE)
+                .addComponent(jSplitPane1)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane3)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonClearScreen, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addComponent(jSplitPane1)
                 .addContainerGap())
         );
 
@@ -354,11 +404,18 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
         frame.requestFocusInWindow();
     }//GEN-LAST:event_jMenuItemCreateMusicActionPerformed
 
+    private void jMenuItemSearchMusicActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSearchMusicActionPerformed
+        ListMusicsFrame listFrame = new ListMusicsFrame(musicRepo);
+        listFrame.setVisible(true);
+    }//GEN-LAST:event_jMenuItemSearchMusicActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonClearScreen;
     private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItemCropBackground;
     private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItemFullScreen;
     private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItemMultiline;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JList<String> jListMusics;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
@@ -369,8 +426,12 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
     private javax.swing.JMenuItem jMenuItemCreateMusic;
     private javax.swing.JMenuItem jMenuItemLoadFromFile;
     private javax.swing.JMenuItem jMenuItemLoadFromLink;
+    private javax.swing.JMenuItem jMenuItemSearchMusic;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JTable jTablePhrases;
     // End of variables declaration//GEN-END:variables
 

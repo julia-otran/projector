@@ -75,4 +75,8 @@ public class OpenMusicRepository {
 
         return phrasesRepos.get(music).getTextAt(selected);
     }
+
+    public boolean contains(Music m) {
+        return musics.contains(m);
+    }
 }

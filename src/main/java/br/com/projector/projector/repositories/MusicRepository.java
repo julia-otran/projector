@@ -11,7 +11,9 @@ import br.com.projector.projector.other.SQLiteJDBCDriverConnection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -43,6 +45,7 @@ public class MusicRepository {
                 m.setId(rs.getInt("id"));
                 m.setName(rs.getString("name"));
                 m.setPhrases(Arrays.asList(rs.getString("phrases").split("\n")));
+                m.setArtist(new Artist(artist));
                 return m;
             }
         } finally {
@@ -74,5 +77,78 @@ public class MusicRepository {
 
         stmt.setString(3, phrases);
         stmt.execute();
+    }
+
+    public List<Music> listAll() throws SQLException {
+        List<Music> result = new ArrayList<>();
+
+        String sql = "SELECT musics.id AS music_id, musics.name AS music_name, musics.phrases AS phrases, "
+                + "artists.id AS artist_id, artists.name AS artist_name "
+                + "FROM musics "
+                + "LEFT JOIN artists ON artists.id = musics.artist_id ";
+
+        PreparedStatement stmt = SQLiteJDBCDriverConnection
+                .getConn()
+                .prepareStatement(sql);
+
+        try {
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                result.add(deserialize(rs));
+            }
+        } finally {
+            stmt.close();
+        }
+
+        return result;
+    }
+
+    public List<Music> listByTerm(String searchTerm) throws SQLException {
+        List<Music> result = new ArrayList<>();
+
+        String sql = "SELECT musics.id AS music_id, musics.name AS music_name, musics.phrases AS phrases, "
+                + "artists.id AS artist_id, artists.name AS artist_name "
+                + "FROM musics "
+                + "LEFT JOIN artists ON artists.id = musics.artist_id "
+                + "WHERE musics.name LIKE ? OR artists.name LIKE ?";
+
+        PreparedStatement stmt = SQLiteJDBCDriverConnection
+                .getConn()
+                .prepareStatement(sql);
+
+        try {
+            stmt.setString(1, "%" + searchTerm + "%");
+            stmt.setString(2, "%" + searchTerm + "%");
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                result.add(deserialize(rs));
+            }
+        } finally {
+            stmt.close();
+        }
+
+        return result;
+    }
+
+    private Music deserialize(ResultSet rs) throws SQLException {
+        Music m = new Music();
+
+        int artistId = rs.getInt("artist_id");
+
+        if (!rs.wasNull()) {
+            Artist a = new Artist();
+            a.setId(artistId);
+            a.setName(rs.getString("artist_name"));
+            m.setArtist(a);
+        }
+
+        m.setId(rs.getInt("music_id"));
+        m.setName(rs.getString("music_name"));
+        m.setPhrases(Arrays.asList(rs.getString("phrases").split("\n")));
+
+        return m;
     }
 }
