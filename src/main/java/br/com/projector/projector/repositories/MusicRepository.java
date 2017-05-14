@@ -151,4 +151,54 @@ public class MusicRepository {
 
         return m;
     }
+
+    public Music findById(Integer id) throws SQLException {
+        String sql = "SELECT musics.id AS music_id, musics.name AS music_name, musics.phrases AS phrases, "
+                + "artists.id AS artist_id, artists.name AS artist_name "
+                + "FROM musics "
+                + "LEFT JOIN artists ON artists.id = musics.artist_id "
+                + "WHERE musics.id = ?";
+
+        PreparedStatement stmt = SQLiteJDBCDriverConnection
+                .getConn()
+                .prepareStatement(sql);
+
+        try {
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return deserialize(rs);
+            }
+        } finally {
+            stmt.close();
+        }
+
+        return null;
+    }
+
+    public void update(Music m) throws SQLException {
+        String sql = "UPDATE musics SET name = ?, artist_id = ?, phrases = ? WHERE id = ?";
+
+        String phrases = m.getPhrases()
+                .stream()
+                .map(l -> l.replace("\r\n", "").replace("\n", ""))
+                .collect(Collectors.joining("\n"));
+
+        PreparedStatement stmt = SQLiteJDBCDriverConnection
+                .getConn()
+                .prepareStatement(sql);
+
+        stmt.setString(1, m.getName());
+
+        if (m.getArtist() == null) {
+            stmt.setNull(2, java.sql.Types.INTEGER);
+        } else {
+            stmt.setInt(2, m.getArtist().getId());
+        }
+
+        stmt.setString(3, phrases);
+        stmt.setInt(4, m.getId());
+        stmt.execute();
+    }
 }

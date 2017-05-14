@@ -7,7 +7,6 @@ package br.com.projector.projector.forms;
 
 import br.com.projector.projector.dtos.ImportingMusicDTO;
 import br.com.projector.projector.models.Music;
-import br.com.projector.projector.repositories.OpenMusicRepository;
 import br.com.projector.projector.services.ManageMusicService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,7 +21,20 @@ public class ManageMusicFrame extends javax.swing.JFrame {
 
     private ManageMusicService service = new ManageMusicService();
     private Integer editingMusicId = null;
-    private OpenMusicRepository openMusicRepo;
+    private SaveCallback saveCallback;
+
+    public SaveCallback getSaveCallback() {
+        return saveCallback;
+    }
+
+    public void setSaveCallback(SaveCallback saveCallback) {
+        this.saveCallback = saveCallback;
+    }
+
+    public interface SaveCallback {
+
+        void onSave(Music music);
+    }
 
     /**
      * Creates new form CreateMusicFrame
@@ -174,23 +186,33 @@ public class ManageMusicFrame extends javax.swing.JFrame {
     private void jButtonSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveActionPerformed
         String artistName = (String) jComboBoxArtist.getSelectedItem();
 
-        if (editingMusicId == null) {
-            try {
-                Music music = service.createMusic(jTextFieldTitle.getText(), artistName, jTextAreaPhrases.getText());
-                openMusicRepo.add(music);
-                this.dispose();
-            } catch (ManageMusicService.PersistenceException ex) {
-                Logger.getLogger(ManageMusicFrame.class.getName()).log(Level.SEVERE, null, ex);
-                int result = JOptionPane.showConfirmDialog(this, "Essa letra não foi salva. Deseja proseguir em modo comente leitura?", "Erro ao salvar letra.", JOptionPane.YES_NO_OPTION);
-                if (result == JOptionPane.YES_OPTION) {
-                    openMusicRepo.add(ex.getMusic());
-                    this.dispose();
-                }
-            } catch (ManageMusicService.MusicAlreadyPresentException ex) {
-                Logger.getLogger(ManageMusicFrame.class.getName()).log(Level.SEVERE, null, ex);
-                JOptionPane.showMessageDialog(this, "Letra já cadastrada para o artista.");
+        try {
+            Music music;
+
+            if (editingMusicId == null) {
+                music = service.createMusic(jTextFieldTitle.getText(), artistName, jTextAreaPhrases.getText());
+            } else {
+                music = service.updateMusic(editingMusicId, jTextFieldTitle.getText(), artistName, jTextAreaPhrases.getText());
             }
+
+            if (saveCallback != null) {
+                saveCallback.onSave(music);
+            }
+            this.dispose();
+        } catch (ManageMusicService.PersistenceException ex) {
+            Logger.getLogger(ManageMusicFrame.class.getName()).log(Level.SEVERE, null, ex);
+            int result = JOptionPane.showConfirmDialog(this, "Essa letra não foi salva. Deseja proseguir em modo comente leitura?", "Erro ao salvar letra.", JOptionPane.YES_NO_OPTION);
+            if (result == JOptionPane.YES_OPTION) {
+                if (saveCallback != null) {
+                    saveCallback.onSave(ex.getMusic());
+                }
+                this.dispose();
+            }
+        } catch (ManageMusicService.MusicAlreadyPresentException ex) {
+            Logger.getLogger(ManageMusicFrame.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(this, "Letra já cadastrada para o artista.");
         }
+
     }//GEN-LAST:event_jButtonSaveActionPerformed
 
     private void addArtist(String name) {
@@ -215,8 +237,4 @@ public class ManageMusicFrame extends javax.swing.JFrame {
     private javax.swing.JTextArea jTextAreaPhrases;
     private javax.swing.JTextField jTextFieldTitle;
     // End of variables declaration//GEN-END:variables
-
-    void setOpenMusicRepository(OpenMusicRepository musicRepo) {
-        this.openMusicRepo = musicRepo;
-    }
 }

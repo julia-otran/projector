@@ -6,6 +6,7 @@
 package br.com.projector.projector.forms;
 
 import br.com.projector.projector.dtos.ImportingMusicDTO;
+import br.com.projector.projector.models.Music;
 import br.com.projector.projector.music_importing.ImportCallback;
 import br.com.projector.projector.music_importing.ImporterFactory;
 import br.com.projector.projector.music_importing.MusicUrlImporter;
@@ -373,7 +374,14 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
             @Override
             public void onImportSuccess(ImportingMusicDTO music) {
                 ManageMusicFrame frame = new ManageMusicFrame(music);
-                frame.setOpenMusicRepository(musicRepo);
+
+                frame.setSaveCallback(new ManageMusicFrame.SaveCallback() {
+                    @Override
+                    public void onSave(Music music) {
+                        musicRepo.add(music);
+                    }
+                });
+
                 frame.setVisible(true);
                 frame.requestFocusInWindow();
             }
@@ -399,7 +407,14 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
 
     private void jMenuItemCreateMusicActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemCreateMusicActionPerformed
         ManageMusicFrame frame = new ManageMusicFrame();
-        frame.setOpenMusicRepository(musicRepo);
+
+        frame.setSaveCallback(new ManageMusicFrame.SaveCallback() {
+            @Override
+            public void onSave(Music music) {
+                musicRepo.add(music);
+            }
+        });
+
         frame.setVisible(true);
         frame.requestFocusInWindow();
     }//GEN-LAST:event_jMenuItemCreateMusicActionPerformed

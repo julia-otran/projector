@@ -5,6 +5,7 @@
  */
 package br.com.projector.projector.forms;
 
+import br.com.projector.projector.forms.ManageMusicFrame.SaveCallback;
 import br.com.projector.projector.models.Music;
 import br.com.projector.projector.repositories.MusicRepository;
 import br.com.projector.projector.repositories.MusicTableModel;
@@ -182,6 +183,17 @@ public class ListMusicsFrame extends javax.swing.JFrame {
             Music m = musics.get(selected);
             ManageMusicFrame mmf = new ManageMusicFrame(m);
             mmf.setVisible(true);
+            mmf.setSaveCallback(new SaveCallback() {
+                @Override
+                public void onSave(Music music) {
+                    openMusicRepo.updateMusic(music);
+                    try {
+                        loadMusics();
+                    } catch (SQLException ex) {
+                        Logger.getLogger(ListMusicsFrame.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            });
         }
     }//GEN-LAST:event_jButtonEditActionPerformed
 

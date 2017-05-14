@@ -9,6 +9,8 @@ import br.com.projector.projector.models.Music;
 import br.com.projector.projector.projection.text.WrappedText;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import javax.swing.DefaultListModel;
 import javax.swing.ListModel;
 import javax.swing.table.TableModel;
@@ -19,14 +21,19 @@ import javax.swing.table.TableModel;
  */
 public class OpenMusicRepository {
 
-    private final List<Music> musics = new ArrayList<>();
+    private final List<OpenMusic> musics = new ArrayList<>();
     private final DefaultListModel<String> musicsListModel;
-    private final List<PhrasesRepository> phrasesRepos;
     private final PhrasesGrouper grouper;
+
+    private class OpenMusic {
+
+        Music music;
+        PhrasesRepository phrasesRepo;
+        int position;
+    }
 
     public OpenMusicRepository() {
         this.musicsListModel = new DefaultListModel<>();
-        this.phrasesRepos = new ArrayList<>();
         this.grouper = new PhrasesGrouper();
     }
 
@@ -35,23 +42,28 @@ public class OpenMusicRepository {
     }
 
     public void regroupPhrases() {
-        phrasesRepos.stream().forEach(r -> r.regroup());
+        musics.stream().forEach(r -> r.phrasesRepo.regroup());
     }
 
     public void add(Music m) {
-        musics.add(m);
         PhrasesRepository repo = new PhrasesRepository(grouper, m);
         repo.regroup();
-        phrasesRepos.add(repo);
-        musicsListModel.addElement(m.getNameWithArtist());
+
+        OpenMusic opened = new OpenMusic();
+        opened.music = m;
+        opened.phrasesRepo = repo;
+        opened.position = musics.size();
+
+        musics.add(opened.position, opened);
+        musicsListModel.add(opened.position, m.getNameWithArtist());
     }
 
     public PhrasesRepository getPhrasesRepository(int index) {
-        if (index < 0 || index >= phrasesRepos.size()) {
+        if (index < 0 || index >= musics.size()) {
             return null;
         }
 
-        return phrasesRepos.get(index);
+        return musics.get(index).phrasesRepo;
     }
 
     public ListModel<String> getMusicsModel() {
@@ -61,11 +73,10 @@ public class OpenMusicRepository {
     public void clear() {
         musics.clear();
         musicsListModel.clear();
-        phrasesRepos.clear();
     }
 
     public TableModel getPhrasesModel(int selectedMusic) {
-        return phrasesRepos.get(selectedMusic).getGroupedPhrasesModel();
+        return musics.get(selectedMusic).phrasesRepo.getGroupedPhrasesModel();
     }
 
     public WrappedText getTextFor(int music, int selected) {
@@ -73,10 +84,30 @@ public class OpenMusicRepository {
             return WrappedText.blankText();
         }
 
-        return phrasesRepos.get(music).getTextAt(selected);
+        return musics.get(music).phrasesRepo.getTextAt(selected);
     }
 
     public boolean contains(Music m) {
-        return musics.contains(m);
+        return musics.stream().anyMatch(om -> Objects.equals(om.music, m));
+    }
+
+    public void updateMusic(Music m) {
+        Optional<OpenMusic> openedMusic = musics.stream()
+                .filter(mo -> mo.music.getId() == m.getId())
+                .findAny();
+
+        if (!openedMusic.isPresent()) {
+            return;
+        }
+
+        PhrasesRepository repo = new PhrasesRepository(grouper, m);
+        repo.regroup();
+
+        OpenMusic opened = openedMusic.get();
+        opened.music = m;
+        opened.phrasesRepo = repo;
+
+        musicsListModel.remove(opened.position);
+        musicsListModel.insertElementAt(m.getNameWithArtist(), opened.position);
     }
 }
