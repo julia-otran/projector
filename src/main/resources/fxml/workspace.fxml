@@ -1,11 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.media.*?>
+<?import javafx.scene.text.*?>
 <?import java.lang.*?>
 <?import java.util.*?>
 <?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.guihouse.projector.forms.controllers.WorkspaceController">
-    
-</AnchorPane>
+<VBox id="RootBox" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.guihouse.projector.forms.controllers.WorkspaceController">
+   <children>
+      <MenuBar VBox.vgrow="NEVER">
+        <menus>
+          <Menu mnemonicParsing="false" text="Gerenciar Letras">
+            <items>
+              <MenuItem mnemonicParsing="false" text="Incluir" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Edit">
+            <items>
+              <MenuItem mnemonicParsing="false" text="Delete" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Help">
+            <items>
+              <MenuItem mnemonicParsing="false" text="About" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+      <SplitPane dividerPositions="0.2807017543859649" layoutX="3.0" layoutY="63.0" VBox.vgrow="ALWAYS">
+        <items>
+            <TitledPane animated="false" prefHeight="590.0" text="Lista de Projeção">
+               <content>
+                  <VBox prefHeight="200.0" prefWidth="100.0">
+                     <children>
+                        <MenuButton mnemonicParsing="false" prefHeight="25.0" prefWidth="830.0" text="+ Incluir item">
+                          <items>
+                            <MenuItem mnemonicParsing="false" text="Letra de Musica" />
+                            <MenuItem mnemonicParsing="false" text="Site WEB (YouTube)" />
+                              <MenuItem mnemonicParsing="false" text="Imagem" />
+                              <MenuItem mnemonicParsing="false" text="Video" />
+                              <MenuItem mnemonicParsing="false" text="Texto" />
+                          </items>
+                        </MenuButton>
+                        <ListView prefHeight="470.0" prefWidth="193.0" VBox.vgrow="ALWAYS" />
+                     </children>
+                  </VBox>
+               </content>
+            </TitledPane>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="569.0" prefWidth="428.0" />
+        </items>
+      </SplitPane>
+   </children>
+</VBox>

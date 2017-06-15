@@ -42,7 +42,7 @@ public class Projector extends Application {
         URL url = getClass().getClassLoader().getResource("fxml/workspace.fxml");
         Parent root = FXMLLoader.load(url);
         
-        Scene scene = new Scene(root, 640, 480);
+        Scene scene = new Scene(root, 800, 600);
         
         primaryStage.setTitle("Projector");
         primaryStage.setScene(scene);
