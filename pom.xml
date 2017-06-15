@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>br.com.projector</groupId>
+    <groupId>us.guihouse.projector</groupId>
     <artifactId>projector</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -54,6 +54,13 @@
             <version>3.16.1</version>
         </dependency>
 
+        <dependency>
+                <groupId>com.oracle</groupId>
+                <artifactId>javafx</artifactId>
+                <version>2.2</version>
+                <systemPath>${java.home}/lib/ext/jfxrt.jar</systemPath>
+                <scope>system</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -81,7 +88,7 @@
                     <!-- MainClass in mainfest make a executable jar -->
                     <archive>
                         <manifest>
-                            <mainClass>br.com.projector.projector.Projector</mainClass>
+                            <mainClass>us.guihouse.projector.Projector</mainClass>
                         </manifest>
                     </archive>
 
