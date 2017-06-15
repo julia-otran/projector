@@ -7,10 +7,13 @@ package br.com.projector.projector.repositories;
 
 import br.com.projector.projector.models.Music;
 import br.com.projector.projector.projection.text.WrappedText;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.ListModel;
 import javax.swing.table.TableModel;
@@ -24,6 +27,7 @@ public class OpenMusicRepository {
     private final List<OpenMusic> musics = new ArrayList<>();
     private final DefaultListModel<String> musicsListModel;
     private final PhrasesGrouper grouper;
+    private final MetricsRepository metricsRepo;
 
     private class OpenMusic {
 
@@ -35,6 +39,7 @@ public class OpenMusicRepository {
     public OpenMusicRepository() {
         this.musicsListModel = new DefaultListModel<>();
         this.grouper = new PhrasesGrouper();
+        this.metricsRepo = new MetricsRepository();
     }
 
     public PhrasesGrouper getGrouper() {
@@ -46,6 +51,12 @@ public class OpenMusicRepository {
     }
 
     public void add(Music m) {
+        try {
+            metricsRepo.registerPlay(m);
+        } catch (SQLException ex) {
+            Logger.getLogger(OpenMusicRepository.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         PhrasesRepository repo = new PhrasesRepository(grouper, m);
         repo.regroup();
 
