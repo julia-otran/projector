@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="us.guihouse.projector.forms.MusicProjectionController">
+   <children>
+      <Button fx:id="clearScreenButton" disable="true" layoutX="11.0" layoutY="14.0" mnemonicParsing="false" prefHeight="27.0" text="Clique em uma frase para projetar" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0" />
+      <TableView fx:id="phrasesTable" layoutX="14.0" layoutY="100.0" prefHeight="342.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
+        <columns>
+          <TableColumn minWidth="300.0" prefWidth="600.0" sortable="false" text="Letra" />
+        </columns>
+      </TableView>
+   </children>
+</AnchorPane>
