@@ -10,10 +10,9 @@ package us.guihouse.projector.projection;
  * @author guilherme
  */
 public interface CanvasDelegate {
-
-    public void repaint();
-
     public int getWidth();
 
     public int getHeight();
+    
+    public void setFullScreen(boolean fullScreen);
 }

@@ -5,50 +5,89 @@
  */
 package us.guihouse.projector.projection;
 
-import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
-import java.util.ArrayList;
-import java.util.List;
-import javax.swing.JComponent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
+import us.guihouse.projector.projection.text.WrappedText;
+import us.guihouse.projector.projection.text.WrapperFactory;
 
 /**
  *
  * @author guilherme
  */
-public class ProjectionCanvas extends JComponent implements CanvasDelegate {
+public class ProjectionCanvas implements ProjectionManager {
+    private CanvasDelegate delegate;
+    private ProjectionBackground background;
+    private ProjectionLabel label;
 
-    private final List<Projectable> projectables;
-
-    public ProjectionCanvas() {
-        projectables = new ArrayList<>();
+    ProjectionCanvas(CanvasDelegate delegate) {
+        this.delegate = delegate;
+        background = new ProjectionBackground(delegate);
+        label = new ProjectionLabel(delegate);
+    }
+    
+    public void init() {
+        background.init();
+        label.init();
     }
 
-    public void addProjectable(Projectable p) {
-        projectables.add(p);
-        p.init(this);
-        revalidate();
-        repaint();
-    }
-
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(640, 480);
-    }
-
-    @Override
     protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-
-        projectables.stream().forEach((p) -> {
-            p.paintComponent(g);
-        });
+        background.paintComponent(g);
+        label.paintComponent(g);
     }
 
     @Override
-    public void revalidate() {
-        super.revalidate();
-        for (Projectable p : projectables) {
-            p.rebuildLayout();
+    public void setText(WrappedText text) {
+        label.setText(text);
+    }
+
+    @Override
+    public Font getTextFont() {
+        return label.getFont();
+    }
+
+    @Override
+    public void setTextFont(Font font) {
+        label.setFont(font);
+    }
+
+    @Override
+    public TextWrapperFactoryChangeListener getTextWrapperChangeListener() {
+        return label.getWrapperChangeListener();
+    }
+
+    @Override
+    public void setTextWrapperChangeListener(TextWrapperFactoryChangeListener wrapperChangeListener) {
+        label.setWrapperChangeListener(wrapperChangeListener);
+    }
+
+    @Override
+    public WrapperFactory getWrapperFactory() {
+        return label.getWrapperFactory();
+    }
+
+    @Override
+    public void setBackgroundImageFile(File selectedFile) {
+        try {
+            BufferedImage image = ImageIO.read(selectedFile);
+            background.setImage(image);
+        } catch (IOException ex) {
+            Logger.getLogger(ProjectionCanvas.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    @Override
+    public void setFullScreen(boolean fullScreen) {
+        
+    }
+
+    @Override
+    public void setCropBackground(boolean selected) {
+        background.setCropBackground(selected);
     }
 }

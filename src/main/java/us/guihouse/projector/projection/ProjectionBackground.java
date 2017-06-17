@@ -30,7 +30,7 @@ public class ProjectionBackground implements Projectable {
     @Override
     public void paintComponent(Graphics g) {
         // Prevent monitor to sleep!
-        g.setColor(new Color(1, 1, 1));
+        g.setColor(new Color(10, 10, 10));
         g.fillRect(0, 0, canvasDelegate.getWidth(), canvasDelegate.getHeight());
 
         if (scaled != null) {
@@ -88,20 +88,19 @@ public class ProjectionBackground implements Projectable {
     }
 
     @Override
-    public void init(ProjectionCanvas sourceCanvas) {
+    public void init() {
+        rebuildLayout();
     }
 
     void setImage(BufferedImage img) {
         this.img = img;
         rebuildLayout();
-        canvasDelegate.repaint();
     }
 
     void setCropBackground(boolean cropBackground) {
         if (this.cropBackground != cropBackground) {
             this.cropBackground = cropBackground;
             rebuildLayout();
-            canvasDelegate.repaint();
         }
     }
 }

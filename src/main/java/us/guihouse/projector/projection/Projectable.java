@@ -19,5 +19,5 @@ public interface Projectable {
 
     public void rebuildLayout();
 
-    public void init(ProjectionCanvas sourceCanvas);
+    public void init();
 }

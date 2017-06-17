@@ -35,6 +35,7 @@
           <Menu mnemonicParsing="false" text="Configurações">
             <items>
                   <MenuItem mnemonicParsing="false" onAction="#onChangeFont" text="Alterar Fonte" />
+                  <CheckMenuItem mnemonicParsing="false" onAction="#onChangeFullScreen" text="Modo Tela Cheia" />
                   <Menu mnemonicParsing="false" text="Modo de Projeção de Letras">
                      <items>
                         <RadioMenuItem fx:id="singleLineProjectionMenuItem" mnemonicParsing="false" onAction="#onSingleLineProjection" selected="true" text="Uma linha por vez">

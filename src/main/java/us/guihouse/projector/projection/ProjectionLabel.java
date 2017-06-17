@@ -56,9 +56,8 @@ public class ProjectionLabel implements Projectable {
     }
 
     @Override
-    public void init(ProjectionCanvas source) {
+    public void init() {
         fontLabel.setVisible(false);
-        source.add(fontLabel);
         setFont(new java.awt.Font(Font.SANS_SERIF, 0, DEFAULT_FONT_SIZE));
     }
 
@@ -92,7 +91,6 @@ public class ProjectionLabel implements Projectable {
     public void setText(WrappedText text) {
         this.text = text;
         rebuildLayout();
-        repaint();
     }
 
     @Override
@@ -133,10 +131,6 @@ public class ProjectionLabel implements Projectable {
     @Override
     public CanvasDelegate getCanvasDelegate() {
         return canvasDelegate;
-    }
-
-    private void repaint() {
-        canvasDelegate.repaint();
     }
 
     @Override

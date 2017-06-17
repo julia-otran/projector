@@ -5,28 +5,42 @@
  */
 package us.guihouse.projector.forms.controllers;
 
-import java.util.function.Function;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.ToggleGroup;
-import javax.swing.event.HyperlinkEvent;
 import us.guihouse.projector.other.GraphicsFinder;
+import us.guihouse.projector.projection.ProjectionManager;
+import us.guihouse.projector.projection.ProjectionWindow;
 
 /**
  *
  * @author guilherme
  */
-public class GraphicsDeviceMenuHelper {
+public class GraphicsDeviceHelper {
     private final Menu projectionScreenMenu;
     private MenuItem reloadItem;
+    private ProjectionWindow projectionWindow;
 
-    public GraphicsDeviceMenuHelper(Menu projectionScreenMenu) {
+    public GraphicsDeviceHelper(Menu projectionScreenMenu) {
         this.projectionScreenMenu = projectionScreenMenu;
+        buildProjectionFrame();
         buildReloadItem();
         reloadDevices();
+    }
+    
+    public ProjectionManager getProjectionManager() {
+        return projectionWindow.getManager();
+    }
+    
+    void stop() {
+        projectionWindow.stop();
+    }
+    
+    void dispose() {
+        projectionWindow.dispose();
     }
     
     private void reloadDevices() {
@@ -48,8 +62,8 @@ public class GraphicsDeviceMenuHelper {
         });
     }
     
-    private void changeDevice(GraphicsFinder.Device device) {
-        
+    private void changeDevice(final GraphicsFinder.Device device) {
+        projectionWindow.setDevice(device.getDevice());
     }
     
     private void buildReloadItem() {
@@ -81,5 +95,9 @@ public class GraphicsDeviceMenuHelper {
         });
         
         return item;
+    }
+
+    private void buildProjectionFrame() {
+        projectionWindow = new ProjectionWindow();
     }
 }

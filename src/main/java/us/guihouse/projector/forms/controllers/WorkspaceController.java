@@ -13,7 +13,6 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.layout.AnchorPane;
 
@@ -23,14 +22,24 @@ import javafx.scene.layout.AnchorPane;
  * @author guilherme
  */
 public class WorkspaceController implements Initializable {
-
+    private GraphicsDeviceHelper graphicsHelper;
+    
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        new GraphicsDeviceMenuHelper(projectionScreenMenu);
+        graphicsHelper = new GraphicsDeviceHelper(projectionScreenMenu);
     }    
+    
+    public void stop() {
+        graphicsHelper.stop();
+    }
+    
+    
+    public void dispose() {
+        graphicsHelper.dispose();
+    }
     
     // ------------------------------
     // Menu
@@ -48,14 +57,10 @@ public class WorkspaceController implements Initializable {
     private Menu projectionScreenMenu;
     
     @FXML
-    public void onRegisterManualMusic() {
-        
-    }
+    public void onRegisterManualMusic() { }
     
     @FXML
-    public void onImportMusicFromWeb() {
-        
-    }
+    public void onImportMusicFromWeb() { }
     
     @FXML
     public void onImportMusicFromTextFile() {}
@@ -71,6 +76,9 @@ public class WorkspaceController implements Initializable {
     
     @FXML
     public void onChangeFont() {}
+    
+    @FXML
+    public void onChangeFullScreen() {}
     
     @FXML
     public void onSingleLineProjection() {}
@@ -112,4 +120,5 @@ public class WorkspaceController implements Initializable {
     
     @FXML
     private AnchorPane targetAnchorPane;
+
 }

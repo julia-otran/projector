@@ -5,47 +5,48 @@
  */
 package us.guihouse.projector;
 
-import us.guihouse.projector.forms.MainFrame;
-import us.guihouse.projector.other.SQLiteJDBCDriverConnection;
-import us.guihouse.projector.projection.ProjectionFrame;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import us.guihouse.projector.forms.controllers.GraphicsDeviceHelper;
+import us.guihouse.projector.forms.controllers.WorkspaceController;
 
 /**
  *
  * @author 15096134
  */
 public class Projector extends Application {
-
+    private static WorkspaceController controller;
+    
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
         launch(args);
+        controller.dispose();
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         URL url = getClass().getClassLoader().getResource("fxml/workspace.fxml");
-        Parent root = FXMLLoader.load(url);
+        
+        FXMLLoader loader = new FXMLLoader(url);
+        Parent root = loader.load();
+        controller = loader.getController();
         
         Scene scene = new Scene(root, 800, 600);
         
         primaryStage.setTitle("Projector");
         primaryStage.setScene(scene);
         primaryStage.show();
+    }
+
+    @Override
+    public void stop() throws Exception {
+        controller.stop();
+        super.stop();
     }
 }
