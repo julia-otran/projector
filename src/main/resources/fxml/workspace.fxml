@@ -11,7 +11,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox id="RootBox" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.guihouse.projector.forms.controllers.WorkspaceController">
+<VBox id="RootBox" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.guihouse.projector.forms.controllers.WorkspaceController">
    <children>
       <MenuBar VBox.vgrow="NEVER">
         <menus>
@@ -58,13 +58,13 @@
           </Menu>
         </menus>
       </MenuBar>
-      <SplitPane dividerPositions="0.3622222222222222" layoutX="3.0" layoutY="63.0" VBox.vgrow="ALWAYS">
+      <SplitPane dividerPositions="0.3051224944320713" layoutX="3.0" layoutY="63.0" VBox.vgrow="ALWAYS">
         <items>
             <VBox>
                <children>
-                  <TitledPane animated="false" text="Lista de Projeção" VBox.vgrow="ALWAYS">
+                  <TitledPane animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Lista de Projeção" VBox.vgrow="ALWAYS">
                       <content>
-                        <VBox>
+                        <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
                             <children>
                                <MenuButton mnemonicParsing="false" prefHeight="25.0" text="+ Incluir item" VBox.vgrow="NEVER">
                                  <items>
@@ -74,7 +74,7 @@
                                      <MenuItem mnemonicParsing="false" onAction="#onAddText" text="Texto" />
                                  </items>
                                </MenuButton>
-                               <ListView fx:id="projectionListView" VBox.vgrow="ALWAYS">
+                               <ListView fx:id="projectionListView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
                                   <VBox.margin>
                                      <Insets top="10.0" />
                                   </VBox.margin>
@@ -83,9 +83,9 @@
                          </VBox>
                       </content>
                   </TitledPane>
-                  <TitledPane animated="false" text="Pré Visualização" VBox.vgrow="NEVER">
+                  <TitledPane animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Pré Visualização" VBox.vgrow="NEVER">
                      <content>
-                        <AnchorPane>
+                        <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
                            <children>
                               <Canvas fx:id="previewCanvas" height="200.0" width="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                            </children>
@@ -94,7 +94,7 @@
                   </TitledPane>
                </children>
             </VBox>
-            <AnchorPane prefHeight="200.0" prefWidth="200.0">
+            <AnchorPane>
                <children>
                   <Pane fx:id="targetPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                </children></AnchorPane>
