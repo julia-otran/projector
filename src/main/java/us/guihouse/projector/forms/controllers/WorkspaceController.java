@@ -7,14 +7,19 @@ package us.guihouse.projector.forms.controllers;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.embed.swing.JFXPanel;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.web.WebView;
+import us.guihouse.projector.projection.ProjectionWebView;
 
 /**
  * FXML Controller class
@@ -30,6 +35,16 @@ public class WorkspaceController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         graphicsHelper = new GraphicsDeviceHelper(projectionScreenMenu);
+        ProjectionWebView pwv = graphicsHelper.getProjectionManager().createWebView();
+        
+        targetPane.getChildren().add(pwv.getNode());
+        pwv.getNode().setScaleX(0.8);
+        pwv.getNode().setScaleY(0.8);
+        pwv.getNode().setLayoutX(0);
+        pwv.getNode().setLayoutY(0);
+        pwv.getWebView().getEngine().load("https://www.google.com");
+        
+        graphicsHelper.getProjectionManager().setWebView(pwv);
     }    
     
     public void stop() {
@@ -119,6 +134,6 @@ public class WorkspaceController implements Initializable {
     private Canvas previewCanvas;
     
     @FXML
-    private AnchorPane targetAnchorPane;
+    private Pane targetPane;
 
 }

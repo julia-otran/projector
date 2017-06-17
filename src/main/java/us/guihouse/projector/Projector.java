@@ -11,7 +11,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import us.guihouse.projector.forms.controllers.GraphicsDeviceHelper;
 import us.guihouse.projector.forms.controllers.WorkspaceController;
 
 /**

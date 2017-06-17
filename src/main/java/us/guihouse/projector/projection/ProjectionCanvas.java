@@ -10,6 +10,8 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
@@ -21,24 +23,36 @@ import us.guihouse.projector.projection.text.WrapperFactory;
  * @author guilherme
  */
 public class ProjectionCanvas implements ProjectionManager {
-    private CanvasDelegate delegate;
-    private ProjectionBackground background;
-    private ProjectionLabel label;
+    private final CanvasDelegate delegate;
+    private final ProjectionBackground background;
+    private final ProjectionLabel label;
+    private Projectable currentWebView;
+    
+    private final List<Projectable> initializeList;
 
     ProjectionCanvas(CanvasDelegate delegate) {
         this.delegate = delegate;
+        this.initializeList = new ArrayList<>();
+        
         background = new ProjectionBackground(delegate);
+        initializeList.add(background);
+        
         label = new ProjectionLabel(delegate);
+        initializeList.add(label);
     }
     
     public void init() {
-        background.init();
-        label.init();
+        initializeList.forEach(p -> p.init());
     }
 
     protected void paintComponent(Graphics g) {
-        background.paintComponent(g);
-        label.paintComponent(g);
+        if (currentWebView == null) {
+            background.paintComponent(g);
+            label.paintComponent(g);
+        } else {
+            currentWebView.paintComponent(g);
+        }
+        
     }
 
     @Override
@@ -89,5 +103,18 @@ public class ProjectionCanvas implements ProjectionManager {
     @Override
     public void setCropBackground(boolean selected) {
         background.setCropBackground(selected);
+    }
+
+    @Override
+    public ProjectionWebView createWebView() {
+        ProjectionWebView wv = new ProjectionWebView(delegate);
+        initializeList.add(wv);
+        wv.init();
+        return wv;
+    }
+    
+    @Override
+    public void setWebView(Projectable webView) {
+        this.currentWebView = webView;
     }
 }

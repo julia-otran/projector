@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.web.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.canvas.*?>
 <?import javafx.scene.media.*?>
@@ -93,7 +94,10 @@
                   </TitledPane>
                </children>
             </VBox>
-            <AnchorPane fx:id="targetAnchorPane" prefHeight="200.0" prefWidth="200.0" />
+            <AnchorPane prefHeight="200.0" prefWidth="200.0">
+               <children>
+                  <Pane fx:id="targetPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+               </children></AnchorPane>
         </items>
       </SplitPane>
    </children>
