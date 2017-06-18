@@ -5,7 +5,7 @@
  */
 package us.guihouse.projector.forms.controllers;
 
-import javafx.scene.Scene;
+import javafx.scene.Parent;
 import javafx.stage.Stage;
 
 /**
@@ -13,7 +13,7 @@ import javafx.stage.Stage;
  * @author guilherme
  */
 public interface SceneManager {
-    void goToScene(Scene scene);
+    void goToParent(Parent toor);
     void goToWorkspace();
     Stage getStage();
 }

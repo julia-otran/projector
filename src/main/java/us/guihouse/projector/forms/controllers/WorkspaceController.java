@@ -18,7 +18,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Scene;
+import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Alert;
 import javafx.scene.control.CheckMenuItem;
@@ -81,22 +81,13 @@ public class WorkspaceController implements Initializable, SceneObserver {
     private CheckMenuItem fullScreenCheckMenuItem;
     
     @FXML
-    public void onRegisterManualMusic() { }
-    
-    @FXML
-    public void onImportMusicFromWeb() { }
-    
-    @FXML
-    public void onImportMusicFromTextFile() {}
-    
-    @FXML
     public void onOpenMusicList() {}
     
     @FXML
     public void onSelectBackgroundImageFile() {
         try {
-            Scene changeBg = BgImageScene.createScene(graphicsHelper.getProjectionManager(), getSceneManager(), 800, 600);
-            getSceneManager().goToScene(changeBg);
+            Parent changeBg = BgImageScene.createScene(graphicsHelper.getProjectionManager(), getSceneManager());
+            getSceneManager().goToParent(changeBg);
         } catch (IOException ex) {
             Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
         }

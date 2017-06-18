@@ -17,13 +17,6 @@
         <menus>
           <Menu mnemonicParsing="false" text="Gerenciar Letras">
             <items>
-                  <Menu mnemonicParsing="false" text="Cadastrar Letra">
-                    <items>
-                      <MenuItem mnemonicParsing="false" onAction="#onRegisterManualMusic" text="Digitar Manualmente" />
-                        <MenuItem mnemonicParsing="false" onAction="#onImportMusicFromWeb" text="Importar de um Site" />
-                        <MenuItem mnemonicParsing="false" onAction="#onImportMusicFromTextFile" text="Importar de Arquivo Texto" />
-                    </items>
-                  </Menu>
               <MenuItem mnemonicParsing="false" onAction="#onOpenMusicList" text="Lista De Letras" />
             </items>
           </Menu>

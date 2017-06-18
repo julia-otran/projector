@@ -6,31 +6,14 @@
 package us.guihouse.projector.other.file_filters;
 
 import java.io.File;
-import javax.swing.filechooser.FileFilter;
+import javafx.stage.FileChooser.ExtensionFilter;
 
 /**
  *
  * @author guilherme
  */
-public class DatabaseFileFilter extends FileFilter {
-
-    @Override
-    public boolean accept(File f) {
-        if (f.isDirectory()) {
-            return true;
-        }
-
-        String name = f.getName();
-
-        if (name == null) {
-            return false;
-        }
-
-        return name.endsWith(".db");
-    }
-
-    @Override
-    public String getDescription() {
-        return "SQLite (*.db)";
+public class DatabaseFileFilter {
+    public static ExtensionFilter getFilter() {
+        return new ExtensionFilter("Arquivos do SQLite (*.db)", "*.db");
     }
 }

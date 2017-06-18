@@ -13,13 +13,17 @@ import java.util.prefs.Preferences;
  */
 public class ProjectorPreferences {
 
-    private static final String NODE_NAME = "/br/com/projector/projector";
-    private static final Preferences PREFS = Preferences.userRoot().node(NODE_NAME);
+    private static final String NODE_NAME = "/us/guihouse/projector";
+    private static Preferences prefs;
 
     private static final String SQLITE_FILE = "SQLITE_FILE";
 
     public static Preferences getPrefs() {
-        return PREFS;
+        if (prefs == null) {
+            prefs = Preferences.userRoot().node(NODE_NAME);
+        }
+        
+        return prefs;
     }
 
     public static String getSqlitePath() {
@@ -27,6 +31,10 @@ public class ProjectorPreferences {
     }
 
     public static void setSqlitePath(String path) {
-        getPrefs().put(SQLITE_FILE, path);
+        if (path == null) {
+            getPrefs().remove(SQLITE_FILE);
+        } else {
+            getPrefs().put(SQLITE_FILE, path);
+        }
     }
 }

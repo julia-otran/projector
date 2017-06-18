@@ -13,6 +13,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import us.guihouse.projector.forms.controllers.SceneManager;
 import us.guihouse.projector.forms.controllers.WorkspaceController;
+import us.guihouse.projector.other.SQLiteJDBCDriverConnection;
 
 /**
  *
@@ -31,22 +32,25 @@ public class Projector extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        primaryStage.setTitle("Projector");
+        SQLiteJDBCDriverConnection.connect();
+        
         URL url = getClass().getClassLoader().getResource("fxml/workspace.fxml");
         
         FXMLLoader loader = new FXMLLoader(url);
-        Parent root = loader.load();
-        Scene workspaceScene = new Scene(root, 800, 600);
+        Parent workspaceRoot = loader.load();
+        Scene workspaceScene = new Scene(workspaceRoot, 800, 600);
         
         controller = loader.getController();
         controller.setSceneManager(new SceneManager() {
             @Override
-            public void goToScene(Scene scene) {
-                primaryStage.setScene(scene);
+            public void goToParent(Parent scene) {
+                workspaceScene.setRoot(scene);
             }
 
             @Override
             public void goToWorkspace() {
-                primaryStage.setScene(workspaceScene);
+                workspaceScene.setRoot(workspaceRoot);
             }
 
             @Override
@@ -55,14 +59,15 @@ public class Projector extends Application {
             }
         });
         
-        primaryStage.setTitle("Projector");
         primaryStage.setScene(workspaceScene);
         primaryStage.show();
     }
 
     @Override
     public void stop() throws Exception {
-        controller.stop();
+        if (controller != null) {
+            controller.stop();
+        }
         super.stop();
     }
 }

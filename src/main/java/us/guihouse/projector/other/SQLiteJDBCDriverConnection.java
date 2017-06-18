@@ -11,10 +11,14 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.stage.FileChooser;
 
 /**
  *
@@ -31,11 +35,6 @@ public class SQLiteJDBCDriverConnection {
         try {
             // create a connection to the database
             String path = getDatabaseUrl();
-
-            if (path == null) {
-                return;
-            }
-
             conn = DriverManager.getConnection("jdbc:sqlite:" + path);
             ProjectorPreferences.setSqlitePath(path);
             System.out.println("Connection to SQLite has been established.");
@@ -52,52 +51,64 @@ public class SQLiteJDBCDriverConnection {
             return path;
         }
 
-        JFileChooser chooser;
+        FileChooser chooser;
 
         do {
-            int result = shouldOpenFile();
+            boolean openFile = shouldOpenFile();
 
-            if (result == JOptionPane.CANCEL_OPTION) {
-                return null;
+            chooser = new FileChooser();
+
+            chooser.getExtensionFilters().setAll(DatabaseFileFilter.getFilter());
+
+            if (openFile) {
+                current = chooser.showOpenDialog(null);
+            } else {
+                current = chooser.showSaveDialog(null);
             }
 
-            chooser = new JFileChooser();
-
-            chooser.setFileFilter(new DatabaseFileFilter());
-            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            chooser.setMultiSelectionEnabled(false);
-
-            if (result == JOptionPane.YES_OPTION) {
-                result = chooser.showSaveDialog(null);
-            } else {
-                result = chooser.showOpenDialog(null);
+            if (current == null) {
+                throw new RuntimeException("Cannot proceed without database");
+            }
+            
+            if (current.isDirectory()) {
+                current = null;
+                continue;
             }
 
-            if (result == JFileChooser.APPROVE_OPTION) {
-                current = chooser.getSelectedFile();
+            if (!current.getName().endsWith(".db")) {
+                current = new File(current.getAbsolutePath() + ".db");
+            }
 
-                if (current.isDirectory()) {
-                    current = null;
-                    continue;
-                }
-
-                if (!current.getName().endsWith(".db")) {
-                    current = new File(current.getAbsolutePath() + ".db");
-                }
-
-                if (current.exists() && !current.canWrite()) {
-                    current = null;
-                }
-            } else {
-                return null;
+            if (current.exists() && !current.canWrite()) {
+                current = null;
             }
         } while (current == null);
 
         return current.getAbsolutePath();
     }
 
-    private static int shouldOpenFile() {
-        return JOptionPane.showConfirmDialog(null, "Inicializar dados do zero?");
+    private static boolean shouldOpenFile() {
+        Alert d = new Alert(AlertType.CONFIRMATION);
+        d.setTitle("Inicializar dados");
+        d.setHeaderText("Começar com uma nova bibliotaca de letras?");
+        d.setContentText("Você pode escolher entre começar sem nenhuma letra, ou abrir uma biblioteca de letras já existente.");
+        
+        ButtonType btOpen = new ButtonType("Abrir Biblioteca", ButtonBar.ButtonData.OTHER);
+        ButtonType btInit = new ButtonType("Iniciar do zero", ButtonBar.ButtonData.OTHER);
+        
+        d.getDialogPane().getButtonTypes().setAll(btOpen, btInit);
+        
+        Optional<ButtonType> result = d.showAndWait();
+        
+        if (result.isPresent() && btOpen.equals(result.get())) {
+            return true;
+        }
+        
+        if (result.isPresent() && btInit.equals(result.get())) {
+            return false;
+        }
+        
+        throw new RuntimeException("Cannot proceed without database");
     }
 
     public static Connection getConn() {
@@ -147,3 +158,4 @@ public class SQLiteJDBCDriverConnection {
         }
     }
 }
+;
