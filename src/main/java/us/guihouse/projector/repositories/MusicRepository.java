@@ -111,7 +111,7 @@ public class MusicRepository {
                 + "artists.id AS artist_id, artists.name AS artist_name "
                 + "FROM musics "
                 + "LEFT JOIN artists ON artists.id = musics.artist_id "
-                + "WHERE musics.name LIKE ? OR artists.name LIKE ?";
+                + "WHERE musics.name LIKE ? OR artists.name LIKE ? Or musics.phrases LIKE ?; ";
 
         PreparedStatement stmt = SQLiteJDBCDriverConnection
                 .getConn()
@@ -120,6 +120,7 @@ public class MusicRepository {
         try {
             stmt.setString(1, "%" + searchTerm + "%");
             stmt.setString(2, "%" + searchTerm + "%");
+            stmt.setString(3, "%" + searchTerm + "%");
 
             ResultSet rs = stmt.executeQuery();
 

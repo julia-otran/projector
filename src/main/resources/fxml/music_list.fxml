@@ -9,24 +9,24 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-
-<VBox id="RootBox" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="us.guihouse.projector.forms.controllers.MusicListController">
+<VBox id="RootBox" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.guihouse.projector.forms.controllers.MusicListController">
    <children>
-      <ToolBar maxWidth="1.7976931348623157E308" prefHeight="40.0">
+      <ToolBar prefHeight="40.0" prefWidth="200.0">
          <items>
-            <ImageView fitHeight="19.0" fitWidth="17.0" preserveRatio="true">
-               <image>
-                  <Image url="@../icons/icon-ios7-search-strong-128.png" />
-               </image>
-            </ImageView>
-            <TextField fx:id="searchText" maxWidth="1.7976931348623157E308" prefHeight="27.0" prefWidth="554.0" promptText="Pesquisar (Nome, Artista Trecho da letra)" style="-fx-background-radius: 10;" />
+            <HBox alignment="TOP_RIGHT" prefHeight="27.0" prefWidth="581.0">
+               <children>
+                  <ImageView fitHeight="19.0" fitWidth="17.0" preserveRatio="true" HBox.hgrow="NEVER">
+                     <image>
+                        <Image url="@../icons/icon-ios7-search-strong-128.png" />
+                     </image>
+                     <HBox.margin>
+                        <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                     </HBox.margin>
+                  </ImageView>
+                  <TextField fx:id="searchText" maxWidth="1.7976931348623157E308" prefHeight="27.0" prefWidth="407.0" promptText="Pesquisar (Nome, Artista ou Trecho da letra)" style="-fx-background-radius: 10;" HBox.hgrow="ALWAYS" />
+               </children>
+            </HBox>
          </items>
-         <VBox.margin>
-            <Insets />
-         </VBox.margin>
-         <padding>
-            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-         </padding>
       </ToolBar>
       <TableView fx:id="resultsTable" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
         <columns>

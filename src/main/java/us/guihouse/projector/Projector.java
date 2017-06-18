@@ -11,6 +11,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import us.guihouse.projector.forms.controllers.SceneManager;
 import us.guihouse.projector.forms.controllers.WorkspaceController;
 import us.guihouse.projector.other.SQLiteJDBCDriverConnection;
@@ -56,6 +57,11 @@ public class Projector extends Application {
             @Override
             public Stage getStage() {
                 return primaryStage;
+            }
+
+            @Override
+            public Window getWindow() {
+                return workspaceScene.getWindow();
             }
         });
         

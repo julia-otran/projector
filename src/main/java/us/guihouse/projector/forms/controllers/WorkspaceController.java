@@ -19,6 +19,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Alert;
 import javafx.scene.control.CheckMenuItem;
@@ -27,10 +28,12 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
 import us.guihouse.projector.other.YouTubeVideoResolve;
 import us.guihouse.projector.scenes.BgImageScene;
 import us.guihouse.projector.scenes.BrowserSubScene;
 import us.guihouse.projector.scenes.ImageSubScene;
+import us.guihouse.projector.scenes.MusicListScene;
 import us.guihouse.projector.scenes.ProjectionItemSubScene;
 import us.guihouse.projector.scenes.TextSubScene;
 /**
@@ -42,6 +45,7 @@ public class WorkspaceController implements Initializable, SceneObserver {
     private SceneManager sceneManager;
     private GraphicsDeviceHelper graphicsHelper;
     private final List<ProjectionItemSubScene> items = new ArrayList<>(); 
+    private Stage listMusicStage;
     
     /**
      * Initializes the controller class.
@@ -52,6 +56,7 @@ public class WorkspaceController implements Initializable, SceneObserver {
         initializeProjectionList();
         onCropBackgroundChanged();
         onChangeFullScreen();
+        createListMusicStage();
     }    
     
     public void stop() {
@@ -81,7 +86,9 @@ public class WorkspaceController implements Initializable, SceneObserver {
     private CheckMenuItem fullScreenCheckMenuItem;
     
     @FXML
-    public void onOpenMusicList() {}
+    public void onOpenMusicList() {
+        listMusicStage.show();
+    }
     
     @FXML
     public void onSelectBackgroundImageFile() {
@@ -174,7 +181,9 @@ public class WorkspaceController implements Initializable, SceneObserver {
     }
     
     @FXML
-    public void onAddMusic() {}
+    public void onAddMusic() {
+        listMusicStage.show();
+    }
     
     @FXML
     public void onAddYouTube() {
@@ -280,5 +289,16 @@ public class WorkspaceController implements Initializable, SceneObserver {
 
     public void setSceneManager(SceneManager sceneManager) {
         this.sceneManager = sceneManager;
+    }
+
+    private void createListMusicStage() {
+        try {
+            Parent list = MusicListScene.createMusicListScene();
+            Scene listScene = new Scene(list, 640, 480);
+            listMusicStage = new Stage();
+            listMusicStage.setScene(listScene);
+        } catch (IOException ex) {
+            Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }
