@@ -11,7 +11,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,14 +26,11 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.layout.Pane;
-import javafx.scene.text.Font;
-import us.guihouse.projector.projection.ProjectionManager;
 import us.guihouse.projector.scenes.BgImageScene;
 import us.guihouse.projector.scenes.BrowserSubScene;
 import us.guihouse.projector.scenes.ImageSubScene;
 import us.guihouse.projector.scenes.ProjectionItemSubScene;
 import us.guihouse.projector.scenes.TextSubScene;
-import org.controlsfx.dialog.FontSelectorDialog;
 /**
  * FXML Controller class
  *
