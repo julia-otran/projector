@@ -26,7 +26,7 @@ public class ProjectionCanvas implements ProjectionManager {
     private final CanvasDelegate delegate;
     private final ProjectionBackground background;
     private final ProjectionLabel label;
-    private Projectable currentWebView;
+    private Projectable currentProjectable;
     
     private final List<Projectable> initializeList;
 
@@ -46,11 +46,11 @@ public class ProjectionCanvas implements ProjectionManager {
     }
 
     protected void paintComponent(Graphics g) {
-        if (currentWebView == null) {
+        if (currentProjectable == null) {
             background.paintComponent(g);
             label.paintComponent(g);
         } else {
-            currentWebView.paintComponent(g);
+            currentProjectable.paintComponent(g);
         }
         
     }
@@ -115,7 +115,7 @@ public class ProjectionCanvas implements ProjectionManager {
     
     @Override
     public void setProjectable(Projectable webView) {
-        this.currentWebView = webView;
+        this.currentProjectable = webView;
     }
 
     @Override

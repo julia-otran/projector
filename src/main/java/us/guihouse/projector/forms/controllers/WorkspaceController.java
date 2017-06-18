@@ -28,6 +28,7 @@ import javafx.scene.layout.Pane;
 import us.guihouse.projector.scenes.BrowserSubScene;
 import us.guihouse.projector.scenes.ImageSubScene;
 import us.guihouse.projector.scenes.ProjectionItemSubScene;
+import us.guihouse.projector.scenes.TextSubScene;
 
 /**
  * FXML Controller class
@@ -195,7 +196,20 @@ public class WorkspaceController implements Initializable, SceneObserver {
     
     @FXML
     public void onAddText() {
-        
+        try {
+            ProjectionItemSubScene created = TextSubScene.createScene(targetPane.getWidth(), targetPane.getHeight());
+            created.setObserver(this);
+            
+            items.add(created);
+            projectionListView.getItems().add("Novo texto");
+            projectionListView.getSelectionModel().select(projectionListView.getItems().size() - 1);
+            
+            created.initWithProjectionManager(graphicsHelper.getProjectionManager());
+            created.widthProperty().bind(targetPane.widthProperty());
+            created.heightProperty().bind(targetPane.heightProperty());
+        } catch (IOException ex) {
+            Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     // ------------------------------

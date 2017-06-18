@@ -16,9 +16,11 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
+import java.awt.Toolkit;
 import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.swing.JLabel;
 
@@ -36,7 +38,9 @@ public class ProjectionLabel implements Projectable {
     private static final int DEFAULT_FONT_SIZE = 110;
 
     // Label used to get fontMetrics
-    private final JLabel fontLabel;
+    //private final JLabel fontLabel;
+    private Font font;
+    private FontMetrics fontMetrics;
 
     // Customizations
     private TextWrapperFactoryChangeListener factoryChangeListener;
@@ -45,28 +49,27 @@ public class ProjectionLabel implements Projectable {
     private int paddingY = DEFAULT_PADDING_Y;
 
     // Internal control
-    private final List<StringWithPosition> drawLines = new ArrayList<>();
+    private List<StringWithPosition> drawLines = Collections.EMPTY_LIST;
 
     private final BasicStroke outlineStroke = new BasicStroke(4.0f);
     private final Color overlay = new Color(0, 0, 0, 240);
 
     public ProjectionLabel(CanvasDelegate canvasDelegate) {
         this.canvasDelegate = canvasDelegate;
-        this.fontLabel = new JLabel();
     }
 
     @Override
     public void init() {
-        fontLabel.setVisible(false);
         setFont(new java.awt.Font(Font.SANS_SERIF, 0, DEFAULT_FONT_SIZE));
     }
 
     public Font getFont() {
-        return fontLabel.getFont();
+        return font;
     }
 
     public void setFont(Font font) {
-        fontLabel.setFont(font);
+        this.font = font;
+        this.fontMetrics = Toolkit.getDefaultToolkit().getFontMetrics(font);
         onFactoryChange();
     }
 
@@ -97,7 +100,7 @@ public class ProjectionLabel implements Projectable {
     public void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
 
-        if (drawLines.stream().allMatch(p -> p.getText().trim().isEmpty())) {
+        if (drawLines.isEmpty()) {
             return;
         }
 
@@ -113,7 +116,7 @@ public class ProjectionLabel implements Projectable {
         drawLines.forEach((pt) -> {
             g2.translate(pt.getX(), pt.getY());
             // create a glyph vector from your text
-            GlyphVector glyphVector = fontLabel.getFont().createGlyphVector(g2.getFontRenderContext(), pt.getText());
+            GlyphVector glyphVector = getFont().createGlyphVector(g2.getFontRenderContext(), pt.getText());
 
             // get the shape object
             Shape textShape = glyphVector.getOutline();
@@ -135,15 +138,15 @@ public class ProjectionLabel implements Projectable {
 
     @Override
     public void rebuildLayout() {
-        drawLines.clear();
-
         if (text == null) {
+            drawLines = Collections.EMPTY_LIST;
             return;
         }
 
         List<String> lines = text.getLines();
 
         if (lines == null || lines.isEmpty()) {
+            drawLines = Collections.EMPTY_LIST;
             return;
         }
 
@@ -160,6 +163,8 @@ public class ProjectionLabel implements Projectable {
 
         int width = canvasDelegate.getWidth();
 
+        List<StringWithPosition> pendingLines = new ArrayList<>();
+        
         for (String line : lines) {
             int lineWidth = fontMetrics.stringWidth(line);
             int x = (width - lineWidth) / 2;
@@ -172,8 +177,15 @@ public class ProjectionLabel implements Projectable {
                 translateY += between;
             }
 
-            drawLines.add(new StringWithPosition(line, x, y));
+            pendingLines.add(new StringWithPosition(line, x, y));
         }
+        
+        if (pendingLines.stream().allMatch(l -> l.getText().isEmpty())) {
+            drawLines = Collections.EMPTY_LIST;
+            return;
+        }
+
+        drawLines = pendingLines;
     }
 
     private int getFreeWidth() {
@@ -204,6 +216,6 @@ public class ProjectionLabel implements Projectable {
     }
 
     private FontMetrics getFontMetrics() {
-        return fontLabel.getFontMetrics(fontLabel.getFont());
+        return this.fontMetrics;
     }
 }
