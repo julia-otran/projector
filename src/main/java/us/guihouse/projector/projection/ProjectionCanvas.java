@@ -71,13 +71,8 @@ public class ProjectionCanvas implements ProjectionManager {
     }
 
     @Override
-    public TextWrapperFactoryChangeListener getTextWrapperChangeListener() {
-        return label.getWrapperChangeListener();
-    }
-
-    @Override
-    public void setTextWrapperChangeListener(TextWrapperFactoryChangeListener wrapperChangeListener) {
-        label.setWrapperChangeListener(wrapperChangeListener);
+    public void addTextWrapperChangeListener(TextWrapperFactoryChangeListener wrapperChangeListener) {
+        label.addWrapperChangeListener(wrapperChangeListener);
     }
 
     @Override
@@ -87,6 +82,11 @@ public class ProjectionCanvas implements ProjectionManager {
 
     @Override
     public void setBackgroundImageFile(File selectedFile) {
+        if (selectedFile == null) {
+            background.setImage(null);
+            return;
+        }
+        
         try {
             BufferedImage image = ImageIO.read(selectedFile);
             background.setImage(image);
@@ -97,7 +97,7 @@ public class ProjectionCanvas implements ProjectionManager {
 
     @Override
     public void setFullScreen(boolean fullScreen) {
-        
+        delegate.setFullScreen(fullScreen);
     }
 
     @Override

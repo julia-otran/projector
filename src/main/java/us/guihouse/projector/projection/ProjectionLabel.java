@@ -22,7 +22,6 @@ import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.swing.JLabel;
 
 /**
  *
@@ -43,7 +42,7 @@ public class ProjectionLabel implements Projectable {
     private FontMetrics fontMetrics;
 
     // Customizations
-    private TextWrapperFactoryChangeListener factoryChangeListener;
+    private final List<TextWrapperFactoryChangeListener> factoryChangeListeners;
     private WrappedText text;
     private int paddingX = DEFAULT_PADDING_X;
     private int paddingY = DEFAULT_PADDING_Y;
@@ -56,6 +55,7 @@ public class ProjectionLabel implements Projectable {
 
     public ProjectionLabel(CanvasDelegate canvasDelegate) {
         this.canvasDelegate = canvasDelegate;
+        factoryChangeListeners = new ArrayList<>();
     }
 
     @Override
@@ -201,17 +201,11 @@ public class ProjectionLabel implements Projectable {
     }
 
     private void onFactoryChange() {
-        if (factoryChangeListener != null) {
-            factoryChangeListener.onWrapperFactoryChanged(getWrapperFactory());
-        }
+        factoryChangeListeners.forEach(l -> l.onWrapperFactoryChanged(getWrapperFactory()));
     }
 
-    public TextWrapperFactoryChangeListener getWrapperChangeListener() {
-        return factoryChangeListener;
-    }
-
-    public void setWrapperChangeListener(TextWrapperFactoryChangeListener factoryChangeListener) {
-        this.factoryChangeListener = factoryChangeListener;
+    public void addWrapperChangeListener(TextWrapperFactoryChangeListener factoryChangeListener) {
+        factoryChangeListeners.add(factoryChangeListener);
         factoryChangeListener.onWrapperFactoryChanged(getWrapperFactory());
     }
 

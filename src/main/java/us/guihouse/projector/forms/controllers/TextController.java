@@ -14,21 +14,25 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import us.guihouse.projector.projection.ProjectionManager;
+import us.guihouse.projector.projection.TextWrapperFactoryChangeListener;
 import us.guihouse.projector.projection.text.TextWrapper;
 import us.guihouse.projector.projection.text.WrappedText;
+import us.guihouse.projector.projection.text.WrapperFactory;
 
 /**
  * FXML Controller class
  *
  * @author guilherme
  */
-public class TextController extends ProjectionController {
+public class TextController extends ProjectionController implements TextWrapperFactoryChangeListener {
 
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        projecting = false;
         endProjectionButton.disableProperty().set(true);
         projectionText.textProperty().addListener(new ChangeListener<String>() {
             @Override
@@ -54,21 +58,22 @@ public class TextController extends ProjectionController {
     @FXML
     private TextField projectionText;
     
+    private boolean projecting;
+
+    @Override
+    public void initWithProjectionManager(ProjectionManager projectionManager) {
+        super.initWithProjectionManager(projectionManager);
+        getProjectionManager().addTextWrapperChangeListener(this);
+    }
+    
     @FXML
     public void onBeginProjection() {
-        TextWrapper tw = getProjectionManager().getWrapperFactory().getTextWrapper(true);
-        List<WrappedText> text = tw.fitGroups(Collections.singletonList(projectionText.getText()));
-        
-        if (text.size() <= 0) {
-            return;
-        }
-        
-        // TODO: Warn a error. Too much text to fit on screen if text.size() > 1
-        getProjectionManager().setText(text.get(0));
-        
+        printText();
         beginProjectionButton.disableProperty().set(true);
         endProjectionButton.disableProperty().set(false);
         projectionText.disableProperty().set(true);
+        
+        projecting = true;
     }
     
     @FXML
@@ -77,5 +82,26 @@ public class TextController extends ProjectionController {
         beginProjectionButton.disableProperty().set(false);
         endProjectionButton.disableProperty().set(true);
         getProjectionManager().setText(null);
+        projecting = false;
+    }
+
+    @Override
+    public void onWrapperFactoryChanged(WrapperFactory factory) {
+        if (projecting) {
+            printText();
+        }
+    }
+    
+    private void printText() {
+        TextWrapper tw = getProjectionManager().getWrapperFactory().getTextWrapper(true);
+        
+        List<WrappedText> text = tw.fitGroups(Collections.singletonList(projectionText.getText()));
+        
+        if (text.size() <= 0) {
+            return;
+        }
+        
+        // TODO: Warn a error. Too much text to fit on screen if text.size() > 1
+        getProjectionManager().setText(text.get(0));
     }
 }

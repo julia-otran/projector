@@ -30,13 +30,14 @@
             <Menu mnemonicParsing="false" text="Imagem de Fundo">
               <items>
                 <MenuItem mnemonicParsing="false" onAction="#onSelectBackgroundImageFile" text="Selecionar Arquivo" />
+                  <MenuItem mnemonicParsing="false" onAction="#onRemoveBackground" text="Remover Fundo" />
                   <CheckMenuItem fx:id="cropBackgroundMenuItem" mnemonicParsing="false" onAction="#onCropBackgroundChanged" selected="true" text="Corte De Imagem" />
               </items>
             </Menu>
           <Menu mnemonicParsing="false" text="Configurações">
             <items>
                   <MenuItem mnemonicParsing="false" onAction="#onChangeFont" text="Alterar Fonte" />
-                  <CheckMenuItem mnemonicParsing="false" onAction="#onChangeFullScreen" text="Modo Tela Cheia" />
+                  <CheckMenuItem fx:id="fullScreenCheckMenuItem" mnemonicParsing="false" onAction="#onChangeFullScreen" text="Modo Tela Cheia" />
                   <Menu mnemonicParsing="false" text="Modo de Projeção de Letras">
                      <items>
                         <RadioMenuItem fx:id="singleLineProjectionMenuItem" mnemonicParsing="false" onAction="#onSingleLineProjection" selected="true" text="Uma linha por vez">

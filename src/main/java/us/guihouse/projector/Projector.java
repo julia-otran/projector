@@ -11,6 +11,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import us.guihouse.projector.forms.controllers.SceneManager;
 import us.guihouse.projector.forms.controllers.WorkspaceController;
 
 /**
@@ -34,12 +35,28 @@ public class Projector extends Application {
         
         FXMLLoader loader = new FXMLLoader(url);
         Parent root = loader.load();
-        controller = loader.getController();
+        Scene workspaceScene = new Scene(root, 800, 600);
         
-        Scene scene = new Scene(root, 800, 600);
+        controller = loader.getController();
+        controller.setSceneManager(new SceneManager() {
+            @Override
+            public void goToScene(Scene scene) {
+                primaryStage.setScene(scene);
+            }
+
+            @Override
+            public void goToWorkspace() {
+                primaryStage.setScene(workspaceScene);
+            }
+
+            @Override
+            public Stage getStage() {
+                return primaryStage;
+            }
+        });
         
         primaryStage.setTitle("Projector");
-        primaryStage.setScene(scene);
+        primaryStage.setScene(workspaceScene);
         primaryStage.show();
     }
 

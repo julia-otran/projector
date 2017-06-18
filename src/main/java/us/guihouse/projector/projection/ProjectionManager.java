@@ -7,10 +7,8 @@ package us.guihouse.projector.projection;
 
 import us.guihouse.projector.projection.text.WrappedText;
 import us.guihouse.projector.projection.text.WrapperFactory;
-import java.awt.Font;
 import java.io.File;
-import javafx.embed.swing.JFXPanel;
-import javafx.scene.web.WebView;
+import java.awt.Font;
 
 /**
  *
@@ -24,9 +22,7 @@ public interface ProjectionManager {
 
     void setTextFont(Font font);
 
-    TextWrapperFactoryChangeListener getTextWrapperChangeListener();
-
-    void setTextWrapperChangeListener(TextWrapperFactoryChangeListener wrapperChangeListener);
+    void addTextWrapperChangeListener(TextWrapperFactoryChangeListener wrapperChangeListener);
     
     ProjectionWebView createWebView();
     ProjectionImage createImage();

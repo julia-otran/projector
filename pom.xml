@@ -12,26 +12,12 @@
 
     <name>Projector</name>
 
-    <repositories>
-        <repository>
-            <id>say.swing</id>
-            <name>say.swing</name>
-            <url>http://jfontchooser.osdn.jp/repository/</url>
-        </repository>
-    </repositories>
-
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
             <version>1.8.3</version>
-        </dependency>
-
-        <dependency>
-            <groupId>say.swing</groupId>
-            <artifactId>jfontchooser</artifactId>
-            <version>1.0.5</version>
         </dependency>
 
         <dependency>

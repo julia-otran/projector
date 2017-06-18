@@ -72,14 +72,16 @@ public class ProjectionImage implements Projectable {
         at.translate(x, y);
         at.scale(scale, scale);
 
-        scaled = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2 = scaled.createGraphics();
+        BufferedImage scaling = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = scaling.createGraphics();
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setTransform(at);
         g2.drawImage(img, 0, 0, null);
         g2.dispose();
+        
+        this.scaled = scaling;
     }
 
     @Override

@@ -34,7 +34,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
-import say.swing.JFontChooser;
 
 /**
  *
@@ -276,31 +275,31 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
     }// </editor-fold>//GEN-END:initComponents
 
     private void jMenuItemChangeFontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemChangeFontActionPerformed
-        JFontChooser fontChooser = new JFontChooser();
-        fontChooser.setSelectedFont(projectionWindow.getTextFont());
-
-        int result = fontChooser.showDialog(this);
-        if (result == JFontChooser.OK_OPTION) {
-            projectionWindow.setTextFont(fontChooser.getSelectedFont());
-        }
+//        JFontChooser fontChooser = new JFontChooser();
+//        fontChooser.setSelectedFont(projectionWindow.getTextFont());
+//
+//        int result = fontChooser.showDialog(this);
+//        if (result == JFontChooser.OK_OPTION) {
+//            projectionWindow.setTextFont(fontChooser.getSelectedFont());
+//        }
     }//GEN-LAST:event_jMenuItemChangeFontActionPerformed
 
     private void jMenuItemLoadFromFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemLoadFromFileActionPerformed
-        final JFileChooser fc = new JFileChooser();
-        fc.setFileFilter(new TextFileFilter());
-        fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        fc.setMultiSelectionEnabled(true);
-
-        if (lastDirectory != null) {
-            fc.setCurrentDirectory(lastDirectory);
-        }
-
-        int returnVal = fc.showOpenDialog(this);
-
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            lastDirectory = fc.getCurrentDirectory();
-            MusicLoader.loadFilesToRepository(fc.getSelectedFiles(), musicRepo);
-        }
+//        final JFileChooser fc = new JFileChooser();
+//        fc.setFileFilter(new TextFileFilter());
+//        fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+//        fc.setMultiSelectionEnabled(true);
+//
+//        if (lastDirectory != null) {
+//            fc.setCurrentDirectory(lastDirectory);
+//        }
+//
+//        int returnVal = fc.showOpenDialog(this);
+//
+//        if (returnVal == JFileChooser.APPROVE_OPTION) {
+//            lastDirectory = fc.getCurrentDirectory();
+//            MusicLoader.loadFilesToRepository(fc.getSelectedFiles(), musicRepo);
+//        }
 
     }//GEN-LAST:event_jMenuItemLoadFromFileActionPerformed
 
@@ -340,21 +339,21 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
     }//GEN-LAST:event_jCheckBoxMenuItemMultilineStateChanged
 
     private void jMenuItemChangeBackgroundActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemChangeBackgroundActionPerformed
-        final JFileChooser fc = new JFileChooser();
-        fc.setFileFilter(new ImageFileFilter());
-        fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        fc.setMultiSelectionEnabled(false);
-
-        if (lastDirectory != null) {
-            fc.setCurrentDirectory(lastDirectory);
-        }
-
-        int returnVal = fc.showOpenDialog(this);
-
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            lastDirectory = fc.getCurrentDirectory();
-            projectionWindow.setBackgroundImageFile(fc.getSelectedFile());
-        }
+//        final JFileChooser fc = new JFileChooser();
+//        fc.setFileFilter(new ImageFileFilter());
+//        fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+//        fc.setMultiSelectionEnabled(false);
+//
+//        if (lastDirectory != null) {
+//            fc.setCurrentDirectory(lastDirectory);
+//        }
+//
+//        int returnVal = fc.showOpenDialog(this);
+//
+//        if (returnVal == JFileChooser.APPROVE_OPTION) {
+//            lastDirectory = fc.getCurrentDirectory();
+//            projectionWindow.setBackgroundImageFile(fc.getSelectedFile());
+//        }
     }//GEN-LAST:event_jMenuItemChangeBackgroundActionPerformed
 
     private void jButtonClearScreenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonClearScreenActionPerformed
@@ -454,7 +453,7 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
     public void init() {
         multiline = jCheckBoxMenuItemMultiline.isSelected();
 
-        projectionWindow.setTextWrapperChangeListener(new TextWrapperFactoryChangeListener() {
+        projectionWindow.addTextWrapperChangeListener(new TextWrapperFactoryChangeListener() {
             @Override
             public void onWrapperFactoryChanged(WrapperFactory factory) {
                 musicRepo.getGrouper().setWrapper(factory.getTextWrapper(multiline));

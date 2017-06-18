@@ -10,9 +10,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -23,8 +21,6 @@ import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import us.guihouse.projector.projection.ProjectionImage;
-import us.guihouse.projector.projection.ProjectionManager;
 import us.guihouse.projector.services.ImageDragDropService;
 
 /**
@@ -32,17 +28,29 @@ import us.guihouse.projector.services.ImageDragDropService;
  *
  * @author guilherme
  */
-public class ImageController extends ProjectionController implements ImageDragDropService.Client {
+public class BgImageController extends ProjectionController implements ImageDragDropService.Client {
     private ImageDragDropService service;
+    
+    @FXML
+    private Label dragDropLabel;
+    
+    @FXML
+    private Pane imagePane;
+    
+    @FXML
+    private ImageView imageView;
+    
+    private SceneManager sceneManager;
+    private String oldLabelText;
+    
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        service = new ImageDragDropService(this);
+        oldLabelText = dragDropLabel.getText();
+        service = new ImageDragDropService(this, true);
         
-        beginProjectionButton.disableProperty().set(true);
-        endProjectionButton.disableProperty().set(true);
         imageView.fitWidthProperty().bind(imagePane.widthProperty());
         imageView.fitHeightProperty().bind(imagePane.heightProperty());
         
@@ -63,57 +71,23 @@ public class ImageController extends ProjectionController implements ImageDragDr
     }    
     
     @FXML
-    private Button beginProjectionButton;
-    
-    @FXML
-    private Button endProjectionButton;
-    
-    @FXML
-    private Label dragDropLabel;
-    
-    @FXML
-    private Pane imagePane;
-    
-    @FXML
-    private ImageView imageView;
-    private Image currentImage;
-    
-    private ProjectionImage projectable;
-    
-    private String oldLabelText;
-
-    @Override
-    public void initWithProjectionManager(ProjectionManager projectionManager) {
-        super.initWithProjectionManager(projectionManager);
-        this.projectable = projectionManager.createImage();
-        projectable.setCropBackground(false);
-        oldLabelText = dragDropLabel.getText();
-    }
-    
-    @FXML
     public void onDragOver(DragEvent event) {
-        if (currentImage != null) {
-            setError("Já existe uma imagem aqui. Adicione uma nova imagem à lista de projeção.");
-            return;
-        }
-        
         service.onDragOver(event);
     }
     
     @FXML
     public void onDragExit() {
-        if (currentImage != null) {
-            setOriginal();
-            dragDropLabel.setVisible(false);
-            return;
-        }
-        
         service.onDragExit();
     }
     
     @FXML
     public void onDragDropped(DragEvent event) {
         service.onDragDropped(event);
+    }
+    
+    @FXML
+    public void onCancel() {
+        sceneManager.goToWorkspace();
     }
     
     private void setError(String error) {
@@ -125,22 +99,6 @@ public class ImageController extends ProjectionController implements ImageDragDr
     private void setOriginal() {
         dragDropLabel.setText(oldLabelText);
         imagePane.setBorder(null);
-    }
-    
-    @FXML
-    public void onBeginProjection() {
-        projectable.setImage(SwingFXUtils.fromFXImage(currentImage, null));
-        getProjectionManager().setProjectable(projectable);
-        
-        beginProjectionButton.disableProperty().set(true);
-        endProjectionButton.disableProperty().set(false);
-    }
-    
-    @FXML
-    public void onEndProjection() {
-        getProjectionManager().setProjectable(null);
-        beginProjectionButton.disableProperty().set(false);
-        endProjectionButton.disableProperty().set(true);
     }
     
     private void centerImage() {
@@ -186,11 +144,8 @@ public class ImageController extends ProjectionController implements ImageDragDr
 
     @Override
     public void onDropSuccess(Image image, File file) {
-        beginProjectionButton.disableProperty().set(false);
-        currentImage = image;
-        if (file != null && !file.getName().isEmpty()) {
-            notifyTitleChange(file.getName());
-        }
+        getProjectionManager().setBackgroundImageFile(file);
+        sceneManager.goToWorkspace();
     }
 
     @Override
@@ -202,5 +157,13 @@ public class ImageController extends ProjectionController implements ImageDragDr
     public void showPreviewImage(Image image) {
         imageView.setImage(image);
         centerImage();
+    }
+
+    public SceneManager getSceneManager() {
+        return sceneManager;
+    }
+
+    public void setSceneManager(SceneManager sceneManager) {
+        this.sceneManager = sceneManager;
     }
 }

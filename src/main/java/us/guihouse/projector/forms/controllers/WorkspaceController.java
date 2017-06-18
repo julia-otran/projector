@@ -11,6 +11,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,6 +19,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ListView;
@@ -25,17 +27,21 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.layout.Pane;
+import javafx.scene.text.Font;
+import us.guihouse.projector.projection.ProjectionManager;
+import us.guihouse.projector.scenes.BgImageScene;
 import us.guihouse.projector.scenes.BrowserSubScene;
 import us.guihouse.projector.scenes.ImageSubScene;
 import us.guihouse.projector.scenes.ProjectionItemSubScene;
 import us.guihouse.projector.scenes.TextSubScene;
-
+import org.controlsfx.dialog.FontSelectorDialog;
 /**
  * FXML Controller class
  *
  * @author guilherme
  */
 public class WorkspaceController implements Initializable, SceneObserver {
+    private SceneManager sceneManager;
     private GraphicsDeviceHelper graphicsHelper;
     private final List<ProjectionItemSubScene> items = new ArrayList<>(); 
     
@@ -46,6 +52,7 @@ public class WorkspaceController implements Initializable, SceneObserver {
     public void initialize(URL url, ResourceBundle rb) {
         graphicsHelper = new GraphicsDeviceHelper(projectionScreenMenu);
         initializeProjectionList();
+        onCropBackgroundChanged();
     }    
     
     public void stop() {
@@ -72,6 +79,9 @@ public class WorkspaceController implements Initializable, SceneObserver {
     private Menu projectionScreenMenu;
     
     @FXML
+    private CheckMenuItem fullScreenCheckMenuItem;
+    
+    @FXML
     public void onRegisterManualMusic() { }
     
     @FXML
@@ -84,16 +94,34 @@ public class WorkspaceController implements Initializable, SceneObserver {
     public void onOpenMusicList() {}
     
     @FXML
-    public void onSelectBackgroundImageFile() {}
+    public void onSelectBackgroundImageFile() {
+        try {
+            Scene changeBg = BgImageScene.createScene(graphicsHelper.getProjectionManager(), getSceneManager(), 800, 600);
+            getSceneManager().goToScene(changeBg);
+        } catch (IOException ex) {
+            Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     
     @FXML
-    public void onCropBackgroundChanged() {}
+    public void onRemoveBackground() {
+        graphicsHelper.getProjectionManager().setBackgroundImageFile(null);
+    }
     
     @FXML
-    public void onChangeFont() {}
+    public void onCropBackgroundChanged() {
+        graphicsHelper.getProjectionManager().setCropBackground(cropBackgroundMenuItem.isSelected());
+    }
     
     @FXML
-    public void onChangeFullScreen() {}
+    public void onChangeFont() {
+
+    }
+    
+    @FXML
+    public void onChangeFullScreen() {
+        graphicsHelper.getProjectionManager().setFullScreen(fullScreenCheckMenuItem.isSelected());
+    }
     
     @FXML
     public void onSingleLineProjection() {}
@@ -234,4 +262,11 @@ public class WorkspaceController implements Initializable, SceneObserver {
         }
     }
 
+    public SceneManager getSceneManager() {
+        return sceneManager;
+    }
+
+    public void setSceneManager(SceneManager sceneManager) {
+        this.sceneManager = sceneManager;
+    }
 }
