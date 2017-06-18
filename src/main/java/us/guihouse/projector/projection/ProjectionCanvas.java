@@ -114,7 +114,15 @@ public class ProjectionCanvas implements ProjectionManager {
     }
     
     @Override
-    public void setWebView(Projectable webView) {
+    public void setProjectable(Projectable webView) {
         this.currentWebView = webView;
+    }
+
+    @Override
+    public ProjectionImage createImage() {
+        ProjectionImage image = new ProjectionImage(delegate);
+        initializeList.add(image);
+        image.init();
+        return image;
     }
 }

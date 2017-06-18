@@ -29,7 +29,9 @@ public interface ProjectionManager {
     void setTextWrapperChangeListener(TextWrapperFactoryChangeListener wrapperChangeListener);
     
     ProjectionWebView createWebView();
-    void setWebView(Projectable webView);
+    ProjectionImage createImage();
+    
+    void setProjectable(Projectable webView);
 
     public WrapperFactory getWrapperFactory();
 

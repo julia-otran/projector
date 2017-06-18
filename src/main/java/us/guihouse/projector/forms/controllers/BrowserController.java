@@ -62,14 +62,14 @@ public class BrowserController extends ProjectionController {
     public void onBeginProjection() {
         beginProjectionButton.disableProperty().set(true);
         endProjectionButton.disableProperty().set(false);
-        getProjectionManager().setWebView(projectionWebView);
+        getProjectionManager().setProjectable(projectionWebView);
     }
 
     @FXML
     public void onEndProjection() {
         beginProjectionButton.disableProperty().set(false);
         endProjectionButton.disableProperty().set(true);
-        getProjectionManager().setWebView(null);
+        getProjectionManager().setProjectable(null);
     }
 
     @FXML

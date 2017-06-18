@@ -26,6 +26,7 @@ import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.layout.Pane;
 import us.guihouse.projector.scenes.BrowserSubScene;
+import us.guihouse.projector.scenes.ImageSubScene;
 import us.guihouse.projector.scenes.ProjectionItemSubScene;
 
 /**
@@ -175,7 +176,22 @@ public class WorkspaceController implements Initializable, SceneObserver {
     }
     
     @FXML
-    public void onAddPicture() {}
+    public void onAddPicture() {
+        try {
+            ProjectionItemSubScene created = ImageSubScene.createScene(targetPane.getWidth(), targetPane.getHeight());
+            created.setObserver(this);
+            
+            items.add(created);
+            projectionListView.getItems().add("Nova imagem");
+            projectionListView.getSelectionModel().select(projectionListView.getItems().size() - 1);
+            
+            created.initWithProjectionManager(graphicsHelper.getProjectionManager());
+            created.widthProperty().bind(targetPane.widthProperty());
+            created.heightProperty().bind(targetPane.heightProperty());
+        } catch (IOException ex) {
+            Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     
     @FXML
     public void onAddText() {
