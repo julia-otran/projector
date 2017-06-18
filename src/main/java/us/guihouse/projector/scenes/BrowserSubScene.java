@@ -16,7 +16,7 @@ import us.guihouse.projector.forms.controllers.BrowserController;
  * @author guilherme
  */
 public class BrowserSubScene extends ProjectionItemSubScene {
-    public static ProjectionItemSubScene createScene(double width, double height) throws IOException {
+    public static BrowserSubScene createScene(double width, double height) throws IOException {
         URL url = BrowserSubScene.class.getClassLoader().getResource("fxml/browser.fxml");
         FXMLLoader loader = new FXMLLoader(url);
         
@@ -37,5 +37,9 @@ public class BrowserSubScene extends ProjectionItemSubScene {
 
     private void setController(BrowserController controller) {
         super.setController(controller);
+    }
+
+    public void setUrl(String url) {
+        getController().setUrl(url);
     }
 }

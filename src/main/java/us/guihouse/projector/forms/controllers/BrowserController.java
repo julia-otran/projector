@@ -33,6 +33,8 @@ import us.guihouse.projector.projection.ProjectionWebView;
  * @author guilherme
  */
 public class BrowserController extends ProjectionController {
+
+    private String url;
     /**
      * Initializes the controller class.
      */
@@ -108,6 +110,10 @@ public class BrowserController extends ProjectionController {
             }
         });
         
-        engine.load("https://www.google.com");
+        engine.load(url);
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }

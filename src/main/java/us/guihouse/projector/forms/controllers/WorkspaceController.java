@@ -20,12 +20,14 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.Alert;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.layout.Pane;
+import us.guihouse.projector.other.YouTubeVideoResolve;
 import us.guihouse.projector.scenes.BgImageScene;
 import us.guihouse.projector.scenes.BrowserSubScene;
 import us.guihouse.projector.scenes.ImageSubScene;
@@ -49,6 +51,7 @@ public class WorkspaceController implements Initializable, SceneObserver {
         graphicsHelper = new GraphicsDeviceHelper(projectionScreenMenu);
         initializeProjectionList();
         onCropBackgroundChanged();
+        onChangeFullScreen();
     }    
     
     public void stop() {
@@ -183,14 +186,36 @@ public class WorkspaceController implements Initializable, SceneObserver {
     public void onAddMusic() {}
     
     @FXML
+    public void onAddYouTube() {
+        YouTubeVideoResolve.getVideoEmbedUrl((event) -> {
+            if (event.isError()) {
+                Alert a = new Alert(Alert.AlertType.ERROR);
+                a.setTitle("Erro");
+                a.setHeaderText("Falha ao obter dados do vídeo");
+                a.setContentText("Não foi possível obter a URL 'Embed'");
+                a.show();
+            } else if (event.getResolved() != null) {
+                addBroser(event.getResolved());
+            }
+        });
+    }
+    
+    @FXML
     public void onAddBrowser() {
+        addBroser("https://google.com.br");
+    }
+    
+    private void addBroser(String url) {
         try {
-            ProjectionItemSubScene created = BrowserSubScene.createScene(targetPane.getWidth(), targetPane.getHeight());
+            BrowserSubScene created = BrowserSubScene.createScene(targetPane.getWidth(), targetPane.getHeight());
             created.setObserver(this);
+            created.setUrl(url);
             
             items.add(created);
+            
+            changingTitle = true;
             projectionListView.getItems().add("Página Web");
-            projectionListView.getSelectionModel().select(projectionListView.getItems().size() - 1);
+            changingTitle = false;
             
             created.initWithProjectionManager(graphicsHelper.getProjectionManager());
             created.widthProperty().bind(targetPane.widthProperty());

@@ -70,9 +70,10 @@
                                <MenuButton mnemonicParsing="false" prefHeight="25.0" text="+ Incluir item" VBox.vgrow="NEVER">
                                  <items>
                                    <MenuItem mnemonicParsing="false" onAction="#onAddMusic" text="Letra de Musica" />
-                                   <MenuItem mnemonicParsing="false" onAction="#onAddBrowser" text="Site WEB (YouTube)" />
+                                    <MenuItem mnemonicParsing="false" onAction="#onAddYouTube" text="YouTube" />
                                      <MenuItem mnemonicParsing="false" onAction="#onAddPicture" text="Imagem" />
                                      <MenuItem mnemonicParsing="false" onAction="#onAddText" text="Texto" />
+                                   <MenuItem mnemonicParsing="false" onAction="#onAddBrowser" text="Site WEB" />
                                  </items>
                                </MenuButton>
                                <ListView fx:id="projectionListView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
