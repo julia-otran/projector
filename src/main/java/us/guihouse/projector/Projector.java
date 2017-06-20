@@ -38,6 +38,7 @@ public class Projector extends Application {
         primaryStage.setMaxHeight(Double.MAX_VALUE);
         
         SQLiteJDBCDriverConnection.connect();
+        SQLiteJDBCDriverConnection.migrate();
         
         URL url = getClass().getClassLoader().getResource("fxml/workspace.fxml");
         
