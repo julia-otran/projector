@@ -34,15 +34,20 @@ public class Projector extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("Projector");
+        primaryStage.setMaxWidth(Double.MAX_VALUE);
+        primaryStage.setMaxHeight(Double.MAX_VALUE);
+        
         SQLiteJDBCDriverConnection.connect();
         
         URL url = getClass().getClassLoader().getResource("fxml/workspace.fxml");
         
         FXMLLoader loader = new FXMLLoader(url);
-        Parent workspaceRoot = loader.load();
-        Scene workspaceScene = new Scene(workspaceRoot, 800, 600);
         
+        Parent workspaceRoot = loader.load();
         controller = loader.getController();
+        
+        Scene workspaceScene = new Scene(workspaceRoot, 1000, 700);
+        
         controller.setSceneManager(new SceneManager() {
             @Override
             public void goToParent(Parent scene) {

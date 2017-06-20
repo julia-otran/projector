@@ -15,13 +15,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import us.guihouse.projector.dtos.ListMusicDTO;
 
 /**
  *
  * @author guilherme
  */
 public class MusicRepository {
-
+    private static final int LIST_LIMIT = 500;
+    
     public Music findByNameAndArtist(String name, Artist artist) throws SQLException {
         String sql = "SELECT id, name, phrases FROM musics WHERE name = ? AND artist_id = ?";
 
@@ -79,13 +81,14 @@ public class MusicRepository {
         stmt.execute();
     }
 
-    public List<Music> listAll() throws SQLException {
-        List<Music> result = new ArrayList<>();
+    public List<ListMusicDTO> listWithLimit() throws SQLException {
+        List<ListMusicDTO> result = new ArrayList<>();
 
         String sql = "SELECT musics.id AS music_id, musics.name AS music_name, musics.phrases AS phrases, "
                 + "artists.id AS artist_id, artists.name AS artist_name "
                 + "FROM musics "
-                + "LEFT JOIN artists ON artists.id = musics.artist_id ";
+                + "LEFT JOIN artists ON artists.id = musics.artist_id "
+                + "LIMIT " + LIST_LIMIT + ";";
 
         PreparedStatement stmt = SQLiteJDBCDriverConnection
                 .getConn()
@@ -95,7 +98,7 @@ public class MusicRepository {
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                result.add(deserialize(rs));
+                result.add(deserializeDto(rs, null));
             }
         } finally {
             stmt.close();
@@ -104,14 +107,15 @@ public class MusicRepository {
         return result;
     }
 
-    public List<Music> listByTerm(String searchTerm) throws SQLException {
-        List<Music> result = new ArrayList<>();
+    public List<ListMusicDTO> listByTermWithLimit(String searchTerm) throws SQLException {
+        List<ListMusicDTO> result = new ArrayList<>();
 
         String sql = "SELECT musics.id AS music_id, musics.name AS music_name, musics.phrases AS phrases, "
                 + "artists.id AS artist_id, artists.name AS artist_name "
                 + "FROM musics "
                 + "LEFT JOIN artists ON artists.id = musics.artist_id "
-                + "WHERE musics.name LIKE ? OR artists.name LIKE ? Or musics.phrases LIKE ?; ";
+                + "WHERE musics.name LIKE ? OR artists.name LIKE ? Or musics.phrases LIKE ? "
+                + "LIMIT " + LIST_LIMIT + ";";
 
         PreparedStatement stmt = SQLiteJDBCDriverConnection
                 .getConn()
@@ -125,7 +129,7 @@ public class MusicRepository {
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                result.add(deserialize(rs));
+                result.add(deserializeDto(rs, searchTerm));
             }
         } finally {
             stmt.close();
@@ -133,26 +137,7 @@ public class MusicRepository {
 
         return result;
     }
-
-    private Music deserialize(ResultSet rs) throws SQLException {
-        Music m = new Music();
-
-        int artistId = rs.getInt("artist_id");
-
-        if (!rs.wasNull()) {
-            Artist a = new Artist();
-            a.setId(artistId);
-            a.setName(rs.getString("artist_name"));
-            m.setArtist(a);
-        }
-
-        m.setId(rs.getInt("music_id"));
-        m.setName(rs.getString("music_name"));
-        m.setPhrases(Arrays.asList(rs.getString("phrases").split("\n")));
-
-        return m;
-    }
-
+    
     public Music findById(Integer id) throws SQLException {
         String sql = "SELECT musics.id AS music_id, musics.name AS music_name, musics.phrases AS phrases, "
                 + "artists.id AS artist_id, artists.name AS artist_name "
@@ -201,5 +186,58 @@ public class MusicRepository {
         stmt.setString(3, phrases);
         stmt.setInt(4, m.getId());
         stmt.execute();
+    }
+
+    private Music deserialize(ResultSet rs) throws SQLException {
+        Music m = new Music();
+
+        int artistId = rs.getInt("artist_id");
+
+        if (!rs.wasNull()) {
+            Artist a = new Artist();
+            a.setId(artistId);
+            a.setName(rs.getString("artist_name"));
+            m.setArtist(a);
+        }
+
+        m.setId(rs.getInt("music_id"));
+        m.setName(rs.getString("music_name"));
+        m.setPhrases(Arrays.asList(rs.getString("phrases").split("\n")));
+
+        return m;
+    }
+
+    private ListMusicDTO deserializeDto(ResultSet rs, String searchingTerm) throws SQLException {
+        ListMusicDTO m = new ListMusicDTO();
+
+        String artistName = rs.getString("artist_name");
+
+        if (rs.wasNull()) {
+            m.setArtistName(null);
+        } else {
+            m.setArtistName(artistName);
+        }
+
+        m.setId(rs.getInt("music_id"));
+        m.setName(rs.getString("music_name"));
+        
+        String phrases[] = rs.getString("phrases").split("\n");
+        String firsts;
+        
+        if (searchingTerm == null) {
+            firsts = Arrays.asList(phrases).stream().limit(5).collect(Collectors.joining("\n"));
+        } else {
+            final String searchingTermLower = searchingTerm.toLowerCase();
+            
+            firsts = Arrays.asList(phrases)
+                    .stream()
+                    .filter(s -> s.toLowerCase().contains(searchingTermLower))
+                    .limit(5)
+                    .collect(Collectors.joining("\n"));
+        }
+        
+        m.setPhrases(firsts);
+
+        return m;
     }
 }

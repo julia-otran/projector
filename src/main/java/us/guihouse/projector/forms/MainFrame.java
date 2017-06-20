@@ -420,8 +420,7 @@ public class MainFrame extends javax.swing.JFrame implements ListSelectionListen
     }//GEN-LAST:event_jMenuItemCreateMusicActionPerformed
 
     private void jMenuItemSearchMusicActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSearchMusicActionPerformed
-        ListMusicsFrame listFrame = new ListMusicsFrame(musicRepo);
-        listFrame.setVisible(true);
+
     }//GEN-LAST:event_jMenuItemSearchMusicActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

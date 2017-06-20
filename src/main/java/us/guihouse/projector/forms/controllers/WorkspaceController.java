@@ -294,7 +294,7 @@ public class WorkspaceController implements Initializable, SceneObserver {
     private void createListMusicStage() {
         try {
             Parent list = MusicListScene.createMusicListScene();
-            Scene listScene = new Scene(list, 640, 480);
+            Scene listScene = new Scene(list, 800, 480);
             listMusicStage = new Stage();
             listMusicStage.setScene(listScene);
         } catch (IOException ex) {
