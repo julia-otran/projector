@@ -5,7 +5,6 @@
  */
 package us.guihouse.projector.repositories;
 
-import us.guihouse.projector.models.Music;
 import us.guihouse.projector.projection.text.TextWrapper;
 import us.guihouse.projector.projection.text.WrappedText;
 import java.util.Collections;
@@ -27,12 +26,12 @@ public class PhrasesGrouper {
         this.wrapper = wrapper;
     }
 
-    public List<WrappedText> groupMusic(Music m) {
+    public List<WrappedText> groupPhrases(List<String> phrases) {
         if (wrapper == null) {
             return Collections.emptyList();
         }
 
-        return wrapper.fitGroups(m.getPhrases());
+        return wrapper.fitGroups(phrases);
     }
 
 }

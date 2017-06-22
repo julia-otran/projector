@@ -5,69 +5,26 @@
  */
 package us.guihouse.projector.models;
 
-import java.util.Objects;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
+import lombok.Data;
 
 /**
  *
  * @author guilherme
  */
+@Data
 public class Artist {
-
-    private int id;
-    private String name;
+    private final Property<Integer> idProperty;
+    private final Property<String> nameProperty;
 
     public Artist(Artist artist) {
-        this.id = artist.id;
-        this.name = artist.name;
+        this.idProperty = new SimpleObjectProperty<>(artist.getIdProperty().getValue());
+        this.nameProperty = new SimpleObjectProperty<>(artist.getNameProperty().getValue());
     }
 
     public Artist() {
-
+        this.idProperty = new SimpleObjectProperty<>();
+        this.nameProperty = new SimpleObjectProperty<>();
     }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 47 * hash + this.id;
-        hash = 47 * hash + Objects.hashCode(this.name);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Artist other = (Artist) obj;
-        if (this.id != other.id) {
-            return false;
-        }
-        if (!Objects.equals(this.name, other.name)) {
-            return false;
-        }
-        return true;
-    }
-
 }

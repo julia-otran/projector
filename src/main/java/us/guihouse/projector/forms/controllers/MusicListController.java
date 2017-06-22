@@ -42,6 +42,8 @@ public class MusicListController implements Initializable {
     
     @FXML
     private TableView<ListMusicDTO> resultsTable;
+    
+    private AddMusicCallback addCallback;
    
     /**
      * Initializes the controller class.
@@ -124,6 +126,10 @@ public class MusicListController implements Initializable {
 
         return col;
     }
+
+    public void setAddMusicCallback(AddMusicCallback callback) {
+        this.addCallback = callback;
+    }
     
     class ActionsTableCell extends TableCell<ListMusicDTO, Integer> implements EventHandler<ActionEvent> {
         private final Button addToList = new Button("Incluir a lista");
@@ -171,7 +177,9 @@ public class MusicListController implements Initializable {
     }
     
     private void addToList(Integer id) {
-        System.out.println("AddToList " + id);
+        if (this.addCallback != null) {
+            this.addCallback.addMusic(id);
+        }
     }
     
     private void seeDetails(Integer id) {

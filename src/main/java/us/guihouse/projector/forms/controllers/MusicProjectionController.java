@@ -7,15 +7,23 @@ package us.guihouse.projector.forms.controllers;
 
 import java.net.URL;
 import java.util.ResourceBundle;
-import javafx.fxml.Initializable;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.TableView;
 
 /**
  * FXML Controller class
  *
  * @author guilherme
  */
-public class MusicProjectionController implements Initializable {
+public class MusicProjectionController extends ProjectionController {
 
+    @FXML
+    private Button clearScreenButton;
+    
+    @FXML
+    private TableView phrasesTable;
+    
     /**
      * Initializes the controller class.
      */
@@ -23,5 +31,9 @@ public class MusicProjectionController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
     }    
+
+    public void setMusicId(Integer musicId) {
+        
+    }
     
 }

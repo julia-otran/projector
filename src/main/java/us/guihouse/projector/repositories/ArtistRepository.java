@@ -32,8 +32,8 @@ public class ArtistRepository {
 
             if (rs.next()) {
                 Artist a = new Artist();
-                a.setId(rs.getInt("id"));
-                a.setName(rs.getString("name"));
+                a.getIdProperty().setValue(rs.getInt("id"));
+                a.getNameProperty().setValue(rs.getString("name"));
                 return a;
             }
         } finally {
@@ -56,15 +56,15 @@ public class ArtistRepository {
 
                 while (rs.next()) {
                     a = new Artist();
-                    a.setId(rs.getInt("id"));
-                    a.setName(rs.getString("name"));
+                    a.getIdProperty().setValue(rs.getInt("id"));
+                    a.getNameProperty().setValue(rs.getString("name"));
                     result.add(a);
                 }
             } finally {
                 stmt.close();
             }
         } catch (SQLException ex) {
-            Logger.getLogger(MusicLoader.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ArtistRepository.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return result;
@@ -81,8 +81,8 @@ public class ArtistRepository {
 
             if (rs.next()) {
                 Artist a = new Artist();
-                a.setId(rs.getInt("id"));
-                a.setName(rs.getString("name"));
+                a.getIdProperty().setValue(rs.getInt("id"));
+                a.getNameProperty().setValue(rs.getString("name"));
                 return a;
             }
         } finally {
@@ -112,8 +112,8 @@ public class ArtistRepository {
             ResultSet generated = stmt.getGeneratedKeys();
 
             if (generated.next()) {
-                a.setId(generated.getInt(1));
-                a.setName(name);
+                a.getIdProperty().setValue(generated.getInt(1));
+                a.getNameProperty().setValue(name);
                 return a;
             }
 

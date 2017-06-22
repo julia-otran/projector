@@ -34,6 +34,7 @@ import us.guihouse.projector.scenes.BgImageScene;
 import us.guihouse.projector.scenes.BrowserSubScene;
 import us.guihouse.projector.scenes.ImageSubScene;
 import us.guihouse.projector.scenes.MusicListScene;
+import us.guihouse.projector.scenes.MusicProjectionScene;
 import us.guihouse.projector.scenes.ProjectionItemSubScene;
 import us.guihouse.projector.scenes.TextSubScene;
 /**
@@ -41,7 +42,7 @@ import us.guihouse.projector.scenes.TextSubScene;
  *
  * @author guilherme
  */
-public class WorkspaceController implements Initializable, SceneObserver {
+public class WorkspaceController implements Initializable, SceneObserver, AddMusicCallback {
     private SceneManager sceneManager;
     private GraphicsDeviceHelper graphicsHelper;
     private final List<ProjectionItemSubScene> items = new ArrayList<>(); 
@@ -293,10 +294,29 @@ public class WorkspaceController implements Initializable, SceneObserver {
 
     private void createListMusicStage() {
         try {
-            Parent list = MusicListScene.createMusicListScene();
+            Parent list = MusicListScene.createMusicListScene(this);
             Scene listScene = new Scene(list, 800, 480);
             listMusicStage = new Stage();
             listMusicStage.setScene(listScene);
+        } catch (IOException ex) {
+            Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @Override
+    public void addMusic(Integer id) {
+        try {
+            MusicProjectionScene created = MusicProjectionScene.createScene(targetPane.getWidth(), targetPane.getHeight());
+            created.setObserver(this);
+            created.setMusicId(id);
+            
+            items.add(created);
+            projectionListView.getItems().add("Letra de música");
+            projectionListView.getSelectionModel().select(projectionListView.getItems().size() - 1);
+            
+            created.initWithProjectionManager(graphicsHelper.getProjectionManager());
+            created.widthProperty().bind(targetPane.widthProperty());
+            created.heightProperty().bind(targetPane.heightProperty());
         } catch (IOException ex) {
             Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
         }

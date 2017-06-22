@@ -37,7 +37,7 @@ public class MusicRepository {
             if (artist == null) {
                 stmt.setNull(2, java.sql.Types.INTEGER);
             } else {
-                stmt.setInt(2, artist.getId());
+                stmt.setInt(2, artist.getIdProperty().getValue());
             }
 
             ResultSet rs = stmt.executeQuery();
@@ -60,7 +60,7 @@ public class MusicRepository {
     public void create(Music music) throws SQLException {
         String sql = "INSERT INTO musics(name, artist_id, phrases) VALUES(?, ?, ?)";
 
-        String phrases = music.getPhrases()
+        String phrases = music.getPhrasesList()
                 .stream()
                 .map(l -> l.replace("\r\n", "").replace("\n", ""))
                 .collect(Collectors.joining("\n"));
@@ -74,7 +74,7 @@ public class MusicRepository {
         if (music.getArtist() == null) {
             stmt.setNull(2, java.sql.Types.INTEGER);
         } else {
-            stmt.setInt(2, music.getArtist().getId());
+            stmt.setInt(2, music.getArtist().getIdProperty().getValue());
         }
 
         stmt.setString(3, phrases);
@@ -166,7 +166,7 @@ public class MusicRepository {
     public void update(Music m) throws SQLException {
         String sql = "UPDATE musics SET name = ?, artist_id = ?, phrases = ? WHERE id = ?";
 
-        String phrases = m.getPhrases()
+        String phrases = m.getPhrasesList()
                 .stream()
                 .map(l -> l.replace("\r\n", "").replace("\n", ""))
                 .collect(Collectors.joining("\n"));
@@ -180,7 +180,7 @@ public class MusicRepository {
         if (m.getArtist() == null) {
             stmt.setNull(2, java.sql.Types.INTEGER);
         } else {
-            stmt.setInt(2, m.getArtist().getId());
+            stmt.setInt(2, m.getArtist().getIdProperty().getValue());
         }
 
         stmt.setString(3, phrases);
@@ -195,8 +195,8 @@ public class MusicRepository {
 
         if (!rs.wasNull()) {
             Artist a = new Artist();
-            a.setId(artistId);
-            a.setName(rs.getString("artist_name"));
+            a.getIdProperty().setValue(artistId);
+            a.getNameProperty().setValue(rs.getString("artist_name"));
             m.setArtist(a);
         }
 

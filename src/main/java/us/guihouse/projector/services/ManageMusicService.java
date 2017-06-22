@@ -11,8 +11,14 @@ import us.guihouse.projector.other.SQLiteJDBCDriverConnection;
 import us.guihouse.projector.repositories.ArtistRepository;
 import us.guihouse.projector.repositories.MusicRepository;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -24,6 +30,10 @@ import java.util.stream.Collectors;
 public class ManageMusicService {
 
     public class SaveException extends Exception {
+        public SaveException() { }
+        public SaveException(String msg, Throwable cause) {
+            super(msg, cause);
+        } 
     }
 
     public class MusicAlreadyPresentException extends SaveException {
@@ -39,139 +49,175 @@ public class ManageMusicService {
         }
     }
 
-    public class PersistenceException extends SaveException {
-
-        private final Music music;
-
-        public PersistenceException(Music music) {
-            this.music = music;
-        }
-
-        public Music getMusic() {
-            return music;
-        }
+    public class PersistenceException extends SaveException { 
+        public PersistenceException(){ }
+        
+        public PersistenceException(String msg, Throwable cause) {
+            super(msg, cause);
+        } 
     }
+    
+    public class InvalidData extends SaveException { }
+    public class InavlidArtist extends InvalidData { }
 
     private final ArtistRepository artistRepo = new ArtistRepository();
     private final MusicRepository musicRepo = new MusicRepository();
-
-    public Music createMusic(String name, String artist, String phrases) throws MusicAlreadyPresentException, PersistenceException {
-        if (artist != null && artist.isEmpty()) {
-            artist = null;
+    private final Map<Music, Integer> openedMusics = new HashMap<>();
+    
+    /**
+     * Keeps the musics in cache so properties events works correcly
+     * @param id music id
+     * @return the music, or null
+     * @throws us.guihouse.projector.services.ManageMusicService.PersistenceException Only for DB errors
+     */
+    public Music openMusic(Integer id) throws PersistenceException {
+        Optional<Entry<Music, Integer>> cache = openedMusics.entrySet().stream()
+                .filter(m -> Objects.equals(m.getKey().getId(), id))
+                .findAny();
+        
+        if (cache.isPresent()) {
+            Entry<Music, Integer> e = cache.get();
+            e.setValue(e.getValue() + 1);
+            return e.getKey();
         }
+        
+        try {
+            Music m = musicRepo.findById(id);
+            
+            if (m != null) {
+                openedMusics.put(m, 1);
+            }
+            
+            return m;
+        } catch (SQLException ex) {
+            Logger.getLogger(ManageMusicService.class.getName()).log(Level.SEVERE, null, ex);
+            throw new PersistenceException(ex.getMessage(), ex);
+        }
+    }
+    
+    public void closeMusic(Integer id) {
+        Optional<Entry<Music, Integer>> cache = openedMusics.entrySet().stream()
+                .filter(m -> Objects.equals(m.getKey().getId(), id))
+                .findAny();
+        
+        if (cache.isPresent()) {
+            Entry<Music, Integer> e = cache.get();
+            
+            int newCount = e.getValue() - 1;
+            
+            if (newCount > 0) {
+                e.setValue(newCount);
+            } else {
+                openedMusics.remove(e.getKey());
+            }
+        }
+    }
+    
+    private Artist findOrCrateArtist(String name) throws PersistenceException, InavlidArtist {
+        if (name == null || name.trim().isEmpty()) {
+            throw new InavlidArtist();
+        }
+        
+        try {
+            return artistRepo.findOrCreateByName(name);
+        } catch (SQLException ex) {
+            Logger.getLogger(ManageMusicService.class.getName()).log(Level.SEVERE, null, ex);
+            
+            try {
+                SQLiteJDBCDriverConnection.getConn().rollback();
+            } catch (SQLException ex1) {
+                Logger.getLogger(ManageMusicService.class.getName()).log(Level.SEVERE, null, ex1);
+            }
+            
+            throw new PersistenceException(ex.getMessage(), ex);
+        }
+    }
 
+    public Integer createMusic(String name, String artist, String phrases) throws MusicAlreadyPresentException, PersistenceException, InavlidArtist {
         try {
             SQLiteJDBCDriverConnection.getConn().setAutoCommit(false);
-            Artist a = null;
-
-            if (artist != null) {
-                try {
-                    a = artistRepo.findOrCreateByName(artist);
-                } catch (SQLException ex) {
-                    Logger.getLogger(ManageMusicService.class.getName()).log(Level.SEVERE, null, ex);
-                    a = null;
-                }
-            }
-
+            
+            Artist a = findOrCrateArtist(artist);
             Music m;
 
             try {
                 m = musicRepo.findByNameAndArtist(name, a);
 
                 if (m != null) {
+                    SQLiteJDBCDriverConnection.getConn().rollback();
                     throw new MusicAlreadyPresentException(m);
                 }
 
             } catch (SQLException ex) {
                 Logger.getLogger(ManageMusicService.class.getName()).log(Level.SEVERE, null, ex);
-                m = null;
+                SQLiteJDBCDriverConnection.getConn().rollback();
+                throw new PersistenceException(ex.getMessage(), ex);
             }
 
             m = new Music();
             m.setArtist(a);
             m.setName(name);
-            m.setPhrases(Arrays.asList(phrases.replace("\r\n", "\n").split("\n")));
+            m.setPhrases(phrases);
 
             try {
                 musicRepo.create(m);
                 SQLiteJDBCDriverConnection.getConn().commit();
-                return m;
+                return m.getId();
             } catch (SQLException ex) {
                 Logger.getLogger(ManageMusicService.class.getName()).log(Level.SEVERE, null, ex);
-                throw new PersistenceException(m);
+                SQLiteJDBCDriverConnection.getConn().rollback();
+                throw new PersistenceException(ex.getMessage(), ex);
             }
 
         } catch (SQLException ex) {
             Logger.getLogger(ManageMusicService.class.getName()).log(Level.SEVERE, null, ex);
-
-            Music m = new Music();
-            m.setName(name);
-            m.setPhrases(Arrays.asList(phrases.replace("\r\n", "\n").split("\n")));
-
-            throw new PersistenceException(m);
+            throw new PersistenceException(ex.getMessage(), ex);
         }
     }
 
-    public Music updateMusic(Integer id, String name, String artist, String phrases) throws MusicAlreadyPresentException, PersistenceException {
-        if (artist != null && artist.isEmpty()) {
-            artist = null;
-        }
-
+    public void updateMusic(Integer id, String name, String artist, String phrases) throws MusicAlreadyPresentException, PersistenceException, InavlidArtist {
         try {
             SQLiteJDBCDriverConnection.getConn().setAutoCommit(false);
-            Artist a = null;
-
-            if (artist != null) {
-                try {
-                    a = artistRepo.findOrCreateByName(artist);
-                } catch (SQLException ex) {
-                    Logger.getLogger(ManageMusicService.class.getName()).log(Level.SEVERE, null, ex);
-                    a = null;
-                }
-            }
+            Artist a = findOrCrateArtist(artist);
 
             Music m;
 
             try {
-                m = musicRepo.findById(id);
+                m = openMusic(id);
+                
+                if (m == null) {
+                    SQLiteJDBCDriverConnection.getConn().rollback();
+                    throw new PersistenceException();
+                }
             } catch (SQLException ex) {
                 Logger.getLogger(ManageMusicService.class.getName()).log(Level.SEVERE, null, ex);
-                m = null;
-            }
-
-            if (m == null) {
-                m = new Music();
-                m.setName(name);
-                m.setPhrases(Arrays.asList(phrases.replace("\r\n", "\n").split("\n")));
-
-                throw new PersistenceException(m);
+                SQLiteJDBCDriverConnection.getConn().rollback();
+                throw new PersistenceException(ex.getMessage(), ex);
             }
 
             m.setArtist(a);
             m.setName(name);
-            m.setPhrases(Arrays.asList(phrases.replace("\r\n", "\n").split("\n")));
+            m.setPhrases(phrases);
 
             try {
                 musicRepo.update(m);
                 SQLiteJDBCDriverConnection.getConn().commit();
-                return m;
+                closeMusic(id);
             } catch (SQLException ex) {
                 Logger.getLogger(ManageMusicService.class.getName()).log(Level.SEVERE, null, ex);
-                throw new PersistenceException(m);
+                SQLiteJDBCDriverConnection.getConn().rollback();
+                throw new PersistenceException(ex.getMessage(), ex);
             }
 
         } catch (SQLException ex) {
             Logger.getLogger(ManageMusicService.class.getName()).log(Level.SEVERE, null, ex);
-
-            Music m = new Music();
-            m.setName(name);
-            m.setPhrases(Arrays.asList(phrases.replace("\r\n", "\n").split("\n")));
-
-            throw new PersistenceException(m);
+            throw new PersistenceException(ex.getMessage(), ex);
         }
     }
 
     public List<String> listArtists() {
-        return artistRepo.findAll().stream().map(Artist::getName).collect(Collectors.toList());
+        return artistRepo.findAll().stream()
+                .map(a -> a.getNameProperty().getValue())
+                .collect(Collectors.toList());
     }
 }
