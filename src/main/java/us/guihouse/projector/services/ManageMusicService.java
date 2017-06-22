@@ -22,6 +22,8 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import us.guihouse.projector.dtos.ListMusicDTO;
+import us.guihouse.projector.repositories.MetricsRepository;
 
 /**
  *
@@ -62,6 +64,7 @@ public class ManageMusicService {
 
     private final ArtistRepository artistRepo = new ArtistRepository();
     private final MusicRepository musicRepo = new MusicRepository();
+    private final MetricsRepository metricRepo = new MetricsRepository();
     private final Map<Music, Integer> openedMusics = new HashMap<>();
     
     /**
@@ -93,6 +96,27 @@ public class ManageMusicService {
             Logger.getLogger(ManageMusicService.class.getName()).log(Level.SEVERE, null, ex);
             throw new PersistenceException(ex.getMessage(), ex);
         }
+    }
+    
+    /**
+     * Same as #openMusic, but registers the play in metrics.
+     * @param id music id
+     * @return the music, or null
+     * @throws us.guihouse.projector.services.ManageMusicService.PersistenceException Only for DB errors
+     */
+    public Music openMusicForPlay(Integer id) throws PersistenceException {
+        Music m = openMusic(id);
+        
+        if (m != null) {
+            try {
+                metricRepo.registerPlay(m);
+            } catch (SQLException ex) {
+                // Ops, this is only metrics, so go ahead.
+                Logger.getLogger(ManageMusicService.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
+        return m;
     }
     
     public void closeMusic(Integer id) {
@@ -219,5 +243,22 @@ public class ManageMusicService {
         return artistRepo.findAll().stream()
                 .map(a -> a.getNameProperty().getValue())
                 .collect(Collectors.toList());
+    }
+    
+    public List<ListMusicDTO> listByTermIfPresentWithLimit(String term) throws PersistenceException {
+        List<ListMusicDTO> musics;
+        
+        try {
+            if (term == null || term.isEmpty()) {
+                musics = musicRepo.listWithLimit();
+            } else {
+                musics = musicRepo.listByTermWithLimit(term);
+            }
+            
+            return musics;
+        } catch (SQLException ex) {
+            Logger.getLogger(ManageMusicService.class.getName()).log(Level.SEVERE, null, ex);
+            throw new PersistenceException(ex.getMessage(), ex);
+        }           
     }
 }

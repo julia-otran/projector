@@ -6,7 +6,6 @@
 package us.guihouse.projector.forms.controllers;
 
 import java.net.URL;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -26,7 +25,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.util.Callback;
 import us.guihouse.projector.dtos.ListMusicDTO;
-import us.guihouse.projector.repositories.MusicRepository;
+import us.guihouse.projector.services.ManageMusicService;
 
 /**
  * FXML Controller class
@@ -35,8 +34,6 @@ import us.guihouse.projector.repositories.MusicRepository;
  */
 public class MusicListController implements Initializable {
 
-    private MusicRepository musicRepository = new MusicRepository();
-    
     @FXML
     private TextField searchText;
     
@@ -44,6 +41,7 @@ public class MusicListController implements Initializable {
     private TableView<ListMusicDTO> resultsTable;
     
     private AddMusicCallback addCallback;
+    private ManageMusicService manageMusicService;
    
     /**
      * Initializes the controller class.
@@ -58,8 +56,6 @@ public class MusicListController implements Initializable {
                 fillMusicsProtected(newValue);
             }
         });
-        
-        fillMusicsProtected(null);
     }    
     
     private void initTable() {
@@ -95,19 +91,13 @@ public class MusicListController implements Initializable {
     private void fillMusicsProtected(String term) {
         try {
             fillMusics(term);
-        } catch (SQLException ex) {
+        } catch (ManageMusicService.PersistenceException ex) {
             Logger.getLogger(MusicListController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
-    private void fillMusics(String term) throws SQLException {
-        List<ListMusicDTO> musics;
-        
-        if (term == null || term.isEmpty()) {
-            musics = musicRepository.listWithLimit();
-        } else {
-            musics = musicRepository.listByTermWithLimit(term);
-        }
+    private void fillMusics(String term) throws ManageMusicService.PersistenceException {
+        List<ListMusicDTO> musics = manageMusicService.listByTermIfPresentWithLimit(term);
         
         resultsTable.getItems().clear();
         resultsTable.getItems().addAll(musics);
@@ -129,6 +119,16 @@ public class MusicListController implements Initializable {
 
     public void setAddMusicCallback(AddMusicCallback callback) {
         this.addCallback = callback;
+    }
+
+    public void setManageMusicService(ManageMusicService manageMusicService) {
+        this.manageMusicService = manageMusicService;
+        
+        try {
+            fillMusics(null);
+        } catch (ManageMusicService.PersistenceException ex) {
+            Logger.getLogger(MusicListController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     class ActionsTableCell extends TableCell<ListMusicDTO, Integer> implements EventHandler<ActionEvent> {

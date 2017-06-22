@@ -37,6 +37,7 @@ import us.guihouse.projector.scenes.MusicListScene;
 import us.guihouse.projector.scenes.MusicProjectionScene;
 import us.guihouse.projector.scenes.ProjectionItemSubScene;
 import us.guihouse.projector.scenes.TextSubScene;
+import us.guihouse.projector.services.ManageMusicService;
 /**
  * FXML Controller class
  *
@@ -47,6 +48,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     private GraphicsDeviceHelper graphicsHelper;
     private final List<ProjectionItemSubScene> items = new ArrayList<>(); 
     private Stage listMusicStage;
+    private final ManageMusicService manageMusicService = new ManageMusicService();
     
     /**
      * Initializes the controller class.
@@ -294,7 +296,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
 
     private void createListMusicStage() {
         try {
-            Parent list = MusicListScene.createMusicListScene(this);
+            Parent list = MusicListScene.createMusicListScene(this, manageMusicService);
             Scene listScene = new Scene(list, 800, 480);
             listMusicStage = new Stage();
             listMusicStage.setScene(listScene);

@@ -12,20 +12,23 @@ import javafx.scene.Parent;
 import us.guihouse.projector.forms.controllers.AddMusicCallback;
 import us.guihouse.projector.forms.controllers.ImageController;
 import us.guihouse.projector.forms.controllers.MusicListController;
+import us.guihouse.projector.services.ManageMusicService;
 
 /**
  *
  * @author guilherme
  */
 public class MusicListScene {
-    public static Parent createMusicListScene(AddMusicCallback callback) throws IOException {
+    public static Parent createMusicListScene(AddMusicCallback callback,  ManageMusicService manageMusicService) throws IOException {
         URL url = ImageController.class.getClassLoader().getResource("fxml/music_list.fxml");
         FXMLLoader loader = new FXMLLoader(url);
        
         Parent root = loader.load();
         MusicListController ctrl = loader.getController();
         ctrl.setAddMusicCallback(callback);
+        ctrl.setManageMusicService(manageMusicService);
         
         return root;
     }
+
 }
