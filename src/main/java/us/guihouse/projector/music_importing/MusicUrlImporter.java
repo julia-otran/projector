@@ -5,12 +5,12 @@
  */
 package us.guihouse.projector.music_importing;
 
-import us.guihouse.projector.dtos.ImportingMusicDTO;
-import us.guihouse.projector.other.ProgressDialog.Executor;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import us.guihouse.projector.dtos.ImportingMusicDTO;
+//import us.guihouse.projector.other.ProgressDialog.Executor;
 
 /**
  *
@@ -24,33 +24,34 @@ public abstract class MusicUrlImporter {
         this.url = url;
     }
 
-    public Executor getExecutor(final ImportCallback callback) {
-        return new Executor() {
-            ImportingMusicDTO parsed;
-            boolean success;
-
-            @Override
-            public void doInBackground() {
-                try {
-                    String data = doRequest();
-                    parsed = parseMusic(data);
-                    success = true;
-                } catch (ImportError ex) {
-                    Logger.getLogger(MusicUrlImporter.class.getName()).log(Level.SEVERE, null, ex);
-                    success = false;
-                }
-            }
-
-            @Override
-            public void done() {
-                if (success) {
-                    callback.onImportSuccess(parsed);
-                } else {
-                    callback.onImportError();
-                }
-            }
-
-        };
+    public void getExecutor(final ImportCallback callback) {
+        return;
+//        return new Executor() {
+//            ImportingMusicDTO parsed;
+//            boolean success;
+//
+//            @Override
+//            public void doInBackground() {
+//                try {
+//                    String data = doRequest();
+//                    parsed = parseMusic(data);
+//                    success = true;
+//                } catch (ImportError ex) {
+//                    Logger.getLogger(MusicUrlImporter.class.getName()).log(Level.SEVERE, null, ex);
+//                    success = false;
+//                }
+//            }
+//
+//            @Override
+//            public void done() {
+//                if (success) {
+//                    callback.onImportSuccess(parsed);
+//                } else {
+//                    callback.onImportError();
+//                }
+//            }
+//
+//        };
     }
 
     public String getUrl() {

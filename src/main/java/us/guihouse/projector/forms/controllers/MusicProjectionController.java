@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import javafx.application.Platform;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -20,14 +22,17 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -49,7 +54,7 @@ public class MusicProjectionController extends ProjectionController {
     private Button clearScreenButton;
 
     @FXML
-    private TableView<WrappedText> phrasesTable;
+    private TableView<SelectionText> phrasesTable;
 
     @FXML
     private TextField searchTextField;
@@ -58,23 +63,50 @@ public class MusicProjectionController extends ProjectionController {
     private Music music;
     private Property<TextWrapper> textWrapperProperty = new SimpleObjectProperty<>();
 
-    private final ObservableList<WrappedText> data = FXCollections.observableArrayList();
+    private final ObservableList<SelectionText> data = FXCollections.observableArrayList();
+
+    private String clearText;
 
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        TableColumn<WrappedText, List<String>> col = (TableColumn<WrappedText, List<String>>) phrasesTable.getColumns().get(0);
+        TableColumn<SelectionText, List<String>> col = (TableColumn<SelectionText, List<String>>) phrasesTable.getColumns().get(0);
         col.setCellValueFactory(new PropertyValueFactory<>("lines"));
-        col.setCellFactory(new Callback<TableColumn<WrappedText, List<String>>, TableCell<WrappedText, List<String>>>() {
+        col.setCellFactory(new Callback<TableColumn<SelectionText, List<String>>, TableCell<SelectionText, List<String>>>() {
             @Override
-            public TableCell<WrappedText, List<String>> call(TableColumn<WrappedText, List<String>> param) {
+            public TableCell<SelectionText, List<String>> call(TableColumn<SelectionText, List<String>> param) {
                 return new MusicPhraseCell();
             }
         });
 
+        TableColumn<SelectionText, Boolean> sel = new TableColumn<>("");
+        sel.setCellValueFactory(new PropertyValueFactory<>("selected"));
+        sel.setCellFactory(column -> {
+            return new TableCell<SelectionText, Boolean>() {
+                @Override
+                protected void updateItem(Boolean item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setGraphic(null);
+                    setText(null);
+
+                    TableRow<SelectionText> row = getTableRow();
+
+                    if (row != null && !empty) {
+                        if (item) {
+                            row.setStyle("-fx-background-color:lightcoral");
+                        } else {
+                            row.setStyle("");
+                        }
+                    }
+                }
+            };
+        });
+
+        phrasesTable.getColumns().add(sel);
         phrasesTable.setItems(data);
+        clearText = clearScreenButton.getText();
     }
 
     @Override
@@ -109,9 +141,12 @@ public class MusicProjectionController extends ProjectionController {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 if (newValue == null) {
+                    disableClear();
                     projectionManager.setText(WrappedText.blankText());
                     return;
                 }
+
+                enableClear();
 
                 int pos = newValue.intValue();
                 if (pos < 0 || pos >= data.size()) {
@@ -119,7 +154,29 @@ public class MusicProjectionController extends ProjectionController {
                     return;
                 }
 
-                projectionManager.setText(data.get(pos));
+                WrappedText text = data.get(pos).text;
+
+                if (text.isEmpty()) {
+                    if (oldValue != null) {
+                        if (oldValue.intValue() < pos) {
+                            pos++;
+                        } else {
+                            pos--;
+                        }
+
+                        if (pos >= 0 && pos < data.size()) {
+                            final int pos2 = pos;
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    phrasesTable.getSelectionModel().select(pos2);
+                                }
+                            });
+                        }
+                    }
+                } else {
+                    projectionManager.setText(text);
+                }
             }
         });
 
@@ -153,12 +210,53 @@ public class MusicProjectionController extends ProjectionController {
 
     private void reprocessPhrases() {
         data.clear();
-        data.addAll(textWrapperProperty.getValue().fitGroups(music.getPhrasesList()));
+        List<WrappedText> lst = textWrapperProperty.getValue().fitGroups(music.getPhrasesList());
+        data.addAll(lst.stream().map(wt -> new SelectionText(wt)).collect(Collectors.toList()));
     }
 
-    class MusicPhraseCell extends TableCell<WrappedText, List<String>> {
+    private void disableClear() {
+        clearScreenButton.setText(clearText);
+        clearScreenButton.disableProperty().set(true);
+    }
 
-        private VBox box;
+    private void enableClear() {
+        clearScreenButton.setText("Limpar Tela (ESC)");
+        clearScreenButton.disableProperty().set(false);
+    }
+
+    @FXML
+    private void onClearScreen() {
+        Integer current = phrasesTable.getSelectionModel().getSelectedIndex();
+        if (current != null && current >= 0 && current < data.size()) {
+            data.get(current).selected = true;
+        }
+        phrasesTable.getSelectionModel().clearSelection();
+    }
+
+    public static class SelectionText {
+
+        public SelectionText(WrappedText text) {
+            this.text = text;
+            this.lines = FXCollections.observableArrayList(text.getLines());
+            this.selected = false;
+        }
+
+        WrappedText text;
+        boolean selected;
+        ObservableList<String> lines;
+
+        public List<String> getLines() {
+            return lines;
+        }
+
+        public boolean isSelected() {
+            return selected;
+        }
+    }
+
+    class MusicPhraseCell extends TableCell<SelectionText, List<String>> {
+
+        private final VBox box;
 
         public MusicPhraseCell() {
             super();
@@ -175,10 +273,15 @@ public class MusicProjectionController extends ProjectionController {
             } else {
                 ensureLabels(item.size());
 
-                int i = 0;
-                for (String s : item) {
-                    ((Label) box.getChildren().get(i)).setText(s);
-                    i++;
+                int p = 0;
+                for (Node n : box.getChildren()) {
+                    if (p < item.size()) {
+                        ((Label) n).setText(item.get(p));
+                    } else {
+                        ((Label) n).setText("");
+                    }
+
+                    p++;
                 }
 
                 setGraphic(box);
@@ -187,9 +290,12 @@ public class MusicProjectionController extends ProjectionController {
             setText(null);
         }
 
-        private final void ensureLabels(int count) {
+        private void ensureLabels(int count) {
             while (box.getChildren().size() < count) {
                 box.getChildren().add(createLabel());
+            }
+            while (box.getChildren().size() > count) {
+                box.getChildren().remove(0);
             }
         }
 
@@ -198,6 +304,7 @@ public class MusicProjectionController extends ProjectionController {
             VBox.setVgrow(label, Priority.ALWAYS);
             label.setMaxWidth(Double.MAX_VALUE);
             label.setAlignment(Pos.CENTER);
+            label.setBackground(Background.EMPTY);
             Font original = label.getFont();
             label.setFont(Font.font(original.getFamily(), original.getSize() + 4));
             return label;

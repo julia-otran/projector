@@ -143,6 +143,10 @@ public class ProjectionLabel implements Projectable {
             return;
         }
 
+        if (font == null) {
+            return;
+        }
+
         List<String> lines = text.getLines();
 
         if (lines == null || lines.isEmpty()) {
