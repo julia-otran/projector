@@ -7,10 +7,13 @@ package us.guihouse.projector.scenes;
 
 import java.io.IOException;
 import java.net.URL;
+import javafx.beans.property.Property;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import us.guihouse.projector.forms.controllers.MusicProjectionController;
 import us.guihouse.projector.forms.controllers.ProjectionController;
+import us.guihouse.projector.projection.text.TextWrapper;
+import us.guihouse.projector.services.ManageMusicService;
 
 /**
  *
@@ -37,7 +40,15 @@ public class MusicProjectionScene extends ProjectionItemSubScene {
         return (MusicProjectionController) super.getController(); //To change body of generated methods, choose Tools | Templates.
     }
     
-    public void setMusicId(Integer musicId) {
-        getController().setMusicId(musicId);
+    public void loadMusicWithId(Integer musicId) {
+        getController().loadMusicWithId(musicId);
+    }
+    
+    public void setManageMusicService(ManageMusicService svc) {
+        getController().setManageMusicService(svc);
+    }
+    
+    public Property<TextWrapper> getTextWrapperProperty() {
+        return getController().getTextWrapperProperty();
     }
 }

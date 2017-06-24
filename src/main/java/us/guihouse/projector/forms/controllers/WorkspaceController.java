@@ -14,6 +14,8 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -30,6 +32,9 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import us.guihouse.projector.other.YouTubeVideoResolve;
+import us.guihouse.projector.projection.TextWrapperFactoryChangeListener;
+import us.guihouse.projector.projection.text.TextWrapper;
+import us.guihouse.projector.projection.text.WrapperFactory;
 import us.guihouse.projector.scenes.BgImageScene;
 import us.guihouse.projector.scenes.BrowserSubScene;
 import us.guihouse.projector.scenes.ImageSubScene;
@@ -50,6 +55,9 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     private Stage listMusicStage;
     private final ManageMusicService manageMusicService = new ManageMusicService();
     
+    private Property<TextWrapper> textWrapperProperty = new SimpleObjectProperty<>();
+    private WrapperFactory wrapperFactory;
+    
     /**
      * Initializes the controller class.
      */
@@ -60,6 +68,14 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
         onCropBackgroundChanged();
         onChangeFullScreen();
         createListMusicStage();
+        
+        graphicsHelper.getProjectionManager().addTextWrapperChangeListener(new TextWrapperFactoryChangeListener(){
+            @Override
+            public void onWrapperFactoryChanged(WrapperFactory factory) {
+                wrapperFactory = factory;
+                updateTextWrapper();
+            }
+        });
     }    
     
     public void stop() {
@@ -124,10 +140,14 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     }
     
     @FXML
-    public void onSingleLineProjection() {}
+    public void onSingleLineProjection() {
+        updateTextWrapper();
+    }
     
     @FXML
-    public void onMultilineProjection() {}
+    public void onMultilineProjection() {
+        updateTextWrapper();
+    }
     
     @FXML
     public void onHelpAbout() {}
@@ -310,7 +330,9 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
         try {
             MusicProjectionScene created = MusicProjectionScene.createScene(targetPane.getWidth(), targetPane.getHeight());
             created.setObserver(this);
-            created.setMusicId(id);
+            created.setManageMusicService(manageMusicService);
+            created.loadMusicWithId(id);
+            created.getTextWrapperProperty().bind(textWrapperProperty);
             
             items.add(created);
             projectionListView.getItems().add("Letra de música");
@@ -321,6 +343,14 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
             created.heightProperty().bind(targetPane.heightProperty());
         } catch (IOException ex) {
             Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private void updateTextWrapper() {
+        if (singleLineProjectionMenuItem.isSelected()) {
+            textWrapperProperty.setValue(wrapperFactory.getTextWrapper(false));
+        } else if (multilineProjectionMenuItem.isSelected()) {
+            textWrapperProperty.setValue(wrapperFactory.getTextWrapper(true));
         }
     }
 }
