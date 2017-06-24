@@ -10,5 +10,6 @@ package us.guihouse.projector.forms.controllers;
  * @author guilherme
  */
 public interface AddMusicCallback {
-    void addMusic(Integer id);
+
+    boolean addMusic(Integer id);
 }

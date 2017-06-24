@@ -5,9 +5,6 @@
  */
 package us.guihouse.projector.repositories;
 
-import us.guihouse.projector.models.Artist;
-import us.guihouse.projector.models.Music;
-import us.guihouse.projector.other.SQLiteJDBCDriverConnection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,14 +13,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import us.guihouse.projector.dtos.ListMusicDTO;
+import us.guihouse.projector.models.Artist;
+import us.guihouse.projector.models.Music;
+import us.guihouse.projector.other.SQLiteJDBCDriverConnection;
 
 /**
  *
  * @author guilherme
  */
 public class MusicRepository {
+
     private static final int LIST_LIMIT = 500;
-    
+
     public Music findByNameAndArtist(String name, Artist artist) throws SQLException {
         String sql = "SELECT id, name, phrases FROM musics WHERE name = ? AND artist_id = ?";
 
@@ -137,7 +138,7 @@ public class MusicRepository {
 
         return result;
     }
-    
+
     public Music findById(Integer id) throws SQLException {
         String sql = "SELECT musics.id AS music_id, musics.name AS music_name, musics.phrases AS phrases, "
                 + "artists.id AS artist_id, artists.name AS artist_name "
@@ -202,7 +203,7 @@ public class MusicRepository {
 
         m.setId(rs.getInt("music_id"));
         m.setName(rs.getString("music_name"));
-        m.setPhrases(Arrays.asList(rs.getString("phrases").split("\n")));
+        m.setPhrases(rs.getString("phrases"));
 
         return m;
     }
@@ -220,22 +221,22 @@ public class MusicRepository {
 
         m.setId(rs.getInt("music_id"));
         m.setName(rs.getString("music_name"));
-        
+
         String phrases[] = rs.getString("phrases").split("\n");
         String firsts;
-        
+
         if (searchingTerm == null) {
             firsts = Arrays.asList(phrases).stream().limit(5).collect(Collectors.joining("\n"));
         } else {
             final String searchingTermLower = searchingTerm.toLowerCase();
-            
+
             firsts = Arrays.asList(phrases)
                     .stream()
                     .filter(s -> s.toLowerCase().contains(searchingTermLower))
                     .limit(5)
                     .collect(Collectors.joining("\n"));
         }
-        
+
         m.setPhrases(firsts);
 
         return m;

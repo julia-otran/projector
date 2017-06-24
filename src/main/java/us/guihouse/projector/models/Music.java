@@ -5,22 +5,15 @@
  */
 package us.guihouse.projector.models;
 
-import com.sun.javafx.collections.ObservableListWrapper;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
-import javafx.beans.InvalidationListener;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.adapter.ReadOnlyJavaBeanObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -32,11 +25,12 @@ import lombok.Getter;
  */
 @Data
 public class Music {
+
     private final Property<Integer> idProperty;
     private final Property<String> nameProperty;
     private final Property<Artist> artistProperty;
     private final ObservableList<String> phrasesList;
-    
+
     @Getter(AccessLevel.NONE)
     private final ReadOnlyObjectWrapper<String> nameAndArtistProperty;
 
@@ -46,10 +40,10 @@ public class Music {
         this.artistProperty = new SimpleObjectProperty<>();
         this.nameAndArtistProperty = new ReadOnlyObjectWrapper<>();
         this.phrasesList = FXCollections.observableArrayList();
-        
+
         setupNameAndArtistProp();
     }
-    
+
     private void setupNameAndArtistProp() {
         final ChangeListener<String> listener = new ChangeListener<String>() {
             @Override
@@ -57,36 +51,36 @@ public class Music {
                 updateNameAndArtistProp();
             }
         };
-        
+
         nameProperty.addListener(listener);
-        
+
         artistProperty.addListener(new ChangeListener<Artist>() {
             @Override
             public void changed(ObservableValue<? extends Artist> observable, Artist oldValue, Artist newValue) {
                 if (oldValue != null) {
                     oldValue.getNameProperty().removeListener(listener);
                 }
-                
+
                 if (newValue != null) {
                     newValue.getNameProperty().addListener(listener);
                 }
-                
+
                 updateNameAndArtistProp();
             }
         });
     }
-    
+
     private void updateNameAndArtistProp() {
-        String name = nameProperty.getName();
+        String name = nameProperty.getValue();
         String artistName = "";
 
         if (name == null) {
-            name = ""; 
+            name = "";
         }
-        
+
         if (artistProperty.getValue() != null) {
             artistName = artistProperty.getValue().getNameProperty().getValue();
-            
+
             if (artistName == null) {
                 artistName = "";
             }
@@ -101,40 +95,40 @@ public class Music {
             nameAndArtistProperty.set(name + " - " + artistName);
         }
     }
-    
+
     public ReadOnlyProperty<String> getNameWithArtistProperty() {
         return nameAndArtistProperty.getReadOnlyProperty();
     }
-    
+
     public Integer getId() {
         return idProperty.getValue();
     }
-    
+
     public void setId(Integer id) {
         idProperty.setValue(id);
     }
-    
+
     public String getName() {
         return nameProperty.getName();
     }
-    
+
     public void setName(String name) {
         nameProperty.setValue(name);
     }
-    
+
     public Artist getArtist() {
         return artistProperty.getValue();
     }
-    
+
     public void setArtist(Artist a) {
         artistProperty.setValue(a);
     }
-    
+
     public void setPhrases(List<String> p) {
         phrasesList.clear();
         phrasesList.addAll(p);
     }
-    
+
     public void setPhrases(String text) {
         if (text != null) {
             setPhrases(Arrays.asList(text.replace("\r\n", "\n").split("\n")));

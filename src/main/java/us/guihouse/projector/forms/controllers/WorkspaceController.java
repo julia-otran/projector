@@ -5,7 +5,6 @@
  */
 package us.guihouse.projector.forms.controllers;
 
-import us.guihouse.projector.scenes.SceneObserver;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -41,23 +40,26 @@ import us.guihouse.projector.scenes.ImageSubScene;
 import us.guihouse.projector.scenes.MusicListScene;
 import us.guihouse.projector.scenes.MusicProjectionScene;
 import us.guihouse.projector.scenes.ProjectionItemSubScene;
+import us.guihouse.projector.scenes.SceneObserver;
 import us.guihouse.projector.scenes.TextSubScene;
 import us.guihouse.projector.services.ManageMusicService;
+
 /**
  * FXML Controller class
  *
  * @author guilherme
  */
 public class WorkspaceController implements Initializable, SceneObserver, AddMusicCallback {
+
     private SceneManager sceneManager;
     private GraphicsDeviceHelper graphicsHelper;
-    private final List<ProjectionItemSubScene> items = new ArrayList<>(); 
+    private final List<ProjectionItemSubScene> items = new ArrayList<>();
     private Stage listMusicStage;
     private final ManageMusicService manageMusicService = new ManageMusicService();
-    
+
     private Property<TextWrapper> textWrapperProperty = new SimpleObjectProperty<>();
     private WrapperFactory wrapperFactory;
-    
+
     /**
      * Initializes the controller class.
      */
@@ -68,47 +70,47 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
         onCropBackgroundChanged();
         onChangeFullScreen();
         createListMusicStage();
-        
-        graphicsHelper.getProjectionManager().addTextWrapperChangeListener(new TextWrapperFactoryChangeListener(){
+
+        graphicsHelper.getProjectionManager().addTextWrapperChangeListener(new TextWrapperFactoryChangeListener() {
             @Override
             public void onWrapperFactoryChanged(WrapperFactory factory) {
                 wrapperFactory = factory;
                 updateTextWrapper();
             }
         });
-    }    
-    
+    }
+
     public void stop() {
         graphicsHelper.stop();
     }
-    
+
     public void dispose() {
         graphicsHelper.dispose();
     }
-    
+
     // ------------------------------
     // Menu
     // ------------------------------
     @FXML
     private CheckMenuItem cropBackgroundMenuItem;
-    
+
     @FXML
     private RadioMenuItem singleLineProjectionMenuItem;
-    
+
     @FXML
     private RadioMenuItem multilineProjectionMenuItem;
-    
+
     @FXML
     private Menu projectionScreenMenu;
-    
+
     @FXML
     private CheckMenuItem fullScreenCheckMenuItem;
-    
+
     @FXML
     public void onOpenMusicList() {
         listMusicStage.show();
     }
-    
+
     @FXML
     public void onSelectBackgroundImageFile() {
         try {
@@ -118,59 +120,62 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
             Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     @FXML
     public void onRemoveBackground() {
         graphicsHelper.getProjectionManager().setBackgroundImageFile(null);
     }
-    
+
     @FXML
     public void onCropBackgroundChanged() {
         graphicsHelper.getProjectionManager().setCropBackground(cropBackgroundMenuItem.isSelected());
     }
-    
+
     @FXML
     public void onChangeFont() {
 
     }
-    
+
     @FXML
     public void onChangeFullScreen() {
         graphicsHelper.getProjectionManager().setFullScreen(fullScreenCheckMenuItem.isSelected());
     }
-    
+
     @FXML
     public void onSingleLineProjection() {
         updateTextWrapper();
     }
-    
+
     @FXML
     public void onMultilineProjection() {
         updateTextWrapper();
     }
-    
+
     @FXML
-    public void onHelpAbout() {}
-    
+    public void onHelpAbout() {
+    }
+
     @FXML
-    public void onHelpManual() {}
-    
+    public void onHelpManual() {
+    }
+
     // ------------------------------
     // Projection List
     // ------------------------------
-    
     @FXML
     private ListView projectionListView;
-    
+
     private boolean changingTitle = false;
-    
+
     private void initializeProjectionList() {
         projectionListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         projectionListView.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                if (changingTitle) { return; }
-                
+                if (changingTitle) {
+                    return;
+                }
+
                 if (newValue != null) {
                     int val = newValue.intValue();
                     if (val >= 0 && val < items.size()) {
@@ -178,36 +183,36 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
                         return;
                     }
                 }
-                
+
                 setProjectionView(null);
             }
         });
     }
-    
+
     private void setProjectionView(ProjectionItemSubScene scene) {
         if (scene == null) {
             targetPane.getChildren().clear();
             return;
         }
-        
+
         if (targetPane.getChildren().size() <= 0) {
             targetPane.getChildren().add(scene);
             return;
         }
-        
+
         if (Objects.equals(targetPane.getChildren().get(0), scene)) {
             return;
         }
-        
+
         targetPane.getChildren().clear();
         targetPane.getChildren().add(scene);
     }
-    
+
     @FXML
     public void onAddMusic() {
         listMusicStage.show();
     }
-    
+
     @FXML
     public void onAddYouTube() {
         YouTubeVideoResolve.getVideoEmbedUrl((event) -> {
@@ -222,24 +227,24 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
             }
         });
     }
-    
+
     @FXML
     public void onAddBrowser() {
         addBroser("https://google.com.br");
     }
-    
+
     private void addBroser(String url) {
         try {
             BrowserSubScene created = BrowserSubScene.createScene(targetPane.getWidth(), targetPane.getHeight());
             created.setObserver(this);
             created.setUrl(url);
-            
+
             items.add(created);
-            
+
             changingTitle = true;
             projectionListView.getItems().add("Página Web");
             changingTitle = false;
-            
+
             created.initWithProjectionManager(graphicsHelper.getProjectionManager());
             created.widthProperty().bind(targetPane.widthProperty());
             created.heightProperty().bind(targetPane.heightProperty());
@@ -247,17 +252,17 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
             Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     @FXML
     public void onAddPicture() {
         try {
             ProjectionItemSubScene created = ImageSubScene.createScene(targetPane.getWidth(), targetPane.getHeight());
             created.setObserver(this);
-            
+
             items.add(created);
             projectionListView.getItems().add("Nova imagem");
             projectionListView.getSelectionModel().select(projectionListView.getItems().size() - 1);
-            
+
             created.initWithProjectionManager(graphicsHelper.getProjectionManager());
             created.widthProperty().bind(targetPane.widthProperty());
             created.heightProperty().bind(targetPane.heightProperty());
@@ -265,17 +270,17 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
             Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     @FXML
     public void onAddText() {
         try {
             ProjectionItemSubScene created = TextSubScene.createScene(targetPane.getWidth(), targetPane.getHeight());
             created.setObserver(this);
-            
+
             items.add(created);
             projectionListView.getItems().add("Novo texto");
             projectionListView.getSelectionModel().select(projectionListView.getItems().size() - 1);
-            
+
             created.initWithProjectionManager(graphicsHelper.getProjectionManager());
             created.widthProperty().bind(targetPane.widthProperty());
             created.heightProperty().bind(targetPane.heightProperty());
@@ -283,14 +288,13 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
             Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     // ------------------------------
     // Preview
     // ------------------------------
-    
     @FXML
     private Canvas previewCanvas;
-    
+
     @FXML
     private Pane targetPane;
 
@@ -326,26 +330,37 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     }
 
     @Override
-    public void addMusic(Integer id) {
+    public boolean addMusic(Integer id) {
+        for (ProjectionItemSubScene i : items) {
+            if (i instanceof MusicProjectionScene) {
+                MusicProjectionScene mps = (MusicProjectionScene) i;
+                if (mps.getMusicId() == id) {
+                    return false;
+                }
+            }
+        };
+
         try {
             MusicProjectionScene created = MusicProjectionScene.createScene(targetPane.getWidth(), targetPane.getHeight());
             created.setObserver(this);
             created.setManageMusicService(manageMusicService);
             created.loadMusicWithId(id);
             created.getTextWrapperProperty().bind(textWrapperProperty);
-            
+
             items.add(created);
             projectionListView.getItems().add("Letra de música");
             projectionListView.getSelectionModel().select(projectionListView.getItems().size() - 1);
-            
+
             created.initWithProjectionManager(graphicsHelper.getProjectionManager());
             created.widthProperty().bind(targetPane.widthProperty());
             created.heightProperty().bind(targetPane.heightProperty());
         } catch (IOException ex) {
             Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+        return true;
     }
-    
+
     private void updateTextWrapper() {
         if (singleLineProjectionMenuItem.isSelected()) {
             textWrapperProperty.setValue(wrapperFactory.getTextWrapper(false));

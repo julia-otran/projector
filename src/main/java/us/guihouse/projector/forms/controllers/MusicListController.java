@@ -16,6 +16,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -36,58 +37,58 @@ public class MusicListController implements Initializable {
 
     @FXML
     private TextField searchText;
-    
+
     @FXML
     private TableView<ListMusicDTO> resultsTable;
-    
+
     private AddMusicCallback addCallback;
     private ManageMusicService manageMusicService;
-   
+
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         initTable();
-        
+
         searchText.textProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 fillMusicsProtected(newValue);
             }
         });
-    }    
-    
+    }
+
     private void initTable() {
         resultsTable.getColumns().clear();
-        
+
         resultsTable.getColumns().add(getActionsColumn());
-        
-        TableColumn<ListMusicDTO,String> nameCol = new TableColumn<>("Título");
+
+        TableColumn<ListMusicDTO, String> nameCol = new TableColumn<>("Título");
         nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
         resultsTable.getColumns().add(nameCol);
-        
-        TableColumn<ListMusicDTO,String> artistCol = new TableColumn<>("Artista");
+
+        TableColumn<ListMusicDTO, String> artistCol = new TableColumn<>("Artista");
         artistCol.setCellValueFactory(new PropertyValueFactory<>("artistName"));
         resultsTable.getColumns().add(artistCol);
-        
-        TableColumn<ListMusicDTO,String> phrasesCol = new TableColumn<>("Letra");
+
+        TableColumn<ListMusicDTO, String> phrasesCol = new TableColumn<>("Letra");
         phrasesCol.setCellValueFactory(new PropertyValueFactory<>("phrases"));
         resultsTable.getColumns().add(phrasesCol);
-        
+
         resultsTable.requestFocus();
     }
-    
+
     @FXML
     public void onManualType() {
-        
+
     }
-    
+
     @FXML
     public void onWebImport() {
-        
+
     }
-    
+
     private void fillMusicsProtected(String term) {
         try {
             fillMusics(term);
@@ -95,17 +96,17 @@ public class MusicListController implements Initializable {
             Logger.getLogger(MusicListController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     private void fillMusics(String term) throws ManageMusicService.PersistenceException {
         List<ListMusicDTO> musics = manageMusicService.listByTermIfPresentWithLimit(term);
-        
+
         resultsTable.getItems().clear();
         resultsTable.getItems().addAll(musics);
     }
-    
+
     private TableColumn<ListMusicDTO, Integer> getActionsColumn() {
         TableColumn<ListMusicDTO, Integer> col = new TableColumn<>("Açoes");
-        
+
         col.setCellValueFactory(new PropertyValueFactory<>("id"));
         col.setCellFactory(new Callback<TableColumn<ListMusicDTO, Integer>, TableCell<ListMusicDTO, Integer>>() {
             @Override
@@ -123,15 +124,16 @@ public class MusicListController implements Initializable {
 
     public void setManageMusicService(ManageMusicService manageMusicService) {
         this.manageMusicService = manageMusicService;
-        
+
         try {
             fillMusics(null);
         } catch (ManageMusicService.PersistenceException ex) {
             Logger.getLogger(MusicListController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     class ActionsTableCell extends TableCell<ListMusicDTO, Integer> implements EventHandler<ActionEvent> {
+
         private final Button addToList = new Button("Incluir a lista");
         private final Button seeDetails = new Button("Ver Detalhes");
         private final Button edit = new Button("Alterar");
@@ -145,17 +147,17 @@ public class MusicListController implements Initializable {
             seeDetails.setOnAction(this);
             edit.setOnAction(this);
         }
-        
+
         @Override
         protected void updateItem(Integer item, boolean empty) {
             super.updateItem(item, empty);
-            
+
             if (empty) {
                 setGraphic(null);
             } else {
                 setGraphic(actionsBox);
             }
-            
+
             setText(null);
             this.id = item;
         }
@@ -165,27 +167,33 @@ public class MusicListController implements Initializable {
             if (addToList.equals(event.getSource())) {
                 addToList(id);
             }
-            
+
             if (seeDetails.equals(event.getSource())) {
                 seeDetails(id);
             }
-            
+
             if (edit.equals(event.getSource())) {
                 edit(id);
             }
         }
     }
-    
+
     private void addToList(Integer id) {
         if (this.addCallback != null) {
-            this.addCallback.addMusic(id);
+            if (!this.addCallback.addMusic(id)) {
+                Alert a = new Alert(Alert.AlertType.ERROR);
+                a.setTitle("Erro");
+                a.setHeaderText("Falha incluir item");
+                a.setContentText("Esta música já esta na lista.");
+                a.show();
+            }
         }
     }
-    
+
     private void seeDetails(Integer id) {
         System.out.println("seeDetails " + id);
     }
-    
+
     private void edit(Integer id) {
         System.out.println("edit " + id);
     }

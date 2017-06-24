@@ -10,23 +10,23 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox id="RootBox" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.131" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.guihouse.projector.forms.controllers.MusicProjectionController">
-   <children>
-      <ToolBar prefHeight="40.0" prefWidth="200.0">
-         <items>
-            <ImageView fitHeight="19.0" fitWidth="17.0" preserveRatio="true">
-               <image>
-                  <Image url="@../icons/icon-ios7-search-strong-128.png" />
-               </image>
-            </ImageView>
-            <TextField fx:id="searchTextField" onKeyPressed="#onSearchFieldKeyPress" prefHeight="28.0" prefWidth="316.0" promptText="Ir para" />
-            <Button fx:id="clearScreenButton" disable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="28.0" prefWidth="243.0" text="Clique em uma frase para projetar" />
-         </items>
-      </ToolBar>
-      <TableView fx:id="phrasesTable" layoutX="14.0" layoutY="100.0" prefHeight="342.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0" VBox.vgrow="ALWAYS">
-        <columns>
-          <TableColumn minWidth="300.0" prefWidth="600.0" sortable="false" text="Letra" />
-        </columns>
-      </TableView>
-   </children>
+<VBox id="RootBox" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.guihouse.projector.forms.controllers.MusicProjectionController">
+    <children>
+        <ToolBar prefHeight="40.0" prefWidth="200.0">
+            <items>
+                <ImageView fitHeight="19.0" fitWidth="17.0" preserveRatio="true">
+                    <image>
+                        <Image url="@../icons/icon-ios7-search-strong-128.png" />
+                    </image>
+                </ImageView>
+                <TextField fx:id="searchTextField" onKeyPressed="#onSearchFieldKeyPress" prefHeight="28.0" prefWidth="316.0" promptText="Ir para" />
+                <Button fx:id="clearScreenButton" disable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="28.0" prefWidth="243.0" text="Clique em uma frase para projetar" />
+            </items>
+        </ToolBar>
+        <TableView fx:id="phrasesTable" layoutX="14.0" layoutY="100.0" prefHeight="342.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn minWidth="300.0" prefWidth="600.0" sortable="false" text="Letra" />
+            </columns>
+        </TableView>
+    </children>
 </VBox>

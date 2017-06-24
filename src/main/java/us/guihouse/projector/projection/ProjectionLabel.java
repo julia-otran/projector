@@ -5,9 +5,6 @@
  */
 package us.guihouse.projector.projection;
 
-import us.guihouse.projector.projection.models.StringWithPosition;
-import us.guihouse.projector.projection.text.WrappedText;
-import us.guihouse.projector.projection.text.WrapperFactory;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
@@ -22,6 +19,9 @@ import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import us.guihouse.projector.projection.models.StringWithPosition;
+import us.guihouse.projector.projection.text.WrappedText;
+import us.guihouse.projector.projection.text.WrapperFactory;
 
 /**
  *
@@ -164,7 +164,7 @@ public class ProjectionLabel implements Projectable {
         int width = canvasDelegate.getWidth();
 
         List<StringWithPosition> pendingLines = new ArrayList<>();
-        
+
         for (String line : lines) {
             int lineWidth = fontMetrics.stringWidth(line);
             int x = (width - lineWidth) / 2;
@@ -179,7 +179,7 @@ public class ProjectionLabel implements Projectable {
 
             pendingLines.add(new StringWithPosition(line, x, y));
         }
-        
+
         if (pendingLines.stream().allMatch(l -> l.getText().isEmpty())) {
             drawLines = Collections.EMPTY_LIST;
             return;

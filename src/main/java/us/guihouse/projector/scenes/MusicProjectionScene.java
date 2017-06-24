@@ -11,7 +11,6 @@ import javafx.beans.property.Property;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import us.guihouse.projector.forms.controllers.MusicProjectionController;
-import us.guihouse.projector.forms.controllers.ProjectionController;
 import us.guihouse.projector.projection.text.TextWrapper;
 import us.guihouse.projector.services.ManageMusicService;
 
@@ -20,17 +19,17 @@ import us.guihouse.projector.services.ManageMusicService;
  * @author guilherme
  */
 public class MusicProjectionScene extends ProjectionItemSubScene {
-    
+
     public static MusicProjectionScene createScene(double width, double height) throws IOException {
         URL url = MusicProjectionScene.class.getClassLoader().getResource("fxml/music_projection.fxml");
         FXMLLoader loader = new FXMLLoader(url);
-        
+
         Parent root = loader.load();
         MusicProjectionScene scene = new MusicProjectionScene(root, width, height);
         scene.setController(loader.getController());
         return scene;
     }
-    
+
     private MusicProjectionScene(Parent root, double width, double height) {
         super(root, width, height);
     }
@@ -39,16 +38,20 @@ public class MusicProjectionScene extends ProjectionItemSubScene {
     public MusicProjectionController getController() {
         return (MusicProjectionController) super.getController(); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
     public void loadMusicWithId(Integer musicId) {
         getController().loadMusicWithId(musicId);
     }
-    
+
     public void setManageMusicService(ManageMusicService svc) {
         getController().setManageMusicService(svc);
     }
-    
+
     public Property<TextWrapper> getTextWrapperProperty() {
         return getController().getTextWrapperProperty();
+    }
+
+    public int getMusicId() {
+        return getController().getMusicId();
     }
 }
