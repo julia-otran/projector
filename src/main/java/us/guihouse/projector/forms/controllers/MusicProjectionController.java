@@ -12,7 +12,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -81,12 +83,12 @@ public class MusicProjectionController extends ProjectionController {
             }
         });
 
-        TableColumn<SelectionText, Boolean> sel = new TableColumn<>("");
+        TableColumn<SelectionText, BooleanProperty> sel = new TableColumn<>("");
         sel.setCellValueFactory(new PropertyValueFactory<>("selected"));
         sel.setCellFactory(column -> {
-            return new TableCell<SelectionText, Boolean>() {
+            return new TableCell<SelectionText, BooleanProperty>() {
                 @Override
-                protected void updateItem(Boolean item, boolean empty) {
+                protected void updateItem(BooleanProperty item, boolean empty) {
                     super.updateItem(item, empty);
                     setGraphic(null);
                     setText(null);
@@ -94,7 +96,7 @@ public class MusicProjectionController extends ProjectionController {
                     TableRow<SelectionText> row = getTableRow();
 
                     if (row != null && !empty) {
-                        if (item) {
+                        if (item.get()) {
                             row.setStyle("-fx-background-color:lightcoral");
                         } else {
                             row.setStyle("");
@@ -140,6 +142,8 @@ public class MusicProjectionController extends ProjectionController {
         phrasesTable.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                clearMarker();
+                
                 if (newValue == null) {
                     disableClear();
                     projectionManager.setText(WrappedText.blankText());
@@ -227,10 +231,24 @@ public class MusicProjectionController extends ProjectionController {
     @FXML
     private void onClearScreen() {
         Integer current = phrasesTable.getSelectionModel().getSelectedIndex();
-        if (current != null && current >= 0 && current < data.size()) {
-            data.get(current).selected = true;
-        }
+        
         phrasesTable.getSelectionModel().clearSelection();
+        
+        if (current >= 0 && current < data.size()) {
+            SelectionText st = data.get(current);
+            st.selected.setValue(Boolean.TRUE);
+            data.set(current, st);
+        }
+    }
+    
+    private void clearMarker() {
+        for (int i=0; i<data.size(); i++) {
+            SelectionText st = data.get(i);
+            if (st.selected.get()) {
+                st.selected.set(false);
+                data.set(i, st);
+            }
+        }
     }
 
     public static class SelectionText {
@@ -238,18 +256,18 @@ public class MusicProjectionController extends ProjectionController {
         public SelectionText(WrappedText text) {
             this.text = text;
             this.lines = FXCollections.observableArrayList(text.getLines());
-            this.selected = false;
+            this.selected = new SimpleBooleanProperty(false);
         }
 
         WrappedText text;
-        boolean selected;
+        BooleanProperty selected;
         ObservableList<String> lines;
 
         public List<String> getLines() {
             return lines;
         }
 
-        public boolean isSelected() {
+        public BooleanProperty getSelected() {
             return selected;
         }
     }
