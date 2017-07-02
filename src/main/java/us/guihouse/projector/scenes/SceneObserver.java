@@ -5,12 +5,11 @@
  */
 package us.guihouse.projector.scenes;
 
-import javafx.scene.SubScene;
-
 /**
  *
  * @author guilherme
  */
 public interface SceneObserver {
-    void titleChanged(ProjectionItemSubScene scene, String newTitle);
+
+    void titleChanged();
 }

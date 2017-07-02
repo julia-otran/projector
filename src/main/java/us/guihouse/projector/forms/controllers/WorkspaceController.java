@@ -7,8 +7,6 @@ package us.guihouse.projector.forms.controllers;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -24,12 +22,15 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Alert;
 import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import javafx.util.Callback;
+import us.guihouse.projector.other.ListCellX;
 import us.guihouse.projector.other.YouTubeVideoResolve;
 import us.guihouse.projector.projection.TextWrapperFactoryChangeListener;
 import us.guihouse.projector.projection.text.TextWrapper;
@@ -53,7 +54,6 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
 
     private SceneManager sceneManager;
     private GraphicsDeviceHelper graphicsHelper;
-    private final List<ProjectionItemSubScene> items = new ArrayList<>();
     private Stage listMusicStage;
     private final ManageMusicService manageMusicService = new ManageMusicService();
 
@@ -163,11 +163,35 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     // Projection List
     // ------------------------------
     @FXML
-    private ListView projectionListView;
+    private ListView<ProjectionItemSubScene> projectionListView;
 
     private boolean changingTitle = false;
 
     private void initializeProjectionList() {
+        projectionListView.setCellFactory(new Callback<ListView<ProjectionItemSubScene>, ListCell<ProjectionItemSubScene>>() {
+            @Override
+            public ListCell<ProjectionItemSubScene> call(ListView<ProjectionItemSubScene> arg0) {
+                //My cell is on my way to call
+                ListCellX<ProjectionItemSubScene> cell = new ListCellX<ProjectionItemSubScene>() {
+                    @Override
+                    public void updateItem(ProjectionItemSubScene item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (item != null) {
+                            //finally every thing is just setup
+                            setText(item.getTitle());
+                        }
+                    }
+                };
+                //this is my chemical solution
+                //Need to call on every cell for making things work
+                cell.init(projectionListView.getItems());
+
+                //Take my cell
+                return cell;
+            }
+
+        });
+
         projectionListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         projectionListView.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             @Override
@@ -178,8 +202,8 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
 
                 if (newValue != null) {
                     int val = newValue.intValue();
-                    if (val >= 0 && val < items.size()) {
-                        setProjectionView(items.get(val));
+                    if (val >= 0 && val < projectionListView.getItems().size()) {
+                        setProjectionView(projectionListView.getItems().get(val));
                         return;
                     }
                 }
@@ -239,10 +263,8 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
             created.setObserver(this);
             created.setUrl(url);
 
-            items.add(created);
-
             changingTitle = true;
-            projectionListView.getItems().add("Página Web");
+            projectionListView.getItems().add(created);
             changingTitle = false;
 
             created.initWithProjectionManager(graphicsHelper.getProjectionManager());
@@ -259,8 +281,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
             ProjectionItemSubScene created = ImageSubScene.createScene(targetPane.getWidth(), targetPane.getHeight());
             created.setObserver(this);
 
-            items.add(created);
-            projectionListView.getItems().add("Nova imagem");
+            projectionListView.getItems().add(created);
             projectionListView.getSelectionModel().select(projectionListView.getItems().size() - 1);
 
             created.initWithProjectionManager(graphicsHelper.getProjectionManager());
@@ -277,8 +298,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
             ProjectionItemSubScene created = TextSubScene.createScene(targetPane.getWidth(), targetPane.getHeight());
             created.setObserver(this);
 
-            items.add(created);
-            projectionListView.getItems().add("Novo texto");
+            projectionListView.getItems().add(created);
             projectionListView.getSelectionModel().select(projectionListView.getItems().size() - 1);
 
             created.initWithProjectionManager(graphicsHelper.getProjectionManager());
@@ -299,15 +319,8 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     private Pane targetPane;
 
     @Override
-    public void titleChanged(ProjectionItemSubScene scene, String newTitle) {
-        int index = items.indexOf(scene);
-        if (index >= 0 && index < items.size()) {
-            changingTitle = true;
-            int selected = projectionListView.getSelectionModel().getSelectedIndex();
-            projectionListView.getItems().set(index, newTitle);
-            projectionListView.getSelectionModel().select(selected);
-            changingTitle = false;
-        }
+    public void titleChanged() {
+        projectionListView.refresh();
     }
 
     public SceneManager getSceneManager() {
@@ -331,7 +344,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
 
     @Override
     public boolean addMusic(Integer id) {
-        for (ProjectionItemSubScene i : items) {
+        for (ProjectionItemSubScene i : projectionListView.getItems()) {
             if (i instanceof MusicProjectionScene) {
                 MusicProjectionScene mps = (MusicProjectionScene) i;
                 if (mps.getMusicId() == id) {
@@ -347,8 +360,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
             created.loadMusicWithId(id);
             created.getTextWrapperProperty().bind(textWrapperProperty);
 
-            items.add(created);
-            projectionListView.getItems().add("Letra de música");
+            projectionListView.getItems().add(created);
             projectionListView.getSelectionModel().select(projectionListView.getItems().size() - 1);
 
             created.initWithProjectionManager(graphicsHelper.getProjectionManager());

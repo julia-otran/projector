@@ -16,18 +16,19 @@ import us.guihouse.projector.forms.controllers.BrowserController;
  * @author guilherme
  */
 public class BrowserSubScene extends ProjectionItemSubScene {
+
     public static BrowserSubScene createScene(double width, double height) throws IOException {
         URL url = BrowserSubScene.class.getClassLoader().getResource("fxml/browser.fxml");
         FXMLLoader loader = new FXMLLoader(url);
-        
+
         Parent root = loader.load();
         BrowserSubScene scene = new BrowserSubScene(root, width, height);
         scene.setController(loader.getController());
         return scene;
     }
-    
+
     private BrowserSubScene(Parent root, double width, double height) {
-        super(root, width, height);
+        super(root, "Página WEB", width, height);
     }
 
     @Override

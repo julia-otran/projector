@@ -16,11 +16,14 @@ import us.guihouse.projector.projection.ProjectionManager;
  * @author guilherme
  */
 public abstract class ProjectionItemSubScene extends SubScene implements ControllerObserver {
+
     private ProjectionController controller;
     private SceneObserver observer;
-    
-    protected ProjectionItemSubScene(Parent root, double width, double height) {
+    private String title;
+
+    protected ProjectionItemSubScene(Parent root, String title, double width, double height) {
         super(root, width, height);
+        this.title = title;
     }
 
     public SceneObserver getObserver() {
@@ -39,15 +42,25 @@ public abstract class ProjectionItemSubScene extends SubScene implements Control
         this.controller = controller;
         controller.setObserver(this);
     }
-    
+
     public void initWithProjectionManager(ProjectionManager projectionManager) {
         controller.initWithProjectionManager(projectionManager);
     }
-    
+
     @Override
     public void onTitleChanged(String newTitle) {
+        this.title = newTitle;
+
         if (observer != null) {
-            observer.titleChanged(this, newTitle);
+            observer.titleChanged();
         }
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String toString() {
+        return title;
     }
 }

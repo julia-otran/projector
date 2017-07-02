@@ -15,18 +15,18 @@ import javafx.scene.Parent;
  * @author guilherme
  */
 public class TextSubScene extends ProjectionItemSubScene {
-    
+
     public static ProjectionItemSubScene createScene(double width, double height) throws IOException {
         URL url = TextSubScene.class.getClassLoader().getResource("fxml/text.fxml");
         FXMLLoader loader = new FXMLLoader(url);
-        
+
         Parent root = loader.load();
         TextSubScene scene = new TextSubScene(root, width, height);
         scene.setController(loader.getController());
         return scene;
     }
-    
+
     private TextSubScene(Parent root, double width, double height) {
-        super(root, width, height);
+        super(root, "Novo Texto", width, height);
     }
 }
