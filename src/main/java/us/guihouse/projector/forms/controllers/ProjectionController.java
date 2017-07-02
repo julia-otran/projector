@@ -14,7 +14,7 @@ import us.guihouse.projector.projection.ProjectionManager;
  */
 public abstract class ProjectionController implements Initializable {
     private ControllerObserver observer;
-    private ProjectionManager projectionManager;
+    ProjectionManager projectionManager;
 
     public ControllerObserver getObserver() {
         return observer;
