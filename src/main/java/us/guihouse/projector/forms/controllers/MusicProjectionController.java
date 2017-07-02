@@ -133,6 +133,13 @@ public class MusicProjectionController extends ProjectionController {
             }
         });
 
+        searchTextField.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                focusToTerm(newValue);
+            }
+        });
+
         phrasesTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         phrasesTable.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             @Override
@@ -179,11 +186,6 @@ public class MusicProjectionController extends ProjectionController {
         });
 
         reprocessPhrases();
-    }
-
-    @FXML
-    private void onSearchFieldKeyPress() {
-
     }
 
     public void setManageMusicService(ManageMusicService svc) {
@@ -267,6 +269,27 @@ public class MusicProjectionController extends ProjectionController {
         phrasesTable.refresh();
     }
 
+    private void focusToTerm(String term) {
+        if (term == null) {
+            return;
+        }
+
+        term = term.trim().toLowerCase();
+
+        if (term.isEmpty()) {
+            return;
+        }
+
+        for (int i = 0; i < data.size(); i++) {
+            SelectionText st = data.get(i);
+            if (st.hasTerm(term)) {
+                phrasesTable.scrollTo(st);
+                markIfPosible(i);
+                return;
+            }
+        }
+    }
+
     public static class SelectionText {
 
         public SelectionText(WrappedText text) {
@@ -291,6 +314,10 @@ public class MusicProjectionController extends ProjectionController {
 
         public List<String> getLines() {
             return lines;
+        }
+
+        private boolean hasTerm(String term) {
+            return text.getJoinedLines().toLowerCase().contains(term);
         }
     }
 

@@ -19,7 +19,7 @@
                         <Image url="@../icons/icon-ios7-search-strong-128.png" />
                     </image>
                 </ImageView>
-                <TextField fx:id="searchTextField" onKeyPressed="#onSearchFieldKeyPress" prefHeight="28.0" prefWidth="316.0" promptText="Ir para" />
+                <TextField fx:id="searchTextField" prefHeight="28.0" prefWidth="316.0" promptText="Ir para" />
                 <Button fx:id="clearScreenButton" onAction="#onClearScreen" focusTraversable="false" disable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="28.0" prefWidth="243.0" text="Clique em uma frase para projetar" />
             </items>
         </ToolBar>
