@@ -333,9 +333,9 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
 
     private void createListMusicStage() {
         try {
-            Parent list = MusicListScene.createMusicListScene(this, manageMusicService);
-            Scene listScene = new Scene(list, 800, 480);
             listMusicStage = new Stage();
+            Parent list = MusicListScene.createMusicListScene(this, manageMusicService, listMusicStage);
+            Scene listScene = new Scene(list, 800, 480);
             listMusicStage.setScene(listScene);
         } catch (IOException ex) {
             Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);

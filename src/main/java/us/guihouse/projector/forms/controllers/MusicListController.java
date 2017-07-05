@@ -5,6 +5,7 @@
  */
 package us.guihouse.projector.forms.controllers;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -16,6 +17,8 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
@@ -24,8 +27,10 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
 import javafx.util.Callback;
 import us.guihouse.projector.dtos.ListMusicDTO;
+import us.guihouse.projector.scenes.MusicFormScene;
 import us.guihouse.projector.services.ManageMusicService;
 
 /**
@@ -33,7 +38,7 @@ import us.guihouse.projector.services.ManageMusicService;
  *
  * @author guilherme
  */
-public class MusicListController implements Initializable {
+public class MusicListController implements Initializable, BackCallback {
 
     @FXML
     private TextField searchText;
@@ -44,6 +49,9 @@ public class MusicListController implements Initializable {
     private AddMusicCallback addCallback;
     private ManageMusicService manageMusicService;
 
+    private Stage currentStage;
+    private Parent oldRoot;
+    
     /**
      * Initializes the controller class.
      */
@@ -81,7 +89,13 @@ public class MusicListController implements Initializable {
 
     @FXML
     public void onManualType() {
-
+        try {
+            Parent root = MusicFormScene.createMusicFormScene(manageMusicService, this);
+            oldRoot = currentStage.getScene().getRoot();
+            currentStage.getScene().setRoot(root);
+        } catch (IOException ex) {
+            Logger.getLogger(MusicListController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @FXML
@@ -130,6 +144,17 @@ public class MusicListController implements Initializable {
         } catch (ManageMusicService.PersistenceException ex) {
             Logger.getLogger(MusicListController.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    @Override
+    public void goBack() {
+        currentStage.getScene().setRoot(oldRoot);
+    }
+    
+    @Override
+    public void goBackAndRefresh() {
+        fillMusicsProtected(null);
+        currentStage.getScene().setRoot(oldRoot);
     }
 
     class ActionsTableCell extends TableCell<ListMusicDTO, Integer> implements EventHandler<ActionEvent> {
@@ -197,4 +222,14 @@ public class MusicListController implements Initializable {
     private void edit(Integer id) {
         System.out.println("edit " + id);
     }
+
+    public Stage getCurrentStage() {
+        return currentStage;
+    }
+
+    public void setCurrentStage(Stage currentStage) {
+        this.currentStage = currentStage;
+    }
+    
+    
 }

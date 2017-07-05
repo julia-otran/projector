@@ -61,6 +61,8 @@ public class ManageMusicService {
     
     public class InvalidData extends SaveException { }
     public class InavlidArtist extends InvalidData { }
+    public class InvalidName extends InvalidData { }
+    public class InvalidPhrases extends InvalidData { }
 
     private final ArtistRepository artistRepo = new ArtistRepository();
     private final MusicRepository musicRepo = new MusicRepository();
@@ -157,8 +159,23 @@ public class ManageMusicService {
         }
     }
 
-    public Integer createMusic(String name, String artist, String phrases) throws MusicAlreadyPresentException, PersistenceException, InavlidArtist {
+    public Integer createMusic(String name, String artist, String phrases) throws MusicAlreadyPresentException, PersistenceException, InavlidArtist, InvalidName, InvalidPhrases {
         try {
+            name = name.trim();
+            phrases = phrases.trim();
+            
+            if (name.isEmpty()) {
+                throw new InvalidName();
+            }
+            
+            if (phrases.isEmpty()) {
+                throw new InvalidPhrases();
+            }
+            
+            if (!phrases.endsWith("\n")) {
+                phrases = phrases + "\n";
+            }
+            
             SQLiteJDBCDriverConnection.getConn().setAutoCommit(false);
             
             Artist a = findOrCrateArtist(artist);

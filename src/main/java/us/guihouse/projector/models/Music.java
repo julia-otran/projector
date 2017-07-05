@@ -109,7 +109,8 @@ public class Music {
     }
 
     public String getName() {
-        return nameProperty.getName();
+        String name = nameProperty.getValue();
+        return name;
     }
 
     public void setName(String name) {

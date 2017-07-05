@@ -9,27 +9,27 @@ import java.io.IOException;
 import java.net.URL;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.stage.Stage;
-import us.guihouse.projector.forms.controllers.AddMusicCallback;
+import us.guihouse.projector.forms.controllers.BackCallback;
 import us.guihouse.projector.forms.controllers.ImageController;
-import us.guihouse.projector.forms.controllers.MusicListController;
-import us.guihouse.projector.forms.controllers.WorkspaceController;
+import us.guihouse.projector.forms.controllers.MusicFormController;
 import us.guihouse.projector.services.ManageMusicService;
 
 /**
  *
  * @author guilherme
  */
-public class MusicListScene {
-    public static Parent createMusicListScene(AddMusicCallback callback,  ManageMusicService manageMusicService, Stage listMusicStage) throws IOException {
-        URL url = ImageController.class.getClassLoader().getResource("fxml/music_list.fxml");
+public class MusicFormScene {
+    public static Parent createMusicFormScene(ManageMusicService manageMusicService, BackCallback callback) throws IOException {
+        URL url = ImageController.class.getClassLoader().getResource("fxml/music_form.fxml");
         FXMLLoader loader = new FXMLLoader(url);
        
         Parent root = loader.load();
-        MusicListController ctrl = loader.getController();
-        ctrl.setAddMusicCallback(callback);
+        
+        MusicFormController ctrl = loader.getController();
         ctrl.setManageMusicService(manageMusicService);
-        ctrl.setCurrentStage(listMusicStage);
+        ctrl.setBackCallback(callback);
+        ctrl.init();
+        
         
         return root;
     }
