@@ -33,4 +33,18 @@ public class MusicFormScene {
         
         return root;
     }
+    
+    public static Parent editMusicFormScene(ManageMusicService manageMusicService, BackCallback callback, Integer id) throws IOException, ManageMusicService.PersistenceException {
+        URL url = ImageController.class.getClassLoader().getResource("fxml/music_form.fxml");
+        FXMLLoader loader = new FXMLLoader(url);
+
+        Parent root = loader.load();
+
+        MusicFormController ctrl = loader.getController();
+        ctrl.setManageMusicService(manageMusicService);
+        ctrl.setBackCallback(callback);
+        ctrl.init(id);
+
+        return root;
+    }
 }

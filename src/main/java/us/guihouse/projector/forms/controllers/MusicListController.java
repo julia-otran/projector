@@ -168,6 +168,7 @@ public class MusicListController implements Initializable, BackCallback {
         private ActionsTableCell() {
             super();
             actionsBox.getChildren().addAll(addToList, seeDetails, edit);
+            actionsBox.spacingProperty().set(5);
             addToList.setOnAction(this);
             seeDetails.setOnAction(this);
             edit.setOnAction(this);
@@ -220,7 +221,15 @@ public class MusicListController implements Initializable, BackCallback {
     }
 
     private void edit(Integer id) {
-        System.out.println("edit " + id);
+        try {
+            Parent root = MusicFormScene.editMusicFormScene(manageMusicService, this, id);
+            oldRoot = currentStage.getScene().getRoot();
+            currentStage.getScene().setRoot(root);
+        } catch (IOException ex) {
+            Logger.getLogger(MusicListController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ManageMusicService.PersistenceException ex) {
+            Logger.getLogger(MusicListController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public Stage getCurrentStage() {

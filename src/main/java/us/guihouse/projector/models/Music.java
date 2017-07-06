@@ -7,6 +7,7 @@ package us.guihouse.projector.models;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyProperty;
@@ -134,5 +135,9 @@ public class Music {
         if (text != null) {
             setPhrases(Arrays.asList(text.replace("\r\n", "\n").split("\n")));
         }
+    }
+
+    public String getPhrasesAsString() {
+        return phrasesList.stream().collect(Collectors.joining("\n"));
     }
 }

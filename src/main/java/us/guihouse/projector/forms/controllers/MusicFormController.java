@@ -21,6 +21,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
+import us.guihouse.projector.models.Music;
 import us.guihouse.projector.services.ManageMusicService;
 
 /**
@@ -32,6 +33,7 @@ public class MusicFormController implements Initializable {
     private ManageMusicService musicService;
     private BackCallback callback;
     private String creatingArtist;
+    private Music editingMusic;
     
     @FXML
     private TextField titleTextField;
@@ -72,6 +74,10 @@ public class MusicFormController implements Initializable {
     
     @FXML
     public void onCancel() {
+        if (editingMusic != null) {
+            musicService.closeMusic(editingMusic.getId());
+        }
+        
         getCallback().goBack();
     }
     
@@ -86,7 +92,12 @@ public class MusicFormController implements Initializable {
         alert.setHeaderText("Falha ao salvar música.");
         
         try {
-            musicService.createMusic(name, artist, music);
+            if (editingMusic == null) {
+                musicService.createMusic(name, artist, music);
+            } else {
+                musicService.updateMusic(editingMusic.getId(), name, artist, music);
+                musicService.closeMusic(editingMusic.getId());
+            }
             getCallback().goBackAndRefresh();
         } catch (ManageMusicService.MusicAlreadyPresentException ex) {
             Logger.getLogger(MusicFormController.class.getName()).log(Level.SEVERE, null, ex);
@@ -137,5 +148,17 @@ public class MusicFormController implements Initializable {
         } else {
             artistCombo.setItems(list);
         }
+    }
+
+    public void init(Integer id) throws ManageMusicService.PersistenceException {
+        init();
+        editingMusic = musicService.openMusic(id);
+        
+        if (editingMusic.getArtist() != null) {
+            artistCombo.getSelectionModel().select(editingMusic.getArtist().getNameProperty().getValue());
+        }
+        
+        titleTextField.setText(editingMusic.getName());
+        musicTextArea.setText(editingMusic.getPhrasesAsString());
     }
 }
