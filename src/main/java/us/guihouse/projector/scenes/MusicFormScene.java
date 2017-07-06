@@ -9,9 +9,11 @@ import java.io.IOException;
 import java.net.URL;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import us.guihouse.projector.dtos.ImportingMusicDTO;
 import us.guihouse.projector.forms.controllers.BackCallback;
 import us.guihouse.projector.forms.controllers.ImageController;
 import us.guihouse.projector.forms.controllers.MusicFormController;
+import us.guihouse.projector.forms.controllers.MusicListController;
 import us.guihouse.projector.services.ManageMusicService;
 
 /**
@@ -44,6 +46,20 @@ public class MusicFormScene {
         ctrl.setManageMusicService(manageMusicService);
         ctrl.setBackCallback(callback);
         ctrl.init(id);
+
+        return root;
+    }
+
+    public static Parent createMusicFormScene(ManageMusicService manageMusicService, BackCallback callback, ImportingMusicDTO music) throws IOException {
+        URL url = ImageController.class.getClassLoader().getResource("fxml/music_form.fxml");
+        FXMLLoader loader = new FXMLLoader(url);
+
+        Parent root = loader.load();
+
+        MusicFormController ctrl = loader.getController();
+        ctrl.setManageMusicService(manageMusicService);
+        ctrl.setBackCallback(callback);
+        ctrl.init(music);
 
         return root;
     }

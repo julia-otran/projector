@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -21,6 +22,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
+import us.guihouse.projector.dtos.ImportingMusicDTO;
 import us.guihouse.projector.models.Music;
 import us.guihouse.projector.services.ManageMusicService;
 
@@ -82,7 +84,16 @@ public class MusicFormController implements Initializable {
     }
     
     @FXML
+    public void onSaveAndAdd() {
+        save(true);
+    }
+    
+    @FXML
     public void onSave() {
+        save(false);
+    }
+    
+    private void save(boolean addToList) {
         String name = titleTextField.getText();
         String artist = artistCombo.getSelectionModel().getSelectedItem();
         String music = musicTextArea.getText();
@@ -93,12 +104,23 @@ public class MusicFormController implements Initializable {
         
         try {
             if (editingMusic == null) {
-                musicService.createMusic(name, artist, music);
+                Integer createdId = musicService.createMusic(name, artist, music);
+                if (addToList) {
+                    getCallback().goBackWithId(createdId);
+                } else {
+                    getCallback().goBackAndReload();
+                }
             } else {
                 musicService.updateMusic(editingMusic.getId(), name, artist, music);
                 musicService.closeMusic(editingMusic.getId());
+                
+                if (addToList) {
+                    getCallback().goBackWithId(editingMusic.getId());
+                } else {
+                    getCallback().goBackAndReload();
+                }
             }
-            getCallback().goBackAndRefresh();
+            
         } catch (ManageMusicService.MusicAlreadyPresentException ex) {
             Logger.getLogger(MusicFormController.class.getName()).log(Level.SEVERE, null, ex);
             alert.setContentText("Já existe uma música com mesmo nome e artista.");
@@ -142,7 +164,9 @@ public class MusicFormController implements Initializable {
         ObservableList<String> list = FXCollections.observableArrayList(musicService.listArtists());
         
         if (creatingArtist != null) {
-            list.add(0, creatingArtist);
+            if (!list.contains(creatingArtist)) {
+                list.add(0, creatingArtist);
+            }
             artistCombo.setItems(list);
             artistCombo.getSelectionModel().select(creatingArtist);
         } else {
@@ -160,5 +184,12 @@ public class MusicFormController implements Initializable {
         
         titleTextField.setText(editingMusic.getName());
         musicTextArea.setText(editingMusic.getPhrasesAsString());
+    }
+
+    public void init(ImportingMusicDTO music) {
+        creatingArtist = music.getArtist();
+        init();
+        titleTextField.setText(music.getName());
+        musicTextArea.setText(music.getPhrases().stream().collect(Collectors.joining("\n")));
     }
 }

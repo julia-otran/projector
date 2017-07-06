@@ -14,13 +14,13 @@ import java.util.logging.Logger;
  *
  * @author guilherme
  */
-public class ImporterFactory {
+public class ImportMusicContext {
 
-    public static ImporterFactory getFactory() {
-        return new ImporterFactory();
+    public static ImportMusicContext getContext() {
+        return new ImportMusicContext();
     }
 
-    private ImporterFactory() {
+    private ImportMusicContext() {
 
     }
 
@@ -34,7 +34,7 @@ public class ImporterFactory {
                 return new VagalumeImporter(urlSpec);
             }
         } catch (MalformedURLException ex) {
-            Logger.getLogger(ImporterFactory.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ImportMusicContext.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return null;

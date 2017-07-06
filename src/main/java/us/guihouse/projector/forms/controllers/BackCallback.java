@@ -11,5 +11,7 @@ package us.guihouse.projector.forms.controllers;
  */
 public interface BackCallback {
     void goBack();
-    void goBackAndRefresh();
+    void goBackWithId(Integer id);
+
+    public void goBackAndReload();
 }

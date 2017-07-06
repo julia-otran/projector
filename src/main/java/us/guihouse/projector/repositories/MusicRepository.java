@@ -80,6 +80,10 @@ public class MusicRepository {
 
         stmt.setString(3, phrases);
         stmt.execute();
+        
+        ResultSet keys = stmt.getGeneratedKeys();
+        keys.next();
+        music.setId(keys.getInt(1));
     }
 
     public List<ListMusicDTO> listWithLimit() throws SQLException {

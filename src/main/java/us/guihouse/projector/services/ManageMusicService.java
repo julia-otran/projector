@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import us.guihouse.projector.dtos.ImportingMusicDTO;
 import us.guihouse.projector.dtos.ListMusicDTO;
 import us.guihouse.projector.repositories.MetricsRepository;
 
@@ -157,6 +158,22 @@ public class ManageMusicService {
             
             throw new PersistenceException(ex.getMessage(), ex);
         }
+    }
+    
+    public boolean alreadyExists(ImportingMusicDTO music) throws SQLException {
+        Artist a = artistRepo.findByName(music.getArtist());
+        
+        if (a == null) {
+            return false;
+        }
+        
+        Music m = musicRepo.findByNameAndArtist(music.getName(), a);
+        
+        if (m == null) {
+            return false;
+        }
+        
+        return true;
     }
 
     public Integer createMusic(String name, String artist, String phrases) throws MusicAlreadyPresentException, PersistenceException, InavlidArtist, InvalidName, InvalidPhrases {

@@ -6,6 +6,7 @@
 package us.guihouse.projector.forms.controllers;
 
 import java.net.URL;
+import java.text.Collator;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -38,6 +39,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.util.Callback;
 import us.guihouse.projector.models.Music;
+import us.guihouse.projector.other.ProjectorStringUtils;
 import us.guihouse.projector.projection.ProjectionManager;
 import us.guihouse.projector.projection.text.TextWrapper;
 import us.guihouse.projector.projection.text.WrappedText;
@@ -66,6 +68,7 @@ public class MusicProjectionController extends ProjectionController {
     private ObservableList<SelectionText> data;
 
     private String clearText;
+    final Collator collator = Collator.getInstance();
 
     /**
      * Initializes the controller class.
@@ -274,7 +277,7 @@ public class MusicProjectionController extends ProjectionController {
             return;
         }
 
-        term = term.trim().toLowerCase();
+        term = ProjectorStringUtils.noAccents(term.trim());
 
         if (term.isEmpty()) {
             return;
@@ -317,7 +320,7 @@ public class MusicProjectionController extends ProjectionController {
         }
 
         private boolean hasTerm(String term) {
-            return text.getJoinedLines().toLowerCase().contains(term);
+            return ProjectorStringUtils.noAccents(text.getJoinedLines()).contains(term);
         }
     }
 

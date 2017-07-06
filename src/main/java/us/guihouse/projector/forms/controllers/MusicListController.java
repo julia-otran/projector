@@ -7,7 +7,9 @@ package us.guihouse.projector.forms.controllers;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,11 +27,16 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import us.guihouse.projector.dtos.ImportingMusicDTO;
 import us.guihouse.projector.dtos.ListMusicDTO;
+import us.guihouse.projector.music_importing.ImportCallback;
+import us.guihouse.projector.music_importing.ImportMusicContext;
+import us.guihouse.projector.music_importing.MusicUrlImporter;
 import us.guihouse.projector.scenes.MusicFormScene;
 import us.guihouse.projector.services.ManageMusicService;
 
@@ -38,7 +45,7 @@ import us.guihouse.projector.services.ManageMusicService;
  *
  * @author guilherme
  */
-public class MusicListController implements Initializable, BackCallback {
+public class MusicListController implements Initializable, BackCallback, ImportCallback {
 
     @FXML
     private TextField searchText;
@@ -100,7 +107,24 @@ public class MusicListController implements Initializable, BackCallback {
 
     @FXML
     public void onWebImport() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Importar música");
+        dialog.setHeaderText("Copie e cole a URL (endereço) da música no campo abaixo:");
+        dialog.setContentText("URL:");
 
+        Optional<String> result = dialog.showAndWait();
+        result.ifPresent(url -> {
+            MusicUrlImporter importer = ImportMusicContext.getContext().getImporter(url);
+            if (importer == null) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Erro");
+                alert.setHeaderText("Falha ao importar música.");
+                alert.setContentText("URL (endereço) não suportada. Usar letras.mus.br ou vagalume.com.br");
+                alert.showAndWait();
+            } else {
+                importer.execute(this);
+            }
+        });
     }
 
     private void fillMusicsProtected(String term) {
@@ -152,9 +176,49 @@ public class MusicListController implements Initializable, BackCallback {
     }
     
     @Override
-    public void goBackAndRefresh() {
-        fillMusicsProtected(null);
+    public void goBackWithId(Integer id) {
+        fillMusicsProtected(searchText.getText());
+        addToList(id);
         currentStage.getScene().setRoot(oldRoot);
+    }
+    
+    @Override
+    public void goBackAndReload() {
+        fillMusicsProtected(searchText.getText());
+        currentStage.getScene().setRoot(oldRoot);
+    }
+
+    @Override
+    public void onImportSuccess(ImportingMusicDTO music) {
+        try {
+            if (manageMusicService.alreadyExists(music)) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Erro");
+                alert.setHeaderText("Falha ao importar música.");
+                alert.setContentText("A música já existe, pesquise-a e inclua-a na lista.");
+                alert.showAndWait();
+                return;
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(MusicListController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        try {
+            Parent root = MusicFormScene.createMusicFormScene(manageMusicService, this, music);
+            oldRoot = currentStage.getScene().getRoot();
+            currentStage.getScene().setRoot(root);
+        } catch (IOException ex) {
+            Logger.getLogger(MusicListController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @Override
+    public void onImportError(boolean errored) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Erro");
+        alert.setHeaderText("Falha ao importar música.");
+        alert.setContentText("Falha ao obter dados.");
+        alert.showAndWait();
     }
 
     class ActionsTableCell extends TableCell<ListMusicDTO, Integer> implements EventHandler<ActionEvent> {

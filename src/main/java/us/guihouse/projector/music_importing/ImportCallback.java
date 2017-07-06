@@ -15,5 +15,5 @@ public interface ImportCallback {
 
     void onImportSuccess(ImportingMusicDTO music);
 
-    void onImportError();
+    void onImportError(boolean errored);
 }
