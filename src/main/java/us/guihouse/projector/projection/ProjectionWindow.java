@@ -13,26 +13,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import us.guihouse.projector.services.SettingsService;
 
 /**
  *
  * @author guilherme
  */
 public class ProjectionWindow implements Runnable, CanvasDelegate {
+
     private Frame frame;
     private final ProjectionCanvas projectionCanvas;
     private GraphicsDevice currentDevice;
     private Thread drawThread;
     private boolean running = false;
     private boolean fullScreen = false;
-    
+    private final SettingsService settingsService;
+
     private final List<Frame> pending;
-    
-    public ProjectionWindow() {
+
+    public ProjectionWindow(SettingsService settingsService) {
         pending = new ArrayList<>();
         projectionCanvas = new ProjectionCanvas(this);
+        this.settingsService = settingsService;
     }
-    
+
     public ProjectionManager getManager() {
         return projectionCanvas;
     }
@@ -42,41 +46,41 @@ public class ProjectionWindow implements Runnable, CanvasDelegate {
         this.currentDevice = device;
         startEngine();
     }
-    
+
     private void stopEngine() {
         running = false;
-        
+
         if (drawThread != null) {
             drawThread.interrupt();
             drawThread = null;
         }
-        
+
         if (currentDevice != null) {
             currentDevice.setFullScreenWindow(null);
         }
-        
+
         if (frame != null) {
             frame.setVisible(false);
-            disposeFrame(frame);            
+            disposeFrame(frame);
             frame = null;
         }
     }
-    
+
     private void startEngine() {
         if (currentDevice != null) {
             frame = new Frame(currentDevice.getDefaultConfiguration());
-            
+
             frame.setExtendedState(Frame.MAXIMIZED_BOTH);
             frame.setBounds(currentDevice.getDefaultConfiguration().getBounds());
             frame.setUndecorated(true);
             frame.setIgnoreRepaint(true);
-            
+
             if (fullScreen) {
                 currentDevice.setFullScreenWindow(frame);
             } else {
                 frame.setVisible(true);
             }
-            
+
             frame.createBufferStrategy(2);
 
             projectionCanvas.init();
@@ -86,19 +90,19 @@ public class ProjectionWindow implements Runnable, CanvasDelegate {
             drawThread.start();
         }
     }
-    
+
     @Override
     public void run() {
         BufferStrategy bufferStrategy = frame.getBufferStrategy();
         Graphics g;
-        
+
         while (running) {
             g = bufferStrategy.getDrawGraphics();
             projectionCanvas.paintComponent(g);
-            
+
             bufferStrategy.show();
             g.dispose();
-            
+
             try {
                 Thread.sleep(25);
             } catch (InterruptedException ex) {
@@ -115,7 +119,7 @@ public class ProjectionWindow implements Runnable, CanvasDelegate {
         if (frame == null) {
             return 800;
         }
-        
+
         return frame.getWidth();
     }
 
@@ -124,7 +128,7 @@ public class ProjectionWindow implements Runnable, CanvasDelegate {
         if (frame == null) {
             return 600;
         }
-        
+
         return frame.getHeight();
     }
 
@@ -133,7 +137,7 @@ public class ProjectionWindow implements Runnable, CanvasDelegate {
         if (this.fullScreen == fullScreen) {
             return;
         }
-        
+
         stopEngine();
         this.fullScreen = fullScreen;
         startEngine();
@@ -142,12 +146,17 @@ public class ProjectionWindow implements Runnable, CanvasDelegate {
     public void dispose() {
         pending.forEach(f -> f.dispose());
     }
-    
+
     public void stop() {
         stopEngine();
     }
 
     private void disposeFrame(final Frame fr) {
         pending.add(fr);
+    }
+
+    @Override
+    public SettingsService getSettingsService() {
+        return settingsService;
     }
 }

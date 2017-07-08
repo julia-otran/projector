@@ -17,12 +17,13 @@ public class ProjectorPreferences {
     private static Preferences prefs;
 
     private static final String SQLITE_FILE = "SQLITE_FILE";
+    private static final String BACKGROUND_FILE_PATH = "BACKGROUND_FILE_PATH";
 
     public static Preferences getPrefs() {
         if (prefs == null) {
             prefs = Preferences.userRoot().node(NODE_NAME);
         }
-        
+
         return prefs;
     }
 
@@ -35,6 +36,18 @@ public class ProjectorPreferences {
             getPrefs().remove(SQLITE_FILE);
         } else {
             getPrefs().put(SQLITE_FILE, path);
+        }
+    }
+
+    public static String getBackgroundFilePath() {
+        return getPrefs().get(BACKGROUND_FILE_PATH, null);
+    }
+
+    public static void setBackgroundFilePath(String path) {
+        if (path == null) {
+            getPrefs().remove(BACKGROUND_FILE_PATH);
+        } else {
+            getPrefs().put(BACKGROUND_FILE_PATH, path);
         }
     }
 }

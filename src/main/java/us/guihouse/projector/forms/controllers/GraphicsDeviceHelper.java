@@ -14,15 +14,18 @@ import javafx.scene.control.ToggleGroup;
 import us.guihouse.projector.other.GraphicsFinder;
 import us.guihouse.projector.projection.ProjectionManager;
 import us.guihouse.projector.projection.ProjectionWindow;
+import us.guihouse.projector.services.SettingsService;
 
 /**
  *
  * @author guilherme
  */
 public class GraphicsDeviceHelper {
+
     private final Menu projectionScreenMenu;
     private MenuItem reloadItem;
     private ProjectionWindow projectionWindow;
+    private final SettingsService settingsService = new SettingsService();
 
     public GraphicsDeviceHelper(Menu projectionScreenMenu) {
         this.projectionScreenMenu = projectionScreenMenu;
@@ -30,42 +33,42 @@ public class GraphicsDeviceHelper {
         buildReloadItem();
         reloadDevices();
     }
-    
+
     public ProjectionManager getProjectionManager() {
         return projectionWindow.getManager();
     }
-    
+
     void stop() {
         projectionWindow.stop();
     }
-    
+
     void dispose() {
         projectionWindow.dispose();
     }
-    
+
     private void reloadDevices() {
         projectionScreenMenu.getItems().clear();
         projectionScreenMenu.getItems().add(reloadItem);
-        
+
         ToggleGroup group = new ToggleGroup();
-        
+
         GraphicsFinder.getAvailableDevices().stream().map((GraphicsFinder.Device dev) -> {
             return buildItem(dev);
         }).forEachOrdered((item) -> {
             item.setToggleGroup(group);
-            
+
             if (item.isSelected()) {
                 item.fire();
             }
-            
+
             projectionScreenMenu.getItems().add(item);
         });
     }
-    
+
     private void changeDevice(final GraphicsFinder.Device device) {
         projectionWindow.setDevice(device.getDevice());
     }
-    
+
     private void buildReloadItem() {
         reloadItem = new MenuItem();
         reloadItem.setText("Redetectar Telas");
@@ -76,28 +79,28 @@ public class GraphicsDeviceHelper {
             }
         });
     }
-    
+
     private RadioMenuItem buildItem(final GraphicsFinder.Device dev) {
         RadioMenuItem item = new RadioMenuItem();
         item.setText(dev.getName());
-        
+
         if (dev.isProjectionDevice()) {
             item.setSelected(true);
         } else {
             item.setSelected(false);
         }
-        
+
         item.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 changeDevice(dev);
             }
         });
-        
+
         return item;
     }
 
     private void buildProjectionFrame() {
-        projectionWindow = new ProjectionWindow();
+        projectionWindow = new ProjectionWindow(settingsService);
     }
 }

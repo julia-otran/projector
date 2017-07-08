@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.text.*?>
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
-<VBox id="RootBox" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.guihouse.projector.forms.controllers.MusicListController">
+<VBox id="RootBox" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.131" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.guihouse.projector.forms.controllers.MusicListController">
    <children>
       <ToolBar prefHeight="40.0" prefWidth="200.0">
          <items>
@@ -37,7 +39,7 @@
       <ToolBar prefHeight="40.0" prefWidth="200.0">
         <items>
             <Button mnemonicParsing="false" onAction="#onManualType" text="Digitar Letra" />
-          <Button mnemonicParsing="false" onAction="#onWebImport" text="Importar de um Site" />
+          <Button defaultButton="true" mnemonicParsing="false" onAction="#onWebImport" text="Importar de um Site" />
         </items>
       </ToolBar>
    </children>

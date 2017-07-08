@@ -55,6 +55,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     private SceneManager sceneManager;
     private GraphicsDeviceHelper graphicsHelper;
     private Stage listMusicStage;
+
     private final ManageMusicService manageMusicService = new ManageMusicService();
 
     private Property<TextWrapper> textWrapperProperty = new SimpleObjectProperty<>();

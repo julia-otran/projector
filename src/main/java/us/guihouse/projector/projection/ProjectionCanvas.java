@@ -7,14 +7,9 @@ package us.guihouse.projector.projection;
 
 import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.imageio.ImageIO;
 import us.guihouse.projector.projection.text.WrappedText;
 import us.guihouse.projector.projection.text.WrapperFactory;
 
@@ -23,24 +18,25 @@ import us.guihouse.projector.projection.text.WrapperFactory;
  * @author guilherme
  */
 public class ProjectionCanvas implements ProjectionManager {
+
     private final CanvasDelegate delegate;
     private final ProjectionBackground background;
     private final ProjectionLabel label;
     private Projectable currentProjectable;
-    
+
     private final List<Projectable> initializeList;
 
     ProjectionCanvas(CanvasDelegate delegate) {
         this.delegate = delegate;
         this.initializeList = new ArrayList<>();
-        
+
         background = new ProjectionBackground(delegate);
         initializeList.add(background);
-        
+
         label = new ProjectionLabel(delegate);
         initializeList.add(label);
     }
-    
+
     public void init() {
         initializeList.forEach(p -> p.init());
     }
@@ -52,7 +48,7 @@ public class ProjectionCanvas implements ProjectionManager {
         } else {
             currentProjectable.paintComponent(g);
         }
-        
+
     }
 
     @Override
@@ -82,17 +78,7 @@ public class ProjectionCanvas implements ProjectionManager {
 
     @Override
     public void setBackgroundImageFile(File selectedFile) {
-        if (selectedFile == null) {
-            background.setImage(null);
-            return;
-        }
-        
-        try {
-            BufferedImage image = ImageIO.read(selectedFile);
-            background.setImage(image);
-        } catch (IOException ex) {
-            Logger.getLogger(ProjectionCanvas.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        background.setImage(selectedFile);
     }
 
     @Override
@@ -112,7 +98,7 @@ public class ProjectionCanvas implements ProjectionManager {
         wv.init();
         return wv;
     }
-    
+
     @Override
     public void setProjectable(Projectable webView) {
         this.currentProjectable = webView;

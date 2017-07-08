@@ -5,14 +5,19 @@
  */
 package us.guihouse.projector.projection;
 
+import us.guihouse.projector.services.SettingsService;
+
 /**
  *
  * @author guilherme
  */
 public interface CanvasDelegate {
+
     public int getWidth();
 
     public int getHeight();
-    
+
     public void setFullScreen(boolean fullScreen);
+
+    public SettingsService getSettingsService();
 }
