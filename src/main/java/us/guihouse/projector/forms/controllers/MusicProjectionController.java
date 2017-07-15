@@ -8,6 +8,7 @@ package us.guihouse.projector.forms.controllers;
 import java.net.URL;
 import java.text.Collator;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -282,15 +283,55 @@ public class MusicProjectionController extends ProjectionController {
         if (term.isEmpty()) {
             return;
         }
+        
+        int closestPhrase = getSelectedOrMarkedPhraseIndex();
+        if (closestPhrase < 0 || closestPhrase >= data.size()) {
+            closestPhrase = 0;
+        } 
+        
+        int positions[] = new int[data.size()];
+        boolean neg = false;
+        
+        for (int i=0; i<data.size(); i++) {
+            if (i % 2 == 0) {
+                positions[i] = closestPhrase - (i / 2);
+            } else {
+                positions[i] = closestPhrase + ((i+1) / 2);
+            }
+            
+            neg |= positions[i] < 0;
+            
+            if (neg) {
+                positions[i] = i;
+            }
+        }
 
         for (int i = 0; i < data.size(); i++) {
-            SelectionText st = data.get(i);
+            SelectionText st = data.get(positions[i]);
             if (st.hasTerm(term)) {
                 phrasesTable.scrollTo(st);
-                markIfPosible(i);
+                markIfPosible(positions[i]);
                 return;
             }
         }
+    }
+    
+    private int getSelectedOrMarkedPhraseIndex() {
+        int selected = phrasesTable.getSelectionModel().getSelectedIndex();
+        
+        if (selected < 0 || selected >= data.size()) {
+            selected = phrasesTable.getSelectionModel().getFocusedIndex();
+        }
+        
+        if (selected < 0 || selected >= data.size()) {
+            for (int i=0; i<data.size(); i++) {
+                if (data.get(i).selectedProperty().get()) {
+                    return i;
+                }
+            }
+        }
+        
+        return selected;
     }
 
     public static class SelectionText {

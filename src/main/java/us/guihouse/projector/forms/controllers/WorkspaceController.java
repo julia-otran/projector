@@ -236,6 +236,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     @FXML
     public void onAddMusic() {
         listMusicStage.show();
+        listMusicStage.requestFocus();
     }
 
     @FXML

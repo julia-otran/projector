@@ -37,7 +37,6 @@ public class ProjectionLabel implements Projectable {
     private static final int DEFAULT_FONT_SIZE = 110;
 
     // Label used to get fontMetrics
-    //private final JLabel fontLabel;
     private Font font;
     private FontMetrics fontMetrics;
 
@@ -51,7 +50,7 @@ public class ProjectionLabel implements Projectable {
     private List<StringWithPosition> drawLines = Collections.EMPTY_LIST;
 
     private final BasicStroke outlineStroke = new BasicStroke(4.0f);
-    private final Color overlay = new Color(0, 0, 0, 240);
+    private final Color overlay = new Color(0, 0, 0, 230);
 
     public ProjectionLabel(CanvasDelegate canvasDelegate) {
         this.canvasDelegate = canvasDelegate;
@@ -149,7 +148,7 @@ public class ProjectionLabel implements Projectable {
 
         List<String> lines = text.getLines();
 
-        if (lines == null || lines.isEmpty()) {
+        if (lines == null || text.isEmpty() || lines.isEmpty()) {
             drawLines = Collections.EMPTY_LIST;
             return;
         }
