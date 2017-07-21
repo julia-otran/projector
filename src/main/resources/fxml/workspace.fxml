@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.embed.swing.*?>
 <?import javafx.scene.web.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.canvas.*?>
@@ -79,14 +80,10 @@
                                 </VBox>
                             </content>
                         </TitledPane>
-                        <TitledPane animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Pré Visualização" VBox.vgrow="NEVER">
-                            <content>
-                                <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
-                                    <children>
-                                        <Canvas fx:id="previewCanvas" height="200.0" width="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                    </children>
-                                </AnchorPane>
-                            </content>
+                        <TitledPane animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="300.0" prefWidth="300.0" text="Pré Visualização" VBox.vgrow="SOMETIMES">
+                     <content>
+                        <Pane fx:id="previewPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" />
+                     </content>
                         </TitledPane>
                     </children>
                 </VBox>

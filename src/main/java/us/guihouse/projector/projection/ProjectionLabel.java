@@ -96,37 +96,35 @@ public class ProjectionLabel implements Projectable {
     }
 
     @Override
-    public void paintComponent(Graphics g) {
-        Graphics2D g2 = (Graphics2D) g;
-
+    public void paintComponent(Graphics2D g) {
         if (drawLines.isEmpty()) {
             return;
         }
 
-        g2.setColor(overlay);
-        g2.fillRect(0, 0, canvasDelegate.getWidth(), canvasDelegate.getHeight());
+        g.setColor(overlay);
+        g.fillRect(0, 0, canvasDelegate.getWidth(), canvasDelegate.getHeight());
 
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        g2.setStroke(outlineStroke);
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g.setStroke(outlineStroke);
 
-        AffineTransform oldTransform = g2.getTransform();
+        AffineTransform oldTransform = g.getTransform();
 
         drawLines.forEach((pt) -> {
-            g2.translate(pt.getX(), pt.getY());
+            g.translate(pt.getX(), pt.getY());
             // create a glyph vector from your text
-            GlyphVector glyphVector = getFont().createGlyphVector(g2.getFontRenderContext(), pt.getText());
+            GlyphVector glyphVector = getFont().createGlyphVector(g.getFontRenderContext(), pt.getText());
 
             // get the shape object
             Shape textShape = glyphVector.getOutline();
 
-            g2.setColor(Color.black);
-            g2.draw(textShape);
+            g.setColor(Color.black);
+            g.draw(textShape);
 
-            g2.setColor(Color.white);
-            g2.fill(textShape);
+            g.setColor(Color.white);
+            g.fill(textShape);
 
-            g2.setTransform(oldTransform);
+            g.setTransform(oldTransform);
         });
     }
 

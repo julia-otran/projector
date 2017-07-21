@@ -6,6 +6,7 @@
 package us.guihouse.projector.projection;
 
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 
 /**
  *
@@ -13,7 +14,7 @@ import java.awt.Graphics;
  */
 public interface Projectable {
 
-    public void paintComponent(Graphics g);
+    public void paintComponent(Graphics2D g);
 
     public CanvasDelegate getCanvasDelegate();
 

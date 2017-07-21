@@ -7,11 +7,13 @@ package us.guihouse.projector;
 
 import java.net.URL;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import javafx.stage.WindowEvent;
 import us.guihouse.projector.forms.controllers.SceneManager;
 import us.guihouse.projector.forms.controllers.WorkspaceController;
 import us.guihouse.projector.other.SQLiteJDBCDriverConnection;
@@ -21,18 +23,18 @@ import us.guihouse.projector.other.SQLiteJDBCDriverConnection;
  * @author 15096134
  */
 public class Projector extends Application {
-    private static WorkspaceController controller;
     
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
         launch(args);
-        controller.dispose();
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        WorkspaceController controller;
+        
         primaryStage.setTitle("Projector");
         primaryStage.setMaxWidth(Double.MAX_VALUE);
         primaryStage.setMaxHeight(Double.MAX_VALUE);
@@ -72,14 +74,21 @@ public class Projector extends Application {
         });
         
         primaryStage.setScene(workspaceScene);
+        
+        primaryStage.xProperty().addListener(controller.getPreviewPaneBoundsListener());
+        primaryStage.yProperty().addListener(controller.getPreviewPaneBoundsListener());
+        primaryStage.widthProperty().addListener(controller.getPreviewPaneBoundsListener());
+        primaryStage.heightProperty().addListener(controller.getPreviewPaneBoundsListener());
+        
         primaryStage.show();
-    }
-
-    @Override
-    public void stop() throws Exception {
-        if (controller != null) {
-            controller.stop();
-        }
-        super.stop();
+        
+        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent event) {
+                if (controller != null) {
+                    controller.stop();
+                }
+            }
+        });
     }
 }

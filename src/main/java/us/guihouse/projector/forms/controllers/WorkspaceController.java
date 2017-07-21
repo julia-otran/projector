@@ -17,9 +17,9 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Bounds;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Alert;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ListCell;
@@ -67,6 +67,8 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         graphicsHelper = new GraphicsDeviceHelper(projectionScreenMenu);
+
+        preparePreview();
         initializeProjectionList();
         onCropBackgroundChanged();
         onChangeFullScreen();
@@ -83,10 +85,6 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
 
     public void stop() {
         graphicsHelper.stop();
-    }
-
-    public void dispose() {
-        graphicsHelper.dispose();
     }
 
     // ------------------------------
@@ -165,6 +163,9 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     // ------------------------------
     @FXML
     private ListView<ProjectionItemSubScene> projectionListView;
+    
+    @FXML
+    private Pane targetPane;
 
     private boolean changingTitle = false;
 
@@ -314,12 +315,42 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     // ------------------------------
     // Preview
     // ------------------------------
+    
     @FXML
-    private Canvas previewCanvas;
+    private Pane previewPane;
+    
+    private ChangeListener previewPaneBoundsListener = new ChangeListener() {
+        @Override
+        public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+            updatePreviewSize();
+        }
 
-    @FXML
-    private Pane targetPane;
+    };
 
+    public ChangeListener getPreviewPaneBoundsListener() {
+        return previewPaneBoundsListener;
+    }
+    
+    private void preparePreview() {
+        previewPane.widthProperty().addListener(previewPaneBoundsListener);
+        previewPane.heightProperty().addListener(previewPaneBoundsListener);
+    }
+
+    public void updatePreviewSize() {
+        Bounds screenBounds = previewPane.localToScreen(previewPane.getBoundsInLocal());
+        
+        if (screenBounds == null) {
+            return;
+        }
+
+        int x = (int) Math.round(screenBounds.getMinX());
+        int y = (int) Math.round(screenBounds.getMinY());
+        int w = (int) Math.round(screenBounds.getWidth());
+        int h = (int) Math.round(screenBounds.getHeight());
+        
+        graphicsHelper.updatePreviewSize(x, y, w, h);
+    }
+    
     @Override
     public void titleChanged() {
         projectionListView.refresh();

@@ -7,6 +7,7 @@ package us.guihouse.projector.projection;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +26,7 @@ public class ProjectionBackground extends ProjectionImage {
     }
 
     @Override
-    public void paintComponent(Graphics g) {
+    public void paintComponent(Graphics2D g) {
         // Prevent monitor to sleep!
         g.setColor(new Color(10, 10, 10));
         g.fillRect(0, 0, canvasDelegate.getWidth(), canvasDelegate.getHeight());

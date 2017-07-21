@@ -40,10 +40,11 @@ public class GraphicsDeviceHelper {
 
     void stop() {
         projectionWindow.stop();
+        projectionWindow.stopPreview();
     }
 
-    void dispose() {
-        projectionWindow.dispose();
+    void updatePreviewSize(int x, int y, int maxWidth, int maxHeight) {
+        projectionWindow.updatePreviewSize(x, y, maxWidth, maxHeight);
     }
 
     private void reloadDevices() {

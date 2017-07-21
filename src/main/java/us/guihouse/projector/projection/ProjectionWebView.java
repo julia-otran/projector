@@ -7,6 +7,7 @@ package us.guihouse.projector.projection;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import javafx.embed.swing.JFXPanel;
 import javafx.embed.swing.SwingNode;
 import javafx.scene.Node;
@@ -32,7 +33,7 @@ public class ProjectionWebView implements Projectable {
     }
     
     @Override
-    public void paintComponent(Graphics g) {
+    public void paintComponent(Graphics2D g) {
         panel.paint(g);
     }
 

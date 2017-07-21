@@ -7,6 +7,7 @@ package us.guihouse.projector.projection;
 
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +42,7 @@ public class ProjectionCanvas implements ProjectionManager {
         initializeList.forEach(p -> p.init());
     }
 
-    protected void paintComponent(Graphics g) {
+    protected void paintComponent(Graphics2D g) {
         if (currentProjectable == null) {
             background.paintComponent(g);
             label.paintComponent(g);

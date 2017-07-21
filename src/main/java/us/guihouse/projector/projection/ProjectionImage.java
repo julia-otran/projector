@@ -27,10 +27,9 @@ public class ProjectionImage implements Projectable {
     }
     
     @Override
-    public void paintComponent(Graphics g) {
+    public void paintComponent(Graphics2D g) {
         if (scaled != null) {
-            Graphics2D g2 = (Graphics2D) g;
-            g2.drawImage(scaled, 0, 0, null);
+            g.drawImage(scaled, 0, 0, null);
         }
     }
 

@@ -13,6 +13,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+import javafx.geometry.Bounds;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JRootPane;
+import javax.swing.SwingUtilities;
 import us.guihouse.projector.services.SettingsService;
 
 /**
@@ -22,19 +36,35 @@ import us.guihouse.projector.services.SettingsService;
 public class ProjectionWindow implements Runnable, CanvasDelegate {
 
     private Frame frame;
+    private Frame previewFrame;
+    
     private final ProjectionCanvas projectionCanvas;
     private GraphicsDevice currentDevice;
     private Thread drawThread;
+    
     private boolean running = false;
     private boolean fullScreen = false;
+    private boolean starting = false;
+    
     private final SettingsService settingsService;
-
-    private final List<Frame> pending;
+    
+    private final Cursor blankCursor;
+    
+    private float previewScale;
 
     public ProjectionWindow(SettingsService settingsService) {
-        pending = new ArrayList<>();
-        projectionCanvas = new ProjectionCanvas(this);
         this.settingsService = settingsService;
+        
+        projectionCanvas = new ProjectionCanvas(this);
+        
+        // Transparent 16 x 16 pixel cursor image.
+        BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+
+        // Create a new blank cursor.
+        blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImg, new Point(0, 0), "blank cursor");
+        
+        previewScale = 1;
+        createPreviewFrame();
     }
 
     public ProjectionManager getManager() {
@@ -61,45 +91,80 @@ public class ProjectionWindow implements Runnable, CanvasDelegate {
 
         if (frame != null) {
             frame.setVisible(false);
-            disposeFrame(frame);
+            frame.dispose();
             frame = null;
         }
+        
+        previewFrame.setVisible(false);
     }
 
     private void startEngine() {
+        if (starting) {
+            return;
+        }
+        
         if (currentDevice != null) {
-            frame = new Frame(currentDevice.getDefaultConfiguration());
-
+            frame = new JFrame(currentDevice.getDefaultConfiguration());
+            
             frame.setExtendedState(Frame.MAXIMIZED_BOTH);
-            frame.setBounds(currentDevice.getDefaultConfiguration().getBounds());
             frame.setUndecorated(true);
             frame.setIgnoreRepaint(true);
-
+            frame.setLayout(null);
+            frame.setCursor(blankCursor);
+            
             if (fullScreen) {
                 currentDevice.setFullScreenWindow(frame);
             } else {
-                frame.setVisible(true);
+                Rectangle displayRect = currentDevice.getDefaultConfiguration().getBounds();
+                frame.setLocation(displayRect.getLocation());
+                frame.setSize(displayRect.getSize());
             }
 
+            frame.setVisible(true);
+            previewFrame.setVisible(true);
+            
             frame.createBufferStrategy(2);
+            previewFrame.createBufferStrategy(2);
+            
+            starting = true;
+            
+            SwingUtilities.invokeLater(new Runnable(){
+                @Override
+                public void run() {
+                    projectionCanvas.init();
 
-            projectionCanvas.init();
-
-            running = true;
-            drawThread = new Thread(this);
-            drawThread.start();
+                    running = true;
+                    drawThread = new Thread(ProjectionWindow.this);
+                    drawThread.start();
+                    starting = false;
+                }
+            });
         }
     }
 
     @Override
     public void run() {
         BufferStrategy bufferStrategy = frame.getBufferStrategy();
-        Graphics g;
+        BufferStrategy previewStrategy = previewFrame.getBufferStrategy();
+        
+        Graphics2D g;
+        Graphics2D gp;
 
+        AffineTransform oldTransform;
+        
         while (running) {
-            g = bufferStrategy.getDrawGraphics();
+            gp = (Graphics2D) previewStrategy.getDrawGraphics();
+            
+            oldTransform = gp.getTransform();
+            gp.scale(previewScale, previewScale);
+            projectionCanvas.paintComponent(gp);
+            gp.setTransform(oldTransform);
+            
+            previewStrategy.show();
+            gp.dispose();
+            
+            g = (Graphics2D) bufferStrategy.getDrawGraphics();
             projectionCanvas.paintComponent(g);
-
             bufferStrategy.show();
             g.dispose();
 
@@ -143,20 +208,44 @@ public class ProjectionWindow implements Runnable, CanvasDelegate {
         startEngine();
     }
 
-    public void dispose() {
-        pending.forEach(f -> f.dispose());
-    }
-
     public void stop() {
         stopEngine();
-    }
-
-    private void disposeFrame(final Frame fr) {
-        pending.add(fr);
     }
 
     @Override
     public SettingsService getSettingsService() {
         return settingsService;
+    }
+    
+    public void updatePreviewSize(int x, int y, int maxWidth, int maxHeight) {
+        int width = maxWidth;
+        float scale = width / (float) getWidth();
+        int height = Math.round(getHeight() * scale);
+        
+        if (height > maxHeight) {
+            height = maxHeight;
+            scale = height / (float) getHeight();
+            width = Math.round(getWidth() * scale);
+        }
+        
+        previewScale = scale;
+        x += (maxWidth - width) / 2;
+        y += (maxHeight - height) / 2;
+        
+        previewFrame.setLocation(x, y);
+        previewFrame.setSize(width, height);
+    }
+
+    private void createPreviewFrame() {
+        previewFrame = new Frame();
+        previewFrame.setUndecorated(true);
+        previewFrame.setIgnoreRepaint(true);
+        previewFrame.setLayout(null);
+        previewFrame.setAlwaysOnTop(true);
+        previewFrame.setResizable(false);
+    }
+
+    public void stopPreview() {
+        previewFrame.dispose();
     }
 }
