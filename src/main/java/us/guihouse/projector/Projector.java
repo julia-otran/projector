@@ -11,6 +11,8 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
@@ -70,6 +72,15 @@ public class Projector extends Application {
             @Override
             public Window getWindow() {
                 return workspaceScene.getWindow();
+            }
+        });
+        
+        workspaceScene.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent t) {
+                if(t.getCode() == KeyCode.ESCAPE) {
+                    controller.onEscapeKeyPressed();
+                }
             }
         });
         

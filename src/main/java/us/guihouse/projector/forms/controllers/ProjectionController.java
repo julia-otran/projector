@@ -37,4 +37,6 @@ public abstract class ProjectionController implements Initializable {
     public void initWithProjectionManager(ProjectionManager projectionManager) {
         this.projectionManager = projectionManager;
     }
+    
+    public abstract void onEscapeKeyPressed();
 }

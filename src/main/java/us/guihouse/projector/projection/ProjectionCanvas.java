@@ -49,7 +49,6 @@ public class ProjectionCanvas implements ProjectionManager {
         } else {
             currentProjectable.paintComponent(g);
         }
-
     }
 
     @Override

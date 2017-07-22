@@ -421,4 +421,12 @@ public class MusicProjectionController extends ProjectionController {
             return label;
         }
     }
+    
+    
+    @Override
+    public void onEscapeKeyPressed() {
+        if (!clearScreenButton.isDisabled()) {
+            clearScreenButton.fire();
+        }
+    }
 }

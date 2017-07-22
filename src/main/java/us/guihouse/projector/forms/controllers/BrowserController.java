@@ -157,4 +157,11 @@ public class BrowserController extends ProjectionController {
     public void setUrl(String url) {
         this.url = url;
     }
+    
+    @Override
+    public void onEscapeKeyPressed() {
+        if (!endProjectionButton.isDisabled()) {
+            endProjectionButton.fire();
+        }
+    }
 }

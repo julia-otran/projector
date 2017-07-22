@@ -166,4 +166,9 @@ public class BgImageController extends ProjectionController implements ImageDrag
     public void setSceneManager(SceneManager sceneManager) {
         this.sceneManager = sceneManager;
     }
+    
+    @Override
+    public void onEscapeKeyPressed() {
+        sceneManager.goToWorkspace();
+    }
 }

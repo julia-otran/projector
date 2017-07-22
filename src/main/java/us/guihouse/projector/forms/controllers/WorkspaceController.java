@@ -89,6 +89,13 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     public void stop() {
         graphicsHelper.stop();
     }
+    
+    public void onEscapeKeyPressed() {
+        projectionListView
+                .getSelectionModel()
+                .getSelectedItems()
+                .forEach(s -> s.onEscapeKeyPressed());
+    }
 
     // ------------------------------
     // Menu

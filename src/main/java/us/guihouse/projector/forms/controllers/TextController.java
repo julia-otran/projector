@@ -104,4 +104,11 @@ public class TextController extends ProjectionController implements TextWrapperF
         // TODO: Warn a error. Too much text to fit on screen if text.size() > 1
         getProjectionManager().setText(text.get(0));
     }
+
+    @Override
+    public void onEscapeKeyPressed() {
+        if (!endProjectionButton.isDisabled()) {
+            endProjectionButton.fire();
+        }
+    }
 }

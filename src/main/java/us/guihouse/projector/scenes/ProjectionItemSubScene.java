@@ -63,4 +63,10 @@ public abstract class ProjectionItemSubScene extends SubScene implements Control
     public String toString() {
         return title;
     }
+    
+    public void onEscapeKeyPressed() {
+        if (controller != null) {
+            controller.onEscapeKeyPressed();
+        }
+    }
 }

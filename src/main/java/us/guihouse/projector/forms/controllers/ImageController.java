@@ -203,4 +203,11 @@ public class ImageController extends ProjectionController implements ImageDragDr
         imageView.setImage(image);
         centerImage();
     }
+    
+    @Override
+    public void onEscapeKeyPressed() {
+        if (!endProjectionButton.isDisabled()) {
+            endProjectionButton.fire();
+        }
+    }
 }
