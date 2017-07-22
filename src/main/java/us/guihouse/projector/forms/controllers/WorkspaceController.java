@@ -5,6 +5,7 @@
  */
 package us.guihouse.projector.forms.controllers;
 
+import java.awt.Font;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Objects;
@@ -33,6 +34,7 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import us.guihouse.projector.other.AwtFontChooseDialog;
 import us.guihouse.projector.other.DragSortListCell;
 import us.guihouse.projector.other.YouTubeVideoResolve;
 import us.guihouse.projector.projection.TextWrapperFactoryChangeListener;
@@ -142,7 +144,13 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
 
     @FXML
     public void onChangeFont() {
-
+        Font current = graphicsHelper.getProjectionManager().getTextFont();
+        
+        AwtFontChooseDialog dialog = new AwtFontChooseDialog(current, (font) -> {
+            graphicsHelper.getProjectionManager().setTextFont(font);
+        });
+        
+        dialog.show();
     }
 
     @FXML

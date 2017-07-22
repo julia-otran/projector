@@ -34,7 +34,7 @@ public class ProjectionLabel implements Projectable {
     private static final int DEFAULT_PADDING_X = 120;
     private static final int DEFAULT_PADDING_Y = 40;
 
-    private static final int DEFAULT_FONT_SIZE = 110;
+    private static final int DEFAULT_FONT_SIZE = 112;
 
     // Label used to get fontMetrics
     private Font font;
