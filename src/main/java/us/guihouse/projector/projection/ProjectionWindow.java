@@ -20,6 +20,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import javafx.beans.property.BooleanProperty;
@@ -31,6 +32,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.SwingUtilities;
+import us.guihouse.projector.other.OsCheck;
 import us.guihouse.projector.services.SettingsService;
 
 /**
@@ -39,7 +41,7 @@ import us.guihouse.projector.services.SettingsService;
  */
 public class ProjectionWindow implements Runnable, CanvasDelegate {
 
-    private Frame frame;
+    private JFrame frame;
     private final PreviewPanel preview;
     
     private final ProjectionCanvas projectionCanvas;
@@ -92,6 +94,10 @@ public class ProjectionWindow implements Runnable, CanvasDelegate {
         }
 
         if (frame != null) {
+            if (fullScreen && OsCheck.getOperatingSystemType() == OsCheck.OSType.MacOS) {
+                com.apple.eawt.FullScreenUtilities.setWindowCanFullScreen(frame, false);
+            }
+            
             frame.setVisible(false);
             frame.dispose();
             frame = null;
@@ -109,27 +115,34 @@ public class ProjectionWindow implements Runnable, CanvasDelegate {
             frame = new JFrame(currentDevice.getDefaultConfiguration());
             
             frame.setExtendedState(Frame.MAXIMIZED_BOTH);
+            frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
             frame.setUndecorated(true);
             frame.setIgnoreRepaint(true);
             frame.setLayout(null);
             frame.setCursor(blankCursor);
             
-            if (fullScreen) {
-                currentDevice.setFullScreenWindow(frame);
-            } else {
+            if (OsCheck.getOperatingSystemType() != OsCheck.OSType.MacOS) {
                 Rectangle displayRect = currentDevice.getDefaultConfiguration().getBounds();
-                frame.setLocation(displayRect.getLocation());
-                frame.setSize(displayRect.getSize());
+                frame.setBounds(displayRect);
             }
-
-            frame.setVisible(true);            
-            frame.createBufferStrategy(2);
+            
+            if (OsCheck.getOperatingSystemType() == OsCheck.OSType.MacOS) {
+                com.apple.eawt.FullScreenUtilities.setWindowCanFullScreen(frame, true);
+            }
             
             starting = true;
             
             SwingUtilities.invokeLater(new Runnable(){
                 @Override
                 public void run() {
+                    frame.setVisible(true);
+                    
+                    if (fullScreen) {
+                        currentDevice.setFullScreenWindow(frame);
+                    }
+                    
+                    frame.createBufferStrategy(2);
+            
                     projectionCanvas.init();
                     preview.setProjectionCanvas(projectionCanvas);
 
