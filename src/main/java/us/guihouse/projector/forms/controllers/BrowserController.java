@@ -17,12 +17,16 @@ import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
 import javafx.concurrent.Worker.State;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.Pane;
+import javafx.scene.transform.Scale;
+import javafx.scene.transform.Transform;
 import javafx.scene.web.WebEngine;
 import us.guihouse.projector.projection.ProjectionManager;
 import us.guihouse.projector.projection.ProjectionWebView;
@@ -35,6 +39,8 @@ import us.guihouse.projector.projection.ProjectionWebView;
 public class BrowserController extends ProjectionController {
 
     private String url;
+    private Transform currentTransform;
+    
     /**
      * Initializes the controller class.
      */
@@ -81,12 +87,47 @@ public class BrowserController extends ProjectionController {
             this.projectionWebView.getWebView().getEngine().load(url);
         }
     }
-
+    
     @Override
     public void initWithProjectionManager(ProjectionManager projectionManager) {
         super.initWithProjectionManager(projectionManager);
         this.projectionWebView = projectionManager.createWebView();
-        browserPane.setContent(projectionWebView.getNode());
+        
+        Node displayNode = projectionWebView.getNode();
+        
+        Pane scalePane = new Pane();
+        scalePane.setMaxWidth(Double.MAX_VALUE);
+        scalePane.setMaxHeight(Double.MAX_VALUE);
+        
+        browserPane.setContent(scalePane);
+        scalePane.getChildren().add(displayNode);
+        
+        ChangeListener sizeChangeListener = new ChangeListener() {
+            @Override
+            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+                double ww = projectionWebView.getWebView().getWidth();
+                double wh = projectionWebView.getWebView().getHeight();
+                double pw = browserPane.getWidth();
+                double ph = browserPane.getHeight();
+                
+                double sw = pw / ww;
+                double sh = ph / wh;
+                double s = Math.min(sw, sh);
+                
+                scalePane.setPrefSize(pw * s, ph * s);
+                
+                scalePane.getTransforms().remove(currentTransform);
+                currentTransform = new Scale(s, s, 0.0, 0.0);
+                scalePane.getTransforms().add(currentTransform);
+            }
+        };
+        
+        projectionWebView.getWebView().widthProperty().addListener(sizeChangeListener);
+        projectionWebView.getWebView().heightProperty().addListener(sizeChangeListener);
+        browserPane.widthProperty().addListener(sizeChangeListener);
+        browserPane.heightProperty().addListener(sizeChangeListener);
+        sizeChangeListener.changed(null, null, null);
+        
         WebEngine engine = projectionWebView.getWebView().getEngine();
         browserProgressBar.progressProperty().bind(engine.getLoadWorker().progressProperty());
         
