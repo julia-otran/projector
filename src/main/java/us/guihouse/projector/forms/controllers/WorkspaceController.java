@@ -33,7 +33,7 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import us.guihouse.projector.other.ListCellX;
+import us.guihouse.projector.other.DragSortListCell;
 import us.guihouse.projector.other.YouTubeVideoResolve;
 import us.guihouse.projector.projection.TextWrapperFactoryChangeListener;
 import us.guihouse.projector.projection.text.TextWrapper;
@@ -184,19 +184,17 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
             @Override
             public ListCell<ProjectionItemSubScene> call(ListView<ProjectionItemSubScene> arg0) {
                 //My cell is on my way to call
-                ListCellX<ProjectionItemSubScene> cell = new ListCellX<ProjectionItemSubScene>() {
+                DragSortListCell<ProjectionItemSubScene> cell = new DragSortListCell<ProjectionItemSubScene>() {
                     @Override
                     public void updateItem(ProjectionItemSubScene item, boolean empty) {
                         super.updateItem(item, empty);
+                        
                         if (item != null) {
                             //finally every thing is just setup
                             setText(item.getTitle());
                         }
                     }
                 };
-                //this is my chemical solution
-                //Need to call on every cell for making things work
-                cell.init(projectionListView.getItems());
 
                 //Take my cell
                 return cell;

@@ -5,18 +5,21 @@
  */
 package us.guihouse.projector.scenes;
 
+import java.util.UUID;
 import javafx.scene.Parent;
 import javafx.scene.SubScene;
 import us.guihouse.projector.forms.controllers.ControllerObserver;
 import us.guihouse.projector.forms.controllers.ProjectionController;
+import us.guihouse.projector.other.Identifiable;
 import us.guihouse.projector.projection.ProjectionManager;
 
 /**
  *
  * @author guilherme
  */
-public abstract class ProjectionItemSubScene extends SubScene implements ControllerObserver {
+public abstract class ProjectionItemSubScene extends SubScene implements ControllerObserver, Identifiable {
 
+    private final String identity;
     private ProjectionController controller;
     private SceneObserver observer;
     private String title;
@@ -24,6 +27,7 @@ public abstract class ProjectionItemSubScene extends SubScene implements Control
     protected ProjectionItemSubScene(Parent root, String title, double width, double height) {
         super(root, width, height);
         this.title = title;
+        this.identity = UUID.randomUUID().toString();
     }
 
     public SceneObserver getObserver() {
@@ -68,5 +72,10 @@ public abstract class ProjectionItemSubScene extends SubScene implements Control
         if (controller != null) {
             controller.onEscapeKeyPressed();
         }
+    }
+
+    @Override
+    public String getIdentity() {
+        return identity;
     }
 }
