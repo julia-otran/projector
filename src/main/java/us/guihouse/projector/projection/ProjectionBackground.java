@@ -20,20 +20,25 @@ import javax.imageio.ImageIO;
  * @author guilherme
  */
 public class ProjectionBackground extends ProjectionImage {
-
+    private final Color bgColor;
+    
     ProjectionBackground(CanvasDelegate canvasDelegate) {
         super(canvasDelegate);
+        
+        // Place some color to prevent monitor from sleeping
+        bgColor = new Color(20, 20, 20);
     }
 
     @Override
     public void paintComponent(Graphics2D g) {
-        // Prevent monitor to sleep!
-        g.setColor(new Color(10, 10, 10));
-        g.fillRect(0, 0, canvasDelegate.getWidth(), canvasDelegate.getHeight());
-
+        if (!hasImage()) {
+            g.setColor(bgColor);
+            g.fillRect(0, 0, canvasDelegate.getWidth(), canvasDelegate.getHeight());
+        }
+        
         super.paintComponent(g);
     }
-
+    
     @Override
     public CanvasDelegate getCanvasDelegate() {
         return canvasDelegate;

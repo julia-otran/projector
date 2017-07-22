@@ -5,6 +5,7 @@
  */
 package us.guihouse.projector.projection;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -18,21 +19,33 @@ import java.awt.image.BufferedImage;
 public class ProjectionImage implements Projectable {
     protected CanvasDelegate canvasDelegate;
     
+    private final Color bgColor;
     private BufferedImage img;
     private BufferedImage scaled;
     private boolean cropBackground;
     
     ProjectionImage(CanvasDelegate canvasDelegate) {
+        this(canvasDelegate, new Color(0, 0, 0));
+    }
+
+    public ProjectionImage(CanvasDelegate canvasDelegate, Color bgColor) {
         this.canvasDelegate = canvasDelegate;
+        this.bgColor = bgColor;
     }
     
     @Override
     public void paintComponent(Graphics2D g) {
-        if (scaled != null) {
+        if (hasImage()) {
+            g.setColor(bgColor);
+            g.fillRect(0, 0, canvasDelegate.getWidth(), canvasDelegate.getHeight());
             g.drawImage(scaled, 0, 0, null);
         }
     }
 
+    protected boolean hasImage() {
+        return scaled != null;
+    }
+    
     @Override
     public CanvasDelegate getCanvasDelegate() {
         return canvasDelegate;
