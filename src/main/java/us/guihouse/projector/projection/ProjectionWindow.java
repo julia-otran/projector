@@ -23,6 +23,8 @@ import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
@@ -89,17 +91,17 @@ public class ProjectionWindow implements Runnable, CanvasDelegate {
             drawThread = null;
         }
 
-        if (currentDevice != null) {
-            currentDevice.setFullScreenWindow(null);
-        }
-
         if (frame != null) {
-            if (fullScreen && OsCheck.getOperatingSystemType() == OsCheck.OSType.MacOS) {
-                com.apple.eawt.FullScreenUtilities.setWindowCanFullScreen(frame, false);
-            }
+            final Frame f = frame;
             
-            frame.setVisible(false);
-            frame.dispose();
+            SwingUtilities.invokeLater(new Runnable(){
+                @Override
+                public void run() {
+                    f.setVisible(false);
+                    f.dispose();
+                }
+            });
+            
             frame = null;
         }
         
@@ -121,13 +123,13 @@ public class ProjectionWindow implements Runnable, CanvasDelegate {
             frame.setLayout(null);
             frame.setCursor(blankCursor);
             
-            if (OsCheck.getOperatingSystemType() != OsCheck.OSType.MacOS) {
+            if (OsCheck.getOperatingSystemType() == OsCheck.OSType.MacOS) {
+                if (fullScreen) {
+                    setWindowCanFullScreen(frame, true);
+                }
+            } else {
                 Rectangle displayRect = currentDevice.getDefaultConfiguration().getBounds();
                 frame.setBounds(displayRect);
-            }
-            
-            if (OsCheck.getOperatingSystemType() == OsCheck.OSType.MacOS) {
-                com.apple.eawt.FullScreenUtilities.setWindowCanFullScreen(frame, true);
             }
             
             starting = true;
@@ -177,6 +179,8 @@ public class ProjectionWindow implements Runnable, CanvasDelegate {
                 }
             }
         }
+        
+        drawThread = null;
     }
 
     @Override
@@ -219,5 +223,30 @@ public class ProjectionWindow implements Runnable, CanvasDelegate {
     
     public JPanel getPreviewPanel() {
         return preview;
+    }
+    
+    /**
+    * @param window
+    */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static void setWindowCanFullScreen(Window window, boolean can) {
+       try {
+           Class util = Class.forName("com.apple.eawt.FullScreenUtilities");
+           Class params[] = new Class[]{Window.class, Boolean.TYPE};
+           Method method = util.getMethod("setWindowCanFullScreen", params);
+           method.invoke(util, window, can);
+       } catch (ClassNotFoundException ex) {
+            Logger.getLogger(ProjectionWindow.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoSuchMethodException ex) {
+            Logger.getLogger(ProjectionWindow.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SecurityException ex) {
+            Logger.getLogger(ProjectionWindow.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(ProjectionWindow.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalArgumentException ex) {
+            Logger.getLogger(ProjectionWindow.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvocationTargetException ex) {
+            Logger.getLogger(ProjectionWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }
