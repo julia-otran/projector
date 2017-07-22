@@ -74,12 +74,7 @@ public class Projector extends Application {
         });
         
         primaryStage.setScene(workspaceScene);
-        
-        primaryStage.xProperty().addListener(controller.getPreviewPaneBoundsListener());
-        primaryStage.yProperty().addListener(controller.getPreviewPaneBoundsListener());
-        primaryStage.widthProperty().addListener(controller.getPreviewPaneBoundsListener());
-        primaryStage.heightProperty().addListener(controller.getPreviewPaneBoundsListener());
-        
+
         primaryStage.show();
         
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {

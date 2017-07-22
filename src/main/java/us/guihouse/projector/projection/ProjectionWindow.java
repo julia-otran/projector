@@ -22,6 +22,10 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.Bounds;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -36,7 +40,7 @@ import us.guihouse.projector.services.SettingsService;
 public class ProjectionWindow implements Runnable, CanvasDelegate {
 
     private Frame frame;
-    private Frame previewFrame;
+    private final PreviewPanel preview;
     
     private final ProjectionCanvas projectionCanvas;
     private GraphicsDevice currentDevice;
@@ -50,7 +54,6 @@ public class ProjectionWindow implements Runnable, CanvasDelegate {
     
     private final Cursor blankCursor;
     
-    private float previewScale;
 
     public ProjectionWindow(SettingsService settingsService) {
         this.settingsService = settingsService;
@@ -63,8 +66,7 @@ public class ProjectionWindow implements Runnable, CanvasDelegate {
         // Create a new blank cursor.
         blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImg, new Point(0, 0), "blank cursor");
         
-        previewScale = 1;
-        createPreviewFrame();
+        preview = new PreviewPanel(this);
     }
 
     public ProjectionManager getManager() {
@@ -95,7 +97,7 @@ public class ProjectionWindow implements Runnable, CanvasDelegate {
             frame = null;
         }
         
-        previewFrame.setVisible(false);
+        preview.setProjectionCanvas(null);
     }
 
     private void startEngine() {
@@ -120,11 +122,8 @@ public class ProjectionWindow implements Runnable, CanvasDelegate {
                 frame.setSize(displayRect.getSize());
             }
 
-            frame.setVisible(true);
-            previewFrame.setVisible(true);
-            
+            frame.setVisible(true);            
             frame.createBufferStrategy(2);
-            previewFrame.createBufferStrategy(2);
             
             starting = true;
             
@@ -132,6 +131,7 @@ public class ProjectionWindow implements Runnable, CanvasDelegate {
                 @Override
                 public void run() {
                     projectionCanvas.init();
+                    preview.setProjectionCanvas(projectionCanvas);
 
                     running = true;
                     drawThread = new Thread(ProjectionWindow.this);
@@ -145,23 +145,10 @@ public class ProjectionWindow implements Runnable, CanvasDelegate {
     @Override
     public void run() {
         BufferStrategy bufferStrategy = frame.getBufferStrategy();
-        BufferStrategy previewStrategy = previewFrame.getBufferStrategy();
-        
         Graphics2D g;
-        Graphics2D gp;
 
-        AffineTransform oldTransform;
-        
         while (running) {
-            gp = (Graphics2D) previewStrategy.getDrawGraphics();
-            
-            oldTransform = gp.getTransform();
-            gp.scale(previewScale, previewScale);
-            projectionCanvas.paintComponent(gp);
-            gp.setTransform(oldTransform);
-            
-            previewStrategy.show();
-            gp.dispose();
+            preview.scheduleRepaint();
             
             g = (Graphics2D) bufferStrategy.getDrawGraphics();
             projectionCanvas.paintComponent(g);
@@ -217,35 +204,7 @@ public class ProjectionWindow implements Runnable, CanvasDelegate {
         return settingsService;
     }
     
-    public void updatePreviewSize(int x, int y, int maxWidth, int maxHeight) {
-        int width = maxWidth;
-        float scale = width / (float) getWidth();
-        int height = Math.round(getHeight() * scale);
-        
-        if (height > maxHeight) {
-            height = maxHeight;
-            scale = height / (float) getHeight();
-            width = Math.round(getWidth() * scale);
-        }
-        
-        previewScale = scale;
-        x += (maxWidth - width) / 2;
-        y += (maxHeight - height) / 2;
-        
-        previewFrame.setLocation(x, y);
-        previewFrame.setSize(width, height);
-    }
-
-    private void createPreviewFrame() {
-        previewFrame = new Frame();
-        previewFrame.setUndecorated(true);
-        previewFrame.setIgnoreRepaint(true);
-        previewFrame.setLayout(null);
-        previewFrame.setAlwaysOnTop(true);
-        previewFrame.setResizable(false);
-    }
-
-    public void stopPreview() {
-        previewFrame.dispose();
+    public JPanel getPreviewPanel() {
+        return preview;
     }
 }

@@ -11,10 +11,12 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.embed.swing.SwingNode;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Bounds;
@@ -27,6 +29,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TitledPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -311,70 +314,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
             Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
-    // ------------------------------
-    // Preview
-    // ------------------------------
     
-    @FXML
-    private Pane previewPane;
-    
-    private ChangeListener previewPaneBoundsListener = new ChangeListener() {
-        @Override
-        public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-            updatePreviewSize();
-        }
-
-    };
-
-    public ChangeListener getPreviewPaneBoundsListener() {
-        return previewPaneBoundsListener;
-    }
-    
-    private void preparePreview() {
-        previewPane.widthProperty().addListener(previewPaneBoundsListener);
-        previewPane.heightProperty().addListener(previewPaneBoundsListener);
-    }
-
-    public void updatePreviewSize() {
-        Bounds screenBounds = previewPane.localToScreen(previewPane.getBoundsInLocal());
-        
-        if (screenBounds == null) {
-            return;
-        }
-
-        int x = (int) Math.round(screenBounds.getMinX());
-        int y = (int) Math.round(screenBounds.getMinY());
-        int w = (int) Math.round(screenBounds.getWidth());
-        int h = (int) Math.round(screenBounds.getHeight());
-        
-        graphicsHelper.updatePreviewSize(x, y, w, h);
-    }
-    
-    @Override
-    public void titleChanged() {
-        projectionListView.refresh();
-    }
-
-    public SceneManager getSceneManager() {
-        return sceneManager;
-    }
-
-    public void setSceneManager(SceneManager sceneManager) {
-        this.sceneManager = sceneManager;
-    }
-
-    private void createListMusicStage() {
-        try {
-            listMusicStage = new Stage();
-            Parent list = MusicListScene.createMusicListScene(this, manageMusicService, listMusicStage);
-            Scene listScene = new Scene(list, 800, 480);
-            listMusicStage.setScene(listScene);
-        } catch (IOException ex) {
-            Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
     @Override
     public boolean addMusic(Integer id) {
         for (ProjectionItemSubScene i : projectionListView.getItems()) {
@@ -405,6 +345,50 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
 
         return true;
     }
+
+    // ------------------------------
+    // Preview
+    // ------------------------------
+    
+    @FXML
+    private TitledPane previewPane;
+    private SwingNode previewNode;
+    
+    private void preparePreview() {
+        previewNode = new SwingNode();
+        previewPane.setContent(previewNode);
+        previewNode.setContent(graphicsHelper.getPreviewPanel());
+    }
+
+    
+    // ------------------------------
+    // Other
+    // ------------------------------
+    
+    @Override
+    public void titleChanged() {
+        projectionListView.refresh();
+    }
+
+    public SceneManager getSceneManager() {
+        return sceneManager;
+    }
+
+    public void setSceneManager(SceneManager sceneManager) {
+        this.sceneManager = sceneManager;
+    }
+
+    private void createListMusicStage() {
+        try {
+            listMusicStage = new Stage();
+            Parent list = MusicListScene.createMusicListScene(this, manageMusicService, listMusicStage);
+            Scene listScene = new Scene(list, 800, 480);
+            listMusicStage.setScene(listScene);
+        } catch (IOException ex) {
+            Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
 
     private void updateTextWrapper() {
         if (singleLineProjectionMenuItem.isSelected()) {

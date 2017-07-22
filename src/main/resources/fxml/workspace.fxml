@@ -80,11 +80,7 @@
                                 </VBox>
                             </content>
                         </TitledPane>
-                        <TitledPane animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="300.0" prefWidth="300.0" text="Pré Visualização" VBox.vgrow="SOMETIMES">
-                     <content>
-                        <Pane fx:id="previewPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" />
-                     </content>
-                        </TitledPane>
+                        <TitledPane fx:id="previewPane" animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="300.0" prefWidth="300.0" text="Pré Visualização" VBox.vgrow="SOMETIMES" />
                     </children>
                 </VBox>
                 <AnchorPane>

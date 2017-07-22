@@ -5,12 +5,14 @@
  */
 package us.guihouse.projector.forms.controllers;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.ToggleGroup;
+import javax.swing.JPanel;
 import us.guihouse.projector.other.GraphicsFinder;
 import us.guihouse.projector.projection.ProjectionManager;
 import us.guihouse.projector.projection.ProjectionWindow;
@@ -37,14 +39,9 @@ public class GraphicsDeviceHelper {
     public ProjectionManager getProjectionManager() {
         return projectionWindow.getManager();
     }
-
+    
     void stop() {
         projectionWindow.stop();
-        projectionWindow.stopPreview();
-    }
-
-    void updatePreviewSize(int x, int y, int maxWidth, int maxHeight) {
-        projectionWindow.updatePreviewSize(x, y, maxWidth, maxHeight);
     }
 
     private void reloadDevices() {
@@ -103,5 +100,9 @@ public class GraphicsDeviceHelper {
 
     private void buildProjectionFrame() {
         projectionWindow = new ProjectionWindow(settingsService);
+    }
+    
+    public JPanel getPreviewPanel() {
+        return projectionWindow.getPreviewPanel();
     }
 }
