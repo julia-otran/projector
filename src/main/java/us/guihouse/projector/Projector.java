@@ -5,7 +5,11 @@
  */
 package us.guihouse.projector;
 
+import com.mashape.unirest.http.Unirest;
+import java.io.IOException;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -93,6 +97,12 @@ public class Projector extends Application {
             public void handle(WindowEvent event) {
                 if (controller != null) {
                     controller.stop();
+                    
+                    try {
+                        Unirest.shutdown();
+                    } catch (IOException ex) {
+                        Logger.getLogger(Projector.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             }
         });

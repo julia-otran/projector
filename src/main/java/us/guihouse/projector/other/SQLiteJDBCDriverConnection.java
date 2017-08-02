@@ -57,8 +57,9 @@ public class SQLiteJDBCDriverConnection {
             boolean openFile = shouldOpenFile();
 
             chooser = new FileChooser();
-
+            
             chooser.getExtensionFilters().setAll(DatabaseFileFilter.getFilter());
+            chooser.setInitialFileName("musicas.db");
 
             if (openFile) {
                 current = chooser.showOpenDialog(null);
