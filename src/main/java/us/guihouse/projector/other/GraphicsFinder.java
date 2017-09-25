@@ -18,9 +18,10 @@ import java.util.stream.Collectors;
 public class GraphicsFinder {
 
     public static class Device {
+
         private final GraphicsDevice device;
         private final boolean isProjectionDevice;
-        
+
         private Device(GraphicsDevice device, boolean isProjectionDevice) {
             this.device = device;
             this.isProjectionDevice = isProjectionDevice;
@@ -29,19 +30,21 @@ public class GraphicsFinder {
         public String getName() {
             return getDeviceName(device);
         }
-        
-        public boolean isProjectionDevice() { return isProjectionDevice; }
+
+        public boolean isProjectionDevice() {
+            return isProjectionDevice;
+        }
 
         public GraphicsDevice getDevice() {
             return device;
         }
     }
-    
+
     public static List<Device> getAvailableDevices() {
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice devices[] = ge.getScreenDevices();
         String preferred = getPreferredProjectionDeviceID();
-        
+
         return Arrays.asList(devices)
                 .stream()
                 .filter(GraphicsDevice::isFullScreenSupported)
@@ -50,27 +53,34 @@ public class GraphicsFinder {
 
     }
 
+    public static Device getDefaultDevice() {
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice dev = ge.getDefaultScreenDevice();
+
+        return new Device(dev, false);
+    }
+
     private static String getPreferredProjectionDeviceID() {
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice devices[] = ge.getScreenDevices();
         GraphicsDevice main = ge.getDefaultScreenDevice();
-        
+
         if (main == null) {
             return null;
         }
-        
+
         if (devices.length < 2) {
             return null;
         }
-        
+
         String mainId = main.getIDstring();
-        
+
         for (GraphicsDevice dev : devices) {
             if (dev.isFullScreenSupported() && !dev.getIDstring().equals(mainId)) {
                 return dev.getIDstring();
             }
         }
-        
+
         return null;
     }
 

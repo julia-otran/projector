@@ -6,7 +6,6 @@
 package us.guihouse.projector.projection;
 
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.io.File;
 import java.util.ArrayList;
@@ -41,6 +40,8 @@ public class ProjectionCanvas implements ProjectionManager {
     public void init() {
         initializeList.forEach(p -> p.init());
     }
+
+    public void finish() { initializeList.forEach(p -> p.finish()); }
 
     protected void paintComponent(Graphics2D g) {
         if (currentProjectable == null) {
@@ -110,5 +111,13 @@ public class ProjectionCanvas implements ProjectionManager {
         initializeList.add(image);
         image.init();
         return image;
+    }
+
+    @Override
+    public ProjectionPlayer createPlayer() {
+        ProjectionPlayer pl = new ProjectionPlayer(delegate);
+        initializeList.add(pl);
+        pl.init();
+        return pl;
     }
 }

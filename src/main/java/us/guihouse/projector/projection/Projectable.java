@@ -14,11 +14,13 @@ import java.awt.Graphics2D;
  */
 public interface Projectable {
 
-    public void paintComponent(Graphics2D g);
+    void paintComponent(Graphics2D g);
 
-    public CanvasDelegate getCanvasDelegate();
+    CanvasDelegate getCanvasDelegate();
 
-    public void rebuildLayout();
+    void rebuildLayout();
 
-    public void init();
+    void init();
+
+    void finish();
 }

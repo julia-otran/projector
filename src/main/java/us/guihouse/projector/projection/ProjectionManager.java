@@ -5,10 +5,10 @@
  */
 package us.guihouse.projector.projection;
 
+import java.awt.Font;
+import java.io.File;
 import us.guihouse.projector.projection.text.WrappedText;
 import us.guihouse.projector.projection.text.WrapperFactory;
-import java.io.File;
-import java.awt.Font;
 
 /**
  *
@@ -23,18 +23,21 @@ public interface ProjectionManager {
     void setTextFont(Font font);
 
     void addTextWrapperChangeListener(TextWrapperFactoryChangeListener wrapperChangeListener);
-    
+
     ProjectionWebView createWebView();
+
     ProjectionImage createImage();
-    
+
     void setProjectable(Projectable webView);
 
     public WrapperFactory getWrapperFactory();
 
     public void setBackgroundImageFile(File selectedFile);
-    
+
     public void setFullScreen(boolean fullScreen);
 
     public void setCropBackground(boolean selected);
+
+    public ProjectionPlayer createPlayer();
 
 }

@@ -101,6 +101,11 @@ public class ProjectionImage implements Projectable {
         rebuildLayout();
     }
 
+    @Override
+    public void finish() {
+
+    }
+
     public void setImage(BufferedImage img) {
         this.img = img;
         rebuildLayout();

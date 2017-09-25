@@ -5,7 +5,6 @@
  */
 package us.guihouse.projector.forms.controllers;
 
-import javafx.beans.property.BooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Menu;
@@ -29,17 +28,17 @@ public class GraphicsDeviceHelper {
     private ProjectionWindow projectionWindow;
     private final SettingsService settingsService = new SettingsService();
 
-    public GraphicsDeviceHelper(Menu projectionScreenMenu) {
+    GraphicsDeviceHelper(Menu projectionScreenMenu) {
         this.projectionScreenMenu = projectionScreenMenu;
         buildProjectionFrame();
         buildReloadItem();
         reloadDevices();
     }
 
-    public ProjectionManager getProjectionManager() {
+    ProjectionManager getProjectionManager() {
         return projectionWindow.getManager();
     }
-    
+
     void stop() {
         projectionWindow.stop();
     }
@@ -50,17 +49,20 @@ public class GraphicsDeviceHelper {
 
         ToggleGroup group = new ToggleGroup();
 
-        GraphicsFinder.getAvailableDevices().stream().map((GraphicsFinder.Device dev) -> {
-            return buildItem(dev);
-        }).forEachOrdered((item) -> {
-            item.setToggleGroup(group);
+        GraphicsFinder.Device defaulDevice = GraphicsFinder.getDefaultDevice();
+        projectionWindow.setDefaultDevice(defaulDevice.getDevice());
 
-            if (item.isSelected()) {
-                item.fire();
-            }
+        GraphicsFinder.getAvailableDevices().stream()
+                .map(this::buildItem)
+                .forEachOrdered((item) -> {
+                    item.setToggleGroup(group);
 
-            projectionScreenMenu.getItems().add(item);
-        });
+                    if (item.isSelected()) {
+                        item.fire();
+                    }
+
+                    projectionScreenMenu.getItems().add(item);
+                });
     }
 
     private void changeDevice(final GraphicsFinder.Device device) {
@@ -101,8 +103,8 @@ public class GraphicsDeviceHelper {
     private void buildProjectionFrame() {
         projectionWindow = new ProjectionWindow(settingsService);
     }
-    
-    public JPanel getPreviewPanel() {
+
+    JPanel getPreviewPanel() {
         return projectionWindow.getPreviewPanel();
     }
 }

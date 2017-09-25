@@ -12,7 +12,6 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -20,7 +19,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingNode;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Bounds;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -45,6 +43,7 @@ import us.guihouse.projector.scenes.BrowserSubScene;
 import us.guihouse.projector.scenes.ImageSubScene;
 import us.guihouse.projector.scenes.MusicListScene;
 import us.guihouse.projector.scenes.MusicProjectionScene;
+import us.guihouse.projector.scenes.PlayerSubScene;
 import us.guihouse.projector.scenes.ProjectionItemSubScene;
 import us.guihouse.projector.scenes.SceneObserver;
 import us.guihouse.projector.scenes.TextSubScene;
@@ -91,7 +90,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     public void stop() {
         graphicsHelper.stop();
     }
-    
+
     public void onEscapeKeyPressed() {
         projectionListView
                 .getSelectionModel()
@@ -145,11 +144,11 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     @FXML
     public void onChangeFont() {
         Font current = graphicsHelper.getProjectionManager().getTextFont();
-        
+
         AwtFontChooseDialog dialog = new AwtFontChooseDialog(current, (font) -> {
             graphicsHelper.getProjectionManager().setTextFont(font);
         });
-        
+
         dialog.show();
     }
 
@@ -181,7 +180,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     // ------------------------------
     @FXML
     private ListView<ProjectionItemSubScene> projectionListView;
-    
+
     @FXML
     private Pane targetPane;
 
@@ -196,7 +195,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
                     @Override
                     public void updateItem(ProjectionItemSubScene item, boolean empty) {
                         super.updateItem(item, empty);
-                        
+
                         if (item != null) {
                             //finally every thing is just setup
                             setText(item.getTitle());
@@ -327,7 +326,25 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
             Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
+    @FXML
+    public void onAddPlayer() {
+        try {
+            PlayerSubScene created = PlayerSubScene.createScene(targetPane.getWidth(), targetPane.getHeight());
+            created.setObserver(this);
+
+            changingTitle = true;
+            projectionListView.getItems().add(created);
+            changingTitle = false;
+
+            created.initWithProjectionManager(graphicsHelper.getProjectionManager());
+            created.widthProperty().bind(targetPane.widthProperty());
+            created.heightProperty().bind(targetPane.heightProperty());
+        } catch (IOException ex) {
+            Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
     @Override
     public boolean addMusic(Integer id) {
         for (ProjectionItemSubScene i : projectionListView.getItems()) {
@@ -362,22 +379,19 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     // ------------------------------
     // Preview
     // ------------------------------
-    
     @FXML
     private TitledPane previewPane;
     private SwingNode previewNode;
-    
+
     private void preparePreview() {
         previewNode = new SwingNode();
         previewPane.setContent(previewNode);
         previewNode.setContent(graphicsHelper.getPreviewPanel());
     }
 
-    
     // ------------------------------
     // Other
     // ------------------------------
-    
     @Override
     public void titleChanged() {
         projectionListView.refresh();
@@ -401,7 +415,6 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
             Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
 
     private void updateTextWrapper() {
         if (singleLineProjectionMenuItem.isSelected()) {

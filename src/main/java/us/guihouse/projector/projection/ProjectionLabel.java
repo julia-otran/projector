@@ -62,6 +62,11 @@ public class ProjectionLabel implements Projectable {
         setFont(new java.awt.Font(Font.SANS_SERIF, 0, DEFAULT_FONT_SIZE));
     }
 
+    @Override
+    public void finish() {
+
+    }
+
     public Font getFont() {
         return font;
     }

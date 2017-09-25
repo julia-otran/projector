@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.sun.jna.NativeLibrary;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -34,6 +36,13 @@ public class Projector extends Application {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
+        NativeLibrary.addSearchPath("vlc", "/Applications/VLC.app/Contents/MacOS/lib/");
+        
+        //TODO: No windows PRECISA setar a ENV VLC_PLUGIN_PATH
+        // Ver https://github.com/java-native-access/jna
+        //Runtime.getRuntime().exec()
+        NativeLibrary.addSearchPath("libvlc", "C:\\temp\\vlc");
+        
         launch(args);
     }
 
@@ -95,14 +104,12 @@ public class Projector extends Application {
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent event) {
-                if (controller != null) {
-                    controller.stop();
-                    
-                    try {
-                        Unirest.shutdown();
-                    } catch (IOException ex) {
-                        Logger.getLogger(Projector.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                controller.stop();
+
+                try {
+                    Unirest.shutdown();
+                } catch (IOException ex) {
+                    Logger.getLogger(Projector.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         });

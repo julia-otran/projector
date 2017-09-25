@@ -6,7 +6,6 @@
 package us.guihouse.projector.projection;
 
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import javafx.embed.swing.JFXPanel;
 import javafx.embed.swing.SwingNode;
@@ -20,18 +19,19 @@ import javafx.scene.web.WebView;
  * @author guilherme
  */
 public class ProjectionWebView implements Projectable {
+
     private final CanvasDelegate delegate;
-    
+
     private SwingNode node;
     private Pane container;
     private WebView webView;
     private JFXPanel panel;
     private Dimension maxSize;
-    
+
     public ProjectionWebView(CanvasDelegate delegate) {
         this.delegate = delegate;
     }
-    
+
     @Override
     public void paintComponent(Graphics2D g) {
         panel.paint(g);
@@ -46,7 +46,7 @@ public class ProjectionWebView implements Projectable {
     public void rebuildLayout() {
         int width = delegate.getWidth();
         int height = delegate.getHeight();
-        
+
         panel.setBounds(0, 0, width, height);
         panel.setPreferredSize(new Dimension(width, height));
     }
@@ -62,8 +62,13 @@ public class ProjectionWebView implements Projectable {
             this.container = new Pane();
             container.getChildren().add(node);
         }
-        
+
         rebuildLayout();
+    }
+
+    @Override
+    public void finish() {
+
     }
 
     public Dimension getMaxSize() {
@@ -81,32 +86,8 @@ public class ProjectionWebView implements Projectable {
     public void setWebView(WebView webView) {
         this.webView = webView;
     }
-    
+
     public Node getNode() {
         return container;
-    }
-    
-    public void updateNodeScale() {
-        int width = panel.getWidth();
-        int height = panel.getHeight();
-        
-        double oldw = node.getLayoutBounds().getWidth();
-        double oldh = node.getLayoutBounds().getHeight();
-        
-        double ratio = height / (double) width;
-        
-        double neww = oldw;
-        double newh = ratio * neww;
-        
-        if (Double.compare(newh, oldh) > 0) {
-            newh = oldh;
-            neww = newh / ratio;
-        }
-        
-        double scalex = neww / (double) width;
-        double scaley = newh / (double) height;
-        
-        node.setScaleX(scalex);
-        node.setScaleY(scaley);
     }
 }
