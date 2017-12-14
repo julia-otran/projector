@@ -5,6 +5,7 @@
  */
 package us.guihouse.projector.forms.controllers;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
@@ -18,7 +19,8 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ListView;
+import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.DragEvent;
@@ -86,9 +88,16 @@ public class ImageController extends ProjectionController implements ImageDragDr
     private boolean running = false;
     private int projectingIndex;
     private List<Image> images = new ArrayList<>();
+    private List<BufferedImage> swingImages = new ArrayList<>();
 
     @FXML
-    private ScrollPane imagesList;
+    private ListView imagesList;
+
+    @FXML
+    private Label timeLabel;
+
+    @FXML
+    private Slider changeMsecSlider;
 
     private ProjectionImage projectable;
 
@@ -182,8 +191,8 @@ public class ImageController extends ProjectionController implements ImageDragDr
         start();
 
         long current = System.currentTimeMillis();
-
-        if (current - time < 2000) {
+        double interval = changeMsecSlider.valueProperty().doubleValue() * 1000;
+        if (current - time < Math.round(interval)) {
             return;
         }
 
@@ -194,11 +203,10 @@ public class ImageController extends ProjectionController implements ImageDragDr
             projectingIndex = 0;
         }
 
-        Image proj = images.get(projectingIndex);
-        projectable.setImage(SwingFXUtils.fromFXImage(proj, null));
+        projectable.setImage(swingImages.get(projectingIndex));
 
         if (!preview) {
-            imageView.setImage(proj);
+            imageView.setImage(images.get(projectingIndex));
         }
 
 
@@ -249,6 +257,7 @@ public class ImageController extends ProjectionController implements ImageDragDr
     public void onDropSuccess(Image image, File file) {
         beginProjectionButton.disableProperty().set(false);
         images.add(image);
+        swingImages.add(SwingFXUtils.fromFXImage(image, null));
         if (file != null && !file.getName().isEmpty()) {
             notifyTitleChange(file.getName());
         }
