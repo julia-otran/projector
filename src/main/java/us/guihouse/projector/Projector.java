@@ -41,7 +41,7 @@ public class Projector extends Application {
         //TODO: No windows PRECISA setar a ENV VLC_PLUGIN_PATH
         // Ver https://github.com/java-native-access/jna
         //Runtime.getRuntime().exec()
-        NativeLibrary.addSearchPath("libvlc", "C:\\temp\\vlc");
+        NativeLibrary.addSearchPath("libvlc", "C:\\VLC");
         
         launch(args);
     }
