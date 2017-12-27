@@ -279,6 +279,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
         try {
             BrowserSubScene created = BrowserSubScene.createScene(targetPane.getWidth(), targetPane.getHeight());
             created.setObserver(this);
+            created.setSceneManager(getSceneManager());
             created.setUrl(url);
 
             changingTitle = true;
@@ -298,6 +299,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
         try {
             ProjectionItemSubScene created = ImageSubScene.createScene(targetPane.getWidth(), targetPane.getHeight());
             created.setObserver(this);
+            created.setSceneManager(getSceneManager());
 
             projectionListView.getItems().add(created);
             projectionListView.getSelectionModel().select(projectionListView.getItems().size() - 1);
@@ -315,6 +317,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
         try {
             ProjectionItemSubScene created = TextSubScene.createScene(targetPane.getWidth(), targetPane.getHeight());
             created.setObserver(this);
+            created.setSceneManager(getSceneManager());
 
             projectionListView.getItems().add(created);
             projectionListView.getSelectionModel().select(projectionListView.getItems().size() - 1);
@@ -332,6 +335,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
         try {
             PlayerSubScene created = PlayerSubScene.createScene(targetPane.getWidth(), targetPane.getHeight());
             created.setObserver(this);
+            created.setSceneManager(getSceneManager());
 
             changingTitle = true;
             projectionListView.getItems().add(created);
@@ -359,6 +363,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
         try {
             MusicProjectionScene created = MusicProjectionScene.createScene(targetPane.getWidth(), targetPane.getHeight());
             created.setObserver(this);
+            created.setSceneManager(getSceneManager());
             created.setManageMusicService(manageMusicService);
             created.loadMusicWithId(id);
             created.getTextWrapperProperty().bind(textWrapperProperty);

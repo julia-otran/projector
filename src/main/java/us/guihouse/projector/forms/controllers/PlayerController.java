@@ -33,6 +33,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import uk.co.caprica.vlcj.binding.internal.libvlc_media_t;
 import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventListener;
@@ -92,6 +93,9 @@ public class PlayerController extends ProjectionController implements FileDragDr
 
     @FXML
     private Button stopButton;
+
+    @FXML
+    private ToggleButton repeatButton;
 
     @FXML
     private Slider timeBar;
@@ -204,6 +208,11 @@ public class PlayerController extends ProjectionController implements FileDragDr
     }
 
     @FXML
+    public void repeatButtonClick() {
+        projectionPlayer.getPlayer().setRepeat(repeatButton.isSelected());
+    }
+
+    @FXML
     public void withoutSoundButtonClick() { projectionPlayer.getPlayer().mute(true); }
 
     @FXML
@@ -259,7 +268,8 @@ public class PlayerController extends ProjectionController implements FileDragDr
     @FXML
     public void selectFileClick() {
         FileChooser chooser = new FileChooser();
-        File chosen = chooser.showOpenDialog(null);
+        Stage stage = getSceneManager().getStage();
+        File chosen = chooser.showOpenDialog(stage);
 
         if (chosen != null && chosen.canRead()) {
             openMedia(chosen);

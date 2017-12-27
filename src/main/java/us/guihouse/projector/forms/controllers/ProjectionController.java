@@ -15,6 +15,7 @@ import us.guihouse.projector.projection.ProjectionManager;
 public abstract class ProjectionController implements Initializable {
     private ControllerObserver observer;
     ProjectionManager projectionManager;
+    private SceneManager sceneManager;
 
     public ControllerObserver getObserver() {
         return observer;
@@ -22,6 +23,14 @@ public abstract class ProjectionController implements Initializable {
 
     public void setObserver(ControllerObserver observer) {
         this.observer = observer;
+    }
+
+    public SceneManager getSceneManager() {
+        return sceneManager;
+    }
+
+    public void setSceneManager(SceneManager manager) {
+        this.sceneManager = manager;
     }
     
     protected void notifyTitleChange(String title) {

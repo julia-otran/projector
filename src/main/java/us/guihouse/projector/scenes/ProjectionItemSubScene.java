@@ -10,6 +10,7 @@ import javafx.scene.Parent;
 import javafx.scene.SubScene;
 import us.guihouse.projector.forms.controllers.ControllerObserver;
 import us.guihouse.projector.forms.controllers.ProjectionController;
+import us.guihouse.projector.forms.controllers.SceneManager;
 import us.guihouse.projector.other.Identifiable;
 import us.guihouse.projector.projection.ProjectionManager;
 
@@ -36,6 +37,10 @@ public abstract class ProjectionItemSubScene extends SubScene implements Control
 
     public void setObserver(SceneObserver observer) {
         this.observer = observer;
+    }
+
+    public void setSceneManager(SceneManager sceneManager) {
+        controller.setSceneManager(sceneManager);
     }
 
     public ProjectionController getController() {
