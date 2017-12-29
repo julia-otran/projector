@@ -8,6 +8,7 @@ package us.guihouse.projector.forms.controllers;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -17,56 +18,39 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Slider;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.util.Callback;
 import us.guihouse.projector.projection.ProjectionImage;
 import us.guihouse.projector.projection.ProjectionManager;
 import us.guihouse.projector.projection.models.BackgroundProvide;
-import us.guihouse.projector.services.ImageDragDropService;
 
 /**
  * FXML Controller class
  *
  * @author guilherme
  */
-public class ImageController extends ProjectionController implements ImageDragDropService.Client, Runnable {
-    private ImageDragDropService service;
+public class ImageController extends ProjectionController implements Runnable {
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        service = new ImageDragDropService(this);
 
         beginProjectionButton.disableProperty().set(true);
         endProjectionButton.disableProperty().set(true);
         imageView.fitWidthProperty().bind(imagePane.widthProperty());
         imageView.fitHeightProperty().bind(imagePane.heightProperty());
-
-        imageView.fitWidthProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                centerImage();
-            }
-        });
-
-        imageView.fitHeightProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                centerImage();
-            }
-        });
     }
 
     @FXML
@@ -84,14 +68,11 @@ public class ImageController extends ProjectionController implements ImageDragDr
     @FXML
     private ImageView imageView;
 
-    private boolean preview = false;
     private boolean running = false;
-    private int projectingIndex;
-    private List<Image> images = new ArrayList<>();
     private List<BufferedImage> awtImages = new ArrayList<>();
 
     @FXML
-    private ListView imagesList;
+    private ListView<Image> imagesList;
 
     @FXML
     private Label timeLabel;
@@ -103,28 +84,136 @@ public class ImageController extends ProjectionController implements ImageDragDr
 
     private String oldLabelText;
 
+    private DecimalFormat milisecondsFormatter = new DecimalFormat("#0.000");
+
+    private class ImageListCell extends ListCell<Image> {
+        @Override
+        protected void updateItem(Image item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty) {
+                setText(null);
+                setGraphic(null);
+            } else {
+                setText(null);
+                ImageView img = new ImageView(item);
+                img.setFitWidth(70.0);
+                img.setFitHeight(70.0);
+                img.preserveRatioProperty().set(true);
+                setGraphic(img);
+            }
+        }
+    }
+
     @Override
     public void initWithProjectionManager(ProjectionManager projectionManager) {
         super.initWithProjectionManager(projectionManager);
         this.projectable = projectionManager.createImage();
         projectable.setCropBackground(false);
         oldLabelText = dragDropLabel.getText();
-        this.preview = false;
+
+        Callback<ListView<Image>, ListCell<Image>> cellFactory = new Callback<ListView<Image>, ListCell<Image>>() {
+            @Override public ListCell<Image> call(ListView<Image> listView) {
+                return new ImageListCell();
+            }
+        };
+
+        imagesList.setCellFactory(cellFactory);
+
+        imagesList.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                projectable.setModel(new BackgroundProvide() {
+                    @Override
+                    public BufferedImage getBackground() {
+                        return null;
+                    }
+
+                    @Override
+                    public BufferedImage getLogo() {
+                        return null;
+                    }
+
+                    @Override
+                    public BufferedImage getOverlay() {
+                        return null;
+                    }
+
+                    @Override
+                    public BufferedImage getStaticBackground() {
+                        return awtImages.get(newValue.intValue());
+                    }
+
+                    @Override
+                    public Type getType() {
+                        return Type.STATIC;
+                    }
+                });
+
+                imageView.setImage(imagesList.getItems().get(newValue.intValue()));
+            }
+        });
+
+        formatTimeLabel();
+
+        changeMsecSlider.valueProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                formatTimeLabel();
+            }
+        });
     }
+
+    private List<Image> toAdd = new ArrayList<>();
 
     @FXML
     public void onDragOver(DragEvent event) {
-        service.onDragOver(event);
+        toAdd.clear();
+        Dragboard board = event.getDragboard();
+
+        if (board.hasFiles()) {
+            for (File imageFile : board.getFiles()) {
+                Image img = new Image(imageFile.toURI().toString());
+                toAdd.add(img);
+            }
+
+            if (toAdd.size() > 0) {
+                imageView.setImage(toAdd.get(0));
+                dragDropLabel.setText(toAdd.size() + " arquivos a serem adicionados");
+                event.acceptTransferModes(TransferMode.LINK);
+            }
+        } else if (board.hasImage()) {
+            toAdd.add(board.getImage());
+            imageView.setImage(toAdd.get(0));
+            event.acceptTransferModes(TransferMode.LINK);
+        } else {
+            setError("Mídia inaceitável");
+        }
     }
 
     @FXML
     public void onDragExit() {
-        service.onDragExit();
+        toAdd.clear();
+        setOriginal();
     }
 
     @FXML
     public void onDragDropped(DragEvent event) {
-        service.onDragDropped(event);
+        for (Image adding : toAdd) {
+            if (adding.isError()) {
+                continue;
+            }
+
+            BufferedImage awt = SwingFXUtils.fromFXImage(adding, null);
+            awtImages.add(awt);
+            imagesList.getItems().add(adding);
+        }
+
+        if (imagesList.getItems().size() > 0) {
+            beginProjectionButton.setDisable(false);
+        }
+
+        setOriginal();
+        toAdd.clear();
     }
 
     private void setError(String error) {
@@ -133,12 +222,18 @@ public class ImageController extends ProjectionController implements ImageDragDr
         imagePane.setBorder(new Border(new BorderStroke(Color.RED, BorderStrokeStyle.SOLID, null, new BorderWidths(3))));
     }
 
+    private int getProjectingIndex() {
+        return imagesList.getSelectionModel().getSelectedIndex();
+    }
+
     private void setOriginal() {
         dragDropLabel.setText(oldLabelText);
         imagePane.setBorder(null);
-        preview = false;
-        if (projectingIndex >= 0) {
-            imageView.setImage(images.get(projectingIndex));
+
+        if (getProjectingIndex() >= 0 && getProjectingIndex() < imagesList.getItems().size()) {
+            imageView.setImage(imagesList.getItems().get(getProjectingIndex()));
+        } else if (imagesList.getItems().size() > 0) {
+            imagesList.getSelectionModel().select(0);
         } else {
             imageView.setImage(null);
         }
@@ -146,46 +241,7 @@ public class ImageController extends ProjectionController implements ImageDragDr
 
     @FXML
     public void onBeginProjection() {
-        Image currentImage;
-        BufferedImage awtImage;
-
-        if (projectingIndex >= 0) {
-            currentImage = images.get(projectingIndex);
-            awtImage = awtImages.get(projectingIndex);
-        } else {
-            getProjectionManager().setProjectable(null);
-            return;
-        }
-
-        projectable.setModel(new BackgroundProvide() {
-            @Override
-            public BufferedImage getBackground() {
-                return null;
-            }
-
-            @Override
-            public BufferedImage getLogo() {
-                return null;
-            }
-
-            @Override
-            public BufferedImage getOverlay() {
-                return null;
-            }
-
-            @Override
-            public BufferedImage getStaticBackground() {
-                return awtImage;
-            }
-
-            @Override
-            public Type getType() {
-                return Type.STATIC;
-            }
-        });
-
         getProjectionManager().setProjectable(projectable);
-        imageView.setImage(currentImage);
 
         beginProjectionButton.disableProperty().set(true);
         endProjectionButton.disableProperty().set(false);
@@ -200,16 +256,17 @@ public class ImageController extends ProjectionController implements ImageDragDr
         stop();
     }
 
-    public void start() {
+    private void start() {
         running = true;
         Platform.runLater(this);
     }
 
-    public void stop() {
+    private void stop() {
         running = false;
     }
 
     private long time;
+
     @Override
     public void run() {
         if (!running) {
@@ -220,113 +277,24 @@ public class ImageController extends ProjectionController implements ImageDragDr
 
         long current = System.currentTimeMillis();
         double interval = changeMsecSlider.valueProperty().doubleValue() * 1000;
+
         if (current - time < Math.round(interval)) {
+            return;
+        }
+
+        if (time == 0) {
+            time = current;
             return;
         }
 
         time = current;
 
-        projectingIndex++;
-        if (projectingIndex >= images.size()) {
-            projectingIndex = 0;
+        int nextIndex = getProjectingIndex() + 1;
+        if (nextIndex >= imagesList.getItems().size()) {
+            nextIndex = 0;
         }
 
-        projectable.setModel(new BackgroundProvide() {
-            @Override
-            public BufferedImage getBackground() {
-                return null;
-            }
-
-            @Override
-            public BufferedImage getLogo() {
-                return null;
-            }
-
-            @Override
-            public BufferedImage getOverlay() {
-                return null;
-            }
-
-            @Override
-            public BufferedImage getStaticBackground() {
-                return awtImages.get(projectingIndex);
-            }
-
-            @Override
-            public Type getType() {
-                return Type.STATIC;
-            }
-        });
-
-        if (!preview) {
-            imageView.setImage(images.get(projectingIndex));
-        }
-
-
-    }
-
-    private void centerImage() {
-        Image img = imageView.getImage();
-        if (img != null) {
-            double w = 0;
-            double h = 0;
-
-            double ratioX = imageView.getFitWidth() / img.getWidth();
-            double ratioY = imageView.getFitHeight() / img.getHeight();
-
-            double reducCoeff = 0;
-            if(ratioX >= ratioY) {
-                reducCoeff = ratioY;
-            } else {
-                reducCoeff = ratioX;
-            }
-
-            w = img.getWidth() * reducCoeff;
-            h = img.getHeight() * reducCoeff;
-
-            imageView.setX((imageView.getFitWidth() - w) / 2);
-            imageView.setY((imageView.getFitHeight() - h) / 2);
-        }
-    }
-
-    @Override
-    public void onFileLoading() {
-        dragDropLabel.setText("Aguarde, lendo imagem...");
-        imagePane.setBorder(new Border(new BorderStroke(null, BorderStrokeStyle.SOLID, null, new BorderWidths(3))));
-    }
-
-    @Override
-    public void onFileOk() {
-        dragDropLabel.setText("Solte na área demarcada");
-        imagePane.setBorder(new Border(new BorderStroke(Color.GREEN, BorderStrokeStyle.SOLID, null, new BorderWidths(3))));
-    }
-
-    @Override
-    public void onFileError(String message) {
-        setError(message);
-    }
-
-    @Override
-    public void onDropSuccess(Image image, File file) {
-        beginProjectionButton.disableProperty().set(false);
-        images.add(image);
-        awtImages.add(SwingFXUtils.fromFXImage(image, null));
-        if (file != null && !file.getName().isEmpty()) {
-            notifyTitleChange(file.getName());
-        }
-        setOriginal();
-    }
-
-    @Override
-    public void onDropAbort() {
-        setOriginal();
-    }
-
-    @Override
-    public void showPreviewImage(Image image) {
-        imageView.setImage(image);
-        preview = true;
-        centerImage();
+        imagesList.getSelectionModel().clearAndSelect(nextIndex);
     }
 
     @Override
@@ -334,5 +302,11 @@ public class ImageController extends ProjectionController implements ImageDragDr
         if (!endProjectionButton.isDisabled()) {
             endProjectionButton.fire();
         }
+    }
+
+    private void formatTimeLabel() {
+        double secs = changeMsecSlider.getValue();
+        String time = milisecondsFormatter.format(secs);
+        timeLabel.setText(time);
     }
 }
