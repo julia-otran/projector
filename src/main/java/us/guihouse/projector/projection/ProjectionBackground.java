@@ -5,6 +5,8 @@
  */
 package us.guihouse.projector.projection;
 
+import us.guihouse.projector.projection.models.BackgroundModel;
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -27,6 +29,8 @@ public class ProjectionBackground extends ProjectionImage {
         
         // Place some color to prevent monitor from sleeping
         bgColor = new Color(20, 20, 20);
+
+        this.setModel(getCanvasDelegate().getSettingsService().getLastBackground());
     }
 
     @Override
@@ -47,22 +51,10 @@ public class ProjectionBackground extends ProjectionImage {
     @Override
     public void init() {
         super.init();
-        this.setImage(getCanvasDelegate().getSettingsService().getLastBackgroundImageFile());
     }
 
-    void setImage(File selectedFile) {
-        if (selectedFile == null) {
-            super.setImage(null);
-            getCanvasDelegate().getSettingsService().storeLastBackground(null);
-            return;
-        }
-
-        try {
-            BufferedImage image = ImageIO.read(selectedFile);
-            getCanvasDelegate().getSettingsService().storeLastBackground(selectedFile);
-            super.setImage(image);
-        } catch (IOException ex) {
-            Logger.getLogger(ProjectionCanvas.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    public void setModel(BackgroundModel model) {
+        super.setModel(model);
+        getCanvasDelegate().getSettingsService().storeLastBackground(model);
     }
 }

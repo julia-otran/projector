@@ -117,6 +117,9 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     private CheckMenuItem fullScreenCheckMenuItem;
 
     @FXML
+    private CheckMenuItem animateBackgroundCheckItem;
+
+    @FXML
     public void onOpenMusicList() {
         listMusicStage.show();
     }
@@ -132,13 +135,13 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     }
 
     @FXML
-    public void onRemoveBackground() {
-        graphicsHelper.getProjectionManager().setBackgroundImageFile(null);
+    public void onCropBackgroundChanged() {
+        graphicsHelper.getProjectionManager().setCropBackground(cropBackgroundMenuItem.isSelected());
     }
 
     @FXML
-    public void onCropBackgroundChanged() {
-        graphicsHelper.getProjectionManager().setCropBackground(cropBackgroundMenuItem.isSelected());
+    public void onAnimateBackgroundChanged() {
+        graphicsHelper.getProjectionManager().setAnimateBackground(animateBackgroundCheckItem.isSelected());
     }
 
     @FXML

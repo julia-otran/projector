@@ -121,10 +121,11 @@ public class ProjectionWindow implements Runnable, CanvasDelegate {
                 if (fullScreen) {
                     setWindowCanFullScreen(frame, true);
                 }
-            } else {
-                Rectangle displayRect = currentDevice.getDefaultConfiguration().getBounds();
-                frame.setBounds(displayRect);
             }
+
+            Rectangle displayRect = currentDevice.getDefaultConfiguration().getBounds();
+            frame.setBounds(displayRect);
+
 
             starting = true;
 

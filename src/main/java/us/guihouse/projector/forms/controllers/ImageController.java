@@ -32,6 +32,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import us.guihouse.projector.projection.ProjectionImage;
 import us.guihouse.projector.projection.ProjectionManager;
+import us.guihouse.projector.projection.models.BackgroundProvide;
 import us.guihouse.projector.services.ImageDragDropService;
 
 /**
@@ -65,8 +66,7 @@ public class ImageController extends ProjectionController implements ImageDragDr
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 centerImage();
             }
-        }
-                );
+        });
     }
 
     @FXML
@@ -88,7 +88,7 @@ public class ImageController extends ProjectionController implements ImageDragDr
     private boolean running = false;
     private int projectingIndex;
     private List<Image> images = new ArrayList<>();
-    private List<BufferedImage> swingImages = new ArrayList<>();
+    private List<BufferedImage> awtImages = new ArrayList<>();
 
     @FXML
     private ListView imagesList;
@@ -147,15 +147,43 @@ public class ImageController extends ProjectionController implements ImageDragDr
     @FXML
     public void onBeginProjection() {
         Image currentImage;
+        BufferedImage awtImage;
 
         if (projectingIndex >= 0) {
             currentImage = images.get(projectingIndex);
+            awtImage = awtImages.get(projectingIndex);
         } else {
             getProjectionManager().setProjectable(null);
             return;
         }
 
-        projectable.setImage(SwingFXUtils.fromFXImage(currentImage, null));
+        projectable.setModel(new BackgroundProvide() {
+            @Override
+            public BufferedImage getBackground() {
+                return null;
+            }
+
+            @Override
+            public BufferedImage getLogo() {
+                return null;
+            }
+
+            @Override
+            public BufferedImage getOverlay() {
+                return null;
+            }
+
+            @Override
+            public BufferedImage getStaticBackground() {
+                return awtImage;
+            }
+
+            @Override
+            public Type getType() {
+                return Type.STATIC;
+            }
+        });
+
         getProjectionManager().setProjectable(projectable);
         imageView.setImage(currentImage);
 
@@ -203,7 +231,32 @@ public class ImageController extends ProjectionController implements ImageDragDr
             projectingIndex = 0;
         }
 
-        projectable.setImage(swingImages.get(projectingIndex));
+        projectable.setModel(new BackgroundProvide() {
+            @Override
+            public BufferedImage getBackground() {
+                return null;
+            }
+
+            @Override
+            public BufferedImage getLogo() {
+                return null;
+            }
+
+            @Override
+            public BufferedImage getOverlay() {
+                return null;
+            }
+
+            @Override
+            public BufferedImage getStaticBackground() {
+                return awtImages.get(projectingIndex);
+            }
+
+            @Override
+            public Type getType() {
+                return Type.STATIC;
+            }
+        });
 
         if (!preview) {
             imageView.setImage(images.get(projectingIndex));
@@ -257,7 +310,7 @@ public class ImageController extends ProjectionController implements ImageDragDr
     public void onDropSuccess(Image image, File file) {
         beginProjectionButton.disableProperty().set(false);
         images.add(image);
-        swingImages.add(SwingFXUtils.fromFXImage(image, null));
+        awtImages.add(SwingFXUtils.fromFXImage(image, null));
         if (file != null && !file.getName().isEmpty()) {
             notifyTitleChange(file.getName());
         }

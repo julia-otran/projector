@@ -5,22 +5,24 @@
  */
 package us.guihouse.projector.forms.controllers;
 
+import java.awt.*;
 import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.DragEvent;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import us.guihouse.projector.projection.ProjectionManager;
+import us.guihouse.projector.projection.models.BackgroundModel;
 import us.guihouse.projector.services.ImageDragDropService;
 
 /**
@@ -28,147 +30,448 @@ import us.guihouse.projector.services.ImageDragDropService;
  *
  * @author guilherme
  */
-public class BgImageController extends ProjectionController implements ImageDragDropService.Client {
-    private ImageDragDropService service;
-    
+public class BgImageController extends ProjectionController {
+    private BackgroundModel backgroundModel;
+
+    private ImageDragDropService backgroundDragDropService;
+    private ImageDragDropService logoDragDropService;
+    private ImageDragDropService overlayDragDropService;
+
     @FXML
-    private Label dragDropLabel;
-    
+    private RadioButton withoutBackgroundRadio;
+
     @FXML
-    private Pane imagePane;
-    
+    private RadioButton staticRadio;
+
     @FXML
-    private ImageView imageView;
-    
-    private SceneManager sceneManager;
-    private String oldLabelText;
-    
+    private RadioButton animationRadio;
+
+    @FXML
+    private VBox backgroundBox;
+
+    @FXML
+    private VBox logoBox;
+
+    @FXML
+    private VBox overlayBox;
+
+    @FXML
+    private ImageView backgroundImageView;
+
+    @FXML
+    private ImageView logoImageView;
+
+    @FXML
+    private ImageView overlayImageView;
+
+    @FXML
+    private Pane backgroundImagePane;
+
+    @FXML
+    private Pane logoImagePane;
+
+    @FXML
+    private Pane overlayImagePane;
+
+    @FXML
+    private Label backgroundDragDropLabel;
+
+    @FXML
+    private Label logoDragDropLabel;
+
+    @FXML
+    private Label overlayDragDropLabel;
+
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        oldLabelText = dragDropLabel.getText();
-        service = new ImageDragDropService(this, true);
-        
-        imageView.fitWidthProperty().bind(imagePane.widthProperty());
-        imageView.fitHeightProperty().bind(imagePane.heightProperty());
-        
-        imageView.fitWidthProperty().addListener(new ChangeListener<Number>() {
+        initImageView(backgroundImageView, backgroundImagePane);
+        initImageView(logoImageView, logoImagePane);
+        initImageView(overlayImageView, overlayImagePane);
+
+        withoutBackgroundRadio.selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                centerImage();
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if (newValue) {
+                    backgroundBox.setVisible(false);
+                    logoBox.setVisible(false);
+                    overlayBox.setVisible(false);
+                    backgroundModel.setType(BackgroundModel.Type.NONE);
+                    loadImagesByType();
+                    dispatchChanged();
+                }
             }
         });
-        
-        imageView.fitHeightProperty().addListener(new ChangeListener<Number>() {
+
+        staticRadio.selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                centerImage();
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if (newValue) {
+                    backgroundBox.setVisible(true);
+                    logoBox.setVisible(false);
+                    overlayBox.setVisible(false);
+                    backgroundModel.setType(BackgroundModel.Type.STATIC);
+                    loadImagesByType();
+                    dispatchChanged();
+                }
+            }
+        });
+
+        animationRadio.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if (newValue) {
+                    backgroundBox.setVisible(true);
+                    logoBox.setVisible(true);
+                    overlayBox.setVisible(true);
+                    backgroundModel.setType(BackgroundModel.Type.OVERLAY_ANIMATED);
+                    loadImagesByType();
+                    dispatchChanged();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void initWithProjectionManager(ProjectionManager projectionManager) {
+        super.initWithProjectionManager(projectionManager);
+        backgroundModel = getProjectionManager().getBackgroundModel();
+        load();
+
+        setupBackgroundDragDrop();
+        setupLogoDragDrop();
+        setupOverlayDragDrop();
+    }
+
+    private void load() {
+        if (backgroundModel.getType() == BackgroundModel.Type.NONE) {
+            withoutBackgroundRadio.fire();
+        }
+
+        if (backgroundModel.getType() == BackgroundModel.Type.STATIC) {
+            staticRadio.fire();
+        }
+
+        if (backgroundModel.getType() == BackgroundModel.Type.OVERLAY_ANIMATED) {
+            animationRadio.fire();
+        }
+    }
+
+    private void loadImagesByType() {
+        if (staticRadio.isSelected()) {
+            if (backgroundModel.getStaticBackgroundFile().canRead()) {
+                Image background = new Image(backgroundModel.getStaticBackgroundFile().toURI().toString());
+                backgroundImageView.setImage(background);
             }
         }
-        );
-    }    
-    
-    @FXML
-    public void onDragOver(DragEvent event) {
-        service.onDragOver(event);
+
+        if (animationRadio.isSelected()) {
+            if (backgroundModel.getBackgroundFile() != null && backgroundModel.getBackgroundFile().canRead()) {
+                Image background = new Image(backgroundModel.getBackgroundFile().toURI().toString());
+                backgroundImageView.setImage(background);
+            } else {
+                backgroundImageView.setImage(null);
+            }
+
+            if (backgroundModel.getLogoFile() != null && backgroundModel.getLogoFile().canRead()) {
+                Image logo = new Image(backgroundModel.getLogoFile().toURI().toString());
+                logoImageView.setImage(logo);
+            } else {
+                logoImageView.setImage(null);
+            }
+
+            if (backgroundModel.getOverlayFile() != null && backgroundModel.getOverlayFile().canRead()) {
+                Image overlay = new Image(backgroundModel.getOverlayFile().toURI().toString());
+                overlayImageView.setImage(overlay);
+            } else {
+                overlayImageView.setImage(null);
+            }
+        }
     }
-    
-    @FXML
-    public void onDragExit() {
-        service.onDragExit();
+
+    private void initImageView(ImageView imageView, Pane container) {
+        imageView.fitWidthProperty().bind(container.widthProperty());
+        imageView.fitHeightProperty().bind(container.heightProperty());
     }
-    
-    @FXML
-    public void onDragDropped(DragEvent event) {
-        service.onDragDropped(event);
+
+    private void setupBackgroundDragDrop() {
+        String oldText = backgroundDragDropLabel.getText();
+
+        backgroundBox.setOnDragExited(new EventHandler<DragEvent>() {
+            @Override
+            public void handle(DragEvent event) {
+                backgroundDragDropService.onDragExit();
+            }
+        });
+
+        backgroundBox.setOnDragDropped(new EventHandler<DragEvent>() {
+            @Override
+            public void handle(DragEvent event) {
+                backgroundDragDropService.onDragDropped(event);
+            }
+        });
+
+        backgroundBox.setOnDragOver(new EventHandler<DragEvent>() {
+            @Override
+            public void handle(DragEvent event) {
+                backgroundDragDropService.onDragOver(event);
+            }
+        });
+
+        ImageDragDropService.Client client = new ImageDragDropService.Client() {
+
+            @Override
+            public void onFileLoading() {
+                backgroundBox.setBorder(new Border(new BorderStroke(Color.GRAY, BorderStrokeStyle.SOLID, null, new BorderWidths(5.0))));
+                backgroundDragDropLabel.setText("Aguarde, carregando...");
+            }
+
+            @Override
+            public void onFileOk() {
+                backgroundBox.setBorder(new Border(new BorderStroke(Color.GREEN, BorderStrokeStyle.SOLID, null, new BorderWidths(5.0))));
+                backgroundDragDropLabel.setText("Soltar na área demarcada");
+            }
+
+            @Override
+            public void onFileError(String message) {
+                backgroundBox.setBorder(new Border(new BorderStroke(Color.RED, BorderStrokeStyle.SOLID, null, new BorderWidths(5.0))));
+                backgroundDragDropLabel.setText(message);
+            }
+
+            @Override
+            public void onDropSuccess(Image image, File imageFile) {
+                backgroundBox.setBorder(null);
+
+                if (BackgroundModel.Type.STATIC.equals(backgroundModel.getType())) {
+                    backgroundModel.setStaticBackgroundFile(imageFile);
+                } else {
+                    backgroundModel.setBackgroundFile(imageFile);
+                }
+
+                backgroundImageView.setImage(image);
+
+                dispatchChanged();
+            }
+
+            @Override
+            public void onDropAbort() {
+                backgroundBox.setBorder(null);
+                File imageFile;
+
+                if (BackgroundModel.Type.STATIC.equals(backgroundModel.getType())) {
+                    imageFile = backgroundModel.getStaticBackgroundFile();
+                } else {
+                    imageFile = backgroundModel.getBackgroundFile();
+                }
+
+                if (imageFile != null) {
+                    backgroundImageView.setImage(new Image(imageFile.toURI().toString()));
+                } else {
+                    backgroundImageView.setImage(null);
+                }
+
+                backgroundDragDropLabel.setText(oldText);
+            }
+
+            @Override
+            public void showPreviewImage(Image image) {
+                backgroundImageView.setImage(image);
+            }
+        };
+
+        backgroundDragDropService = new ImageDragDropService(client, true);
     }
-    
+
+    private void setupLogoDragDrop() {
+        String oldText = logoDragDropLabel.getText();
+
+        ImageDragDropService.Client client = new ImageDragDropService.Client() {
+
+            @Override
+            public void onFileLoading() {
+                logoBox.setBorder(new Border(new BorderStroke(Color.GRAY, BorderStrokeStyle.SOLID, null, new BorderWidths(5.0))));
+                logoDragDropLabel.setText("Aguarde, carregando...");
+            }
+
+            @Override
+            public void onFileOk() {
+                logoBox.setBorder(new Border(new BorderStroke(Color.GREEN, BorderStrokeStyle.SOLID, null, new BorderWidths(5.0))));
+                logoDragDropLabel.setText("Soltar na área demarcada");
+            }
+
+            @Override
+            public void onFileError(String message) {
+                logoBox.setBorder(new Border(new BorderStroke(Color.RED, BorderStrokeStyle.SOLID, null, new BorderWidths(5.0))));
+                logoDragDropLabel.setText(message);
+            }
+
+            @Override
+            public void onDropSuccess(Image image, File imageFile) {
+                logoBox.setBorder(null);
+                backgroundModel.setLogoFile(imageFile);
+
+                logoImageView.setImage(image);
+
+                dispatchChanged();
+            }
+
+            @Override
+            public void onDropAbort() {
+                logoBox.setBorder(null);
+
+                if (backgroundModel.getLogoFile() != null) {
+                    logoImageView.setImage(new Image(backgroundModel.getLogoFile().toURI().toString()));
+                } else {
+                    logoImageView.setImage(null);
+                }
+
+                logoDragDropLabel.setText(oldText);
+            }
+
+            @Override
+            public void showPreviewImage(Image image) {
+                logoImageView.setImage(image);
+            }
+        };
+
+        logoDragDropService = new ImageDragDropService(client, true);
+
+        logoBox.setOnDragExited(new EventHandler<DragEvent>() {
+            @Override
+            public void handle(DragEvent event) {
+                logoDragDropService.onDragExit();
+            }
+        });
+
+        logoBox.setOnDragDropped(new EventHandler<DragEvent>() {
+            @Override
+            public void handle(DragEvent event) {
+                logoDragDropService.onDragDropped(event);
+            }
+        });
+
+        logoBox.setOnDragOver(new EventHandler<DragEvent>() {
+            @Override
+            public void handle(DragEvent event) {
+                logoDragDropService.onDragOver(event);
+            }
+        });
+    }
+
+    private void setupOverlayDragDrop() {
+        String oldText = overlayDragDropLabel.getText();
+
+        ImageDragDropService.Client client = new ImageDragDropService.Client() {
+
+            @Override
+            public void onFileLoading() {
+                overlayBox.setBorder(new Border(new BorderStroke(Color.GRAY, BorderStrokeStyle.SOLID, null, new BorderWidths(5.0))));
+                overlayDragDropLabel.setText("Aguarde, carregando...");
+            }
+
+            @Override
+            public void onFileOk() {
+                overlayBox.setBorder(new Border(new BorderStroke(Color.GREEN, BorderStrokeStyle.SOLID, null, new BorderWidths(5.0))));
+                overlayDragDropLabel.setText("Soltar na área demarcada");
+            }
+
+            @Override
+            public void onFileError(String message) {
+                overlayBox.setBorder(new Border(new BorderStroke(Color.RED, BorderStrokeStyle.SOLID, null, new BorderWidths(5.0))));
+                overlayDragDropLabel.setText(message);
+            }
+
+            @Override
+            public void onDropSuccess(Image image, File imageFile) {
+                overlayBox.setBorder(null);
+                backgroundModel.setOverlayFile(imageFile);
+
+                overlayImageView.setImage(image);
+
+                dispatchChanged();
+            }
+
+            @Override
+            public void onDropAbort() {
+                overlayBox.setBorder(null);
+
+                if (backgroundModel.getOverlayFile() != null) {
+                    overlayImageView.setImage(new Image(backgroundModel.getOverlayFile().toURI().toString()));
+                } else {
+                    overlayImageView.setImage(null);
+                }
+
+                overlayDragDropLabel.setText(oldText);
+            }
+
+            @Override
+            public void showPreviewImage(Image image) {
+                overlayImageView.setImage(image);
+            }
+        };
+
+        overlayDragDropService = new ImageDragDropService(client, true);
+
+        overlayBox.setOnDragExited(new EventHandler<DragEvent>() {
+            @Override
+            public void handle(DragEvent event) {
+                overlayDragDropService.onDragExit();
+            }
+        });
+
+        overlayBox.setOnDragDropped(new EventHandler<DragEvent>() {
+            @Override
+            public void handle(DragEvent event) {
+                overlayDragDropService.onDragDropped(event);
+            }
+        });
+
+        overlayBox.setOnDragOver(new EventHandler<DragEvent>() {
+            @Override
+            public void handle(DragEvent event) {
+                overlayDragDropService.onDragOver(event);
+            }
+        });
+    }
+
+    private void dispatchChanged() {
+        getProjectionManager().setBackgroundModel(backgroundModel);
+    }
+
     @FXML
     public void onCancel() {
-        sceneManager.goToWorkspace();
-    }
-    
-    private void setError(String error) {
-        dragDropLabel.setVisible(true);
-        dragDropLabel.setText(error);
-        imagePane.setBorder(new Border(new BorderStroke(Color.RED, BorderStrokeStyle.SOLID, null, new BorderWidths(3))));
-    }
-    
-    private void setOriginal() {
-        dragDropLabel.setText(oldLabelText);
-        imagePane.setBorder(null);
-    }
-    
-    private void centerImage() {
-        Image img = imageView.getImage();
-        if (img != null) {
-            double w = 0;
-            double h = 0;
-
-            double ratioX = imageView.getFitWidth() / img.getWidth();
-            double ratioY = imageView.getFitHeight() / img.getHeight();
-
-            double reducCoeff = 0;
-            if(ratioX >= ratioY) {
-                reducCoeff = ratioY;
-            } else {
-                reducCoeff = ratioX;
-            }
-
-            w = img.getWidth() * reducCoeff;
-            h = img.getHeight() * reducCoeff;
-
-            imageView.setX((imageView.getFitWidth() - w) / 2);
-            imageView.setY((imageView.getFitHeight() - h) / 2);
-        }
-    }
-
-    @Override
-    public void onFileLoading() {
-        dragDropLabel.setText("Aguarde, lendo imagem...");
-        imagePane.setBorder(new Border(new BorderStroke(null, BorderStrokeStyle.SOLID, null, new BorderWidths(3))));
-    }
-
-    @Override
-    public void onFileOk() {
-        dragDropLabel.setText("Solte na área demarcada");
-        imagePane.setBorder(new Border(new BorderStroke(Color.GREEN, BorderStrokeStyle.SOLID, null, new BorderWidths(3))));
-    }
-
-    @Override
-    public void onFileError(String message) {
-        setError(message);
-    }
-
-    @Override
-    public void onDropSuccess(Image image, File file) {
-        getProjectionManager().setBackgroundImageFile(file);
-        sceneManager.goToWorkspace();
-    }
-
-    @Override
-    public void onDropAbort() {
-        setOriginal();
-    }
-
-    @Override
-    public void showPreviewImage(Image image) {
-        imageView.setImage(image);
-        centerImage();
-    }
-
-    public SceneManager getSceneManager() {
-        return sceneManager;
-    }
-
-    public void setSceneManager(SceneManager sceneManager) {
-        this.sceneManager = sceneManager;
+        getSceneManager().goToWorkspace();
     }
     
     @Override
     public void onEscapeKeyPressed() {
-        sceneManager.goToWorkspace();
+        getSceneManager().goToWorkspace();
+    }
+
+    @FXML
+    public void withoutBackgroundClick() {
+        backgroundImageView.setImage(null);
+        if (BackgroundModel.Type.STATIC.equals(backgroundModel.getType())) {
+            backgroundModel.setStaticBackgroundFile(null);
+        } else {
+            backgroundModel.setBackgroundFile(null);
+        }
+        dispatchChanged();
+    }
+
+    @FXML
+    public void withoutLogoClick() {
+        logoImageView.setImage(null);
+        backgroundModel.setLogoFile(null);
+        dispatchChanged();
+    }
+
+    @FXML
+    public void withoutOverlayClick() {
+        overlayImageView.setImage(null);
+        backgroundModel.setOverlayFile(null);
+        dispatchChanged();
     }
 }

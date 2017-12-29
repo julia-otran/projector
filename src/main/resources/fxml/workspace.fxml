@@ -23,9 +23,9 @@
                 </Menu>
                 <Menu mnemonicParsing="false" text="Imagem de Fundo">
                     <items>
-                        <MenuItem mnemonicParsing="false" onAction="#onSelectBackgroundImageFile" text="Selecionar Arquivo" />
-                        <MenuItem mnemonicParsing="false" onAction="#onRemoveBackground" text="Remover Fundo" />
+                        <MenuItem mnemonicParsing="false" onAction="#onSelectBackgroundImageFile" text="Alterar Fundo" />
                         <CheckMenuItem fx:id="cropBackgroundMenuItem" mnemonicParsing="false" onAction="#onCropBackgroundChanged" selected="true" text="Corte De Imagem" />
+                  <CheckMenuItem fx:id="animateBackgroundCheckItem" mnemonicParsing="false" onAction="#onAnimateBackgroundChanged" text="Animar Fundo" />
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Configurações">

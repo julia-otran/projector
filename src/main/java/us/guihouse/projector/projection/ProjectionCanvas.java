@@ -10,6 +10,8 @@ import java.awt.Graphics2D;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import us.guihouse.projector.projection.models.BackgroundModel;
 import us.guihouse.projector.projection.text.WrappedText;
 import us.guihouse.projector.projection.text.WrapperFactory;
 
@@ -78,8 +80,13 @@ public class ProjectionCanvas implements ProjectionManager {
     }
 
     @Override
-    public void setBackgroundImageFile(File selectedFile) {
-        background.setImage(selectedFile);
+    public BackgroundModel getBackgroundModel() {
+        return (BackgroundModel) background.getModel();
+    }
+
+    @Override
+    public void setBackgroundModel(BackgroundModel backgroundModel) {
+        background.setModel(backgroundModel);
     }
 
     @Override
@@ -119,5 +126,10 @@ public class ProjectionCanvas implements ProjectionManager {
         initializeList.add(pl);
         pl.init();
         return pl;
+    }
+
+    @Override
+    public void setAnimateBackground(boolean selected) {
+        background.setEnableAnimation(selected);
     }
 }
