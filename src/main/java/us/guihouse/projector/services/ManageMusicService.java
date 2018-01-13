@@ -5,8 +5,11 @@
  */
 package us.guihouse.projector.services;
 
+import us.guihouse.projector.enums.IntervalChoice;
+import us.guihouse.projector.enums.Weekday;
 import us.guihouse.projector.models.Artist;
 import us.guihouse.projector.models.Music;
+import us.guihouse.projector.models.Statistic;
 import us.guihouse.projector.other.SQLiteJDBCDriverConnection;
 import us.guihouse.projector.repositories.ArtistRepository;
 import us.guihouse.projector.repositories.MusicRepository;
@@ -25,6 +28,7 @@ import java.util.stream.Collectors;
 import us.guihouse.projector.dtos.ImportingMusicDTO;
 import us.guihouse.projector.dtos.ListMusicDTO;
 import us.guihouse.projector.repositories.MetricsRepository;
+import us.guihouse.projector.utils.promise.Promise;
 
 /**
  *
@@ -294,5 +298,9 @@ public class ManageMusicService {
             Logger.getLogger(ManageMusicService.class.getName()).log(Level.SEVERE, null, ex);
             throw new PersistenceException(ex.getMessage(), ex);
         }           
+    }
+
+    public Promise<Statistic> getStatistics(IntervalChoice interval, Weekday weekday) {
+
     }
 }

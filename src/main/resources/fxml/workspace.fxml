@@ -19,6 +19,7 @@
                 <Menu mnemonicParsing="false" text="Gerenciar Letras">
                     <items>
                         <MenuItem mnemonicParsing="false" onAction="#onOpenMusicList" text="Lista De Letras" />
+                  <MenuItem mnemonicParsing="false" onAction="#onShowStatistics" text="Estatísticas" />
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Imagem de Fundo">

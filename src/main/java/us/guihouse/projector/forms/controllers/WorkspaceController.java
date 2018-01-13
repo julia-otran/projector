@@ -38,15 +38,7 @@ import us.guihouse.projector.other.YouTubeVideoResolve;
 import us.guihouse.projector.projection.TextWrapperFactoryChangeListener;
 import us.guihouse.projector.projection.text.TextWrapper;
 import us.guihouse.projector.projection.text.WrapperFactory;
-import us.guihouse.projector.scenes.BgImageScene;
-import us.guihouse.projector.scenes.BrowserSubScene;
-import us.guihouse.projector.scenes.ImageSubScene;
-import us.guihouse.projector.scenes.MusicListScene;
-import us.guihouse.projector.scenes.MusicProjectionScene;
-import us.guihouse.projector.scenes.PlayerSubScene;
-import us.guihouse.projector.scenes.ProjectionItemSubScene;
-import us.guihouse.projector.scenes.SceneObserver;
-import us.guihouse.projector.scenes.TextSubScene;
+import us.guihouse.projector.scenes.*;
 import us.guihouse.projector.services.ManageMusicService;
 
 /**
@@ -59,6 +51,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     private SceneManager sceneManager;
     private GraphicsDeviceHelper graphicsHelper;
     private Stage listMusicStage;
+    private Stage statisticsStage;
 
     private final ManageMusicService manageMusicService = new ManageMusicService();
 
@@ -122,6 +115,12 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     @FXML
     public void onOpenMusicList() {
         listMusicStage.show();
+    }
+
+    @FXML
+    public void onShowStatistics() {
+        createStatisticsStage();
+        statisticsStage.show();
     }
 
     @FXML
@@ -419,6 +418,18 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
             Parent list = MusicListScene.createMusicListScene(this, manageMusicService, listMusicStage);
             Scene listScene = new Scene(list, 800, 480);
             listMusicStage.setScene(listScene);
+        } catch (IOException ex) {
+            Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+
+    private void createStatisticsStage() {
+        try {
+            statisticsStage = new Stage();
+            Parent list = StatisticsScene.createStatisticsScene(manageMusicService, statisticsStage);
+            Scene listScene = new Scene(list, 800, 480);
+            statisticsStage.setScene(listScene);
         } catch (IOException ex) {
             Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
         }
