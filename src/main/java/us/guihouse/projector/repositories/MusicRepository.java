@@ -13,8 +13,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import us.guihouse.projector.dtos.ListMusicDTO;
+import us.guihouse.projector.enums.IntervalChoice;
+import us.guihouse.projector.enums.Weekday;
 import us.guihouse.projector.models.Artist;
 import us.guihouse.projector.models.Music;
+import us.guihouse.projector.models.Statistic;
 import us.guihouse.projector.other.SQLiteJDBCDriverConnection;
 
 /**

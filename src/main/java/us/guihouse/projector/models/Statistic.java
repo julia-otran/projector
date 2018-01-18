@@ -5,5 +5,6 @@ import lombok.Data;
 @Data
 public class Statistic {
     private Music music;
+    private Integer musicId;
     private Integer playCount;
 }

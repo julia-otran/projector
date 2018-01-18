@@ -1,8 +1,11 @@
 package us.guihouse.projector.enums;
 
-public enum Weekday {
-    ALL(0, "Todos"), MONDAY(1, "Segunda"), TUESDAY(2, "Terça"), WEDNESDAY(3, "Quarta"), THURSDAY(4, "Quinta"), FRIDAY(5, "Sexta"), SATURDAY(6, "Sábado"), SUNDAY(7, "Domingo");
+import lombok.Getter;
 
+public enum Weekday {
+    ALL(7, "Todos"), MONDAY(1, "Segunda"), TUESDAY(2, "Terça"), WEDNESDAY(3, "Quarta"), THURSDAY(4, "Quinta"), FRIDAY(5, "Sexta"), SATURDAY(6, "Sábado"), SUNDAY(0, "Domingo");
+
+    @Getter
     final int weekdayNumber;
     final String name;
 

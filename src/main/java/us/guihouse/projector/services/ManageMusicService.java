@@ -28,7 +28,10 @@ import java.util.stream.Collectors;
 import us.guihouse.projector.dtos.ImportingMusicDTO;
 import us.guihouse.projector.dtos.ListMusicDTO;
 import us.guihouse.projector.repositories.MetricsRepository;
+import us.guihouse.projector.utils.promise.BackgroundExecutor;
+import us.guihouse.projector.utils.promise.Callback;
 import us.guihouse.projector.utils.promise.Promise;
+import us.guihouse.projector.utils.promise.Task;
 
 /**
  *
@@ -300,7 +303,29 @@ public class ManageMusicService {
         }           
     }
 
-    public Promise<Statistic> getStatistics(IntervalChoice interval, Weekday weekday) {
+    public Promise<List<Statistic>> getStatistics(IntervalChoice interval, Weekday weekday) {
+        return Promise.create(new Task<Void, List<Statistic>>() {
+            @Override
+            public void execute(Void input, Callback<List<Statistic>> callback) {
+                try {
+
+                    List<Statistic> statistics = metricRepo.getStatistics(interval, weekday);
+
+                    statistics.stream().forEach(s -> {
+                        try {
+                            s.setMusic(musicRepo.findById(s.getMusicId()));
+                        } catch (SQLException ex) {
+                            ex.printStackTrace();
+                        }
+                    });
+
+                    callback.success(statistics);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    callback.error(e);
+                }
+            }
+        }, new BackgroundExecutor());
 
     }
 }
