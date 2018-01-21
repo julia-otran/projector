@@ -18,6 +18,7 @@ public class StatisticsScene {
         StatisticsController ctrl = loader.getController();
         ctrl.setManageMusicService(manageMusicService);
         ctrl.setStage(stage);
+        ctrl.init();
 
         return root;
     }

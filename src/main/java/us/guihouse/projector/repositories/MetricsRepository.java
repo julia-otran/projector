@@ -44,9 +44,9 @@ public class MetricsRepository {
     }
 
     public List<Statistic> getStatistics(IntervalChoice interval, Weekday weekday) throws SQLException {
-        String sql = "SELECT musics_plays.id AS music_id, COUNT(*) AS play_count " +
+        String sql = "SELECT musics_plays.music_id AS music_id, COUNT(*) AS play_count " +
                 "FROM musics_plays " +
-                "WHERE (date > ?) AND ('7' = ? OR strftime('%w', date) = ?)" +
+                "WHERE date > ? AND ('7' = ? OR strftime('%w', date) = ?)" +
                 "GROUP BY music_id " +
                 "LIMIT " + STATISTICS_LIMIT;
 

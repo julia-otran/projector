@@ -17,7 +17,7 @@ public enum IntervalChoice {
 
     public LocalDate getIntervalBegin() {
         LocalDate now = LocalDate.now(ZoneOffset.UTC.normalized());
-        now.minus(daysInterval, ChronoUnit.DAYS);
+        now = now.minus(daysInterval, ChronoUnit.DAYS);
         return now;
     }
 
