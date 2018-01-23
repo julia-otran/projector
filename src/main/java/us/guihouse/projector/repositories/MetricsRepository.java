@@ -17,7 +17,10 @@ import java.time.ZoneOffset;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -44,11 +47,11 @@ public class MetricsRepository {
     }
 
     public List<Statistic> getStatistics(IntervalChoice interval, Weekday weekday) throws SQLException {
-        String sql = "SELECT musics_plays.music_id AS music_id, COUNT(*) AS play_count " +
+        Map<Integer, Statistic> statistics = new HashMap<>();
+
+        String sql = "SELECT musics_plays.music_id AS music_id, musics_plays.date as date " +
                 "FROM musics_plays " +
-                "WHERE date > ? AND ('7' = ? OR strftime('%w', date) = ?)" +
-                "GROUP BY music_id " +
-                "LIMIT " + STATISTICS_LIMIT;
+                "WHERE date > ? ";
 
         PreparedStatement stmt = SQLiteJDBCDriverConnection
                 .getConn()
@@ -56,22 +59,36 @@ public class MetricsRepository {
 
         try {
             stmt.setDate(1, Date.valueOf(interval.getIntervalBegin()));
-            stmt.setString(2, Integer.toString(weekday.getWeekdayNumber()));
-            stmt.setString(3, Integer.toString(weekday.getWeekdayNumber()));
 
             ResultSet rs = stmt.executeQuery();
 
-            List<Statistic> result = new ArrayList<>();
             Statistic statistic;
+            Integer musicId;
+            Date date;
 
             while (rs.next()) {
-                statistic = new Statistic();
-                statistic.setMusicId(rs.getInt("music_id"));
-                statistic.setPlayCount(rs.getInt("play_count"));
-                result.add(statistic);
+                date = rs.getDate("date");
+
+                if (weekday.isWeekday(date)) {
+                    musicId = rs.getInt("music_id");
+                    statistic = statistics.get(musicId);
+
+                    if (statistic == null) {
+                        statistic = new Statistic();
+                        statistic.setMusicId(musicId);
+                        statistic.setPlayCount(1);
+                        statistics.put(musicId, statistic);
+                    } else {
+                        statistic.setPlayCount(statistic.getPlayCount() + 1);
+                    }
+                }
             }
 
-            return result;
+            return statistics.values()
+                    .stream()
+                    .sorted((s1, s2) -> Integer.compare(s2.getPlayCount(), s1.getPlayCount()))
+                    .limit(STATISTICS_LIMIT)
+                    .collect(Collectors.toList());
         } finally {
             stmt.close();
         }
