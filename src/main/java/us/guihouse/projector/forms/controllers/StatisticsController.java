@@ -50,6 +50,8 @@ public class StatisticsController implements Initializable {
 
     private List<Statistic> data;
 
+    private XYChart.Series series;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         intervalChoice.getItems().addAll(IntervalChoice.values());
@@ -77,6 +79,10 @@ public class StatisticsController implements Initializable {
                 loadStatistics();
             }
         });
+
+        this.series = new XYChart.Series<String, Integer>();
+        this.series.setName("Plays X Musicas");
+        barChart.getData().addAll(series);
     }
 
     private void loadStatistics() {
@@ -96,15 +102,11 @@ public class StatisticsController implements Initializable {
     }
 
     private void loadData() {
-        XYChart.Series series = new XYChart.Series<String, Integer>();
-        series.setName("Plays X Musicas");
+        series.getData().clear();
 
         for (Statistic statistic : data) {
             series.getData().add(new XYChart.Data<>(statistic.getMusic().getNameWithArtistProperty().getValue(), statistic.getPlayCount()));
         }
-
-        barChart.getData().clear();
-        barChart.getData().addAll(series);
     }
 
     private void loading() {
