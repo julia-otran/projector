@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>us.guihouse.projector</groupId>
     <artifactId>projector</artifactId>
-    <version>1.4</version>
+    <version>1.5</version>
     <packaging>jar</packaging>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
