@@ -8,6 +8,7 @@ package us.guihouse.projector.other;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,12 +44,12 @@ public class GraphicsFinder {
     public static List<Device> getAvailableDevices() {
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice devices[] = ge.getScreenDevices();
-        String preferred = getPreferredProjectionDeviceID();
+        List<String> preferred = getPreferredProjectionDeviceID();
 
         return Arrays.asList(devices)
                 .stream()
                 .filter(GraphicsDevice::isFullScreenSupported)
-                .map(dev -> new Device(dev, dev.getIDstring().equals(preferred)))
+                .map(dev -> new Device(dev, preferred.contains(dev.getIDstring())))
                 .collect(Collectors.toList());
 
     }
@@ -60,28 +61,26 @@ public class GraphicsFinder {
         return new Device(dev, false);
     }
 
-    private static String getPreferredProjectionDeviceID() {
+    private static List<String> getPreferredProjectionDeviceID() {
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice devices[] = ge.getScreenDevices();
         GraphicsDevice main = ge.getDefaultScreenDevice();
 
         if (main == null) {
-            return null;
+            return Collections.emptyList();
         }
 
         if (devices.length < 2) {
-            return null;
+            return Collections.emptyList();
         }
 
         String mainId = main.getIDstring();
 
-        for (GraphicsDevice dev : devices) {
-            if (dev.isFullScreenSupported() && !dev.getIDstring().equals(mainId)) {
-                return dev.getIDstring();
-            }
-        }
-
-        return null;
+        return Arrays.stream(devices)
+                .filter(GraphicsDevice::isFullScreenSupported)
+                .map(GraphicsDevice::getIDstring)
+                .filter(dev -> !dev.equals(mainId))
+                .collect(Collectors.toList());
     }
 
     private static String getDeviceName(GraphicsDevice dev) {

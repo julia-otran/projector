@@ -23,6 +23,4 @@ public interface CanvasDelegate {
     public SettingsService getSettingsService();
 
     public GraphicsDevice getDefaultDevice();
-
-    public GraphicsDevice getCurrentDevice();
 }

@@ -75,16 +75,8 @@ public class ProjectionPlayer implements Projectable {
             this.player.release();
         }
 
-        device = delegate.getCurrentDevice();
-
-        if (device == null) {
-            device = delegate.getDefaultDevice();
-            this.deviceW = device.getDefaultConfiguration().getBounds().width;
-            this.deviceH = device.getDefaultConfiguration().getBounds().height;
-        } else {
-            this.deviceW = delegate.getWidth();
-            this.deviceH = delegate.getHeight();
-        }
+        this.deviceW = delegate.getWidth();
+        this.deviceH = delegate.getHeight();
 
         renderCallback = new MyRenderCallback(panel);
 

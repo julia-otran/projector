@@ -5,14 +5,7 @@
  */
 package us.guihouse.projector.projection;
 
-import java.awt.Cursor;
-import java.awt.Frame;
-import java.awt.Graphics2D;
-import java.awt.GraphicsDevice;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
-import java.awt.Window;
+import java.awt.*;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.InvocationTargetException;
@@ -22,6 +15,9 @@ import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+
+import lombok.Getter;
+import us.guihouse.projector.other.GraphicsFinder;
 import us.guihouse.projector.other.OsCheck;
 import us.guihouse.projector.services.SettingsService;
 
@@ -29,62 +25,42 @@ import us.guihouse.projector.services.SettingsService;
  *
  * @author guilherme
  */
-public class ProjectionWindow implements Runnable, CanvasDelegate {
-
+public class ProjectionWindow  {
+    @Getter
     private JFrame frame;
-    private final PreviewPanel preview;
 
-    private final ProjectionCanvas projectionCanvas;
+    @Getter
+    private GraphicsFinder.Device currentDevice;
 
-    private GraphicsDevice currentDevice;
-    private GraphicsDevice defaultDevice;
-
-    private Thread drawThread;
-
-    private boolean running = false;
-    private boolean fullScreen = false;
-    private boolean starting = false;
-
-    private final SettingsService settingsService;
-
-    private final Cursor blankCursor;
-
-    public ProjectionWindow(SettingsService settingsService) {
-        this.settingsService = settingsService;
-
-        projectionCanvas = new ProjectionCanvas(this);
-
-        // Transparent 16 x 16 pixel cursor image.
-        BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-
-        // Create a new blank cursor.
-        blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImg, new Point(0, 0), "blank cursor");
-
-        preview = new PreviewPanel(this);
-    }
-
-    public ProjectionManager getManager() {
-        return projectionCanvas;
-    }
-
-    public void setDefaultDevice(GraphicsDevice defaultDevice) {
-        this.defaultDevice = defaultDevice;
-    }
-
-    public void setDevice(GraphicsDevice device) {
-        stopEngine();
+    ProjectionWindow(GraphicsFinder.Device device) {
         this.currentDevice = device;
-        startEngine();
     }
 
-    private void stopEngine() {
-        running = false;
+    void init() {
+        frame = new JFrame(currentDevice.getDevice().getDefaultConfiguration());
 
-        if (drawThread != null) {
-            drawThread.interrupt();
-            drawThread = null;
-        }
+        frame.setExtendedState(Frame.MAXIMIZED_BOTH);
+        frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        frame.setUndecorated(true);
+        frame.setIgnoreRepaint(true);
+        frame.setLayout(null);
 
+        Rectangle displayRect = currentDevice.getDevice().getDefaultConfiguration().getBounds();
+        frame.setBounds(displayRect);
+
+        frame.setBackground(Color.BLACK);
+    }
+
+    void makeVisible() {
+        frame.setVisible(true);
+        frame.createBufferStrategy(2);
+    }
+
+    void setCursor(final Cursor cursor) {
+        frame.setCursor(cursor);
+    }
+
+    void shutdown() {
         if (frame != null) {
             final Frame f = frame;
 
@@ -98,161 +74,5 @@ public class ProjectionWindow implements Runnable, CanvasDelegate {
 
             frame = null;
         }
-
-        preview.setProjectionCanvas(null);
-    }
-
-    private void startEngine() {
-        if (starting) {
-            return;
-        }
-
-        if (currentDevice != null) {
-            frame = new JFrame(currentDevice.getDefaultConfiguration());
-
-            frame.setExtendedState(Frame.MAXIMIZED_BOTH);
-            frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-            frame.setUndecorated(true);
-            frame.setIgnoreRepaint(true);
-            frame.setLayout(null);
-            frame.setCursor(blankCursor);
-
-            if (OsCheck.getOperatingSystemType() == OsCheck.OSType.MacOS) {
-                if (fullScreen) {
-                    setWindowCanFullScreen(frame, true);
-                }
-            }
-
-            Rectangle displayRect = currentDevice.getDefaultConfiguration().getBounds();
-            frame.setBounds(displayRect);
-
-
-            starting = true;
-
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    frame.setVisible(true);
-
-                    if (fullScreen) {
-                        currentDevice.setFullScreenWindow(frame);
-                    }
-
-                    frame.createBufferStrategy(2);
-
-                    projectionCanvas.init();
-                    preview.setProjectionCanvas(projectionCanvas);
-
-                    running = true;
-                    drawThread = new Thread(ProjectionWindow.this);
-                    drawThread.start();
-                    starting = false;
-                }
-            });
-        }
-    }
-
-    @Override
-    public void run() {
-        BufferStrategy bufferStrategy = frame.getBufferStrategy();
-        Graphics2D g;
-
-        while (running) {
-            preview.scheduleRepaint();
-
-            g = (Graphics2D) bufferStrategy.getDrawGraphics();
-            projectionCanvas.paintComponent(g);
-            bufferStrategy.show();
-            g.dispose();
-
-            try {
-                Thread.sleep(25);
-            } catch (InterruptedException ex) {
-                if (running) {
-                    running = false;
-                    Logger.getLogger(ProjectionWindow.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
-
-        drawThread = null;
-    }
-
-    @Override
-    public int getWidth() {
-        if (frame == null) {
-            return 800;
-        }
-
-        return frame.getWidth();
-    }
-
-    @Override
-    public int getHeight() {
-        if (frame == null) {
-            return 600;
-        }
-
-        return frame.getHeight();
-    }
-
-    @Override
-    public void setFullScreen(boolean fullScreen) {
-        if (this.fullScreen == fullScreen) {
-            return;
-        }
-
-        stopEngine();
-        this.fullScreen = fullScreen;
-        startEngine();
-    }
-
-    public void stop() {
-        stopEngine();
-        projectionCanvas.finish();
-    }
-
-    @Override
-    public SettingsService getSettingsService() {
-        return settingsService;
-    }
-
-    public JPanel getPreviewPanel() {
-        return preview;
-    }
-
-    /**
-     * @param window
-     */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static void setWindowCanFullScreen(Window window, boolean can) {
-        try {
-            Class util = Class.forName("com.apple.eawt.FullScreenUtilities");
-            Class params[] = new Class[]{Window.class, Boolean.TYPE};
-            Method method = util.getMethod("setWindowCanFullScreen", params);
-            method.invoke(util, window, can);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(ProjectionWindow.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoSuchMethodException ex) {
-            Logger.getLogger(ProjectionWindow.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SecurityException ex) {
-            Logger.getLogger(ProjectionWindow.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(ProjectionWindow.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(ProjectionWindow.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvocationTargetException ex) {
-            Logger.getLogger(ProjectionWindow.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    @Override
-    public GraphicsDevice getDefaultDevice() {
-        return defaultDevice;
-    }
-
-    @Override
-    public GraphicsDevice getCurrentDevice() {
-        return currentDevice;
     }
 }
