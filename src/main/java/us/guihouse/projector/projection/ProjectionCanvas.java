@@ -7,10 +7,8 @@ package us.guihouse.projector.projection;
 
 import java.awt.Font;
 import java.awt.Graphics2D;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
 import us.guihouse.projector.projection.models.BackgroundModel;
 import us.guihouse.projector.projection.text.WrappedText;
 import us.guihouse.projector.projection.text.WrapperFactory;
@@ -43,15 +41,18 @@ public class ProjectionCanvas implements ProjectionManager {
         initializeList.forEach(p -> p.init());
     }
 
-    public void finish() { initializeList.forEach(p -> p.finish()); }
+    public void finish() {
+        initializeList.forEach(p -> p.finish());
+    }
 
     protected void paintComponent(Graphics2D g) {
         if (currentProjectable == null) {
             background.paintComponent(g);
-            label.paintComponent(g);
         } else {
             currentProjectable.paintComponent(g);
         }
+
+        label.paintComponent(g);
     }
 
     @Override

@@ -5,18 +5,16 @@
  */
 package us.guihouse.projector.forms.controllers;
 
+import java.util.stream.Collectors;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.ToggleGroup;
 import javax.swing.JPanel;
 import us.guihouse.projector.other.GraphicsFinder;
-import us.guihouse.projector.projection.WindowManager;
 import us.guihouse.projector.projection.ProjectionManager;
+import us.guihouse.projector.projection.WindowManager;
 import us.guihouse.projector.services.SettingsService;
-
-import java.util.stream.Collectors;
 
 /**
  *
@@ -48,8 +46,6 @@ public class GraphicsDeviceHelper {
         projectionScreenMenu.getItems().clear();
         projectionScreenMenu.getItems().add(reloadItem);
 
-        ToggleGroup group = new ToggleGroup();
-
         GraphicsFinder.Device defaulDevice = GraphicsFinder.getDefaultDevice();
         windowManager.setDefaultDevice(defaulDevice.getDevice());
 
@@ -60,9 +56,6 @@ public class GraphicsDeviceHelper {
                 .collect(Collectors.toList()));
     }
 
-//    private void changeDevice(final GraphicsFinder.Device device) {
-//        projectionWindow.setDevice(device.getDevice());
-//    }
     private void buildReloadItem() {
         reloadItem = new MenuItem();
         reloadItem.setText("Redetectar Telas");

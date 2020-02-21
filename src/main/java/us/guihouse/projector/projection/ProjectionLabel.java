@@ -9,7 +9,6 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
@@ -50,7 +49,7 @@ public class ProjectionLabel implements Projectable {
     private List<StringWithPosition> drawLines = Collections.EMPTY_LIST;
 
     private final BasicStroke outlineStroke = new BasicStroke(4.0f);
-    private final Color overlay = new Color(0, 0, 0, 230);
+    private final Color overlay = new Color(0, 0, 0, 50);
 
     public ProjectionLabel(CanvasDelegate canvasDelegate) {
         this.canvasDelegate = canvasDelegate;

@@ -8,9 +8,8 @@ package us.guihouse.projector.projection;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
-import javax.swing.*;
-
 import javafx.application.Platform;
+import javax.swing.*;
 import uk.co.caprica.vlcj.player.MediaPlayerFactory;
 import uk.co.caprica.vlcj.player.direct.BufferFormat;
 import uk.co.caprica.vlcj.player.direct.BufferFormatCallback;
@@ -75,6 +74,7 @@ public class ProjectionPlayer implements Projectable {
             this.player.release();
         }
 
+        device = delegate.getDefaultDevice();
         this.deviceW = delegate.getWidth();
         this.deviceH = delegate.getHeight();
 
@@ -112,7 +112,7 @@ public class ProjectionPlayer implements Projectable {
         this.previewOW = (int) Math.round(dw);
         this.previewOH = (int) Math.round(dh);
 
-        panel.setBounds(0,0, previewOW, previewOH);
+        panel.setBounds(0, 0, previewOW, previewOH);
         panel.repaint();
 
         recalculatePreviewSize();
@@ -149,6 +149,7 @@ public class ProjectionPlayer implements Projectable {
     }
 
     private final static class MyRenderCallback extends RenderCallbackAdapter {
+
         private BufferedImage image;
         private JComponent preview;
 
@@ -174,7 +175,8 @@ public class ProjectionPlayer implements Projectable {
 
     private final class MyBufferFormatCallback implements BufferFormatCallback {
 
-        MyBufferFormatCallback() { }
+        MyBufferFormatCallback() {
+        }
 
         @Override
         public BufferFormat getBufferFormat(int sourceWidth, int sourceHeight) {
@@ -184,6 +186,7 @@ public class ProjectionPlayer implements Projectable {
     }
 
     private final class PlayerPanel extends JComponent {
+
         private boolean repainting;
         private BufferedImage image;
 
@@ -209,7 +212,7 @@ public class ProjectionPlayer implements Projectable {
         public void paint(Graphics g) {
             super.paint(g);
             g.setColor(Color.BLACK);
-            g.fillRect(0,0,previewOW, previewOH);
+            g.fillRect(0, 0, previewOW, previewOH);
             g.drawImage(image, 0, previewY, previewW, previewH, null);
         }
     }

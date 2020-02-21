@@ -21,8 +21,6 @@ import us.guihouse.projector.utils.WindowConfigsLoader;
 
 public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoader.WindowConfigsObserver {
 
-    private static final int BLEND_WIDTH_PIXELS = 200;
-
     private WindowConfigsLoader configLoader;
 
     private List<WindowConfig> windowConfigs = Collections.emptyList();
@@ -98,27 +96,25 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
         generateAssets();
 
-        if (!windows.isEmpty()) {
-            starting = true;
+        starting = true;
 
-            windows.forEach(ProjectionWindow::init);
-            windows.forEach(w -> w.setCursor(blankCursor));
+        windows.forEach(ProjectionWindow::init);
+        windows.forEach(w -> w.setCursor(blankCursor));
 
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    windows.forEach(ProjectionWindow::makeVisible);
-                    projectionCanvas.init();
-                    preview.setProjectionCanvas(projectionCanvas);
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                windows.forEach(ProjectionWindow::makeVisible);
+                projectionCanvas.init();
+                preview.setProjectionCanvas(projectionCanvas);
 
-                    running = true;
-                    drawThread = new Thread(WindowManager.this);
-                    drawThread.setPriority(Thread.MAX_PRIORITY);
-                    drawThread.start();
-                    starting = false;
-                }
-            });
-        }
+                running = true;
+                drawThread = new Thread(WindowManager.this);
+                drawThread.setPriority(Thread.MAX_PRIORITY);
+                drawThread.start();
+                starting = false;
+            }
+        });
     }
 
     @Override
@@ -143,6 +139,10 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
             windowConfigs.forEach(windowConfig -> {
                 Graphics2D g = allGraphics.get(windowConfig.getDisplayId());
+
+                if (g == null) {
+                    return;
+                }
 
                 g.setColor(Color.BLACK);
                 g.fillRect(windowConfig.getBgFillX(), windowConfig.getBgFillY(), windowConfig.getBgFillWidth(), windowConfig.getBgFillHeight());
