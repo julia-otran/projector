@@ -14,7 +14,6 @@ import javax.swing.JPanel;
 import us.guihouse.projector.other.GraphicsFinder;
 import us.guihouse.projector.projection.WindowManager;
 import us.guihouse.projector.projection.ProjectionManager;
-import us.guihouse.projector.projection.ProjectionWindow;
 import us.guihouse.projector.services.SettingsService;
 
 import java.util.stream.Collectors;
@@ -59,24 +58,11 @@ public class GraphicsDeviceHelper {
                 .stream()
                 .filter(GraphicsFinder.Device::isProjectionDevice)
                 .collect(Collectors.toList()));
-
-//        GraphicsFinder.getAvailableDevices().stream()
-//                .map(this::buildItem)
-//                .forEachOrdered((item) -> {
-//                    item.setToggleGroup(group);
-//
-//                    if (item.isSelected()) {
-//                        item.fire();
-//                    }
-//
-//                    projectionScreenMenu.getItems().add(item);
-//                });
     }
 
 //    private void changeDevice(final GraphicsFinder.Device device) {
 //        projectionWindow.setDevice(device.getDevice());
 //    }
-
     private void buildReloadItem() {
         reloadItem = new MenuItem();
         reloadItem.setText("Redetectar Telas");
@@ -107,7 +93,6 @@ public class GraphicsDeviceHelper {
 //
 //        return item;
 //    }
-
     private void buildProjectionFrame() {
         windowManager = new WindowManager(settingsService);
     }

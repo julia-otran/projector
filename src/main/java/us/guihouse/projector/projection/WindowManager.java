@@ -1,29 +1,26 @@
 package us.guihouse.projector.projection;
 
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
+import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferStrategy;
+import java.awt.image.BufferedImage;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import javax.swing.*;
 import us.guihouse.projector.models.WindowConfig;
 import us.guihouse.projector.other.GraphicsFinder;
 import us.guihouse.projector.services.SettingsService;
 import us.guihouse.projector.utils.BlendGenerator;
 import us.guihouse.projector.utils.WindowConfigsLoader;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
-import java.awt.image.BufferStrategy;
-import java.awt.image.BufferedImage;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
 public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoader.WindowConfigsObserver {
+
     private static final int BLEND_WIDTH_PIXELS = 200;
 
     private WindowConfigsLoader configLoader;
@@ -38,7 +35,9 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
     private List<ProjectionWindow> windows = Collections.emptyList();
 
+    private BufferedImage whiteImage;
     private HashMap<Integer, BufferedImage> blendAssets = new HashMap<>();
+    private HashMap<String, AlphaComposite> blackLevelAssets = new HashMap<>();
     private HashMap<String, AffineTransform> transformAssets = new HashMap<>();
 
     private Thread drawThread;
@@ -114,6 +113,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
                     running = true;
                     drawThread = new Thread(WindowManager.this);
+                    drawThread.setPriority(Thread.MAX_PRIORITY);
                     drawThread.start();
                     starting = false;
                 }
@@ -150,16 +150,23 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                 AffineTransform transform = transformAssets.get(windowConfig.getDisplayId());
 
                 g.setTransform(transform);
-                g.translate(windowConfig.getX(), windowConfig.getY());
 
                 projectionCanvas.paintComponent(g);
 
                 g.setTransform(transform);
 
+                Composite bLevel = blackLevelAssets.get(windowConfig.getDisplayId());
+
+                if (bLevel != null) {
+                    Composite old = g.getComposite();
+                    g.setComposite(bLevel);
+                    g.drawImage(whiteImage, windowConfig.getBlackLevelX(), windowConfig.getBlackLevelY(), null);
+                }
+
                 windowConfig.getBlends().forEach(blend -> {
                     BufferedImage img = blendAssets.get(blend.getId());
                     if (img != null) {
-                        g.drawImage(img, blend.getX(), blend.getY(), null);
+                        g.drawImage(img, blend.getX() - windowConfig.getX(), blend.getY() - windowConfig.getY(), null);
                     }
                 });
 
@@ -288,6 +295,9 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                     wc.setBgFillHeight(device.getDevice().getDisplayMode().getHeight());
 
                     wc.setBlackLevelPadding(0);
+                    wc.setBlackLevelX(0);
+                    wc.setBlackLevelY(0);
+
                     wc.setBlends(Collections.emptyList());
                     wc.setHelpLines(Collections.emptyList());
 
@@ -304,6 +314,22 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     private void generateAssets() {
         blendAssets.clear();
         transformAssets.clear();
+        blackLevelAssets.clear();
+
+        if (whiteImage != null) {
+            whiteImage.flush();
+        }
+
+        int greaterWidth = windowConfigs.stream().map(WindowConfig::getWidth).max(Integer::compareTo).orElse(800);
+        int greaterHeight = windowConfigs.stream().map(WindowConfig::getWidth).max(Integer::compareTo).orElse(800);
+
+        whiteImage = new BufferedImage(greaterWidth, greaterHeight, BufferedImage.TYPE_INT_ARGB);
+
+        for (int x = 0; x < greaterWidth; x++) {
+            for (int y = 0; y < greaterHeight; y++) {
+                whiteImage.setRGB(x, y, 0xFFFFFFFF);
+            }
+        }
 
         windowConfigs.forEach(wc -> {
             wc.getBlends().forEach(blend -> {
@@ -312,13 +338,16 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
             AffineTransform t = new AffineTransform();
 
+            t.translate(wc.getX(), wc.getY());
             t.scale(wc.getScaleX(), wc.getScaleY());
             t.shear(wc.getShearX(), wc.getShearY());
             t.rotate(wc.getRotate());
 
             transformAssets.put(wc.getDisplayId(), t);
-        });
 
+            AlphaComposite composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, wc.getBlackLevelPadding());
+            blackLevelAssets.put(wc.getDisplayId(), composite);
+        });
 
     }
 }

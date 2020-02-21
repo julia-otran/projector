@@ -1,14 +1,16 @@
 package us.guihouse.projector.models;
 
-import lombok.Data;
-
 import java.util.List;
+import lombok.Data;
 
 @Data
 public class WindowConfig {
+
     private String displayId;
 
-    private int blackLevelPadding;
+    private float blackLevelPadding;
+    private int blackLevelX;
+    private int blackLevelY;
 
     private int x;
     private int y;

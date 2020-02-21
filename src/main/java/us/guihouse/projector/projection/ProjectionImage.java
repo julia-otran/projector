@@ -5,26 +5,21 @@
  */
 package us.guihouse.projector.projection;
 
-import javafx.embed.swing.SwingFXUtils;
-import javafx.scene.image.Image;
 import us.guihouse.projector.projection.models.BackgroundModel;
 import us.guihouse.projector.projection.models.BackgroundProvide;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImageOp;
-import java.awt.image.ColorModel;
 
 /**
  *
  * @author guilherme
  */
 public class ProjectionImage implements Projectable {
+
     protected CanvasDelegate canvasDelegate;
-    
+
     private final Color bgColor;
 
     private BufferedImage scaledBackground;
@@ -66,7 +61,7 @@ public class ProjectionImage implements Projectable {
         g.fillRect(0, 0, canvasDelegate.getWidth(), canvasDelegate.getHeight());
 
         if (scaledBackground != null) {
-            g.drawImage(scaledBackground, 0,0, null);
+            g.drawImage(scaledBackground, 0, 0, null);
         }
 
         if (scaledOverlay != null) {
@@ -75,6 +70,7 @@ public class ProjectionImage implements Projectable {
             Composite old = g.getComposite();
 
             float alpha = 0.5f;
+
             AlphaComposite composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
             g.setComposite(composite);
 
