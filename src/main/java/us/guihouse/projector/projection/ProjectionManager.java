@@ -6,8 +6,6 @@
 package us.guihouse.projector.projection;
 
 import java.awt.Font;
-import java.io.File;
-
 import us.guihouse.projector.projection.models.BackgroundModel;
 import us.guihouse.projector.projection.text.WrappedText;
 import us.guihouse.projector.projection.text.WrapperFactory;
@@ -35,6 +33,7 @@ public interface ProjectionManager {
     public WrapperFactory getWrapperFactory();
 
     public BackgroundModel getBackgroundModel();
+
     public void setBackgroundModel(BackgroundModel background);
 
     public void setFullScreen(boolean fullScreen);
@@ -44,4 +43,8 @@ public interface ProjectionManager {
     public ProjectionPlayer createPlayer();
 
     void setAnimateBackground(boolean selected);
+
+    public boolean getDarkenBackground();
+
+    public void setDarkenBackground(boolean darkenBg);
 }

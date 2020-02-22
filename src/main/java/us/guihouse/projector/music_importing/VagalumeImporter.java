@@ -5,7 +5,6 @@
  */
 package us.guihouse.projector.music_importing;
 
-import us.guihouse.projector.dtos.ImportingMusicDTO;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,6 +12,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import us.guihouse.projector.dtos.ImportingMusicDTO;
 
 /**
  *
@@ -29,9 +29,9 @@ public class VagalumeImporter extends MusicUrlImporter {
         ImportingMusicDTO music = new ImportingMusicDTO();
 
         Document doc = Jsoup.parse(data);
-        Elements title = doc.select("#header h1");
-        Elements artist = doc.select("#header p a");
-        Elements stanzasElm = doc.select(".originalOnly div");
+        Elements title = doc.select("#lyricContent h1");
+        Elements artist = doc.select("#lyricContent h2");
+        Elements stanzasElm = doc.select("#lyrics");
 
         music.setName(title.text());
         music.setArtist(artist.text());

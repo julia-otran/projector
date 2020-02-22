@@ -5,7 +5,6 @@
  */
 package us.guihouse.projector.music_importing;
 
-import us.guihouse.projector.dtos.ImportingMusicDTO;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,6 +12,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import us.guihouse.projector.dtos.ImportingMusicDTO;
 
 /**
  *
@@ -31,7 +31,7 @@ public class LetrasMusImporter extends MusicUrlImporter {
         Document doc = Jsoup.parse(data);
         Elements title = doc.select(".cnt-head_title h1");
         Elements artist = doc.select(".cnt-head_title h2");
-        Elements stanzasElm = doc.select(".cnt-letra article p");
+        Elements stanzasElm = doc.select(".cnt-letra p");
 
         music.setName(title.text());
         music.setArtist(artist.text());

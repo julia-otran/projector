@@ -133,4 +133,14 @@ public class ProjectionCanvas implements ProjectionManager {
     public void setAnimateBackground(boolean selected) {
         background.setEnableAnimation(selected);
     }
+
+    @Override
+    public boolean getDarkenBackground() {
+        return label.isDarkenBackground();
+    }
+
+    @Override
+    public void setDarkenBackground(boolean darkenBg) {
+        label.setDarkenBackground(darkenBg);
+    }
 }

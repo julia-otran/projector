@@ -1,96 +1,97 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.embed.swing.*?>
-<?import javafx.scene.web.*?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.canvas.*?>
-<?import javafx.scene.media.*?>
-<?import javafx.scene.text.*?>
 <?import java.lang.*?>
 <?import java.util.*?>
+<?import javafx.embed.swing.*?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.*?>
+<?import javafx.scene.canvas.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.media.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.web.*?>
 
-<VBox id="RootBox" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.guihouse.projector.forms.controllers.WorkspaceController">
-    <children>
-        <MenuBar VBox.vgrow="NEVER">
-            <menus>
-                <Menu mnemonicParsing="false" text="Gerenciar Letras">
-                    <items>
-                        <MenuItem mnemonicParsing="false" onAction="#onOpenMusicList" text="Lista De Letras" />
-                  <MenuItem mnemonicParsing="false" onAction="#onShowStatistics" text="Estatísticas" />
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Imagem de Fundo">
-                    <items>
-                        <MenuItem mnemonicParsing="false" onAction="#onSelectBackgroundImageFile" text="Alterar Fundo" />
-                        <CheckMenuItem fx:id="cropBackgroundMenuItem" mnemonicParsing="false" onAction="#onCropBackgroundChanged" selected="true" text="Corte De Imagem" />
-                  <CheckMenuItem fx:id="animateBackgroundCheckItem" mnemonicParsing="false" onAction="#onAnimateBackgroundChanged" text="Animar Fundo" />
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Configurações">
-                    <items>
-                        <MenuItem mnemonicParsing="false" onAction="#onChangeFont" text="Alterar Fonte" />
-                        <CheckMenuItem fx:id="fullScreenCheckMenuItem" mnemonicParsing="false" onAction="#onChangeFullScreen" text="Modo Tela Cheia" />
-                        <Menu mnemonicParsing="false" text="Modo de Projeção de Letras">
-                            <items>
-                                <RadioMenuItem fx:id="singleLineProjectionMenuItem" mnemonicParsing="false" onAction="#onSingleLineProjection" selected="true" text="Uma linha por vez">
-                                    <toggleGroup>
-                                        <ToggleGroup fx:id="multilineProjection" />
-                                    </toggleGroup>
-                                </RadioMenuItem>
-                                <RadioMenuItem fx:id="multilineProjectionMenuItem" mnemonicParsing="false" onAction="#onMultilineProjection" text="Várias linhas" toggleGroup="$multilineProjection" />
-                            </items>
-                        </Menu>
-                        <Menu fx:id="projectionScreenMenu" mnemonicParsing="false" text="Tela de Projeção" />
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Ajuda">
-                    <items>
-                        <MenuItem mnemonicParsing="false" onAction="#onHelpAbout" text="Sobre" />
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" onAction="#onHelpManual" text="Manual de Instruções" />
-                    </items>
-                </Menu>
-            </menus>
-        </MenuBar>
-        <SplitPane dividerPositions="0.3051224944320713" layoutX="3.0" layoutY="63.0" VBox.vgrow="ALWAYS">
-            <items>
-                <VBox>
-                    <children>
-                        <TitledPane animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Lista de Projeção" VBox.vgrow="ALWAYS">
-                            <content>
-                                <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
-                                    <children>
-                                        <MenuButton mnemonicParsing="false" prefHeight="25.0" text="+ Incluir item" VBox.vgrow="NEVER">
-                                            <items>
-                                                <MenuItem mnemonicParsing="false" onAction="#onAddMusic" text="Letra de Musica" />
-                                                <MenuItem mnemonicParsing="false" onAction="#onAddYouTube" text="YouTube" />
-                                                <MenuItem mnemonicParsing="false" onAction="#onAddPicture" text="Imagem" />
-                                                <MenuItem mnemonicParsing="false" onAction="#onAddText" text="Texto" />
-                                                <MenuItem mnemonicParsing="false" onAction="#onAddBrowser" text="Site WEB" />
-                                                <MenuItem mnemonicParsing="false" onAction="#onAddPlayer" text="Arquivo de vídeo" />
-                                            </items>
-                                        </MenuButton>
-                                        <ListView fx:id="projectionListView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
-                                            <VBox.margin>
-                                                <Insets top="10.0" />
-                                            </VBox.margin>
-                                        </ListView>
-                                    </children>
-                                </VBox>
-                            </content>
-                        </TitledPane>
-                        <TitledPane fx:id="previewPane" animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="300.0" prefWidth="300.0" text="Pré Visualização" VBox.vgrow="SOMETIMES" />
-                    </children>
+<VBox id="RootBox" prefHeight="600.0" prefWidth="900.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="us.guihouse.projector.forms.controllers.WorkspaceController">
+  <children>
+    <MenuBar VBox.vgrow="NEVER">
+      <menus>
+        <Menu mnemonicParsing="false" text="Gerenciar Letras">
+          <items>
+            <MenuItem mnemonicParsing="false" onAction="#onOpenMusicList" text="Lista De Letras" />
+            <MenuItem mnemonicParsing="false" onAction="#onShowStatistics" text="Estatísticas" />
+          </items>
+        </Menu>
+        <Menu mnemonicParsing="false" text="Imagem de Fundo">
+          <items>
+            <CheckMenuItem mnemonicParsing="false" onAction="#onDarkenBackgroundChanged" text="Escurecer Fundo" fx:id="darkenBackgroundMenuItem" />
+            <MenuItem mnemonicParsing="false" onAction="#onSelectBackgroundImageFile" text="Alterar Fundo" />
+            <CheckMenuItem mnemonicParsing="false" onAction="#onCropBackgroundChanged" selected="true" text="Corte De Imagem" fx:id="cropBackgroundMenuItem" />
+            <CheckMenuItem mnemonicParsing="false" onAction="#onAnimateBackgroundChanged" text="Animar Fundo" fx:id="animateBackgroundCheckItem" />
+          </items>
+        </Menu>
+        <Menu mnemonicParsing="false" text="Configurações">
+          <items>
+            <MenuItem mnemonicParsing="false" onAction="#onChangeFont" text="Alterar Fonte" />
+            <CheckMenuItem mnemonicParsing="false" onAction="#onChangeFullScreen" text="Modo Tela Cheia" fx:id="fullScreenCheckMenuItem" />
+            <Menu mnemonicParsing="false" text="Modo de Projeção de Letras">
+              <items>
+                <RadioMenuItem mnemonicParsing="false" onAction="#onSingleLineProjection" selected="true" text="Uma linha por vez" fx:id="singleLineProjectionMenuItem">
+                  <toggleGroup>
+                    <ToggleGroup fx:id="multilineProjection" />
+                  </toggleGroup>
+                </RadioMenuItem>
+                <RadioMenuItem mnemonicParsing="false" onAction="#onMultilineProjection" text="Várias linhas" toggleGroup="$multilineProjection" fx:id="multilineProjectionMenuItem" />
+              </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Tela de Projeção" fx:id="projectionScreenMenu" />
+          </items>
+        </Menu>
+        <Menu mnemonicParsing="false" text="Ajuda">
+          <items>
+            <MenuItem mnemonicParsing="false" onAction="#onHelpAbout" text="Sobre" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem mnemonicParsing="false" onAction="#onHelpManual" text="Manual de Instruções" />
+          </items>
+        </Menu>
+      </menus>
+    </MenuBar>
+    <SplitPane dividerPositions="0.3051224944320713" VBox.vgrow="ALWAYS">
+      <items>
+        <VBox>
+          <children>
+            <TitledPane animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Lista de Projeção" VBox.vgrow="ALWAYS">
+              <content>
+                <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+                  <children>
+                    <MenuButton mnemonicParsing="false" prefHeight="25.0" text="+ Incluir item" VBox.vgrow="NEVER">
+                      <items>
+                        <MenuItem mnemonicParsing="false" onAction="#onAddMusic" text="Letra de Musica" />
+                        <MenuItem mnemonicParsing="false" onAction="#onAddYouTube" text="YouTube" />
+                        <MenuItem mnemonicParsing="false" onAction="#onAddPicture" text="Imagem" />
+                        <MenuItem mnemonicParsing="false" onAction="#onAddText" text="Texto" />
+                        <MenuItem mnemonicParsing="false" onAction="#onAddBrowser" text="Site WEB" />
+                        <MenuItem mnemonicParsing="false" onAction="#onAddPlayer" text="Arquivo de vídeo" />
+                      </items>
+                    </MenuButton>
+                    <ListView fx:id="projectionListView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
+                      <VBox.margin>
+                        <Insets top="10.0" />
+                      </VBox.margin>
+                    </ListView>
+                  </children>
                 </VBox>
-                <AnchorPane>
-                    <children>
-                        <Pane fx:id="targetPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                    </children>
-                </AnchorPane>
-            </items>
-        </SplitPane>
-    </children>
+              </content>
+            </TitledPane>
+            <TitledPane fx:id="previewPane" animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="300.0" prefWidth="300.0" text="Pré Visualização" VBox.vgrow="SOMETIMES" />
+          </children>
+        </VBox>
+        <AnchorPane>
+          <children>
+            <Pane fx:id="targetPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+          </children>
+        </AnchorPane>
+      </items>
+    </SplitPane>
+  </children>
 </VBox>

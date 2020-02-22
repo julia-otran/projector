@@ -18,6 +18,9 @@ import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
+import us.guihouse.projector.other.ProjectorPreferences;
 import us.guihouse.projector.projection.models.StringWithPosition;
 import us.guihouse.projector.projection.text.WrappedText;
 import us.guihouse.projector.projection.text.WrapperFactory;
@@ -45,15 +48,20 @@ public class ProjectionLabel implements Projectable {
     private int paddingX = DEFAULT_PADDING_X;
     private int paddingY = DEFAULT_PADDING_Y;
 
+    @Getter
+    @Setter
+    private boolean darkenBackground;
+
     // Internal control
     private List<StringWithPosition> drawLines = Collections.EMPTY_LIST;
 
-    private final BasicStroke outlineStroke = new BasicStroke(4.0f);
-    private final Color overlay = new Color(0, 0, 0, 50);
+    private final BasicStroke outlineStroke = new BasicStroke(8.0f);
+    private static final Color OVERLAY = new Color(0, 0, 0, 230);
 
     public ProjectionLabel(CanvasDelegate canvasDelegate) {
         this.canvasDelegate = canvasDelegate;
         factoryChangeListeners = new ArrayList<>();
+        darkenBackground = ProjectorPreferences.getDarkenBackground();
     }
 
     @Override
@@ -105,8 +113,10 @@ public class ProjectionLabel implements Projectable {
             return;
         }
 
-        g.setColor(overlay);
-        g.fillRect(0, 0, canvasDelegate.getWidth(), canvasDelegate.getHeight());
+        if (darkenBackground) {
+            g.setColor(OVERLAY);
+            g.fillRect(0, 0, canvasDelegate.getWidth(), canvasDelegate.getHeight());
+        }
 
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);

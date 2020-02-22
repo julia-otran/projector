@@ -78,6 +78,8 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
                 updateTextWrapper();
             }
         });
+
+        darkenBackgroundMenuItem.setSelected(graphicsHelper.getProjectionManager().getDarkenBackground());
     }
 
     public void stop() {
@@ -113,6 +115,9 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     private CheckMenuItem animateBackgroundCheckItem;
 
     @FXML
+    private CheckMenuItem darkenBackgroundMenuItem;
+
+    @FXML
     public void onOpenMusicList() {
         listMusicStage.show();
     }
@@ -131,6 +136,11 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
         } catch (IOException ex) {
             Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    @FXML
+    public void onDarkenBackgroundChanged() {
+        graphicsHelper.getProjectionManager().setDarkenBackground(darkenBackgroundMenuItem.isSelected());
     }
 
     @FXML
@@ -422,7 +432,6 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
             Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
 
     private void createStatisticsStage() {
         try {

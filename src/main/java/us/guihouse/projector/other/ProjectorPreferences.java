@@ -22,6 +22,7 @@ public class ProjectorPreferences {
     private static final String BACKGROUND_LOGO_FILE_PATH = "BACKGROUND_LOGO_FILE_PATH";
     private static final String BACKGROUND_OVERLAY_FILE_PATH = "BACKGROUND_OVERLAY_FILE_PATH";
     private static final String BACKGROUND_TYPE = "BACKGROUND_TYPE";
+    private static final String DARKEN_BACKGROUND = "DARKEN_BACKGROUND";
 
     public static Preferences getPrefs() {
         if (prefs == null) {
@@ -101,5 +102,13 @@ public class ProjectorPreferences {
         } else {
             getPrefs().put(BACKGROUND_TYPE, path);
         }
+    }
+
+    public static boolean getDarkenBackground() {
+        return getPrefs().getBoolean(DARKEN_BACKGROUND, true);
+    }
+
+    public static void setDarkenBackground(boolean darkenBg) {
+        getPrefs().putBoolean(DARKEN_BACKGROUND, darkenBg);
     }
 }

@@ -5,15 +5,11 @@
  */
 package us.guihouse.projector.forms.controllers;
 
-import java.awt.*;
+import com.sun.istack.internal.logging.Logger;
 import java.io.File;
 import java.net.URL;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.ResourceBundle;
-
+import java.util.logging.Level;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -48,7 +44,9 @@ import us.guihouse.projector.services.FileDragDropService;
  * @author guilherme
  */
 public class PlayerController extends ProjectionController implements FileDragDropService.Client, MediaPlayerEventListener {
+
     private FileDragDropService dragDropService;
+
     /**
      * Initializes the controller class.
      */
@@ -62,22 +60,22 @@ public class PlayerController extends ProjectionController implements FileDragDr
     // Drag and drop
     @FXML
     private Label dragDropLabel;
-    
+
     @FXML
     private VBox chooseFileBox;
-    
+
     @FXML
     private VBox playerBox;
-    
+
     private String oldLabelText;
-    
+
     // Controls
     @FXML
     private Button beginProjectionButton;
 
     @FXML
     private Button endProjectionButton;
-    
+
     @FXML
     private Group playerGroup;
 
@@ -140,7 +138,13 @@ public class PlayerController extends ProjectionController implements FileDragDr
 
         this.dragDropService = new FileDragDropService(this);
 
-        this.projectionPlayer = projectionManager.createPlayer();
+        try {
+            this.projectionPlayer = projectionManager.createPlayer();
+        } catch (Exception ex) {
+            Logger.getLogger(PlayerController.class).log(Level.SEVERE, ex.getMessage(), ex);
+            // TODO: Show Error State
+            return;
+        }
 
         playerGroup.setAutoSizeChildren(false);
 
@@ -213,29 +217,31 @@ public class PlayerController extends ProjectionController implements FileDragDr
     }
 
     @FXML
-    public void withoutSoundButtonClick() { projectionPlayer.getPlayer().mute(true); }
+    public void withoutSoundButtonClick() {
+        projectionPlayer.getPlayer().mute(true);
+    }
 
     @FXML
     public void withSoundButtonClick() {
         projectionPlayer.getPlayer().mute(false);
     }
-    
+
     // Drag and drop
     @FXML
     public void onDragOver(DragEvent event) {
         dragDropService.onDragOver(event);
     }
-    
+
     @FXML
     public void onDragExit() {
         dragDropService.onDragExit();
     }
-    
+
     @FXML
     public void onDragDropped(DragEvent event) {
         dragDropService.onDragDropped(event);
     }
-    
+
     private void setOriginal() {
         dragDropLabel.setText(oldLabelText);
         chooseFileBox.setBorder(null);
@@ -303,7 +309,7 @@ public class PlayerController extends ProjectionController implements FileDragDr
 
     @Override
     public void playing(MediaPlayer mediaPlayer) {
-        Platform.runLater(new Runnable(){
+        Platform.runLater(new Runnable() {
 
             @Override
             public void run() {
@@ -316,7 +322,7 @@ public class PlayerController extends ProjectionController implements FileDragDr
 
     @Override
     public void paused(MediaPlayer mediaPlayer) {
-        Platform.runLater(new Runnable(){
+        Platform.runLater(new Runnable() {
 
             @Override
             public void run() {
@@ -330,7 +336,7 @@ public class PlayerController extends ProjectionController implements FileDragDr
 
     @Override
     public void stopped(MediaPlayer mediaPlayer) {
-        Platform.runLater(new Runnable(){
+        Platform.runLater(new Runnable() {
 
             @Override
             public void run() {
@@ -366,7 +372,7 @@ public class PlayerController extends ProjectionController implements FileDragDr
 
         currentTime = l / 1000;
 
-        Platform.runLater(new Runnable(){
+        Platform.runLater(new Runnable() {
 
             @Override
             public void run() {
@@ -381,7 +387,7 @@ public class PlayerController extends ProjectionController implements FileDragDr
 
     @Override
     public void positionChanged(MediaPlayer mediaPlayer, float v) {
-        Platform.runLater(new Runnable(){
+        Platform.runLater(new Runnable() {
 
             @Override
             public void run() {

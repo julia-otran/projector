@@ -151,9 +151,13 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
                 g.setTransform(transform);
 
+                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+
                 projectionCanvas.paintComponent(g);
 
                 g.setTransform(transform);
+                g.translate(windowConfig.getX(), windowConfig.getY());
 
                 Composite bLevel = blackLevelAssets.get(windowConfig.getDisplayId());
 
@@ -166,7 +170,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                 windowConfig.getBlends().forEach(blend -> {
                     BufferedImage img = blendAssets.get(blend.getId());
                     if (img != null) {
-                        g.drawImage(img, blend.getX() - windowConfig.getX(), blend.getY() - windowConfig.getY(), null);
+                        g.drawImage(img, blend.getX(), blend.getY(), null);
                     }
                 });
 
@@ -201,12 +205,16 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
     @Override
     public int getWidth() {
-        return windowConfigs.stream().map(wc -> wc.getX() + wc.getWidth()).max(Integer::compareTo).orElse(800);
+        int screenStart = windowConfigs.stream().map(wc -> wc.getX()).min(Integer::compareTo).orElse(0);
+        int screenEnd = windowConfigs.stream().map(wc -> wc.getX() + wc.getWidth()).max(Integer::compareTo).orElse(800);
+        return screenEnd - screenStart;
     }
 
     @Override
     public int getHeight() {
-        return windowConfigs.stream().map(wc -> wc.getY() + wc.getHeight()).max(Integer::compareTo).orElse(600);
+        int screenStart = windowConfigs.stream().map(wc -> wc.getY()).min(Integer::compareTo).orElse(0);
+        int screenEnd = windowConfigs.stream().map(wc -> wc.getY() + wc.getHeight()).max(Integer::compareTo).orElse(600);
+        return screenEnd - screenStart;
     }
 
     @Override
@@ -321,7 +329,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
         }
 
         int greaterWidth = windowConfigs.stream().map(WindowConfig::getWidth).max(Integer::compareTo).orElse(800);
-        int greaterHeight = windowConfigs.stream().map(WindowConfig::getWidth).max(Integer::compareTo).orElse(800);
+        int greaterHeight = windowConfigs.stream().map(WindowConfig::getHeight).max(Integer::compareTo).orElse(800);
 
         whiteImage = new BufferedImage(greaterWidth, greaterHeight, BufferedImage.TYPE_INT_ARGB);
 
@@ -338,7 +346,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
             AffineTransform t = new AffineTransform();
 
-            t.translate(wc.getX(), wc.getY());
+            t.translate(-1 * wc.getX(), -1 * wc.getY());
             t.scale(wc.getScaleX(), wc.getScaleY());
             t.shear(wc.getShearX(), wc.getShearY());
             t.rotate(wc.getRotate());
