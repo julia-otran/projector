@@ -7,6 +7,18 @@ Esta versão ainda é um W.I.P.
 
 Sinta-se a vontade para abrir um `pull request`e contribuir conosco.
 
+Build
+=====
+- Nós usamos o maven para gerar a build.
+- Utilizar Java 8
+
+Basta executar o seguinte comando:
+
+```
+mvn package
+```
+
+O jar será gerado em `target/projector-x.x-jar-with-dependencies.jar`
 
 Instalação
 ==========
