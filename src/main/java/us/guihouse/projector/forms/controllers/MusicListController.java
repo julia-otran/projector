@@ -20,11 +20,11 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
@@ -58,7 +58,7 @@ public class MusicListController implements Initializable, BackCallback, ImportC
 
     private Stage currentStage;
     private Parent oldRoot;
-    
+
     /**
      * Initializes the controller class.
      */
@@ -71,6 +71,17 @@ public class MusicListController implements Initializable, BackCallback, ImportC
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 fillMusicsProtected(newValue);
             }
+        });
+
+        resultsTable.setRowFactory(tv -> {
+            TableRow<ListMusicDTO> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty())) {
+                    ListMusicDTO rowData = row.getItem();
+                    addToList(rowData.getId());
+                }
+            });
+            return row;
         });
     }
 
@@ -153,6 +164,8 @@ public class MusicListController implements Initializable, BackCallback, ImportC
             }
         });
 
+        col.prefWidthProperty().setValue(300);
+
         return col;
     }
 
@@ -174,14 +187,14 @@ public class MusicListController implements Initializable, BackCallback, ImportC
     public void goBack() {
         currentStage.getScene().setRoot(oldRoot);
     }
-    
+
     @Override
     public void goBackWithId(Integer id) {
         fillMusicsProtected(searchText.getText());
         addToList(id);
         currentStage.getScene().setRoot(oldRoot);
     }
-    
+
     @Override
     public void goBackAndReload() {
         fillMusicsProtected(searchText.getText());
@@ -202,7 +215,7 @@ public class MusicListController implements Initializable, BackCallback, ImportC
         } catch (SQLException ex) {
             Logger.getLogger(MusicListController.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         try {
             Parent root = MusicFormScene.createMusicFormScene(manageMusicService, this, music);
             oldRoot = currentStage.getScene().getRoot();
@@ -303,6 +316,5 @@ public class MusicListController implements Initializable, BackCallback, ImportC
     public void setCurrentStage(Stage currentStage) {
         this.currentStage = currentStage;
     }
-    
-    
+
 }
