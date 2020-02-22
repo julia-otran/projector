@@ -30,4 +30,12 @@ Instalação
    ### Atenção
    - Se você instalou o JDK 64 bits, tem que instalar o VLC 64bits. Por padrão o VLC retorna a versão 32bits, que não irá funcionar com o java x64
    - Instalar o VLC no diretório C:\VLC e não dentro da pasta Program Files (Arquivos de Programas)
-3. Definir uma variável de ambiente `VLC_PLUGIN_PATH com valor C:\VLC\plugins
+3. Definir uma variável de ambiente `VLC_PLUGIN_PATH` com valor `C:\VLC\plugins`
+
+
+Configração de Telas
+====================
+
+Ao iniciar pela primeira vez o Projector, ele cria um arquivo em `~/Projector/window-configs.json`
+
+Lembre-se de excluir e fazer um backup toda vez que você alterar a configuração das telas. (ou trocar de tela)
