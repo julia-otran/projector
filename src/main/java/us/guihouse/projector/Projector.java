@@ -8,11 +8,13 @@ package us.guihouse.projector;
 import com.mashape.unirest.http.Unirest;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sun.jna.NativeLibrary;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -25,6 +27,8 @@ import javafx.stage.WindowEvent;
 import us.guihouse.projector.forms.controllers.SceneManager;
 import us.guihouse.projector.forms.controllers.WorkspaceController;
 import us.guihouse.projector.other.SQLiteJDBCDriverConnection;
+
+import javax.swing.*;
 
 /**
  *
@@ -111,6 +115,18 @@ public class Projector extends Application {
                 } catch (IOException ex) {
                     Logger.getLogger(Projector.class.getName()).log(Level.SEVERE, null, ex);
                 }
+
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                System.exit(0);
+                            }
+                        });
+                    }
+                });
             }
         });
     }

@@ -312,6 +312,7 @@ public class ImageController extends ProjectionController implements Runnable {
     @Override
     public void stop() {
         onEscapeKeyPressed();
+        projectionManager.stop(projectable);
     }
 
     private void start() {

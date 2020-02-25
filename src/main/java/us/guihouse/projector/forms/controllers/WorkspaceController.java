@@ -16,24 +16,23 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ListChangeListener;
 import javafx.embed.swing.SwingNode;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
+import sun.awt.X11.XKeyEvent;
 import us.guihouse.projector.enums.ProjectionListItemType;
-import us.guihouse.projector.models.Music;
-import us.guihouse.projector.models.ProjectionList;
 import us.guihouse.projector.models.ProjectionListItem;
 import us.guihouse.projector.models.SimpleProjectionList;
 import us.guihouse.projector.other.AwtFontChooseDialog;
-import us.guihouse.projector.other.DragSortListCell;
+import us.guihouse.projector.other.ProjectableItemListCell;
 import us.guihouse.projector.other.YouTubeVideoResolve;
 import us.guihouse.projector.projection.TextWrapperFactoryChangeListener;
 import us.guihouse.projector.projection.text.TextWrapper;
@@ -47,7 +46,7 @@ import us.guihouse.projector.services.ManageMusicService;
  *
  * @author guilherme
  */
-public class WorkspaceController implements Initializable, SceneObserver, AddMusicCallback, DragSortListCell.DragDoneCallback<ProjectionListItem> {
+public class WorkspaceController implements Initializable, SceneObserver, AddMusicCallback, ProjectableItemListCell.CellCallback<ProjectionListItem> {
 
     private SceneManager sceneManager;
     private GraphicsDeviceHelper graphicsHelper;
@@ -291,25 +290,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     class ProjectablesListViewCellFactory implements Callback<ListView<ProjectionListItem>, ListCell<ProjectionListItem>> {
         @Override
         public ListCell<ProjectionListItem> call(ListView<ProjectionListItem> arg) {
-            //My cell is on my way to call
-            DragSortListCell<ProjectionListItem> cell = new DragSortListCell<ProjectionListItem>(WorkspaceController.this) {
-                @Override
-                public void updateItem(ProjectionListItem item, boolean empty) {
-                    super.updateItem(item, empty);
-
-                    if (empty) {
-                        setText(null);
-                    }
-
-                    if (item != null) {
-                        //finally every thing is just setup
-                        setText(item.getTitle());
-                    }
-                }
-            };
-
-            //Take my cell
-            return cell;
+            return new ProjectableItemListCell(WorkspaceController.this);
         }
     }
 
@@ -334,6 +315,17 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
                 }
 
                 setProjectionView(null);
+            }
+        });
+
+        projectablesListView.setOnKeyPressed(keyEvent -> {
+            if (keyEvent.getCode() == KeyCode.DELETE) {
+                try {
+                    listRepository.deleteItem(projectablesListView.getSelectionModel().getSelectedItem());
+                    reloadProjectables();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }

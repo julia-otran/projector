@@ -169,19 +169,18 @@ public class ProjectionListRepository {
 
         final String insertSql = "INSERT INTO projection_list_item_properties(projection_list_item_id, key, value) VALUES (?, ?, ?)";
 
-        for (Map.Entry<String, String> entry : properties.entrySet()) {
-            PreparedStatement insert = SQLiteJDBCDriverConnection
-                    .getConn()
-                    .prepareStatement(insertSql);
-
-            try {
+        PreparedStatement insert = SQLiteJDBCDriverConnection
+                .getConn()
+                .prepareStatement(insertSql);
+        try {
+            for (Map.Entry<String, String> entry : properties.entrySet()) {
                 insert.setLong(1, itemId);
                 insert.setString(2, entry.getKey());
                 insert.setString(3, entry.getValue());
                 insert.execute();
-            } finally {
-                insert.close();
             }
+        } finally {
+            insert.close();
         }
     }
 
@@ -213,6 +212,23 @@ public class ProjectionListRepository {
         try {
             stmt.setInt(1, item.getOrder());
             stmt.setLong(2, item.getId());
+            stmt.execute();
+        } finally {
+            stmt.close();
+        }
+    }
+
+    public void deleteItem(ProjectionListItem item) throws SQLException {
+        updateItemProperties(item.getId(), new HashMap<>());
+
+        String sql = "DELETE FROM projection_list_items WHERE id = ?";
+
+        PreparedStatement stmt = SQLiteJDBCDriverConnection
+                .getConn()
+                .prepareStatement(sql);
+
+        try {
+            stmt.setLong(1, item.getId());
             stmt.execute();
         } finally {
             stmt.close();

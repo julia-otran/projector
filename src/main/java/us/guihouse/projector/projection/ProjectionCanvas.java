@@ -38,11 +38,11 @@ public class ProjectionCanvas implements ProjectionManager {
     }
 
     public void init() {
-        initializeList.forEach(p -> p.init());
+        initializeList.forEach(Projectable::init);
     }
 
     public void finish() {
-        initializeList.forEach(p -> p.finish());
+        initializeList.forEach(Projectable::finish);
     }
 
     protected void paintComponent(Graphics2D g) {
@@ -142,5 +142,11 @@ public class ProjectionCanvas implements ProjectionManager {
     @Override
     public void setDarkenBackground(boolean darkenBg) {
         label.setDarkenBackground(darkenBg);
+    }
+
+    @Override
+    public void stop(Projectable projectable) {
+        projectable.finish();
+        initializeList.remove(projectable);
     }
 }

@@ -47,4 +47,6 @@ public interface ProjectionManager {
     public boolean getDarkenBackground();
 
     public void setDarkenBackground(boolean darkenBg);
+
+    void stop(Projectable projectable);
 }

@@ -168,5 +168,6 @@ public class BrowserController extends ProjectionController {
     @Override
     public void stop() {
         onEscapeKeyPressed();
+        projectionManager.stop(projectionWebView);
     }
 }

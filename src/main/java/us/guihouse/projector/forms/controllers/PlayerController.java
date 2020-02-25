@@ -207,7 +207,8 @@ public class PlayerController extends ProjectionController implements FileDragDr
     public void stop() {
         onEscapeKeyPressed();
         projectionPlayer.getPlayer().stop();
-        projectionPlayer.finish();
+        projectionManager.stop(projectionPlayer);
+
     }
 
     @FXML

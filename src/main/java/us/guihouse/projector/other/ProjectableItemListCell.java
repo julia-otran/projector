@@ -7,21 +7,18 @@ import java.util.ArrayList;
 import java.util.List;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ListCell;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.DragEvent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.TransferMode;
+import javafx.scene.input.*;
 import lombok.Getter;
-import lombok.Setter;
+import us.guihouse.projector.models.ProjectionListItem;
 
 
-public class DragSortListCell<X extends Identifiable> extends ListCell<X> {
-    public interface DragDoneCallback<X> {
+public class ProjectableItemListCell extends ListCell<ProjectionListItem> {
+    public interface CellCallback<X> {
         void onDragDone(List<X> items);
     }
 
     @Getter
-    private final DragDoneCallback<X> dragDoneCallback;
+    private final CellCallback<ProjectionListItem> cellCallback;
 
     @Override
     protected void finalize() throws Throwable {
@@ -31,11 +28,12 @@ public class DragSortListCell<X extends Identifiable> extends ListCell<X> {
         setOnDragExited(null);
         setOnDragDropped(null);
         setOnDragDone(null);
+        setOnKeyPressed(null);
         super.finalize();
     }
 
-    public DragSortListCell(DragDoneCallback<X> dragDoneCallback) {
-        this.dragDoneCallback = dragDoneCallback;
+    public ProjectableItemListCell(CellCallback<ProjectionListItem> cellCallback) {
+        this.cellCallback = cellCallback;
         ListCell thisCell = this;
 
         setOnDragDetected(event -> {
@@ -47,7 +45,7 @@ public class DragSortListCell<X extends Identifiable> extends ListCell<X> {
             ClipboardContent content = new ClipboardContent();
             content.putString(getItem().getIdentity());
 
-            dragboard.setDragView(DragSortListCell.this.snapshot(null, null));
+            dragboard.setDragView(ProjectableItemListCell.this.snapshot(null, null));
             dragboard.setContent(content);
 
             event.consume();
@@ -85,19 +83,19 @@ public class DragSortListCell<X extends Identifiable> extends ListCell<X> {
             boolean success = false;
 
             if (db.hasString()) {
-                ObservableList<X> items = getListView().getItems();
-                X item = findItemByIdentity(db.getString());
+                ObservableList<ProjectionListItem> items = getListView().getItems();
+                ProjectionListItem item = findItemByIdentity(db.getString());
                 int draggedIdx = items.indexOf(item);
                 int thisIdx = items.indexOf(getItem());
 
                 items.set(draggedIdx, getItem());
                 items.set(thisIdx, item);
 
-                List<X> itemscopy = new ArrayList<>(getListView().getItems());
+                List<ProjectionListItem> itemscopy = new ArrayList<>(getListView().getItems());
                 getListView().getItems().setAll(itemscopy);
 
-                if (dragDoneCallback != null) {
-                    dragDoneCallback.onDragDone(itemscopy);
+                if (cellCallback != null) {
+                    cellCallback.onDragDone(itemscopy);
                 }
 
                 success = true;
@@ -110,7 +108,21 @@ public class DragSortListCell<X extends Identifiable> extends ListCell<X> {
         setOnDragDone(DragEvent::consume);
     }
 
-    private X findItemByIdentity(String id) {
+    @Override
+    public void updateItem(ProjectionListItem item, boolean empty) {
+        super.updateItem(item, empty);
+
+        if (empty) {
+            setText(null);
+        }
+
+        if (item != null) {
+            //finally every thing is just setup
+            setText(item.getTitle());
+        }
+    }
+
+    private ProjectionListItem findItemByIdentity(String id) {
         return getListView()
                 .getItems()
                 .stream()
