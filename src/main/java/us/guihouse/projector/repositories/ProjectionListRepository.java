@@ -234,4 +234,19 @@ public class ProjectionListRepository {
             stmt.close();
         }
     }
+
+    public void deleteList(SimpleProjectionList selectedItem) throws SQLException {
+        String sql = "UPDATE projection_lists SET active = 0 WHERE id = ?";
+
+        PreparedStatement stmt = SQLiteJDBCDriverConnection
+                .getConn()
+                .prepareStatement(sql);
+
+        try {
+            stmt.setInt(1, selectedItem.getId());
+            stmt.execute();
+        } finally {
+            stmt.close();
+        }
+    }
 }

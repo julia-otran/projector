@@ -57,7 +57,7 @@
         </Menu>
       </menus>
     </MenuBar>
-    <SplitPane dividerPositions="0.30957683741648107" VBox.vgrow="ALWAYS">
+    <SplitPane dividerPositions="0.3106904231625835" VBox.vgrow="ALWAYS">
       <items>
         <VBox>
           <children>
@@ -65,19 +65,29 @@
               <content>
                 <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
                   <children>
-                    <ChoiceBox fx:id="projectionListChoice" maxWidth="1.7976931348623157E308" prefWidth="268.0" VBox.vgrow="NEVER">
-                      <items>
-                        <FXCollections fx:factory="observableArrayList">
-                          <String fx:value="Item 1" />
-                          <String fx:value="Item 2" />
-                          <String fx:value="Item 3" />
-                        </FXCollections>
-                      </items>
+                    <Label text="Selecione ou crie uma lista:" />
+                    <HBox prefHeight="24.0" prefWidth="271.0">
+                      <children>
+                        <ChoiceBox fx:id="projectionListChoice" maxWidth="1.7976931348623157E308" prefWidth="268.0">
+                          <items>
+                            <FXCollections fx:factory="observableArrayList">
+                              <String fx:value="Item 1" />
+                              <String fx:value="Item 2" />
+                              <String fx:value="Item 3" />
+                            </FXCollections>
+                          </items>
+                        </ChoiceBox>
+                        <MenuButton fx:id="projectionListOptionsMenuButton" mnemonicParsing="false" text="Opções">
+                          <items>
+                            <MenuItem mnemonicParsing="false" onAction="#onDeleteProjectionList" text="Excluir Lista de Projeção" />
+                          </items>
+                        </MenuButton>
+                      </children>
                       <VBox.margin>
                         <Insets bottom="12.0" />
                       </VBox.margin>
-                    </ChoiceBox>
-                    <MenuButton fx:id="addItemButtonGroup" mnemonicParsing="false" prefHeight="25.0" text="+ Incluir item" VBox.vgrow="NEVER">
+                    </HBox>
+                    <MenuButton fx:id="addItemButtonGroup" mnemonicParsing="false" prefHeight="25.0" text="+ Incluir item">
                       <items>
                         <MenuItem mnemonicParsing="false" onAction="#onAddMusic" text="Letra de Musica" />
                         <MenuItem mnemonicParsing="false" onAction="#onAddYouTube" text="YouTube" />

@@ -198,6 +198,9 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     @FXML
     private ChoiceBox<SimpleProjectionList> projectionListChoice;
 
+    @FXML
+    private MenuButton projectionListOptionsMenuButton;
+
     private void initProjectionList() {
         projectionListChoice.setConverter(new StringConverter<SimpleProjectionList>() {
             @Override
@@ -214,7 +217,11 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
         projectionListChoice.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<SimpleProjectionList>() {
             @Override
             public void changed(ObservableValue<? extends SimpleProjectionList> observable, SimpleProjectionList oldValue, SimpleProjectionList newValue) {
-                if (newValue != null) {
+                if (newValue == null) {
+                    projectablesListView.setVisible(false);
+                    addItemButtonGroup.setVisible(false);
+                    projectionListOptionsMenuButton.setVisible(false);
+                } else {
                     if (newValue.getTitle().equals("<Criar nova lista>")) {
                         TextInputDialog inputDialog = new TextInputDialog();
                         inputDialog.setTitle("Digitar Título");
@@ -236,6 +243,9 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
 
                     } else {
                         setProjectablesList(newValue);
+                        projectablesListView.setVisible(true);
+                        addItemButtonGroup.setVisible(true);
+                        projectionListOptionsMenuButton.setVisible(true);
                     }
                 }
             }
@@ -253,6 +263,16 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
             projectionListChoice.getItems().addAll(listRepository.activeLists());
         } catch (SQLException e) {
             Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+        }
+    }
+
+    @FXML
+    public void onDeleteProjectionList() {
+        try {
+            listRepository.deleteList(projectionListChoice.getSelectionModel().getSelectedItem());
+            updateProjectionList();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -299,6 +319,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
 
         projectablesListView.setVisible(false);
         addItemButtonGroup.setVisible(false);
+        projectionListOptionsMenuButton.setVisible(false);
 
         projectablesListView.setCellFactory(new ProjectablesListViewCellFactory());
 
@@ -331,8 +352,6 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     }
 
     private void setProjectablesList(SimpleProjectionList simpleProjectablesList) {
-        projectablesListView.setVisible(true);
-        addItemButtonGroup.setVisible(true);
         projectionList = simpleProjectablesList;
         itemSubScenes.clear();
 
