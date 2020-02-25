@@ -17,6 +17,8 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingNode;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
@@ -59,12 +61,28 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     private Property<TextWrapper> textWrapperProperty = new SimpleObjectProperty<>();
     private WrapperFactory wrapperFactory;
 
+    @FXML
+    private SplitPane mainPane;
+
+    @FXML
+    private Pane loadingPane;
+
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        graphicsHelper = new GraphicsDeviceHelper(projectionScreenMenu);
+        buildReloadItem();
+        projectionScreenMenu.getItems().clear();
+        projectionScreenMenu.getItems().add(reloadItem);
+
+        menuBar.setVisible(false);
+        mainPane.setVisible(false);
+        loadingPane.setVisible(true);
+    }
+
+    public void init(GraphicsDeviceHelper graphicsHelper) {
+        this.graphicsHelper = graphicsHelper;
 
         preparePreview();
         initializeProjectablesList();
@@ -84,6 +102,10 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
         });
 
         darkenBackgroundMenuItem.setSelected(graphicsHelper.getProjectionManager().getDarkenBackground());
+
+        menuBar.setVisible(true);
+        mainPane.setVisible(true);
+        loadingPane.setVisible(false);
     }
 
     public void stop() {
@@ -100,6 +122,9 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     // ------------------------------
     // Menu
     // ------------------------------
+    @FXML
+    private MenuBar menuBar;
+
     @FXML
     private CheckMenuItem cropBackgroundMenuItem;
 
@@ -191,6 +216,20 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     public void onHelpManual() {
     }
 
+    private MenuItem reloadItem;
+
+
+    private void buildReloadItem() {
+        reloadItem = new MenuItem();
+        reloadItem.setText("Redetectar Telas");
+        reloadItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                graphicsHelper.reloadDevices();
+            }
+        });
+    }
+
     // ------------------------------
     // Projection List
     // ------------------------------
@@ -203,6 +242,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     private MenuButton projectionListOptionsMenuButton;
 
     private void initProjectionList() {
+        projectionListChoice.getItems().clear();
         projectionListChoice.setConverter(new StringConverter<SimpleProjectionList>() {
             @Override
             public String toString(SimpleProjectionList object) {

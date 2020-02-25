@@ -24,6 +24,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
+import us.guihouse.projector.forms.controllers.GraphicsDeviceHelper;
 import us.guihouse.projector.forms.controllers.SceneManager;
 import us.guihouse.projector.forms.controllers.WorkspaceController;
 import us.guihouse.projector.other.SQLiteJDBCDriverConnection;
@@ -34,32 +35,41 @@ import javax.swing.*;
  *
  * @author 15096134
  */
-public class Projector extends Application {
-    
+public class Projector extends Application implements Runnable {
+    private WorkspaceController controller;
+
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        NativeLibrary.addSearchPath("vlc", "/Applications/VLC.app/Contents/MacOS/lib/");
-        
-        //TODO: No windows PRECISA setar a ENV VLC_PLUGIN_PATH
-        // Ver https://github.com/java-native-access/jna
-        //Runtime.getRuntime().exec()
-        NativeLibrary.addSearchPath("libvlc", "C:\\VLC");
-        
         launch(args);
     }
 
     @Override
+    public void run() {
+        NativeLibrary.addSearchPath("vlc", "/Applications/VLC.app/Contents/MacOS/lib/");
+
+        //TODO: No windows PRECISA setar a ENV VLC_PLUGIN_PATH
+        // Ver https://github.com/java-native-access/jna
+        //Runtime.getRuntime().exec()
+        NativeLibrary.addSearchPath("libvlc", "C:\\VLC");
+
+        SQLiteJDBCDriverConnection.connect();
+        SQLiteJDBCDriverConnection.migrate();
+
+        final GraphicsDeviceHelper graphicsHelper = new GraphicsDeviceHelper();
+
+        Platform.runLater(() -> {
+            controller.init(graphicsHelper);
+        });
+    }
+
+    @Override
     public void start(Stage primaryStage) throws Exception {
-        WorkspaceController controller;
         
         primaryStage.setTitle("Projector");
         primaryStage.setMaxWidth(Double.MAX_VALUE);
         primaryStage.setMaxHeight(Double.MAX_VALUE);
-        
-        SQLiteJDBCDriverConnection.connect();
-        SQLiteJDBCDriverConnection.migrate();
         
         URL url = getClass().getClassLoader().getResource("fxml/workspace.fxml");
         
@@ -129,5 +139,7 @@ public class Projector extends Application {
                 });
             }
         });
+
+        new Thread(this).start();
     }
 }

@@ -14,7 +14,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 
-public abstract class ProjectionVideo implements Projectable {
+public class ProjectionVideo implements Projectable {
     private final CanvasDelegate delegate;
 
     protected DirectMediaPlayer player;
@@ -32,6 +32,7 @@ public abstract class ProjectionVideo implements Projectable {
     private int projectionY;
 
     private final boolean cropVideo;
+
     @Getter
     @Setter
     private boolean render = true;

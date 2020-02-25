@@ -22,15 +22,11 @@ import us.guihouse.projector.services.SettingsService;
  */
 public class GraphicsDeviceHelper {
 
-    private final Menu projectionScreenMenu;
-    private MenuItem reloadItem;
     private WindowManager windowManager;
     private final SettingsService settingsService = new SettingsService();
 
-    GraphicsDeviceHelper(Menu projectionScreenMenu) {
-        this.projectionScreenMenu = projectionScreenMenu;
+    public GraphicsDeviceHelper() {
         buildProjectionFrame();
-        buildReloadItem();
         reloadDevices();
     }
 
@@ -42,10 +38,7 @@ public class GraphicsDeviceHelper {
         windowManager.stop();
     }
 
-    private void reloadDevices() {
-        projectionScreenMenu.getItems().clear();
-        projectionScreenMenu.getItems().add(reloadItem);
-
+    public void reloadDevices() {
         GraphicsFinder.Device defaulDevice = GraphicsFinder.getDefaultDevice();
         windowManager.setDefaultDevice(defaulDevice.getDevice());
 
@@ -56,36 +49,6 @@ public class GraphicsDeviceHelper {
                 .collect(Collectors.toList()));
     }
 
-    private void buildReloadItem() {
-        reloadItem = new MenuItem();
-        reloadItem.setText("Redetectar Telas");
-        reloadItem.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                reloadDevices();
-            }
-        });
-    }
-
-//    private RadioMenuItem buildItem(final GraphicsFinder.Device dev) {
-//        RadioMenuItem item = new RadioMenuItem();
-//        item.setText(dev.getName());
-//
-//        if (dev.isProjectionDevice()) {
-//            item.setSelected(true);
-//        } else {
-//            item.setSelected(false);
-//        }
-//
-//        item.setOnAction(new EventHandler<ActionEvent>() {
-//            @Override
-//            public void handle(ActionEvent event) {
-//                changeDevice(dev);
-//            }
-//        });
-//
-//        return item;
-//    }
     private void buildProjectionFrame() {
         windowManager = new WindowManager(settingsService);
     }

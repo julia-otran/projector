@@ -508,6 +508,11 @@ public class PlayerController extends ProjectionController implements FileDragDr
     }
 
     @Override
+    public void mediaPlayerReady(MediaPlayer mediaPlayer) {
+
+    }
+
+    @Override
     public void mediaMetaChanged(MediaPlayer mediaPlayer, int i) {
 
     }
@@ -524,6 +529,11 @@ public class PlayerController extends ProjectionController implements FileDragDr
 
     @Override
     public void mediaParsedChanged(MediaPlayer mediaPlayer, int i) {
+
+    }
+
+    @Override
+    public void mediaParsedStatus(MediaPlayer mediaPlayer, int i) {
 
     }
 
@@ -563,4 +573,5 @@ public class PlayerController extends ProjectionController implements FileDragDr
     public void endOfSubItems(MediaPlayer mediaPlayer) {
 
     }
+
 }

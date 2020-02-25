@@ -57,6 +57,9 @@ public class MusicProjectionController extends ProjectionController {
     private Button clearScreenButton;
 
     @FXML
+    private Button removeBackgroundButton;
+
+    @FXML
     private TableView<SelectionText> phrasesTable;
 
     @FXML
@@ -260,12 +263,19 @@ public class MusicProjectionController extends ProjectionController {
     private void enableClear() {
         clearScreenButton.setText("Limpar Tela (ESC)");
         clearScreenButton.disableProperty().set(false);
+        removeBackgroundButton.disableProperty().set(false);
     }
 
     @FXML
     public void onClearScreen() {
         markIfPosible(phrasesTable.getSelectionModel().getSelectedIndex());
         phrasesTable.getSelectionModel().clearSelection();
+    }
+
+    @FXML
+    public void removeBackground() {
+        projectionManager.setMusicForBackground(null);
+        removeBackgroundButton.disableProperty().set(true);
     }
 
     private void clearMarker() {
@@ -435,5 +445,8 @@ public class MusicProjectionController extends ProjectionController {
     @Override
     public void stop() {
         onEscapeKeyPressed();
+        if (!removeBackgroundButton.isDisabled()) {
+            removeBackgroundButton.fire();
+        }
     }
 }
