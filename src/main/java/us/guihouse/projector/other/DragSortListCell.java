@@ -14,7 +14,18 @@ import javafx.scene.input.TransferMode;
 
 
 public class DragSortListCell<X extends Identifiable> extends ListCell<X> {
-    
+
+    @Override
+    protected void finalize() throws Throwable {
+        setOnDragDetected(null);
+        setOnDragOver(null);
+        setOnDragEntered(null);
+        setOnDragExited(null);
+        setOnDragDropped(null);
+        setOnDragDone(null);
+        super.finalize();
+    }
+
     public DragSortListCell() {
         ListCell thisCell = this;
 

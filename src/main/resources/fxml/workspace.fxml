@@ -2,6 +2,7 @@
 
 <?import java.lang.*?>
 <?import java.util.*?>
+<?import javafx.collections.*?>
 <?import javafx.embed.swing.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.*?>
@@ -56,7 +57,7 @@
         </Menu>
       </menus>
     </MenuBar>
-    <SplitPane dividerPositions="0.3051224944320713" VBox.vgrow="ALWAYS">
+    <SplitPane dividerPositions="0.30957683741648107" VBox.vgrow="ALWAYS">
       <items>
         <VBox>
           <children>
@@ -64,7 +65,19 @@
               <content>
                 <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
                   <children>
-                    <MenuButton mnemonicParsing="false" prefHeight="25.0" text="+ Incluir item" VBox.vgrow="NEVER">
+                    <ChoiceBox fx:id="projectionListChoice" maxWidth="1.7976931348623157E308" prefWidth="268.0" VBox.vgrow="NEVER">
+                      <items>
+                        <FXCollections fx:factory="observableArrayList">
+                          <String fx:value="Item 1" />
+                          <String fx:value="Item 2" />
+                          <String fx:value="Item 3" />
+                        </FXCollections>
+                      </items>
+                      <VBox.margin>
+                        <Insets bottom="12.0" />
+                      </VBox.margin>
+                    </ChoiceBox>
+                    <MenuButton fx:id="addItemButtonGroup" mnemonicParsing="false" prefHeight="25.0" text="+ Incluir item" VBox.vgrow="NEVER">
                       <items>
                         <MenuItem mnemonicParsing="false" onAction="#onAddMusic" text="Letra de Musica" />
                         <MenuItem mnemonicParsing="false" onAction="#onAddYouTube" text="YouTube" />
@@ -74,7 +87,7 @@
                         <MenuItem mnemonicParsing="false" onAction="#onAddPlayer" text="Arquivo de vídeo" />
                       </items>
                     </MenuButton>
-                    <ListView fx:id="projectionListView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
+                    <ListView fx:id="projectablesListView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="322.0" prefWidth="268.0" VBox.vgrow="ALWAYS">
                       <VBox.margin>
                         <Insets top="10.0" />
                       </VBox.margin>

@@ -10,6 +10,9 @@ import java.net.URL;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import us.guihouse.projector.forms.controllers.BrowserController;
+import us.guihouse.projector.models.ProjectionListItem;
+import us.guihouse.projector.projection.ProjectionManager;
+import us.guihouse.projector.repositories.ProjectionListRepository;
 
 /**
  *
@@ -28,7 +31,7 @@ public class BrowserSubScene extends ProjectionItemSubScene {
     }
 
     private BrowserSubScene(Parent root, double width, double height) {
-        super(root, "Página WEB", width, height);
+        super(root, width, height);
     }
 
     @Override
@@ -38,9 +41,5 @@ public class BrowserSubScene extends ProjectionItemSubScene {
 
     private void setController(BrowserController controller) {
         super.setController(controller);
-    }
-
-    public void setUrl(String url) {
-        getController().setUrl(url);
     }
 }

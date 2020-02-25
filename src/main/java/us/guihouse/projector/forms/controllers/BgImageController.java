@@ -450,6 +450,11 @@ public class BgImageController extends ProjectionController {
         getSceneManager().goToWorkspace();
     }
 
+    @Override
+    public void stop() {
+
+    }
+
     @FXML
     public void withoutBackgroundClick() {
         backgroundImageView.setImage(null);

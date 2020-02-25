@@ -28,7 +28,7 @@ public class PlayerSubScene extends ProjectionItemSubScene {
     }
 
     private PlayerSubScene(Parent root, double width, double height) {
-        super(root, "Player VLC", width, height);
+        super(root, width, height);
     }
 
     @Override

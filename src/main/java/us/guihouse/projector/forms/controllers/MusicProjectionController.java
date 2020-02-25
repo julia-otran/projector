@@ -52,6 +52,7 @@ import us.guihouse.projector.services.ManageMusicService;
  * @author guilherme
  */
 public class MusicProjectionController extends ProjectionController {
+    public static final String MUSIC_ID_PROPERTY = "MUSIC_ID";
 
     @FXML
     private Button clearScreenButton;
@@ -113,6 +114,7 @@ public class MusicProjectionController extends ProjectionController {
     @Override
     public void initWithProjectionManager(final ProjectionManager projectionManager) {
         super.initWithProjectionManager(projectionManager);
+        loadMusicWithId(Integer.parseInt(getObserver().getProperty(MUSIC_ID_PROPERTY)));
 
         notifyTitleChange(music.getNameWithArtistProperty().getValue());
 
@@ -428,5 +430,10 @@ public class MusicProjectionController extends ProjectionController {
         if (!clearScreenButton.isDisabled()) {
             clearScreenButton.fire();
         }
+    }
+
+    @Override
+    public void stop() {
+        onEscapeKeyPressed();
     }
 }

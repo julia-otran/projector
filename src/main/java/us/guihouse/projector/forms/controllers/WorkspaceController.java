@@ -8,36 +8,37 @@ package us.guihouse.projector.forms.controllers;
 import java.awt.Font;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Objects;
-import java.util.ResourceBundle;
+import java.sql.SQLException;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
 import javafx.embed.swing.SwingNode;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.CheckMenuItem;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Menu;
-import javafx.scene.control.RadioMenuItem;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TitledPane;
+import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import javafx.util.StringConverter;
+import us.guihouse.projector.enums.ProjectionListItemType;
+import us.guihouse.projector.models.Music;
+import us.guihouse.projector.models.ProjectionList;
+import us.guihouse.projector.models.ProjectionListItem;
+import us.guihouse.projector.models.SimpleProjectionList;
 import us.guihouse.projector.other.AwtFontChooseDialog;
 import us.guihouse.projector.other.DragSortListCell;
 import us.guihouse.projector.other.YouTubeVideoResolve;
 import us.guihouse.projector.projection.TextWrapperFactoryChangeListener;
 import us.guihouse.projector.projection.text.TextWrapper;
 import us.guihouse.projector.projection.text.WrapperFactory;
+import us.guihouse.projector.repositories.ProjectionListRepository;
 import us.guihouse.projector.scenes.*;
 import us.guihouse.projector.services.ManageMusicService;
 
@@ -66,10 +67,13 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
         graphicsHelper = new GraphicsDeviceHelper(projectionScreenMenu);
 
         preparePreview();
-        initializeProjectionList();
+        initializeProjectablesList();
         onCropBackgroundChanged();
         onChangeFullScreen();
         createListMusicStage();
+
+        initProjectionList();
+        updateProjectionList();
 
         graphicsHelper.getProjectionManager().addTextWrapperChangeListener(new TextWrapperFactoryChangeListener() {
             @Override
@@ -87,10 +91,10 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     }
 
     public void onEscapeKeyPressed() {
-        projectionListView
+        projectablesListView
                 .getSelectionModel()
                 .getSelectedItems()
-                .forEach(s -> s.onEscapeKeyPressed());
+                .forEach(s -> itemSubScenes.get(s.getId()).onEscapeKeyPressed());
     }
 
     // ------------------------------
@@ -190,49 +194,126 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     // ------------------------------
     // Projection List
     // ------------------------------
+    private ProjectionListRepository listRepository = new ProjectionListRepository();
+
     @FXML
-    private ListView<ProjectionItemSubScene> projectionListView;
+    private ChoiceBox<SimpleProjectionList> projectionListChoice;
+
+    private void initProjectionList() {
+        projectionListChoice.setConverter(new StringConverter<SimpleProjectionList>() {
+            @Override
+            public String toString(SimpleProjectionList object) {
+                return object.getTitle();
+            }
+
+            @Override
+            public SimpleProjectionList fromString(String string) {
+                return projectionListChoice.getItems().stream().filter(i -> i.getTitle().equals(string)).findAny().orElse(null);
+            }
+        });
+
+        projectionListChoice.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<SimpleProjectionList>() {
+            @Override
+            public void changed(ObservableValue<? extends SimpleProjectionList> observable, SimpleProjectionList oldValue, SimpleProjectionList newValue) {
+                if (newValue != null) {
+                    if (newValue.getTitle().equals("<Criar nova lista>")) {
+                        TextInputDialog inputDialog = new TextInputDialog();
+                        inputDialog.setTitle("Digitar Título");
+                        inputDialog.setHeaderText("Digite o título da nova lista de projeção");
+                        inputDialog.setContentText("Título:");
+
+                        Optional<String> titleOp = inputDialog.showAndWait();
+                        if (titleOp.isPresent()) {
+                            try {
+                                SimpleProjectionList list = listRepository.createList(titleOp.get());
+                                updateProjectionList();
+                                projectionListChoice.getSelectionModel().select(list);
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            projectionListChoice.getSelectionModel().select(oldValue);
+                        }
+
+                    } else {
+                        setProjectablesList(newValue);
+                    }
+                }
+            }
+        });
+    }
+
+    private void updateProjectionList() {
+        projectionListChoice.getItems().clear();
+
+        SimpleProjectionList createNewItem = new SimpleProjectionList();
+        createNewItem.setTitle("<Criar nova lista>");
+        projectionListChoice.getItems().add(createNewItem);
+
+        try {
+            projectionListChoice.getItems().addAll(listRepository.activeLists());
+        } catch (SQLException e) {
+            Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+        }
+    }
+
+    // ------------------------------
+    // Current Projection List
+    // ------------------------------
+    @FXML
+    private ListView<ProjectionListItem> projectablesListView;
 
     @FXML
     private Pane targetPane;
 
-    private boolean changingTitle = false;
+    @FXML
+    private MenuButton addItemButtonGroup;
 
-    private void initializeProjectionList() {
-        projectionListView.setCellFactory(new Callback<ListView<ProjectionItemSubScene>, ListCell<ProjectionItemSubScene>>() {
-            @Override
-            public ListCell<ProjectionItemSubScene> call(ListView<ProjectionItemSubScene> arg0) {
-                //My cell is on my way to call
-                DragSortListCell<ProjectionItemSubScene> cell = new DragSortListCell<ProjectionItemSubScene>() {
-                    @Override
-                    public void updateItem(ProjectionItemSubScene item, boolean empty) {
-                        super.updateItem(item, empty);
+    private SimpleProjectionList projectionList;
 
-                        if (item != null) {
-                            //finally every thing is just setup
-                            setText(item.getTitle());
-                        }
+    private Map<Long, ProjectionItemSubScene> itemSubScenes;
+
+    class ProjectablesListViewCellFactory implements Callback<ListView<ProjectionListItem>, ListCell<ProjectionListItem>> {
+        @Override
+        public ListCell<ProjectionListItem> call(ListView<ProjectionListItem> arg) {
+            //My cell is on my way to call
+            DragSortListCell<ProjectionListItem> cell = new DragSortListCell<ProjectionListItem>() {
+                @Override
+                public void updateItem(ProjectionListItem item, boolean empty) {
+                    super.updateItem(item, empty);
+
+                    if (empty) {
+                        setText(null);
                     }
-                };
 
-                //Take my cell
-                return cell;
-            }
+                    if (item != null) {
+                        //finally every thing is just setup
+                        setText(item.getTitle());
+                    }
+                }
+            };
 
-        });
+            //Take my cell
+            return cell;
+        }
+    }
 
-        projectionListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        projectionListView.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+    private void initializeProjectablesList() {
+        itemSubScenes = new HashMap<>();
+
+        projectablesListView.setVisible(false);
+        addItemButtonGroup.setVisible(false);
+
+        projectablesListView.setCellFactory(new ProjectablesListViewCellFactory());
+
+        projectablesListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        projectablesListView.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                if (changingTitle) {
-                    return;
-                }
-
                 if (newValue != null) {
                     int val = newValue.intValue();
-                    if (val >= 0 && val < projectionListView.getItems().size()) {
-                        setProjectionView(projectionListView.getItems().get(val));
+                    if (val >= 0 && val < projectablesListView.getItems().size()) {
+                        setProjectionView(projectablesListView.getItems().get(val));
                         return;
                     }
                 }
@@ -242,23 +323,81 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
         });
     }
 
-    private void setProjectionView(ProjectionItemSubScene scene) {
-        if (scene == null) {
+    private void setProjectablesList(SimpleProjectionList simpleProjectablesList) {
+        projectablesListView.setVisible(true);
+        addItemButtonGroup.setVisible(true);
+        projectionList = simpleProjectablesList;
+        itemSubScenes.clear();
+
+        reloadProjectables();
+    }
+
+    private void reloadProjectables() {
+        projectablesListView.getItems().clear();
+
+        try {
+            List<ProjectionListItem> list = listRepository.getItems(projectionList.getId());
+
+            projectablesListView.getItems().addAll(list);
+
+            for (ProjectionListItem item : list) {
+                if (itemSubScenes.get(item.getId()) == null) {
+                    createComponent(item);
+                }
+            }
+
+            for (Map.Entry<Long, ProjectionItemSubScene> entry : itemSubScenes.entrySet()) {
+                if (list.stream().noneMatch(item -> item.getId() == entry.getKey())) {
+                    ProjectionItemSubScene scene = itemSubScenes.remove(entry.getKey());
+                    scene.stop();
+                }
+            }
+        } catch (SQLException e) {
+            Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+        }
+    }
+
+    private void createComponent(ProjectionListItem item) {
+        try {
+            ProjectionItemSubScene created = item.getType().createSubScene(targetPane.getWidth(), targetPane.getHeight());
+            itemSubScenes.put(item.getId(), created);
+
+            created.setObserver(this);
+            created.setSceneManager(getSceneManager());
+            created.setProjectionListItem(item);
+            created.setProjectionListRepository(listRepository);
+
+            if (created instanceof MusicProjectionScene) {
+                MusicProjectionScene scene = (MusicProjectionScene) created;
+                scene.getTextWrapperProperty().bind(textWrapperProperty);
+                scene.setManageMusicService(manageMusicService);
+            }
+
+            created.initWithProjectionManager(graphicsHelper.getProjectionManager());
+            created.widthProperty().bind(targetPane.widthProperty());
+            created.heightProperty().bind(targetPane.heightProperty());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setProjectionView(ProjectionListItem item) {
+        if (item == null) {
             targetPane.getChildren().clear();
             return;
         }
 
         if (targetPane.getChildren().size() <= 0) {
-            targetPane.getChildren().add(scene);
+            targetPane.getChildren().add(itemSubScenes.get(item.getId()));
             return;
         }
 
-        if (Objects.equals(targetPane.getChildren().get(0), scene)) {
+        if (Objects.equals(targetPane.getChildren().get(0), itemSubScenes.get(item.getId()))) {
             return;
         }
 
         targetPane.getChildren().clear();
-        targetPane.getChildren().add(scene);
+        targetPane.getChildren().add(itemSubScenes.get(item.getId()));
     }
 
     @FXML
@@ -277,93 +416,61 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
                 a.setContentText("Não foi possível obter a URL 'Embed'");
                 a.show();
             } else if (event.getResolved() != null) {
-                addBroser(event.getResolved());
+                addBrowser(event.getResolved());
             }
         });
     }
 
     @FXML
     public void onAddBrowser() {
-        addBroser("https://google.com.br");
+        addBrowser("https://google.com.br");
     }
 
-    private void addBroser(String url) {
+    private void addBrowser(String url) {
         try {
-            BrowserSubScene created = BrowserSubScene.createScene(targetPane.getWidth(), targetPane.getHeight());
-            created.setObserver(this);
-            created.setSceneManager(getSceneManager());
-            created.setUrl(url);
-
-            changingTitle = true;
-            projectionListView.getItems().add(created);
-            changingTitle = false;
-
-            created.initWithProjectionManager(graphicsHelper.getProjectionManager());
-            created.widthProperty().bind(targetPane.widthProperty());
-            created.heightProperty().bind(targetPane.heightProperty());
-        } catch (IOException ex) {
-            Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
+            ProjectionListItem item = listRepository.createItem(projectionList, "Navegador", ProjectionListItemType.WEB_SITE);
+            HashMap<String, String> websiteProps = new HashMap<>();
+            websiteProps.put(BrowserController.URL_PROPERTY, url);
+            listRepository.updateItemProperties(item.getId(), websiteProps);
+            reloadProjectables();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
     @FXML
     public void onAddPicture() {
         try {
-            ProjectionItemSubScene created = ImageSubScene.createScene(targetPane.getWidth(), targetPane.getHeight());
-            created.setObserver(this);
-            created.setSceneManager(getSceneManager());
-
-            projectionListView.getItems().add(created);
-            projectionListView.getSelectionModel().select(projectionListView.getItems().size() - 1);
-
-            created.initWithProjectionManager(graphicsHelper.getProjectionManager());
-            created.widthProperty().bind(targetPane.widthProperty());
-            created.heightProperty().bind(targetPane.heightProperty());
-        } catch (IOException ex) {
-            Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
+            listRepository.createItem(projectionList, "Álbum de Imagens", ProjectionListItemType.IMAGE);
+            reloadProjectables();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
     @FXML
     public void onAddText() {
         try {
-            ProjectionItemSubScene created = TextSubScene.createScene(targetPane.getWidth(), targetPane.getHeight());
-            created.setObserver(this);
-            created.setSceneManager(getSceneManager());
-
-            projectionListView.getItems().add(created);
-            projectionListView.getSelectionModel().select(projectionListView.getItems().size() - 1);
-
-            created.initWithProjectionManager(graphicsHelper.getProjectionManager());
-            created.widthProperty().bind(targetPane.widthProperty());
-            created.heightProperty().bind(targetPane.heightProperty());
-        } catch (IOException ex) {
-            Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
+            listRepository.createItem(projectionList, "Texto", ProjectionListItemType.TEXT);
+            reloadProjectables();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
     @FXML
     public void onAddPlayer() {
         try {
-            PlayerSubScene created = PlayerSubScene.createScene(targetPane.getWidth(), targetPane.getHeight());
-            created.setObserver(this);
-            created.setSceneManager(getSceneManager());
-
-            changingTitle = true;
-            projectionListView.getItems().add(created);
-            changingTitle = false;
-
-            created.initWithProjectionManager(graphicsHelper.getProjectionManager());
-            created.widthProperty().bind(targetPane.widthProperty());
-            created.heightProperty().bind(targetPane.heightProperty());
-        } catch (IOException ex) {
-            Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
+            listRepository.createItem(projectionList, "Player", ProjectionListItemType.VIDEO);
+            reloadProjectables();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
     @Override
     public boolean addMusic(Integer id) {
-        for (ProjectionItemSubScene i : projectionListView.getItems()) {
+        for (ProjectionItemSubScene i : itemSubScenes.values()) {
             if (i instanceof MusicProjectionScene) {
                 MusicProjectionScene mps = (MusicProjectionScene) i;
                 if (mps.getMusicId() == id) {
@@ -373,21 +480,13 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
         };
 
         try {
-            MusicProjectionScene created = MusicProjectionScene.createScene(targetPane.getWidth(), targetPane.getHeight());
-            created.setObserver(this);
-            created.setSceneManager(getSceneManager());
-            created.setManageMusicService(manageMusicService);
-            created.loadMusicWithId(id);
-            created.getTextWrapperProperty().bind(textWrapperProperty);
-
-            projectionListView.getItems().add(created);
-            projectionListView.getSelectionModel().select(projectionListView.getItems().size() - 1);
-
-            created.initWithProjectionManager(graphicsHelper.getProjectionManager());
-            created.widthProperty().bind(targetPane.widthProperty());
-            created.heightProperty().bind(targetPane.heightProperty());
-        } catch (IOException ex) {
-            Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
+            ProjectionListItem item = listRepository.createItem(projectionList, "Musica", ProjectionListItemType.MUSIC);
+            HashMap<String, String> musicProps = new HashMap<>();
+            musicProps.put(MusicProjectionController.MUSIC_ID_PROPERTY, Integer.toString(id));
+            listRepository.updateItemProperties(item.getId(), musicProps);
+            reloadProjectables();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
         return true;
@@ -410,8 +509,13 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     // Other
     // ------------------------------
     @Override
-    public void titleChanged() {
-        projectionListView.refresh();
+    public void titleChanged(ProjectionListItem item) {
+        projectablesListView.getItems().forEach(listItem -> {
+            if (listItem.getId() == item.getId()) {
+                listItem.setTitle(item.getTitle());
+                projectablesListView.refresh();
+            }
+        });
     }
 
     public SceneManager getSceneManager() {

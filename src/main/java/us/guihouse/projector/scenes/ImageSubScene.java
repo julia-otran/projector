@@ -10,6 +10,7 @@ import java.net.URL;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import us.guihouse.projector.forms.controllers.ImageController;
+import us.guihouse.projector.repositories.ProjectionListRepository;
 
 /**
  *
@@ -28,6 +29,6 @@ public class ImageSubScene extends ProjectionItemSubScene {
     }
 
     private ImageSubScene(Parent root, double width, double height) {
-        super(root, "Nova Imagem", width, height);
+        super(root, width, height);
     }
 }

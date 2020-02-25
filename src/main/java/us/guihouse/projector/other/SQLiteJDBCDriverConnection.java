@@ -137,7 +137,7 @@ public class SQLiteJDBCDriverConnection {
                     + "name VARCHAR NOT NULL, "
                     + "artist_id INTEGER, "
                     + "phrases TEXT, "
-                    + "FOREIGN KEY(artist_id) REFERENCES artists(artist_id)"
+                    + "FOREIGN KEY(artist_id) REFERENCES artists(id)"
                     + ");";
 
             stmt.execute(query);
@@ -146,9 +146,35 @@ public class SQLiteJDBCDriverConnection {
             query = "CREATE TABLE IF NOT EXISTS musics_plays("
                     + "music_id INTEGER, "
                     + "date DATETIME, "
-                    + "FOREIGN KEY(music_id) REFERENCES musics(music_id) ON DELETE CASCADE"
+                    + "FOREIGN KEY(music_id) REFERENCES musics(id) ON DELETE CASCADE"
                     + ");";
 
+            stmt.execute(query);
+
+            query = "CREATE TABLE IF NOT EXISTS projection_lists("
+                    + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    + "title VARCHAR NOT NULL, "
+                    + "active INTEGER NOT NULL DEFAULT 1"
+                    + ")";
+            stmt.execute(query);
+
+            query = "CREATE TABLE IF NOT EXISTS projection_list_items("
+                    + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    + "title VARCHAR NOT NULL, "
+                    + "type VARCHAR NOT NULL, "
+                    + "projection_list_id INTEGER NOT NULL, "
+                    + "order_number INTEGER NOT NULL, "
+                    + "FOREIGN KEY(projection_list_id) REFERENCES projection_lists(id) ON DELETE CASCADE"
+                    + ")";
+            stmt.execute(query);
+
+            query = "CREATE TABLE IF NOT EXISTS projection_list_item_properties("
+                    + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    + "key VARCHAR NOT NULL, "
+                    + "value VARCHAR NOT NULL, "
+                    + "projection_list_item_id INTEGER NOT NULL, "
+                    + "FOREIGN KEY(projection_list_item_id) REFERENCES projection_list_items(id) ON DELETE CASCADE"
+                    + ")";
             stmt.execute(query);
 
             stmt.close();

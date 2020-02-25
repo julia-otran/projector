@@ -186,6 +186,14 @@ public class PlayerController extends ProjectionController implements FileDragDr
                 }
             }
         });
+
+        String fileStr = getObserver().getProperty("VIDEO_FILE");
+        if (fileStr != null) {
+            File file = new File(fileStr);
+            if (file.canRead()) {
+                openMedia(file);
+            }
+        }
     }
 
     @Override
@@ -193,6 +201,13 @@ public class PlayerController extends ProjectionController implements FileDragDr
         if (!endProjectionButton.isDisabled()) {
             endProjectionButton.fire();
         }
+    }
+
+    @Override
+    public void stop() {
+        onEscapeKeyPressed();
+        projectionPlayer.getPlayer().stop();
+        projectionPlayer.finish();
     }
 
     @FXML
@@ -262,6 +277,7 @@ public class PlayerController extends ProjectionController implements FileDragDr
 
     @Override
     public void onDropSuccess(File file) {
+        getObserver().updateProperty("VIDEO_FILE", file.toString());
         openMedia(file);
     }
 
@@ -527,7 +543,9 @@ public class PlayerController extends ProjectionController implements FileDragDr
 
     @Override
     public void newMedia(MediaPlayer mediaPlayer) {
-        notifyTitleChange(mediaPlayer.getMediaMetaData().getTitle());
+        Platform.runLater(() -> {
+            notifyTitleChange(mediaPlayer.getMediaMetaData().getTitle());
+        });
     }
 
     @Override

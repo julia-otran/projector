@@ -49,7 +49,6 @@ public class ProjectionLabel implements Projectable {
     private int paddingY = DEFAULT_PADDING_Y;
 
     @Getter
-    @Setter
     private boolean darkenBackground;
 
     // Internal control
@@ -82,6 +81,11 @@ public class ProjectionLabel implements Projectable {
         this.font = font;
         this.fontMetrics = Toolkit.getDefaultToolkit().getFontMetrics(font);
         onFactoryChange();
+    }
+
+    public void setDarkenBackground(boolean darken) {
+        this.darkenBackground = darken;
+        ProjectorPreferences.setDarkenBackground(darken);
     }
 
     public int getPaddingX() {

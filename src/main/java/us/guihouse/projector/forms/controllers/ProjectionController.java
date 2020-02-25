@@ -48,4 +48,6 @@ public abstract class ProjectionController implements Initializable {
     }
     
     public abstract void onEscapeKeyPressed();
+
+    public abstract void stop();
 }

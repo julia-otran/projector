@@ -98,13 +98,28 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
         starting = true;
 
-        windows.forEach(ProjectionWindow::init);
-        windows.forEach(w -> w.setCursor(blankCursor));
+        windowConfigs.forEach(wc -> {
+            windows
+                    .stream()
+                    .filter(w -> w.getCurrentDevice().getName().equals(wc.getDisplayId()))
+                    .findAny()
+                    .ifPresent(w -> {
+                        w.init();
+                        w.setCursor(blankCursor);
+                    });
+        });
 
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                windows.forEach(ProjectionWindow::makeVisible);
+                windowConfigs.forEach(wc -> {
+                    windows
+                            .stream()
+                            .filter(w -> w.getCurrentDevice().getName().equals(wc.getDisplayId()))
+                            .findAny()
+                            .ifPresent(ProjectionWindow::makeVisible);
+                });
+
                 projectionCanvas.init();
                 preview.setProjectionCanvas(projectionCanvas);
 

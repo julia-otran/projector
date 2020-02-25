@@ -70,6 +70,7 @@ public class ImageController extends ProjectionController implements Runnable {
 
     private boolean running = false;
     private List<BufferedImage> awtImages = new ArrayList<>();
+    private List<File> openedImages = new ArrayList<>();
 
     @FXML
     private ListView<Image> imagesList;
@@ -161,19 +162,28 @@ public class ImageController extends ProjectionController implements Runnable {
                 formatTimeLabel();
             }
         });
+
+        loadOpenedImages();
     }
 
     private List<Image> toAdd = new ArrayList<>();
+    private List<File> toAddFiles = new ArrayList<>();
 
     @FXML
     public void onDragOver(DragEvent event) {
         toAdd.clear();
+        toAddFiles.clear();
         Dragboard board = event.getDragboard();
 
         if (board.hasFiles()) {
             for (File imageFile : board.getFiles()) {
-                Image img = new Image(imageFile.toURI().toString());
-                toAdd.add(img);
+                try {
+                    Image img = new Image(imageFile.toURI().toString());
+                    toAdd.add(img);
+                    toAddFiles.add(imageFile);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
 
             if (toAdd.size() > 0) {
@@ -181,10 +191,6 @@ public class ImageController extends ProjectionController implements Runnable {
                 dragDropLabel.setText(toAdd.size() + " arquivos a serem adicionados");
                 event.acceptTransferModes(TransferMode.LINK);
             }
-        } else if (board.hasImage()) {
-            toAdd.add(board.getImage());
-            imageView.setImage(toAdd.get(0));
-            event.acceptTransferModes(TransferMode.LINK);
         } else {
             setError("Mídia inaceitável");
         }
@@ -212,8 +218,55 @@ public class ImageController extends ProjectionController implements Runnable {
             beginProjectionButton.setDisable(false);
         }
 
+        openedImages.addAll(toAddFiles);
+
+        saveOpenedImages();
+
         setOriginal();
         toAdd.clear();
+    }
+
+    private void saveOpenedImages() {
+        getObserver().updateProperty("IMAGES_COUNT", Integer.toString(openedImages.size()));
+
+        int fileIndex = 0;
+
+        for (File file : openedImages) {
+            getObserver().updateProperty("IMAGE[" + fileIndex + "]", file.toString());
+            fileIndex++;
+        }
+    }
+
+    private void loadOpenedImages() {
+        String countStr = getObserver().getProperty("IMAGES_COUNT");
+
+        if (countStr != null) {
+            int count = Integer.parseInt(countStr);
+            for (int i=0; i<count; i++) {
+                String imgPath = getObserver().getProperty("IMAGE[" + i + "]");
+                if (imgPath != null) {
+                    File file = new File(imgPath);
+
+                    if (file.canRead()) {
+                        try {
+                            Image img = new Image(file.toURI().toString());
+                            BufferedImage awt = SwingFXUtils.fromFXImage(img, null);
+                            awtImages.add(awt);
+                            imagesList.getItems().add(img);
+                            openedImages.add(file);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
+
+        if (imagesList.getItems().size() > 0) {
+            beginProjectionButton.setDisable(false);
+        }
+
+        setOriginal();
     }
 
     private void setError(String error) {
@@ -253,7 +306,12 @@ public class ImageController extends ProjectionController implements Runnable {
         getProjectionManager().setProjectable(null);
         beginProjectionButton.disableProperty().set(false);
         endProjectionButton.disableProperty().set(true);
-        stop();
+        stopRunning();
+    }
+
+    @Override
+    public void stop() {
+        onEscapeKeyPressed();
     }
 
     private void start() {
@@ -261,7 +319,7 @@ public class ImageController extends ProjectionController implements Runnable {
         Platform.runLater(this);
     }
 
-    private void stop() {
+    private void stopRunning() {
         running = false;
     }
 

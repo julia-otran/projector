@@ -34,19 +34,6 @@ public class TextController extends ProjectionController implements TextWrapperF
     public void initialize(URL url, ResourceBundle rb) {
         projecting = false;
         endProjectionButton.disableProperty().set(true);
-        projectionText.textProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                int sz = newValue.length();
-                if (sz == 0) {
-                    notifyTitleChange("Novo Texto");
-                } else {
-                    sz = Math.min(50, sz);
-                    notifyTitleChange(newValue.substring(0, sz));
-                }
-                
-            }
-        });
     }    
     
     @FXML
@@ -63,7 +50,24 @@ public class TextController extends ProjectionController implements TextWrapperF
     @Override
     public void initWithProjectionManager(ProjectionManager projectionManager) {
         super.initWithProjectionManager(projectionManager);
+
+        projectionText.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                int sz = newValue != null ? newValue.length() : 0;
+                if (sz == 0) {
+                    notifyTitleChange("Novo Texto");
+                    getObserver().updateProperty("TEXT", "");
+                } else {
+                    sz = Math.min(50, sz);
+                    notifyTitleChange(newValue.substring(0, sz));
+                    getObserver().updateProperty("TEXT", newValue);
+                }
+            }
+        });
+
         getProjectionManager().addTextWrapperChangeListener(this);
+        projectionText.textProperty().setValue(getObserver().getProperty("TEXT"));
     }
     
     @FXML
@@ -110,5 +114,10 @@ public class TextController extends ProjectionController implements TextWrapperF
         if (!endProjectionButton.isDisabled()) {
             endProjectionButton.fire();
         }
+    }
+
+    @Override
+    public void stop() {
+        onEscapeKeyPressed();
     }
 }

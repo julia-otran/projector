@@ -27,6 +27,6 @@ public class TextSubScene extends ProjectionItemSubScene {
     }
 
     private TextSubScene(Parent root, double width, double height) {
-        super(root, "Novo Texto", width, height);
+        super(root, width, height);
     }
 }

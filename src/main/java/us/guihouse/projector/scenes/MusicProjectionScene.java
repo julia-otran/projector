@@ -31,7 +31,7 @@ public class MusicProjectionScene extends ProjectionItemSubScene {
     }
 
     private MusicProjectionScene(Parent root, double width, double height) {
-        super(root, "Música", width, height);
+        super(root, width, height);
     }
 
     @Override

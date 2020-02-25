@@ -5,11 +5,13 @@
  */
 package us.guihouse.projector.scenes;
 
+import us.guihouse.projector.models.ProjectionListItem;
+
 /**
  *
  * @author guilherme
  */
 public interface SceneObserver {
 
-    void titleChanged();
+    void titleChanged(ProjectionListItem item);
 }

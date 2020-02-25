@@ -11,4 +11,6 @@ package us.guihouse.projector.forms.controllers;
  */
 public interface ControllerObserver {
     void onTitleChanged(String newTitle);
+    void updateProperty(String key, String value);
+    String getProperty(String key);
 }

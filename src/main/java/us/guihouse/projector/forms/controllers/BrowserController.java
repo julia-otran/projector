@@ -32,6 +32,8 @@ import us.guihouse.projector.projection.ProjectionWebView;
  */
 public class BrowserController extends ProjectionController {
 
+    public static final String URL_PROPERTY = "URL";
+
     private String url;
     private Transform currentTransform;
 
@@ -78,6 +80,7 @@ public class BrowserController extends ProjectionController {
     public void onAddressFiledKeyPress(KeyEvent ke) {
         if (ke.getCode().equals(KeyCode.ENTER)) {
             String url = adddressTextField.getText();
+            this.getObserver().updateProperty(URL_PROPERTY, url);
             this.projectionWebView.getWebView().getEngine().load(url);
         }
     }
@@ -86,6 +89,12 @@ public class BrowserController extends ProjectionController {
     public void initWithProjectionManager(ProjectionManager projectionManager) {
         super.initWithProjectionManager(projectionManager);
         this.projectionWebView = projectionManager.createWebView();
+
+        this.url = this.getObserver().getProperty(URL_PROPERTY);
+
+        if (this.url == null) {
+            this.url = "https://google.com.br";
+        }
 
         Node displayNode = projectionWebView.getNode();
 
@@ -142,14 +151,11 @@ public class BrowserController extends ProjectionController {
                     notifyTitleChange(newTitle);
                 }
                 adddressTextField.setText(engine.getLocation());
+                getObserver().updateProperty(URL_PROPERTY, engine.getLocation());
             }
         });
 
         engine.load(url);
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
     }
 
     @Override
@@ -157,5 +163,10 @@ public class BrowserController extends ProjectionController {
         if (!endProjectionButton.isDisabled()) {
             endProjectionButton.fire();
         }
+    }
+
+    @Override
+    public void stop() {
+        onEscapeKeyPressed();
     }
 }

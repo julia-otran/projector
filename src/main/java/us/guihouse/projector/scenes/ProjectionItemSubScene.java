@@ -5,30 +5,45 @@
  */
 package us.guihouse.projector.scenes;
 
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import javafx.scene.Parent;
 import javafx.scene.SubScene;
+import lombok.Getter;
+import lombok.Setter;
 import us.guihouse.projector.forms.controllers.ControllerObserver;
 import us.guihouse.projector.forms.controllers.ProjectionController;
 import us.guihouse.projector.forms.controllers.SceneManager;
+import us.guihouse.projector.models.ProjectionListItem;
 import us.guihouse.projector.other.Identifiable;
 import us.guihouse.projector.projection.ProjectionManager;
+import us.guihouse.projector.repositories.ProjectionListRepository;
 
 /**
  *
  * @author guilherme
  */
-public abstract class ProjectionItemSubScene extends SubScene implements ControllerObserver, Identifiable {
+public abstract class ProjectionItemSubScene extends SubScene implements ControllerObserver {
 
-    private final String identity;
     private ProjectionController controller;
     private SceneObserver observer;
-    private String title;
 
-    protected ProjectionItemSubScene(Parent root, String title, double width, double height) {
+    private Map<String, String> itemProperties;
+
+    @Getter
+    @Setter
+    private ProjectionListRepository projectionListRepository;
+
+    @Getter
+    @Setter
+    private ProjectionListItem projectionListItem;
+
+    protected ProjectionItemSubScene(Parent root,
+                                     double width,
+                                     double height) {
         super(root, width, height);
-        this.title = title;
-        this.identity = UUID.randomUUID().toString();
     }
 
     public SceneObserver getObserver() {
@@ -53,24 +68,27 @@ public abstract class ProjectionItemSubScene extends SubScene implements Control
     }
 
     public void initWithProjectionManager(ProjectionManager projectionManager) {
+        try {
+            this.itemProperties = projectionListRepository.getItemProperties(projectionListItem.getId());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            this.itemProperties = new HashMap<>();
+        }
+
         controller.initWithProjectionManager(projectionManager);
     }
 
     @Override
     public void onTitleChanged(String newTitle) {
-        this.title = newTitle;
+        try {
+            projectionListRepository.updateItemTitle(projectionListItem, newTitle);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
         if (observer != null) {
-            observer.titleChanged();
+            observer.titleChanged(projectionListItem);
         }
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String toString() {
-        return title;
     }
     
     public void onEscapeKeyPressed() {
@@ -79,8 +97,26 @@ public abstract class ProjectionItemSubScene extends SubScene implements Control
         }
     }
 
+    public void stop() {
+        if (controller != null) {
+            controller.stop();
+        }
+    }
+
     @Override
-    public String getIdentity() {
-        return identity;
+    public void updateProperty(String key, String value) {
+        itemProperties.remove(key);
+        itemProperties.put(key, value);
+
+        try {
+            projectionListRepository.updateItemProperties(projectionListItem.getId(), itemProperties);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public String getProperty(String key) {
+        return itemProperties.get(key);
     }
 }
