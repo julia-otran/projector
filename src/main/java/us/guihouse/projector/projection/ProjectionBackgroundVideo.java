@@ -6,16 +6,18 @@ import uk.co.caprica.vlcj.player.MediaPlayerEventListener;
 
 import java.io.File;
 import java.nio.file.FileSystems;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static us.guihouse.projector.utils.FilePaths.PROJECTOR_BACKGROUND_VIDEOS;
 
 public class ProjectionBackgroundVideo extends ProjectionVideo implements MediaPlayerEventListener {
     private List<File> media = new ArrayList<>();
+    private File currentMedia = null;
+    private Map<Integer, File> musicMap = new HashMap<>();
+    private Random random = new Random();
 
-    public ProjectionBackgroundVideo(CanvasDelegate delegate, boolean cropVideo) {
-        super(delegate, cropVideo);
+    public ProjectionBackgroundVideo(CanvasDelegate delegate) {
+        super(delegate, true);
     }
 
     @Override
@@ -43,11 +45,23 @@ public class ProjectionBackgroundVideo extends ProjectionVideo implements MediaP
         }
     }
 
-    public void startBackground(File file) {
-        getPlayer().playMedia(file.getAbsolutePath());
+    public void startBackground(Integer musicId) {
+        if (!musicMap.containsKey(musicId)) {
+            int id = random.nextInt() % media.size();
+            musicMap.put(musicId, media.get(id));
+        }
+
+        File toPlay = musicMap.get(musicId);
+
+        if (toPlay != null && !toPlay.equals(currentMedia)) {
+            currentMedia = toPlay;
+            getPlayer().playMedia(toPlay.getAbsolutePath());
+            setRender(true);
+        }
     }
 
     public void stopBackground() {
+        setRender(false);
         getPlayer().stop();
     }
 

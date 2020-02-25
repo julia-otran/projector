@@ -22,6 +22,8 @@ public class ProjectionCanvas implements ProjectionManager {
     private final CanvasDelegate delegate;
     private final ProjectionBackground background;
     private final ProjectionLabel label;
+    private final ProjectionBackgroundVideo bgVideo;
+
     private Projectable currentProjectable;
 
     private final List<Projectable> initializeList;
@@ -35,6 +37,10 @@ public class ProjectionCanvas implements ProjectionManager {
 
         label = new ProjectionLabel(delegate);
         initializeList.add(label);
+
+        bgVideo = new ProjectionBackgroundVideo(delegate);
+        initializeList.add(bgVideo);
+
     }
 
     public void init() {
@@ -48,6 +54,7 @@ public class ProjectionCanvas implements ProjectionManager {
     protected void paintComponent(Graphics2D g) {
         if (currentProjectable == null) {
             background.paintComponent(g);
+            bgVideo.paintComponent(g);
         } else {
             currentProjectable.paintComponent(g);
         }
@@ -148,5 +155,14 @@ public class ProjectionCanvas implements ProjectionManager {
     public void stop(Projectable projectable) {
         projectable.finish();
         initializeList.remove(projectable);
+    }
+
+    @Override
+    public void setMusicForBackground(Integer musicId) {
+        if (musicId != null) {
+            bgVideo.startBackground(musicId);
+        } else {
+            bgVideo.stopBackground();
+        }
     }
 }

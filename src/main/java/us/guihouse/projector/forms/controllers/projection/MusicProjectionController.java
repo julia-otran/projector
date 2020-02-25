@@ -186,6 +186,7 @@ public class MusicProjectionController extends ProjectionController {
                     }
                 } else {
                     projectionManager.setText(text);
+                    projectionManager.setMusicForBackground(music.getId());
                 }
             }
         });

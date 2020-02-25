@@ -1,5 +1,7 @@
 package us.guihouse.projector.projection;
 
+import lombok.Getter;
+import lombok.Setter;
 import uk.co.caprica.vlcj.player.MediaPlayerFactory;
 import uk.co.caprica.vlcj.player.direct.BufferFormat;
 import uk.co.caprica.vlcj.player.direct.BufferFormatCallback;
@@ -30,6 +32,9 @@ public abstract class ProjectionVideo implements Projectable {
     private int projectionY;
 
     private final boolean cropVideo;
+    @Getter
+    @Setter
+    private boolean render = true;
 
     protected GraphicsDevice device;
     protected ProjectionVideo.MyRenderCallback renderCallback;
@@ -68,9 +73,11 @@ public abstract class ProjectionVideo implements Projectable {
 
     @Override
     public void paintComponent(Graphics2D g) {
-        g.setColor(Color.BLACK);
-        g.fillRect(0, 0, deviceW, deviceH);
-        g.drawImage(image, null, projectionX, projectionY);
+        if (render) {
+            g.setColor(Color.BLACK);
+            g.fillRect(0, 0, deviceW, deviceH);
+            g.drawImage(image, null, projectionX, projectionY);
+        }
     }
 
     protected BufferedImage generateBuffer(int w, int h) {

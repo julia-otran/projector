@@ -6,6 +6,8 @@
 package us.guihouse.projector.projection;
 
 import java.awt.Font;
+
+import us.guihouse.projector.models.Music;
 import us.guihouse.projector.projection.models.BackgroundModel;
 import us.guihouse.projector.projection.text.WrappedText;
 import us.guihouse.projector.projection.text.WrapperFactory;
@@ -49,4 +51,6 @@ public interface ProjectionManager {
     public void setDarkenBackground(boolean darkenBg);
 
     void stop(Projectable projectable);
+
+    void setMusicForBackground(Integer musicId);
 }
