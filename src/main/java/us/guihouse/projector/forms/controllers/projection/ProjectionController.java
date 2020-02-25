@@ -3,9 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package us.guihouse.projector.forms.controllers;
+package us.guihouse.projector.forms.controllers.projection;
 
 import javafx.fxml.Initializable;
+import us.guihouse.projector.forms.controllers.ControllerObserver;
+import us.guihouse.projector.forms.controllers.SceneManager;
 import us.guihouse.projector.projection.ProjectionManager;
 
 /**

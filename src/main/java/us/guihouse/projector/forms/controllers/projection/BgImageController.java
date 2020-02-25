@@ -3,9 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package us.guihouse.projector.forms.controllers;
+package us.guihouse.projector.forms.controllers.projection;
 
-import java.awt.*;
 import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -20,7 +19,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.DragEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
+import us.guihouse.projector.forms.controllers.projection.ProjectionController;
 import us.guihouse.projector.projection.ProjectionManager;
 import us.guihouse.projector.projection.models.BackgroundModel;
 import us.guihouse.projector.services.ImageDragDropService;

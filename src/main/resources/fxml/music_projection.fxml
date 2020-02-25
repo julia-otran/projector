@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox id="RootBox" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.guihouse.projector.forms.controllers.MusicProjectionController">
+<VBox id="RootBox" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.guihouse.projector.forms.controllers.projection.MusicProjectionController">
     <children>
         <ToolBar prefHeight="40.0" prefWidth="200.0">
             <items>

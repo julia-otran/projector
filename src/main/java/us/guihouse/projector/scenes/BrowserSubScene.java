@@ -9,10 +9,7 @@ import java.io.IOException;
 import java.net.URL;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import us.guihouse.projector.forms.controllers.BrowserController;
-import us.guihouse.projector.models.ProjectionListItem;
-import us.guihouse.projector.projection.ProjectionManager;
-import us.guihouse.projector.repositories.ProjectionListRepository;
+import us.guihouse.projector.forms.controllers.projection.BrowserController;
 
 /**
  *

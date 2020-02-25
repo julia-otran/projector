@@ -11,9 +11,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.stage.Stage;
 import us.guihouse.projector.forms.controllers.AddMusicCallback;
-import us.guihouse.projector.forms.controllers.ImageController;
+import us.guihouse.projector.forms.controllers.projection.ImageController;
 import us.guihouse.projector.forms.controllers.MusicListController;
-import us.guihouse.projector.forms.controllers.WorkspaceController;
 import us.guihouse.projector.services.ManageMusicService;
 
 /**

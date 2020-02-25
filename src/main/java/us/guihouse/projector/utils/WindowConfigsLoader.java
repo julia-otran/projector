@@ -25,16 +25,14 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.List;
 
+import static java.nio.file.StandardWatchEventKinds.*;
+import static us.guihouse.projector.utils.FilePaths.*;
+
 public class WindowConfigsLoader implements Runnable {
 
     private Thread thread;
     private final WindowConfigsObserver observer;
     private final Gson gson = new Gson();
-
-
-    private static final Path PROJECTOR_SETTINGS_PATH = FileSystems.getDefault().getPath(System.getProperty("user.home"), "Projector");
-    private static final Path PROJECTOR_WINDOW_CONFIG_PATH = FileSystems.getDefault().getPath(System.getProperty("user.home"), "Projector", "window-configs.json");
-    private static final File PROJECTOR_WINDOW_CONFIG_FILE = PROJECTOR_WINDOW_CONFIG_PATH.toFile();
 
     public interface WindowConfigsObserver {
         void updateConfigs(List<WindowConfig> windowConfigs);
@@ -67,25 +65,66 @@ public class WindowConfigsLoader implements Runnable {
     }
 
     public void run() {
-        try (final WatchService watchService = FileSystems.getDefault().newWatchService()) {
-            final WatchKey watchKey = PROJECTOR_SETTINGS_PATH.register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
-            while (true) {
-                final WatchKey wk = watchService.take();
-                for (WatchEvent<?> event : wk.pollEvents()) {
-                    //we only register "ENTRY_MODIFY" so the context is always a Path.
-                    final Path changed = (Path) event.context();
-                    if (changed.endsWith("myFile.txt")) {
-                        loadFile();
-                    }
+        WatchService watcher = null;
+
+        try {
+            watcher = FileSystems.getDefault().newWatchService();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        try {
+            PROJECTOR_DATA_PATH.register(watcher,
+                    ENTRY_CREATE,
+                    ENTRY_DELETE,
+                    ENTRY_MODIFY);
+        } catch (IOException x) {
+            x.printStackTrace();
+            return;
+        }
+
+        for (;;) {
+            // wait for key to be signaled
+            WatchKey key;
+
+            try {
+                key = watcher.take();
+            } catch (InterruptedException x) {
+                return;
+            }
+
+            for (WatchEvent<?> event: key.pollEvents()) {
+                WatchEvent.Kind<?> kind = event.kind();
+
+                // This key is registered only
+                // for ENTRY_CREATE events,
+                // but an OVERFLOW event can
+                // occur regardless if events
+                // are lost or discarded.
+                if (kind == OVERFLOW) {
+                    continue;
                 }
-                // reset the key
-                boolean valid = wk.reset();
-                if (!valid) {
-                    break;
+
+                // The filename is the
+                // context of the event.
+                WatchEvent<Path> ev = (WatchEvent<Path>)event;
+                Path filename = ev.context();
+
+                Path child = PROJECTOR_DATA_PATH.resolve(filename);
+
+                if (child.endsWith(PROJECTOR_WINDOW_CONFIG_FILE_NAME)) {
+                    loadFile();
                 }
             }
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+
+            // Reset the key -- this step is critical if you want to
+            // receive further watch events.  If the key is no longer valid,
+            // the directory is inaccessible so exit the loop.
+            boolean valid = key.reset();
+            if (!valid) {
+                break;
+            }
         }
     }
 
@@ -113,7 +152,7 @@ public class WindowConfigsLoader implements Runnable {
     }
 
     private boolean createDefaultFile() {
-        File settingsFolder = PROJECTOR_SETTINGS_PATH.toFile();
+        File settingsFolder = PROJECTOR_DATA_PATH.toFile();
 
         if (!settingsFolder.exists()) {
             if (!settingsFolder.mkdir()) {

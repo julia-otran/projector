@@ -8,16 +8,15 @@ package us.guihouse.projector.scenes;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
+
 import javafx.scene.Parent;
 import javafx.scene.SubScene;
 import lombok.Getter;
 import lombok.Setter;
 import us.guihouse.projector.forms.controllers.ControllerObserver;
-import us.guihouse.projector.forms.controllers.ProjectionController;
+import us.guihouse.projector.forms.controllers.projection.ProjectionController;
 import us.guihouse.projector.forms.controllers.SceneManager;
 import us.guihouse.projector.models.ProjectionListItem;
-import us.guihouse.projector.other.Identifiable;
 import us.guihouse.projector.projection.ProjectionManager;
 import us.guihouse.projector.repositories.ProjectionListRepository;
 

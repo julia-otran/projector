@@ -9,8 +9,8 @@ import java.io.IOException;
 import java.net.URL;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import us.guihouse.projector.forms.controllers.BgImageController;
-import us.guihouse.projector.forms.controllers.ImageController;
+import us.guihouse.projector.forms.controllers.projection.BgImageController;
+import us.guihouse.projector.forms.controllers.projection.ImageController;
 import us.guihouse.projector.forms.controllers.SceneManager;
 import us.guihouse.projector.projection.ProjectionManager;
 

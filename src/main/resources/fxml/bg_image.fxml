@@ -8,7 +8,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox id="RootBox" prefHeight="300.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.guihouse.projector.forms.controllers.BgImageController">
+<VBox id="RootBox" prefHeight="300.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.guihouse.projector.forms.controllers.projection.BgImageController">
 <children>
       <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onCancel" text="Voltar" VBox.vgrow="NEVER" />
       <HBox prefWidth="200.0" VBox.vgrow="NEVER">

@@ -16,7 +16,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox id="RootBox" onDragDropped="#onDragDropped" onDragExited="#onDragExit" onDragOver="#onDragOver" prefHeight="300.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.guihouse.projector.forms.controllers.ImageController">
+<VBox id="RootBox" onDragDropped="#onDragDropped" onDragExited="#onDragExit" onDragOver="#onDragOver" prefHeight="300.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.guihouse.projector.forms.controllers.projection.ImageController">
    <children>
       <HBox maxWidth="1.7976931348623157E308" VBox.vgrow="NEVER">
          <children>

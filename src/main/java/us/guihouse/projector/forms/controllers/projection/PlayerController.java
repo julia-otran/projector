@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package us.guihouse.projector.forms.controllers;
+package us.guihouse.projector.forms.controllers.projection;
 
 import com.sun.istack.internal.logging.Logger;
 import java.io.File;

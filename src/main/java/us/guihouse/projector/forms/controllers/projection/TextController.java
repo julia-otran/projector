@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package us.guihouse.projector.forms.controllers;
+package us.guihouse.projector.forms.controllers.projection;
 
 import java.net.URL;
 import java.util.Collections;
@@ -14,6 +14,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import us.guihouse.projector.forms.controllers.projection.ProjectionController;
 import us.guihouse.projector.projection.ProjectionManager;
 import us.guihouse.projector.projection.TextWrapperFactoryChangeListener;
 import us.guihouse.projector.projection.text.TextWrapper;

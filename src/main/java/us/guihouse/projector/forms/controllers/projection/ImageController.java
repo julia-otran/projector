@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package us.guihouse.projector.forms.controllers;
+package us.guihouse.projector.forms.controllers.projection;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -31,6 +31,7 @@ import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
+import us.guihouse.projector.forms.controllers.projection.ProjectionController;
 import us.guihouse.projector.projection.ProjectionImage;
 import us.guihouse.projector.projection.ProjectionManager;
 import us.guihouse.projector.projection.models.BackgroundProvide;

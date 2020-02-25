@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.*?>
 
 
-<VBox id="RootBox" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="us.guihouse.projector.forms.controllers.TextController">
+<VBox id="RootBox" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="us.guihouse.projector.forms.controllers.projection.TextController">
    <children>
       <HBox maxWidth="1.7976931348623157E308" VBox.vgrow="NEVER">
          <children>
