@@ -47,7 +47,7 @@ import us.guihouse.projector.services.ManageMusicService;
  *
  * @author guilherme
  */
-public class WorkspaceController implements Initializable, SceneObserver, AddMusicCallback {
+public class WorkspaceController implements Initializable, SceneObserver, AddMusicCallback, DragSortListCell.DragDoneCallback<ProjectionListItem> {
 
     private SceneManager sceneManager;
     private GraphicsDeviceHelper graphicsHelper;
@@ -273,11 +273,26 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
 
     private Map<Long, ProjectionItemSubScene> itemSubScenes;
 
+    @Override
+    public void onDragDone(List<ProjectionListItem> items) {
+        int sort = 0;
+
+        for (ProjectionListItem item : items) {
+            item.setOrder(sort);
+            sort++;
+            try {
+                listRepository.updateItemSort(item);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     class ProjectablesListViewCellFactory implements Callback<ListView<ProjectionListItem>, ListCell<ProjectionListItem>> {
         @Override
         public ListCell<ProjectionListItem> call(ListView<ProjectionListItem> arg) {
             //My cell is on my way to call
-            DragSortListCell<ProjectionListItem> cell = new DragSortListCell<ProjectionListItem>() {
+            DragSortListCell<ProjectionListItem> cell = new DragSortListCell<ProjectionListItem>(WorkspaceController.this) {
                 @Override
                 public void updateItem(ProjectionListItem item, boolean empty) {
                     super.updateItem(item, empty);

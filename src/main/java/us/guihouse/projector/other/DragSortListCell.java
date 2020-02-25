@@ -11,9 +11,17 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
+import lombok.Getter;
+import lombok.Setter;
 
 
 public class DragSortListCell<X extends Identifiable> extends ListCell<X> {
+    public interface DragDoneCallback<X> {
+        void onDragDone(List<X> items);
+    }
+
+    @Getter
+    private final DragDoneCallback<X> dragDoneCallback;
 
     @Override
     protected void finalize() throws Throwable {
@@ -26,7 +34,8 @@ public class DragSortListCell<X extends Identifiable> extends ListCell<X> {
         super.finalize();
     }
 
-    public DragSortListCell() {
+    public DragSortListCell(DragDoneCallback<X> dragDoneCallback) {
+        this.dragDoneCallback = dragDoneCallback;
         ListCell thisCell = this;
 
         setOnDragDetected(event -> {
@@ -86,6 +95,10 @@ public class DragSortListCell<X extends Identifiable> extends ListCell<X> {
 
                 List<X> itemscopy = new ArrayList<>(getListView().getItems());
                 getListView().getItems().setAll(itemscopy);
+
+                if (dragDoneCallback != null) {
+                    dragDoneCallback.onDragDone(itemscopy);
+                }
 
                 success = true;
             }

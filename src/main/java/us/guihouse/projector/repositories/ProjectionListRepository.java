@@ -202,4 +202,20 @@ public class ProjectionListRepository {
             stmt.close();
         }
     }
+
+    public void updateItemSort(ProjectionListItem item) throws SQLException {
+        String sql = "UPDATE projection_list_items SET order_number = ? WHERE id = ?";
+
+        PreparedStatement stmt = SQLiteJDBCDriverConnection
+                .getConn()
+                .prepareStatement(sql);
+
+        try {
+            stmt.setInt(1, item.getOrder());
+            stmt.setLong(2, item.getId());
+            stmt.execute();
+        } finally {
+            stmt.close();
+        }
+    }
 }
