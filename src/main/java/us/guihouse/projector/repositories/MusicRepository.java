@@ -29,7 +29,10 @@ public class MusicRepository {
     private static final int LIST_LIMIT = 500;
 
     public Music findByNameAndArtist(String name, Artist artist) throws SQLException {
-        String sql = "SELECT id, name, phrases FROM musics WHERE name = ? AND artist_id = ?";
+        String sql = "SELECT musics.id as id, musics.name AS name, musics.phrases AS phrases, music_themes.theme_name AS theme " +
+                "FROM musics " +
+                "LEFT JOIN music_themes ON music_themes.music_id = musics.id " +
+                "WHERE name = ? AND artist_id = ?";
 
         PreparedStatement stmt = SQLiteJDBCDriverConnection
                 .getConn()
@@ -51,6 +54,7 @@ public class MusicRepository {
                 m.setId(rs.getInt("id"));
                 m.setName(rs.getString("name"));
                 m.setPhrases(Arrays.asList(rs.getString("phrases").split("\n")));
+                m.setTheme(rs.getString("theme"));
                 m.setArtist(new Artist(artist));
                 return m;
             }
@@ -87,6 +91,7 @@ public class MusicRepository {
         ResultSet keys = stmt.getGeneratedKeys();
         keys.next();
         music.setId(keys.getInt(1));
+        saveTheme(music.getId(), music.getTheme());
     }
 
     public List<ListMusicDTO> listWithLimit() throws SQLException {
@@ -148,9 +153,11 @@ public class MusicRepository {
 
     public Music findById(Integer id) throws SQLException {
         String sql = "SELECT musics.id AS music_id, musics.name AS music_name, musics.phrases AS phrases, "
-                + "artists.id AS artist_id, artists.name AS artist_name "
+                + "artists.id AS artist_id, artists.name AS artist_name, "
+                + "music_themes.theme_name AS music_theme "
                 + "FROM musics "
                 + "LEFT JOIN artists ON artists.id = musics.artist_id "
+                + "LEFT JOIN music_themes ON music_themes.music_id = musics.id "
                 + "WHERE musics.id = ?";
 
         PreparedStatement stmt = SQLiteJDBCDriverConnection
@@ -194,6 +201,38 @@ public class MusicRepository {
         stmt.setString(3, phrases);
         stmt.setInt(4, m.getId());
         stmt.execute();
+        saveTheme(m.getId(), m.getTheme());
+    }
+
+    private void saveTheme(Integer musicId, String themeName) throws SQLException {
+        String delSql = "DELETE FROM music_themes WHERE music_id = ?";
+
+        PreparedStatement delStmt = SQLiteJDBCDriverConnection
+                .getConn()
+                .prepareStatement(delSql);
+
+        try {
+            delStmt.setInt(1, musicId);
+            delStmt.execute();
+        } finally {
+            delStmt.close();
+        }
+
+        if (themeName != null) {
+            String themeSql = "INSERT INTO music_themes(music_id, theme_name) VALUES (?, ?)";
+
+            PreparedStatement stmt = SQLiteJDBCDriverConnection
+                    .getConn()
+                    .prepareStatement(themeSql);
+
+            try {
+                stmt.setInt(1, musicId);
+                stmt.setString(2, themeName);
+                stmt.execute();
+            } finally {
+                stmt.close();
+            }
+        }
     }
 
     private Music deserialize(ResultSet rs) throws SQLException {
@@ -211,7 +250,7 @@ public class MusicRepository {
         m.setId(rs.getInt("music_id"));
         m.setName(rs.getString("music_name"));
         m.setPhrases(rs.getString("phrases"));
-
+        m.setTheme(rs.getString("music_theme"));
         return m;
     }
 

@@ -12,4 +12,5 @@ public class FilePaths {
     public static final File PROJECTOR_WINDOW_CONFIG_FILE = PROJECTOR_WINDOW_CONFIG_PATH.toFile();
 
     public static final Path PROJECTOR_BACKGROUND_VIDEOS = FileSystems.getDefault().getPath(System.getProperty("user.home"), "Projector", "Background Videos");
+    public static final Path PROJECTOR_BACKGROUND_VIDEO_THUMBS = FileSystems.getDefault().getPath(System.getProperty("user.home"), "Projector", "Background Videos", "thumbs");
 }

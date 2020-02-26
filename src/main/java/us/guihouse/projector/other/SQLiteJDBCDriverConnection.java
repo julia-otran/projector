@@ -143,6 +143,14 @@ public class SQLiteJDBCDriverConnection {
             stmt.execute(query);
             stmt.execute("CREATE UNIQUE INDEX IF NOT EXISTS UQ_MUSIC ON musics(artist_id, name);");
 
+            query = "CREATE TABLE IF NOT EXISTS music_themes("
+                    + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    + "music_id INTEGER NOT NULL, "
+                    + "theme_name VARCHAR NOT NULL, "
+                    + "FOREIGN KEY(music_id) REFERENCES musics(id) ON DELETE CASCADE"
+                    + ")";
+            stmt.execute(query);
+
             query = "CREATE TABLE IF NOT EXISTS musics_plays("
                     + "music_id INTEGER, "
                     + "date DATETIME, "

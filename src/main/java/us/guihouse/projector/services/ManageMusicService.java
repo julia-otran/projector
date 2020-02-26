@@ -183,7 +183,7 @@ public class ManageMusicService {
         return true;
     }
 
-    public Integer createMusic(String name, String artist, String phrases) throws MusicAlreadyPresentException, PersistenceException, InavlidArtist, InvalidName, InvalidPhrases {
+    public Integer createMusic(String name, String artist, String phrases, String theme) throws MusicAlreadyPresentException, PersistenceException, InavlidArtist, InvalidName, InvalidPhrases {
         try {
             name = name.trim();
             phrases = phrases.trim();
@@ -223,6 +223,7 @@ public class ManageMusicService {
             m.setArtist(a);
             m.setName(name);
             m.setPhrases(phrases);
+            m.setTheme(theme);
 
             try {
                 musicRepo.create(m);
@@ -240,7 +241,7 @@ public class ManageMusicService {
         }
     }
 
-    public void updateMusic(Integer id, String name, String artist, String phrases) throws MusicAlreadyPresentException, PersistenceException, InavlidArtist {
+    public void updateMusic(Integer id, String name, String artist, String phrases, String theme) throws MusicAlreadyPresentException, PersistenceException, InavlidArtist {
         try {
             SQLiteJDBCDriverConnection.getConn().setAutoCommit(false);
             Artist a = findOrCrateArtist(artist);
@@ -263,6 +264,7 @@ public class ManageMusicService {
             m.setArtist(a);
             m.setName(name);
             m.setPhrases(phrases);
+            m.setTheme(theme);
 
             try {
                 musicRepo.update(m);

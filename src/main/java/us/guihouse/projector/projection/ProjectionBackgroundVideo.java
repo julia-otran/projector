@@ -3,6 +3,7 @@ package us.guihouse.projector.projection;
 import uk.co.caprica.vlcj.binding.internal.libvlc_media_t;
 import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventListener;
+import us.guihouse.projector.utils.ThemeFinder;
 
 import java.awt.*;
 import java.io.File;
@@ -67,21 +68,10 @@ public class ProjectionBackgroundVideo implements Projectable {
     }
 
     public void loadMedia() {
-        String[] pathNames = PROJECTOR_BACKGROUND_VIDEOS.toFile().list();
-
-        if (pathNames != null) {
-            media.clear();
-
-            for (String fileStr : pathNames) {
-                File file = FileSystems.getDefault().getPath(PROJECTOR_BACKGROUND_VIDEOS.toFile().getAbsolutePath(), fileStr).toFile();
-
-                if (file.isFile() && file.canRead()) {
-                    media.add(file);
-                    videoProjectors[0].getPlayer().prepareMedia(file.getAbsolutePath());
-                    videoProjectors[1].getPlayer().prepareMedia(file.getAbsolutePath());
-                }
-            }
-        }
+        ThemeFinder.getThemes().forEach(t -> {
+            videoProjectors[0].getPlayer().prepareMedia(t.getVideoFile().getAbsolutePath());
+            videoProjectors[1].getPlayer().prepareMedia(t.getVideoFile().getAbsolutePath());
+        });
     }
 
     public void startBackground(Integer musicId) {

@@ -16,15 +16,16 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
+import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.image.ImageView;
+import javafx.util.Callback;
+import javafx.util.StringConverter;
 import us.guihouse.projector.dtos.ImportingMusicDTO;
 import us.guihouse.projector.models.Music;
+import us.guihouse.projector.models.MusicTheme;
 import us.guihouse.projector.services.ManageMusicService;
+import us.guihouse.projector.utils.ThemeFinder;
 
 /**
  * FXML Controller class
@@ -42,15 +43,68 @@ public class MusicFormController implements Initializable {
     
     @FXML
     private ComboBox<String> artistCombo;
+
+    @FXML
+    private ComboBox<MusicTheme> themeCombo;
     
     @FXML
     private TextArea musicTextArea;
-    
+
+    private MusicTheme randomTheme = new MusicTheme();
+
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        themeCombo.getItems().clear();
+        themeCombo.setConverter(new StringConverter<MusicTheme>() {
+            @Override
+            public String toString(MusicTheme object) {
+                if (object.equals(randomTheme)) {
+                    return "Aleatório";
+                } else {
+                    return object.getVideoFile().getName();
+                }
+            }
+
+            @Override
+            public MusicTheme fromString(String string) {
+                if ("Aleatório".equals(string)) {
+                    return randomTheme;
+                }
+
+                return ThemeFinder.getThemeByVideoName(string);
+            }
+        });
+        themeCombo.setCellFactory(new Callback<ListView<MusicTheme>, ListCell<MusicTheme>>() {
+            @Override
+            public ListCell<MusicTheme> call(ListView<MusicTheme> param) {
+                ListCell<MusicTheme> cell = new ListCell<MusicTheme>() {
+                    @Override
+                    protected void updateItem(MusicTheme item, boolean empty) {
+                        super.updateItem(item, empty);
+
+                        if (empty || item == null) {
+                            setGraphic(null);
+                            setText(null);
+                        } else if (item.equals(randomTheme)) {
+                            setText("Aleatório");
+                            setGraphic(null);
+                        } else {
+                            ImageView thumb = new ImageView(item.getImageFile().toURI().toString());
+                            thumb.setPreserveRatio(true);
+                            thumb.setFitWidth(200D);
+                            thumb.setFitHeight(200D);
+                            setGraphic(thumb);
+                            setText(null);
+                        }
+                    }
+                };
+
+                return cell;
+            }
+        });
     }    
     
     @FXML
@@ -97,6 +151,16 @@ public class MusicFormController implements Initializable {
         String name = titleTextField.getText();
         String artist = artistCombo.getSelectionModel().getSelectedItem();
         String music = musicTextArea.getText();
+
+        MusicTheme theme = themeCombo.getSelectionModel().getSelectedItem();
+
+        String themeName;
+
+        if (theme.equals(randomTheme)) {
+            themeName = null;
+        } else {
+            themeName = theme.getVideoFile().getName();
+        }
         
         Alert alert = new Alert(AlertType.ERROR);
         alert.setTitle("Erro");
@@ -104,14 +168,14 @@ public class MusicFormController implements Initializable {
         
         try {
             if (editingMusic == null) {
-                Integer createdId = musicService.createMusic(name, artist, music);
+                Integer createdId = musicService.createMusic(name, artist, music, themeName);
                 if (addToList) {
                     getCallback().goBackWithId(createdId);
                 } else {
                     getCallback().goBackAndReload();
                 }
             } else {
-                musicService.updateMusic(editingMusic.getId(), name, artist, music);
+                musicService.updateMusic(editingMusic.getId(), name, artist, music, themeName);
                 musicService.closeMusic(editingMusic.getId());
                 
                 if (addToList) {
@@ -158,6 +222,8 @@ public class MusicFormController implements Initializable {
 
     public void init() {
         populateArtists();
+        populateThemes();
+        themeCombo.getSelectionModel().select(randomTheme);
     }
 
     private void populateArtists() {
@@ -174,6 +240,11 @@ public class MusicFormController implements Initializable {
         }
     }
 
+    private void populateThemes() {
+        themeCombo.getItems().add(randomTheme);
+        themeCombo.getItems().addAll(ThemeFinder.getThemes());
+    }
+
     public void init(Integer id) throws ManageMusicService.PersistenceException {
         init();
         editingMusic = musicService.openMusic(id);
@@ -184,6 +255,17 @@ public class MusicFormController implements Initializable {
         
         titleTextField.setText(editingMusic.getName());
         musicTextArea.setText(editingMusic.getPhrasesAsString());
+
+        if (editingMusic.getTheme() == null) {
+            //themeCombo.getSelectionModel().select(randomTheme);
+        } else {
+            MusicTheme theme = ThemeFinder.getThemeByVideoName(editingMusic.getTheme());
+            if (theme != null) {
+                themeCombo.getSelectionModel().select(theme);
+            } else {
+                //themeCombo.getSelectionModel().select(randomTheme);
+            }
+        }
     }
 
     public void init(ImportingMusicDTO music) {

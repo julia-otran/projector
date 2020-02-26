@@ -31,6 +31,7 @@ public class Music {
     private final Property<String> nameProperty;
     private final Property<Artist> artistProperty;
     private final ObservableList<String> phrasesList;
+    private final Property<String> themeProperty;
 
     @Getter(AccessLevel.NONE)
     private final ReadOnlyObjectWrapper<String> nameAndArtistProperty;
@@ -41,6 +42,7 @@ public class Music {
         this.artistProperty = new SimpleObjectProperty<>();
         this.nameAndArtistProperty = new ReadOnlyObjectWrapper<>();
         this.phrasesList = FXCollections.observableArrayList();
+        this.themeProperty = new SimpleObjectProperty<>();
 
         setupNameAndArtistProp();
     }
@@ -139,5 +141,13 @@ public class Music {
 
     public String getPhrasesAsString() {
         return phrasesList.stream().collect(Collectors.joining("\n"));
+    }
+
+    public String getTheme() {
+        return themeProperty.getValue();
+    }
+
+    public void setTheme(String theme) {
+        themeProperty.setValue(theme);
     }
 }
