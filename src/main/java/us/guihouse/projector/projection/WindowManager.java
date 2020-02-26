@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
+import java.awt.image.RescaleOp;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -31,12 +32,14 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
     private GraphicsDevice defaultDevice;
 
+    private BufferedImage targetRender;
+    private BufferedImage bLevelFixed;
+
     private List<ProjectionWindow> windows = Collections.emptyList();
 
-    private BufferedImage whiteImage;
     private HashMap<Integer, BufferedImage> blendAssets = new HashMap<>();
-    private HashMap<String, AlphaComposite> blackLevelAssets = new HashMap<>();
     private HashMap<String, AffineTransform> transformAssets = new HashMap<>();
+    private HashMap<String, RescaleOp> blackLevelRescaleOps = new HashMap<>();
 
     private Thread drawThread;
 
@@ -98,6 +101,9 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
         starting = true;
 
+        targetRender = getDefaultDevice().getDefaultConfiguration().createCompatibleImage(getWidth(), getHeight());
+        bLevelFixed = getDefaultDevice().getDefaultConfiguration().createCompatibleImage(getWidth(), getHeight());
+
         windowConfigs.forEach(wc -> {
             windows
                     .stream()
@@ -148,8 +154,12 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
         HashMap<String, Graphics2D> allGraphics = new HashMap<>();
 
+        Graphics2D targetGraphics = targetRender.createGraphics();
+
         while (running) {
             preview.scheduleRepaint();
+
+            projectionCanvas.paintComponent(targetGraphics);
 
             windowConfigs.forEach(windowConfig -> {
                 BufferStrategy bufferStrategy = bufferStrategies.get(windowConfig.getDisplayId());
@@ -165,6 +175,10 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                     return;
                 }
 
+                RescaleOp rescaleOp = blackLevelRescaleOps.get(windowConfig.getDisplayId());
+
+                rescaleOp.filter(targetRender, bLevelFixed);
+
                 g.setColor(Color.BLACK);
                 g.fillRect(windowConfig.getBgFillX(), windowConfig.getBgFillY(), windowConfig.getBgFillWidth(), windowConfig.getBgFillHeight());
 
@@ -175,19 +189,10 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
-                projectionCanvas.paintComponent(g);
+                g.drawImage(bLevelFixed, 0,0, null);
 
                 g.setTransform(transform);
                 g.translate(windowConfig.getX(), windowConfig.getY());
-
-                Composite bLevel = blackLevelAssets.get(windowConfig.getDisplayId());
-
-                if (bLevel != null) {
-                    Composite old = g.getComposite();
-                    g.setComposite(bLevel);
-                    g.drawImage(whiteImage, windowConfig.getBlackLevelX(), windowConfig.getBlackLevelY(), null);
-                    g.setComposite(old);
-                }
 
                 windowConfig.getBlends().forEach(blend -> {
                     BufferedImage img = blendAssets.get(blend.getId());
@@ -213,7 +218,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
             allGraphics.clear();
 
             try {
-                Thread.sleep(25);
+                Thread.sleep(0);
             } catch (InterruptedException ex) {
                 if (running) {
                     running = false;
@@ -324,9 +329,8 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                     wc.setBgFillWidth(device.getDevice().getDisplayMode().getWidth());
                     wc.setBgFillHeight(device.getDevice().getDisplayMode().getHeight());
 
-                    wc.setBlackLevelPadding(0);
-                    wc.setBlackLevelX(0);
-                    wc.setBlackLevelY(0);
+                    wc.setBLevelOffset(0);
+                    wc.setBLevelScaleFactor(1.0f);
 
                     wc.setBlends(Collections.emptyList());
                     wc.setHelpLines(Collections.emptyList());
@@ -344,22 +348,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     private void generateAssets() {
         blendAssets.clear();
         transformAssets.clear();
-        blackLevelAssets.clear();
-
-        if (whiteImage != null) {
-            whiteImage.flush();
-        }
-
-        int greaterWidth = windowConfigs.stream().map(WindowConfig::getWidth).max(Integer::compareTo).orElse(800);
-        int greaterHeight = windowConfigs.stream().map(WindowConfig::getHeight).max(Integer::compareTo).orElse(800);
-
-        whiteImage = new BufferedImage(greaterWidth, greaterHeight, BufferedImage.TYPE_INT_ARGB);
-
-        for (int x = 0; x < greaterWidth; x++) {
-            for (int y = 0; y < greaterHeight; y++) {
-                whiteImage.setRGB(x, y, 0xFFFFFFFF);
-            }
-        }
 
         windowConfigs.forEach(wc -> {
             wc.getBlends().forEach(blend -> {
@@ -375,8 +363,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
             transformAssets.put(wc.getDisplayId(), t);
 
-            AlphaComposite composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, wc.getBlackLevelPadding());
-            blackLevelAssets.put(wc.getDisplayId(), composite);
+            blackLevelRescaleOps.put(wc.getDisplayId(), new RescaleOp(wc.getBLevelScaleFactor(), wc.getBLevelOffset(), null));
         });
 
     }

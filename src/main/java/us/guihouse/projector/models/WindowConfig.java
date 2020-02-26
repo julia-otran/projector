@@ -8,9 +8,8 @@ public class WindowConfig {
 
     private String displayId;
 
-    private float blackLevelPadding;
-    private int blackLevelX;
-    private int blackLevelY;
+    private float bLevelScaleFactor;
+    private float bLevelOffset;
 
     private int x;
     private int y;
