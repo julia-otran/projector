@@ -102,7 +102,9 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
         starting = true;
 
         targetRender = getDefaultDevice().getDefaultConfiguration().createCompatibleImage(getWidth(), getHeight());
+        targetRender.setAccelerationPriority(1.0f);
         bLevelFixed = getDefaultDevice().getDefaultConfiguration().createCompatibleImage(getWidth(), getHeight());
+        bLevelFixed.setAccelerationPriority(1.0f);
 
         windowConfigs.forEach(wc -> {
             windows
