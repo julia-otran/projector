@@ -5,6 +5,7 @@
  */
 package us.guihouse.projector.forms.controllers.projection;
 
+import java.io.File;
 import java.net.URL;
 import java.text.Collator;
 import java.util.List;
@@ -44,6 +45,7 @@ import us.guihouse.projector.projection.ProjectionManager;
 import us.guihouse.projector.projection.text.TextWrapper;
 import us.guihouse.projector.projection.text.WrappedText;
 import us.guihouse.projector.services.ManageMusicService;
+import us.guihouse.projector.utils.ThemeFinder;
 
 /**
  * FXML Controller class
@@ -73,6 +75,8 @@ public class MusicProjectionController extends ProjectionController {
 
     private String clearText;
     final Collator collator = Collator.getInstance();
+    private File theme;
+    private boolean projecting = false;
 
     /**
      * Initializes the controller class.
@@ -134,6 +138,13 @@ public class MusicProjectionController extends ProjectionController {
             }
         });
 
+        music.getThemeProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                setTheme(ThemeFinder.getThemeByVideoName(newValue).getVideoFile());
+            }
+        });
+
         textWrapperProperty.addListener(new ChangeListener<TextWrapper>() {
             @Override
             public void changed(ObservableValue<? extends TextWrapper> observable, TextWrapper oldValue, TextWrapper newValue) {
@@ -188,13 +199,27 @@ public class MusicProjectionController extends ProjectionController {
                         }
                     }
                 } else {
+                    projecting = true;
                     projectionManager.setText(text);
-                    projectionManager.setMusicForBackground(music.getId());
+                    playTheme();
                 }
             }
         });
 
         reprocessPhrases();
+        setTheme(ThemeFinder.getThemeByVideoName(music.getTheme()).getVideoFile());
+    }
+
+    private void setTheme(File theme) {
+        this.theme = theme;
+
+        if (projecting) {
+            playTheme();
+        }
+    }
+
+    private void playTheme() {
+        projectionManager.setMusicForBackground(music.getId(), theme);
     }
 
     public void setManageMusicService(ManageMusicService svc) {
@@ -255,6 +280,7 @@ public class MusicProjectionController extends ProjectionController {
     }
 
     private void performClear() {
+        projecting = false;
         clearScreenButton.setText(clearText);
         clearScreenButton.disableProperty().set(true);
         projectionManager.setText(WrappedText.blankText());
@@ -274,7 +300,7 @@ public class MusicProjectionController extends ProjectionController {
 
     @FXML
     public void removeBackground() {
-        projectionManager.setMusicForBackground(null);
+        projectionManager.setMusicForBackground(null, null);
         removeBackgroundButton.disableProperty().set(true);
     }
 

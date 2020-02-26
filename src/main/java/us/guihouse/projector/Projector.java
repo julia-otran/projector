@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sun.jna.Native;
 import com.sun.jna.NativeLibrary;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -24,10 +25,12 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
+import uk.co.caprica.vlcj.player.MediaPlayerFactory;
 import us.guihouse.projector.forms.controllers.GraphicsDeviceHelper;
 import us.guihouse.projector.forms.controllers.SceneManager;
 import us.guihouse.projector.forms.controllers.WorkspaceController;
 import us.guihouse.projector.other.SQLiteJDBCDriverConnection;
+import us.guihouse.projector.utils.VlcPlayerFactory;
 
 import javax.swing.*;
 
@@ -47,12 +50,7 @@ public class Projector extends Application implements Runnable {
 
     @Override
     public void run() {
-        NativeLibrary.addSearchPath("vlc", "/Applications/VLC.app/Contents/MacOS/lib/");
-
-        //TODO: No windows PRECISA setar a ENV VLC_PLUGIN_PATH
-        // Ver https://github.com/java-native-access/jna
-        //Runtime.getRuntime().exec()
-        NativeLibrary.addSearchPath("libvlc", "C:\\VLC");
+        VlcPlayerFactory.init();
 
         SQLiteJDBCDriverConnection.connect();
         SQLiteJDBCDriverConnection.migrate();
@@ -119,6 +117,8 @@ public class Projector extends Application implements Runnable {
             @Override
             public void handle(WindowEvent event) {
                 controller.stop();
+
+                VlcPlayerFactory.finish();
 
                 try {
                     Unirest.shutdown();

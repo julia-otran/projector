@@ -6,6 +6,7 @@
 package us.guihouse.projector.projection;
 
 import java.awt.Font;
+import java.io.File;
 
 import us.guihouse.projector.models.Music;
 import us.guihouse.projector.projection.models.BackgroundModel;
@@ -52,5 +53,5 @@ public interface ProjectionManager {
 
     void stop(Projectable projectable);
 
-    void setMusicForBackground(Integer musicId);
+    void setMusicForBackground(Integer musicId, File preferred);
 }

@@ -8,6 +8,7 @@ import uk.co.caprica.vlcj.player.direct.BufferFormatCallback;
 import uk.co.caprica.vlcj.player.direct.DirectMediaPlayer;
 import uk.co.caprica.vlcj.player.direct.RenderCallbackAdapter;
 import uk.co.caprica.vlcj.player.direct.format.RV32BufferFormat;
+import us.guihouse.projector.utils.VlcPlayerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,7 +21,6 @@ public class ProjectionVideo implements Projectable {
     protected DirectMediaPlayer player;
 
     protected BufferedImage image;
-    private final MediaPlayerFactory factory;
 
     protected int deviceW;
     protected int deviceH;
@@ -43,7 +43,6 @@ public class ProjectionVideo implements Projectable {
     public ProjectionVideo(CanvasDelegate delegate, boolean cropVideo) {
         this.delegate = delegate;
         this.cropVideo = cropVideo;
-        factory = new MediaPlayerFactory();
     }
 
     @Override
@@ -63,7 +62,7 @@ public class ProjectionVideo implements Projectable {
 
         renderCallback = new ProjectionVideo.MyRenderCallback();
 
-        this.player = factory.newDirectMediaPlayer(new ProjectionVideo.MyBufferFormatCallback(), renderCallback);
+        this.player = VlcPlayerFactory.getFactory().newDirectMediaPlayer(new ProjectionVideo.MyBufferFormatCallback(), renderCallback);
         this.player.setAdjustVideo(true);
     }
 
@@ -110,7 +109,6 @@ public class ProjectionVideo implements Projectable {
     @Override
     public void finish() {
         this.player.release();
-        this.factory.release();
     }
 
     public DirectMediaPlayer getPlayer() {

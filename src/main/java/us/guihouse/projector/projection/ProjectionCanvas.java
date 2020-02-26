@@ -7,6 +7,7 @@ package us.guihouse.projector.projection;
 
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import us.guihouse.projector.projection.models.BackgroundModel;
@@ -158,9 +159,9 @@ public class ProjectionCanvas implements ProjectionManager {
     }
 
     @Override
-    public void setMusicForBackground(Integer musicId) {
+    public void setMusicForBackground(Integer musicId, File preferred) {
         if (musicId != null) {
-            bgVideo.startBackground(musicId);
+            bgVideo.startBackground(musicId, preferred);
         } else {
             bgVideo.stopBackground();
         }

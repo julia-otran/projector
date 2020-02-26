@@ -74,7 +74,11 @@ public class ProjectionBackgroundVideo implements Projectable {
         });
     }
 
-    public void startBackground(Integer musicId) {
+    public void startBackground(Integer musicId, File preferred) {
+        if (preferred != null) {
+            musicMap.put(musicId, preferred);
+        }
+
         if (!musicMap.containsKey(musicId)) {
             int id = Math.abs(random.nextInt()) % media.size();
             musicMap.put(musicId, media.get(id));
@@ -85,22 +89,21 @@ public class ProjectionBackgroundVideo implements Projectable {
         if (toPlay != null) {
             if (toPlay.equals(currentMedia)) {
                 if (!playing) {
-                    playMedia(toPlay.getAbsolutePath());
+                    playMedia(toPlay);
                 }
             } else {
-                currentMedia = toPlay;
-                playMedia(toPlay.getAbsolutePath());
+                playMedia(toPlay);
             }
         }
     }
 
-    private void playMedia(String absolutePath) {
+    private void playMedia(File toPlay) {
         stopBackground();
-        videoProjectors[0].setRender(true);
+        currentMedia = toPlay;
         playing = true;
         currentPlayer = 0;
-        videoProjectors[0].getPlayer().playMedia(absolutePath);
-        videoProjectors[1].getPlayer().playMedia(absolutePath);
+        videoProjectors[0].getPlayer().playMedia(toPlay.getAbsolutePath());
+        videoProjectors[1].getPlayer().playMedia(toPlay.getAbsolutePath());
     }
 
     public void stopBackground() {

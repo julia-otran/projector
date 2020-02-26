@@ -101,7 +101,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
         windowConfigs.forEach(wc -> {
             windows
                     .stream()
-                    .filter(w -> w.getCurrentDevice().getName().equals(wc.getDisplayId()))
+                    .filter(w -> w.getCurrentDevice().getDevice().getIDstring().equals(wc.getDisplayId()))
                     .findAny()
                     .ifPresent(w -> {
                         w.init();
@@ -115,7 +115,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                 windowConfigs.forEach(wc -> {
                     windows
                             .stream()
-                            .filter(w -> w.getCurrentDevice().getName().equals(wc.getDisplayId()))
+                            .filter(w -> w.getCurrentDevice().getDevice().getIDstring().equals(wc.getDisplayId()))
                             .findAny()
                             .ifPresent(ProjectionWindow::makeVisible);
                 });
@@ -136,8 +136,14 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     public void run() {
         HashMap<String, BufferStrategy> bufferStrategies = new HashMap();
 
-        windows.forEach(window -> {
-            bufferStrategies.put(window.getCurrentDevice().getDevice().getIDstring(), window.getFrame().getBufferStrategy());
+        windowConfigs.forEach(wc -> {
+            windows.stream()
+                    .filter(w -> w.getCurrentDevice().getDevice().getIDstring().equals(wc.getDisplayId()))
+                    .findAny()
+                    .ifPresent(window -> {
+                        BufferStrategy strategy = window.getFrame().getBufferStrategy();
+                        bufferStrategies.put(wc.getDisplayId(), strategy);
+                    });
         });
 
         HashMap<String, Graphics2D> allGraphics = new HashMap<>();
@@ -180,6 +186,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                     Composite old = g.getComposite();
                     g.setComposite(bLevel);
                     g.drawImage(whiteImage, windowConfig.getBlackLevelX(), windowConfig.getBlackLevelY(), null);
+                    g.setComposite(old);
                 }
 
                 windowConfig.getBlends().forEach(blend -> {
