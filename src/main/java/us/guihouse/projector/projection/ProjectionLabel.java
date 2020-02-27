@@ -18,6 +18,8 @@ import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import javafx.application.Platform;
 import lombok.Getter;
 import lombok.Setter;
 import us.guihouse.projector.other.ProjectorPreferences;
@@ -220,7 +222,9 @@ public class ProjectionLabel implements Projectable {
     }
 
     private void onFactoryChange() {
-        factoryChangeListeners.forEach(l -> l.onWrapperFactoryChanged(getWrapperFactory()));
+        Platform.runLater(() -> {
+            factoryChangeListeners.forEach(l -> l.onWrapperFactoryChanged(getWrapperFactory()));
+        });
     }
 
     public void addWrapperChangeListener(TextWrapperFactoryChangeListener factoryChangeListener) {

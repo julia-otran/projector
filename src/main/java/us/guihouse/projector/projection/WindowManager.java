@@ -81,11 +81,13 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
         configLoader.stop();
 
         if (drawThread != null) {
-            drawThread.interrupt();
+            try {
+                drawThread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             drawThread = null;
         }
-
-        windows.forEach(ProjectionWindow::shutdown);
 
         preview.setProjectionCanvas(null);
     }
@@ -114,6 +116,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                     .ifPresent(w -> {
                         w.init();
                         w.setCursor(blankCursor);
+                        w.setFullScreen(fullScreen);
                     });
         });
 
@@ -228,6 +231,8 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                 }
             }
         }
+
+        windows.forEach(ProjectionWindow::shutdown);
 
         drawThread = null;
     }

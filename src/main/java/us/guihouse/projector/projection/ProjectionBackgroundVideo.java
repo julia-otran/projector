@@ -59,6 +59,10 @@ public class ProjectionBackgroundVideo implements Projectable {
         videoProjectors[1].getPlayer().addMediaPlayerEventListener(new Player1Callbacks());
 
         loadMedia();
+
+        if (playing) {
+            playMedia(currentMedia);
+        }
     }
 
     @Override

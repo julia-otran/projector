@@ -8,6 +8,8 @@ package us.guihouse.projector.projection;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.io.File;
+
 import javafx.application.Platform;
 import javax.swing.*;
 import uk.co.caprica.vlcj.player.MediaPlayerFactory;
@@ -23,6 +25,8 @@ import uk.co.caprica.vlcj.player.direct.format.RV32BufferFormat;
  */
 public class ProjectionPlayer extends ProjectionVideo {
     private ProjectionPlayer.PlayerPanel panel;
+
+    private File loadedMedia;
 
     private int previewOW;
     private int previewOH;
@@ -56,6 +60,20 @@ public class ProjectionPlayer extends ProjectionVideo {
         panel.repaint();
 
         recalculatePreviewSize();
+    }
+
+    public void loadMedia(File file) {
+        this.player.prepareMedia(file.getAbsolutePath());
+        this.loadedMedia = file;
+    }
+
+    @Override
+    public void rebuildLayout() {
+        super.rebuildLayout();
+
+        if (loadedMedia != null) {
+            this.player.prepareMedia(loadedMedia.getAbsolutePath());
+        }
     }
 
     @Override

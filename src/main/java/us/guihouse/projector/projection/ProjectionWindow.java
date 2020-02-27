@@ -63,6 +63,7 @@ public class ProjectionWindow  {
     void shutdown() {
         if (frame != null) {
             final Frame f = frame;
+            currentDevice.getDevice().setFullScreenWindow(null);
 
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
@@ -73,6 +74,14 @@ public class ProjectionWindow  {
             });
 
             frame = null;
+        }
+    }
+
+    public void setFullScreen(boolean fullScreen) {
+        if (fullScreen && this.currentDevice.getDevice().isFullScreenSupported()) {
+            this.currentDevice.getDevice().setFullScreenWindow(frame);
+        } else {
+            this.currentDevice.getDevice().setFullScreenWindow(null);
         }
     }
 }

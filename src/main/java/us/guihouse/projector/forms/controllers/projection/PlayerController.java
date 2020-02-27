@@ -300,7 +300,7 @@ public class PlayerController extends ProjectionController implements FileDragDr
     }
 
     private void openMedia(File file) {
-        projectionPlayer.getPlayer().prepareMedia(file.getAbsolutePath());
+        projectionPlayer.loadMedia(file);
         chooseFileBox.setVisible(false);
         playerBox.setVisible(true);
 
