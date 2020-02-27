@@ -33,19 +33,22 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     private GraphicsDevice defaultDevice;
 
     private BufferedImage targetRender;
-    private BufferedImage bLevelFixed;
+    private HashMap<String, BufferedImage> bLevelFixed = new HashMap<>();
 
     private List<ProjectionWindow> windows = Collections.emptyList();
 
     private HashMap<Integer, BufferedImage> blendAssets = new HashMap<>();
     private HashMap<String, AffineTransform> transformAssets = new HashMap<>();
     private HashMap<String, RescaleOp> blackLevelRescaleOps = new HashMap<>();
+    private HashMap<String, BufferedImage> screenImages = new HashMap<>();
+    private HashMap<String, Graphics2D> screenGraphics = new HashMap<>();
 
     private Thread drawThread;
 
     private boolean running = false;
     private boolean fullScreen = false;
     private boolean starting = false;
+    private boolean drawing = false;
 
     private final SettingsService settingsService;
 
@@ -105,8 +108,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
         targetRender = getDefaultDevice().getDefaultConfiguration().createCompatibleImage(getWidth(), getHeight());
         targetRender.setAccelerationPriority(1.0f);
-        bLevelFixed = getDefaultDevice().getDefaultConfiguration().createCompatibleImage(getWidth(), getHeight());
-        bLevelFixed.setAccelerationPriority(1.0f);
 
         windowConfigs.forEach(wc -> {
             windows
@@ -147,6 +148,9 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     public void run() {
         HashMap<String, BufferStrategy> bufferStrategies = new HashMap();
 
+        screenGraphics.clear();
+        screenImages.clear();
+
         windowConfigs.forEach(wc -> {
             windows.stream()
                     .filter(w -> w.getCurrentDevice().getDevice().getIDstring().equals(wc.getDisplayId()))
@@ -154,10 +158,23 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                     .ifPresent(window -> {
                         BufferStrategy strategy = window.getBufferStrategy();
                         bufferStrategies.put(wc.getDisplayId(), strategy);
+
+                        GraphicsDevice device = window.getCurrentDevice().getDevice();
+                        int width = device.getDisplayMode().getWidth();
+                        int height = device.getDisplayMode().getHeight();
+
+                        BufferedImage screenImage = device.getDefaultConfiguration().createCompatibleImage(width, height);
+                        Graphics2D screenGraphic = screenImage.createGraphics();
+
+                        screenGraphics.put(wc.getDisplayId(), screenGraphic);
+                        screenImages.put(wc.getDisplayId(), screenImage);
+
+                        BufferedImage bLevelFixedImg = getDefaultDevice().getDefaultConfiguration().createCompatibleImage(getWidth(), getHeight());
+                        bLevelFixedImg.setAccelerationPriority(1.0f);
+
+                        bLevelFixed.put(wc.getDisplayId(), bLevelFixedImg);
                     });
         });
-
-        HashMap<String, Graphics2D> allGraphics = new HashMap<>();
 
         Graphics2D targetGraphics = targetRender.createGraphics();
 
@@ -165,23 +182,30 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
             projectionCanvas.paintComponent(targetGraphics);
 
             windowConfigs.forEach(windowConfig -> {
-                BufferStrategy bufferStrategy = bufferStrategies.get(windowConfig.getDisplayId());
+                BufferedImage bLevelFix = bLevelFixed.get(windowConfig.getDisplayId());
+                RescaleOp rescaleOp = blackLevelRescaleOps.get(windowConfig.getDisplayId());
+                rescaleOp.filter(targetRender, bLevelFix);
+            });
 
-                if (bufferStrategy == null) {
-                    return;
-                }
-
-                Graphics2D g = (Graphics2D) bufferStrategy.getDrawGraphics();
-
-                allGraphics.put(windowConfig.getDisplayId(), g);
+            windowConfigs.forEach(windowConfig -> {
+                Graphics2D g = screenGraphics.get(windowConfig.getDisplayId());
+                BufferedImage bLevelFix = bLevelFixed.get(windowConfig.getDisplayId());
 
                 if (g == null) {
                     return;
                 }
 
-                RescaleOp rescaleOp = blackLevelRescaleOps.get(windowConfig.getDisplayId());
+                while (drawing && running) {
+                    try {
+                        Thread.sleep(5);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
 
-                rescaleOp.filter(targetRender, bLevelFixed);
+                        if (running) {
+                            running = false;
+                        }
+                    }
+                }
 
                 g.setColor(Color.BLACK);
                 g.fillRect(windowConfig.getBgFillX(), windowConfig.getBgFillY(), windowConfig.getBgFillWidth(), windowConfig.getBgFillHeight());
@@ -193,7 +217,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
-                g.drawImage(bLevelFixed, 0,0, null);
+                g.drawImage(bLevelFix, 0,0, null);
 
                 g.setTransform(transform);
                 g.translate(windowConfig.getX(), windowConfig.getY());
@@ -212,27 +236,29 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
             });
 
             bufferStrategies.forEach((displayId, bufferStrategy) -> {
-                bufferStrategy.show();
+                Graphics g = bufferStrategy.getDrawGraphics();
+                BufferedImage screenImage = screenImages.get(displayId);
+
+                g.drawImage(screenImage, 0, 0, null);
             });
 
-            allGraphics.forEach((displayId, g) -> {
-                g.dispose();
-            });
+            if (!drawing) {
+                drawing = true;
 
-            allGraphics.clear();
-
-            try {
-                Thread.sleep(0);
-            } catch (InterruptedException ex) {
-                if (running) {
-                    running = false;
-                    Logger.getLogger(ProjectionWindow.class.getName()).log(Level.INFO, null, ex);
-                }
+                SwingUtilities.invokeLater(() -> {
+                    bufferStrategies.forEach((displayId, bufferStrategy) -> {
+                        bufferStrategy.show();
+                    });
+                    drawing = false;
+                });
             }
         }
 
         windows.forEach(ProjectionWindow::shutdown);
         targetGraphics.dispose();
+        screenGraphics.forEach((id, g) -> {
+            g.dispose();
+        });
 
         drawThread = null;
     }
