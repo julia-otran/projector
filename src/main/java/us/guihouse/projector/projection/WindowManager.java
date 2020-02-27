@@ -42,6 +42,8 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     private HashMap<String, RescaleOp> blackLevelRescaleOps = new HashMap<>();
     private HashMap<String, BufferedImage> screenImages = new HashMap<>();
     private HashMap<String, Graphics2D> screenGraphics = new HashMap<>();
+    private HashMap<String, BufferedImage> outputs = new HashMap<>();
+    private HashMap<String, Graphics2D> outputGraphics = new HashMap<>();
 
     private Thread drawThread;
 
@@ -49,6 +51,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     private boolean fullScreen = false;
     private boolean starting = false;
     private boolean drawing = false;
+    private final Object sync = new Object();
 
     private final SettingsService settingsService;
 
@@ -173,6 +176,12 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                         bLevelFixedImg.setAccelerationPriority(1.0f);
 
                         bLevelFixed.put(wc.getDisplayId(), bLevelFixedImg);
+
+                        BufferedImage outputImage = device.getDefaultConfiguration().createCompatibleImage(width, height);
+                        Graphics2D outputGraphic = outputImage.createGraphics();
+
+                        outputs.put(wc.getDisplayId(), outputImage);
+                        outputGraphics.put(wc.getDisplayId(), outputGraphic);
                     });
         });
 
@@ -193,18 +202,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
                 if (g == null) {
                     return;
-                }
-
-                while (drawing && running) {
-                    try {
-                        Thread.sleep(5);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-
-                        if (running) {
-                            running = false;
-                        }
-                    }
                 }
 
                 g.setColor(Color.BLACK);
@@ -235,23 +232,39 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                 });
             });
 
-            bufferStrategies.forEach((displayId, bufferStrategy) -> {
-                Graphics g = bufferStrategy.getDrawGraphics();
-                BufferedImage screenImage = screenImages.get(displayId);
+            synchronized (sync) {
+                if (drawing) {
+                    try {
+                        sync.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
 
-                g.drawImage(screenImage, 0, 0, null);
+                drawing = true;
+            }
+
+            windowConfigs.forEach(windowConfig -> {
+                BufferedImage screen = screenImages.get(windowConfig.getDisplayId());
+                Graphics2D g = outputGraphics.get(windowConfig.getDisplayId());
+                g.drawImage(screen, 0, 0, null);
             });
 
-            if (!drawing) {
-                drawing = true;
+            SwingUtilities.invokeLater(() -> {
+                bufferStrategies.forEach((displayId, bufferStrategy) -> {
+                    Graphics g = bufferStrategy.getDrawGraphics();
+                    BufferedImage screenImage = outputs.get(displayId);
 
-                SwingUtilities.invokeLater(() -> {
-                    bufferStrategies.forEach((displayId, bufferStrategy) -> {
-                        bufferStrategy.show();
-                    });
-                    drawing = false;
+                    g.drawImage(screenImage, 0, 0, null);
+                    bufferStrategy.show();
+                    g.dispose();
                 });
-            }
+
+                synchronized (sync) {
+                    drawing = false;
+                    sync.notify();
+                }
+            });
         }
 
         windows.forEach(ProjectionWindow::shutdown);
