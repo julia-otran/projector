@@ -9,35 +9,56 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
+import java.awt.image.BufferedImage;
+import javax.swing.*;
 
 /**
  *
  * @author guilherme
  */
-public class PreviewPanel extends JPanel {
+public class PreviewPanel extends JPanel implements Runnable {
     private final CanvasDelegate delegate;
     private ProjectionCanvas projectionCanvas;
     private boolean repainting = false;
+    private boolean running = false;
+    private Thread updateThread = null;
 
     public PreviewPanel(CanvasDelegate delegate) {
         this.delegate = delegate;
     }
-    
+
     ProjectionCanvas getProjectionCanvas() {
         return projectionCanvas;
     }
 
     void setProjectionCanvas(ProjectionCanvas projectionCanvas) {
         this.projectionCanvas = projectionCanvas;
+
+        if (projectionCanvas == null) {
+            running = false;
+            if (updateThread != null) {
+                try {
+                    updateThread.join();
+                    updateThread = null;
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        } else {
+            if (updateThread == null) {
+                running = true;
+                updateThread = new Thread(this);
+                updateThread.start();
+            }
+        }
     }
-    
+
     @Override
     public void paint(Graphics g) {
+        super.paint(g);
         int gw = getWidth();
         int gh = getHeight();
-        
+
         Graphics2D g2 = (Graphics2D)g;
         g2.setColor(Color.BLACK);
         g2.fillRect(0, 0, gw, gh);
@@ -61,20 +82,30 @@ public class PreviewPanel extends JPanel {
             projectionCanvas.paintComponent(g2);
             g2.setTransform(old);
         }
-        
+
         repainting = false;
     }
 
-    void scheduleRepaint() {
-        if (repainting) {
-            return;
-        }
-        
-        SwingUtilities.invokeLater(new Runnable(){
-            @Override
-            public void run() {
-                repaint();
+    @Override
+    public void run() {
+        while (running) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                running = false;
+                e.printStackTrace();
             }
-        });
+
+            if (repainting) {
+                return;
+            }
+
+            SwingUtilities.invokeLater(new Runnable(){
+                @Override
+                public void run() {
+                    repaint();
+                }
+            });
+        }
     }
 }

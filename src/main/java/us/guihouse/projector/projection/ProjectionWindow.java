@@ -29,6 +29,8 @@ public class ProjectionWindow  {
     @Getter
     private JFrame frame;
 
+    private Canvas canvas;
+
     @Getter
     private GraphicsFinder.Device currentDevice;
 
@@ -47,7 +49,6 @@ public class ProjectionWindow  {
 
         Rectangle displayRect = currentDevice.getDevice().getDefaultConfiguration().getBounds();
         frame.setBounds(displayRect);
-
         frame.setBackground(Color.BLACK);
     }
 
@@ -83,5 +84,9 @@ public class ProjectionWindow  {
         } else {
             this.currentDevice.getDevice().setFullScreenWindow(null);
         }
+    }
+
+    public BufferStrategy getBufferStrategy() {
+        return frame.getBufferStrategy();
     }
 }

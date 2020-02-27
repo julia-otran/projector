@@ -80,6 +80,8 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
         configLoader.stop();
 
+        preview.setProjectionCanvas(null);
+
         if (drawThread != null) {
             try {
                 drawThread.join();
@@ -88,8 +90,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
             }
             drawThread = null;
         }
-
-        preview.setProjectionCanvas(null);
     }
 
     private void startEngine() {
@@ -152,7 +152,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                     .filter(w -> w.getCurrentDevice().getDevice().getIDstring().equals(wc.getDisplayId()))
                     .findAny()
                     .ifPresent(window -> {
-                        BufferStrategy strategy = window.getFrame().getBufferStrategy();
+                        BufferStrategy strategy = window.getBufferStrategy();
                         bufferStrategies.put(wc.getDisplayId(), strategy);
                     });
         });
@@ -162,19 +162,18 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
         Graphics2D targetGraphics = targetRender.createGraphics();
 
         while (running) {
-            preview.scheduleRepaint();
-
             projectionCanvas.paintComponent(targetGraphics);
 
             windowConfigs.forEach(windowConfig -> {
                 BufferStrategy bufferStrategy = bufferStrategies.get(windowConfig.getDisplayId());
-                if (bufferStrategy != null) {
-                    allGraphics.put(windowConfig.getDisplayId(), (Graphics2D) bufferStrategy.getDrawGraphics());
-                }
-            });
 
-            windowConfigs.forEach(windowConfig -> {
-                Graphics2D g = allGraphics.get(windowConfig.getDisplayId());
+                if (bufferStrategy == null) {
+                    return;
+                }
+
+                Graphics2D g = (Graphics2D) bufferStrategy.getDrawGraphics();
+
+                allGraphics.put(windowConfig.getDisplayId(), g);
 
                 if (g == null) {
                     return;
@@ -233,6 +232,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
         }
 
         windows.forEach(ProjectionWindow::shutdown);
+        targetGraphics.dispose();
 
         drawThread = null;
     }
