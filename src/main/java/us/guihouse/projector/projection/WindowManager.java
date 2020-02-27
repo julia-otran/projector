@@ -14,6 +14,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.swing.*;
+
+import lombok.Getter;
+import lombok.Setter;
 import us.guihouse.projector.models.WindowConfig;
 import us.guihouse.projector.other.GraphicsFinder;
 import us.guihouse.projector.services.SettingsService;
@@ -46,6 +49,10 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     private HashMap<String, Graphics2D> outputGraphics = new HashMap<>();
 
     private Thread drawThread;
+
+    @Getter
+    @Setter
+    private Runnable initializationCallback;
 
     private boolean running = false;
     private boolean fullScreen = false;
@@ -112,16 +119,57 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
         targetRender = getDefaultDevice().getDefaultConfiguration().createCompatibleImage(getWidth(), getHeight());
         targetRender.setAccelerationPriority(1.0f);
 
+        screenGraphics.clear();
+        screenImages.clear();
+        outputs.clear();
+        outputGraphics.clear();
+        bLevelFixed.clear();
+
         windowConfigs.forEach(wc -> {
             windows
                     .stream()
                     .filter(w -> w.getCurrentDevice().getDevice().getIDstring().equals(wc.getDisplayId()))
                     .findAny()
                     .ifPresent(w -> {
-                        w.init();
-                        w.setCursor(blankCursor);
-                        w.setFullScreen(fullScreen);
-                    });
+
+                GraphicsDevice device = w.getCurrentDevice().getDevice();
+                int width = device.getDisplayMode().getWidth();
+                int height = device.getDisplayMode().getHeight();
+
+                BufferedImage screenImage = device.getDefaultConfiguration().createCompatibleImage(width, height);
+                Graphics2D screenGraphic = screenImage.createGraphics();
+
+                screenGraphics.put(wc.getDisplayId(), screenGraphic);
+                screenImages.put(wc.getDisplayId(), screenImage);
+
+                BufferedImage bLevelFixedImg = getDefaultDevice().getDefaultConfiguration().createCompatibleImage(getWidth(), getHeight());
+                bLevelFixedImg.setAccelerationPriority(1.0f);
+
+                bLevelFixed.put(wc.getDisplayId(), bLevelFixedImg);
+
+                BufferedImage outputImage = device.getDefaultConfiguration().createCompatibleImage(width, height);
+                Graphics2D outputGraphic = outputImage.createGraphics();
+
+                outputs.put(wc.getDisplayId(), outputImage);
+                outputGraphics.put(wc.getDisplayId(), outputGraphic);
+            });
+        });
+
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                windowConfigs.forEach(wc -> {
+                    windows
+                            .stream()
+                            .filter(w -> w.getCurrentDevice().getDevice().getIDstring().equals(wc.getDisplayId()))
+                            .findAny()
+                            .ifPresent(w -> {
+                                w.init();
+                                w.setCursor(blankCursor);
+                                w.setFullScreen(fullScreen);
+                            });
+                });
+            }
         });
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -151,9 +199,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     public void run() {
         HashMap<String, BufferStrategy> bufferStrategies = new HashMap();
 
-        screenGraphics.clear();
-        screenImages.clear();
-
         windowConfigs.forEach(wc -> {
             windows.stream()
                     .filter(w -> w.getCurrentDevice().getDevice().getIDstring().equals(wc.getDisplayId()))
@@ -161,31 +206,14 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                     .ifPresent(window -> {
                         BufferStrategy strategy = window.getBufferStrategy();
                         bufferStrategies.put(wc.getDisplayId(), strategy);
-
-                        GraphicsDevice device = window.getCurrentDevice().getDevice();
-                        int width = device.getDisplayMode().getWidth();
-                        int height = device.getDisplayMode().getHeight();
-
-                        BufferedImage screenImage = device.getDefaultConfiguration().createCompatibleImage(width, height);
-                        Graphics2D screenGraphic = screenImage.createGraphics();
-
-                        screenGraphics.put(wc.getDisplayId(), screenGraphic);
-                        screenImages.put(wc.getDisplayId(), screenImage);
-
-                        BufferedImage bLevelFixedImg = getDefaultDevice().getDefaultConfiguration().createCompatibleImage(getWidth(), getHeight());
-                        bLevelFixedImg.setAccelerationPriority(1.0f);
-
-                        bLevelFixed.put(wc.getDisplayId(), bLevelFixedImg);
-
-                        BufferedImage outputImage = device.getDefaultConfiguration().createCompatibleImage(width, height);
-                        Graphics2D outputGraphic = outputImage.createGraphics();
-
-                        outputs.put(wc.getDisplayId(), outputImage);
-                        outputGraphics.put(wc.getDisplayId(), outputGraphic);
                     });
         });
 
         Graphics2D targetGraphics = targetRender.createGraphics();
+
+        if (initializationCallback != null) {
+            initializationCallback.run();
+        }
 
         while (running) {
             projectionCanvas.paintComponent(targetGraphics);
@@ -272,6 +300,9 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
         screenGraphics.forEach((id, g) -> {
             g.dispose();
         });
+        outputGraphics.forEach((id, g) -> {
+            g.dispose();
+        });
 
         drawThread = null;
     }
@@ -296,14 +327,18 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
             return;
         }
 
-        stopEngine();
-        this.fullScreen = fullScreen;
-        startEngine();
+        SwingUtilities.invokeLater(() -> {
+            stopEngine();
+            this.fullScreen = fullScreen;
+            startEngine();
+        });
     }
 
     public void stop() {
-        stopEngine();
-        projectionCanvas.finish();
+        SwingUtilities.invokeLater(() -> {
+            stopEngine();
+            projectionCanvas.finish();
+        });
     }
 
     @Override

@@ -11,6 +11,9 @@ import javafx.event.EventHandler;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javax.swing.JPanel;
+
+import lombok.Getter;
+import lombok.Setter;
 import us.guihouse.projector.other.GraphicsFinder;
 import us.guihouse.projector.projection.ProjectionManager;
 import us.guihouse.projector.projection.WindowManager;
@@ -21,17 +24,27 @@ import us.guihouse.projector.services.SettingsService;
  * @author guilherme
  */
 public class GraphicsDeviceHelper {
-
     private WindowManager windowManager;
     private final SettingsService settingsService = new SettingsService();
 
     public GraphicsDeviceHelper() {
-        buildProjectionFrame();
-        reloadDevices();
+        windowManager = new WindowManager(settingsService);
     }
 
     ProjectionManager getProjectionManager() {
         return windowManager.getManager();
+    }
+
+    public Runnable getInitCallback() {
+        return windowManager.getInitializationCallback();
+    }
+
+    public void setInitCallback(Runnable runnable) {
+        windowManager.setInitializationCallback(runnable);
+    }
+
+    public void init() {
+        reloadDevices();
     }
 
     void stop() {
@@ -47,10 +60,6 @@ public class GraphicsDeviceHelper {
                 .stream()
                 .filter(GraphicsFinder.Device::isProjectionDevice)
                 .collect(Collectors.toList()));
-    }
-
-    private void buildProjectionFrame() {
-        windowManager = new WindowManager(settingsService);
     }
 
     JPanel getPreviewPanel() {

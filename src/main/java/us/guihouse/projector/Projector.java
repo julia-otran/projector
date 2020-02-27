@@ -57,9 +57,14 @@ public class Projector extends Application implements Runnable {
 
         final GraphicsDeviceHelper graphicsHelper = new GraphicsDeviceHelper();
 
-        Platform.runLater(() -> {
-            controller.init(graphicsHelper);
+        graphicsHelper.setInitCallback(() -> {
+            Platform.runLater(() -> {
+                graphicsHelper.setInitCallback(null);
+                controller.init(graphicsHelper);
+            });
         });
+
+        graphicsHelper.init();
     }
 
     @Override
