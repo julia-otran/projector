@@ -25,7 +25,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
-import uk.co.caprica.vlcj.player.MediaPlayerFactory;
 import us.guihouse.projector.forms.controllers.GraphicsDeviceHelper;
 import us.guihouse.projector.forms.controllers.SceneManager;
 import us.guihouse.projector.forms.controllers.WorkspaceController;

@@ -5,11 +5,10 @@
  */
 package us.guihouse.projector.forms.controllers.projection;
 
-import com.sun.istack.internal.logging.Logger;
 import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
+
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -141,7 +140,7 @@ public class PlayerController extends ProjectionController implements FileDragDr
         try {
             this.projectionPlayer = projectionManager.createPlayer();
         } catch (Exception ex) {
-            Logger.getLogger(PlayerController.class).log(Level.SEVERE, ex.getMessage(), ex);
+            ex.printStackTrace();
             // TODO: Show Error State
             return;
         }
