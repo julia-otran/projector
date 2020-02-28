@@ -3,10 +3,10 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>us.guihouse.projector</groupId>
     <artifactId>projector</artifactId>
-    <version>1.7</version>
+    <version>1.8</version>
     <packaging>jar</packaging>
     <properties>
-        <maven.compiler.release>12</maven.compiler.release>
+        <maven.compiler.release>13</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
@@ -111,7 +111,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <release>12</release>
+                    <release>13</release>
                 </configuration>
             </plugin>
 
@@ -146,15 +146,4 @@
 
         </plugins>
     </build>
-
-    <repositories>
-        <repository>
-            <id>maven-default</id>
-            <url>https://mvnrepository.com</url>
-        </repository>
-        <repository>
-            <id>maven-apache</id>
-            <url>https://repo.maven.apache.org</url>
-        </repository>
-    </repositories>
 </project>
