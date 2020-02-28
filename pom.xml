@@ -6,7 +6,7 @@
     <version>1.8</version>
     <packaging>jar</packaging>
     <properties>
-        <maven.compiler.release>13</maven.compiler.release>
+        <maven.compiler.release>8</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
@@ -14,7 +14,7 @@
     <name>Projector</name>
 
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/org.openjfx/javafx -->
+        <!--
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
@@ -38,6 +38,7 @@
             <artifactId>javafx-web</artifactId>
             <version>12</version>
         </dependency>
+        -->
 
         <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
         <dependency>
@@ -111,7 +112,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <release>13</release>
+                    <release>8</release>
                 </configuration>
             </plugin>
 
