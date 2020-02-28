@@ -29,8 +29,6 @@ public class ProjectionWindow  {
     @Getter
     private JFrame frame;
 
-    private Canvas canvas;
-
     @Getter
     private GraphicsFinder.Device currentDevice;
 
