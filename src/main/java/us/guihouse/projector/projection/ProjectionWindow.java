@@ -54,7 +54,7 @@ public class ProjectionWindow  {
 
     void makeVisible() {
         frame.setVisible(true);
-        frame.createBufferStrategy(2);
+        frame.createBufferStrategy(3);
     }
 
     void setCursor(final Cursor cursor) {
@@ -69,6 +69,7 @@ public class ProjectionWindow  {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
+                    f.getBufferStrategy().dispose();
                     f.setVisible(false);
                     f.dispose();
                 }

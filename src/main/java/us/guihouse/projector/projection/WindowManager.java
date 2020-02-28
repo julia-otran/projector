@@ -280,12 +280,17 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
             SwingUtilities.invokeLater(() -> {
                 bufferStrategies.forEach((displayId, bufferStrategy) -> {
-                    Graphics g = bufferStrategy.getDrawGraphics();
                     BufferedImage screenImage = outputs.get(displayId);
 
-                    g.drawImage(screenImage, 0, 0, null);
-                    bufferStrategy.show();
-                    g.dispose();
+                    do {
+                        do {
+                            Graphics g = bufferStrategy.getDrawGraphics();
+                            g.drawImage(screenImage, 0, 0, null);
+                            g.dispose();
+                        } while (bufferStrategy.contentsRestored());
+
+                        bufferStrategy.show();
+                    } while (bufferStrategy.contentsLost());
                 });
 
                 synchronized (sync) {
