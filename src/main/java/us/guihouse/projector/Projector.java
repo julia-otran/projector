@@ -79,7 +79,8 @@ public class Projector extends Application implements Runnable {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        
+        Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+
         primaryStage.setTitle("Projector");
         primaryStage.setMaxWidth(Double.MAX_VALUE);
         primaryStage.setMaxHeight(Double.MAX_VALUE);
