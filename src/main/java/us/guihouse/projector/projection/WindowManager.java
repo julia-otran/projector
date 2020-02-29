@@ -2,7 +2,6 @@ package us.guihouse.projector.projection;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
 import java.lang.reflect.InvocationTargetException;
@@ -38,15 +37,12 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     private BufferedImage targetRender;
     private HashMap<String, BufferedImage> bLevelFixed = new HashMap<>();
 
-    private List<ProjectionWindow> windows = Collections.emptyList();
-
+    private HashMap<String, ProjectionWindow> windows = new HashMap<>();
     private HashMap<Integer, BufferedImage> blendAssets = new HashMap<>();
     private HashMap<String, AffineTransform> transformAssets = new HashMap<>();
     private HashMap<String, RescaleOp> blackLevelRescaleOps = new HashMap<>();
     private HashMap<String, BufferedImage> screenImages = new HashMap<>();
     private HashMap<String, Graphics2D> screenGraphics = new HashMap<>();
-    private HashMap<String, BufferedImage> outputs = new HashMap<>();
-    private HashMap<String, Graphics2D> outputGraphics = new HashMap<>();
 
     private Thread drawThread;
 
@@ -89,7 +85,9 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     }
 
     private void stopEngine() {
-        running = false;
+        synchronized (sync) {
+            running = false;
+        }
 
         configLoader.stop();
 
@@ -121,17 +119,12 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
         screenGraphics.clear();
         screenImages.clear();
-        outputs.clear();
-        outputGraphics.clear();
         bLevelFixed.clear();
 
         windowConfigs.forEach(wc -> {
-            windows
-                    .stream()
-                    .filter(w -> w.getCurrentDevice().getDevice().getIDstring().equals(wc.getDisplayId()))
-                    .findAny()
-                    .ifPresent(w -> {
+            ProjectionWindow w = windows.get(wc.getDisplayId());
 
+            if (w != null) {
                 GraphicsDevice device = w.getCurrentDevice().getDevice();
                 int width = device.getDisplayMode().getWidth();
                 int height = device.getDisplayMode().getHeight();
@@ -146,28 +139,20 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                 bLevelFixedImg.setAccelerationPriority(1.0f);
 
                 bLevelFixed.put(wc.getDisplayId(), bLevelFixedImg);
-
-                BufferedImage outputImage = device.getDefaultConfiguration().createCompatibleImage(width, height);
-                Graphics2D outputGraphic = outputImage.createGraphics();
-
-                outputs.put(wc.getDisplayId(), outputImage);
-                outputGraphics.put(wc.getDisplayId(), outputGraphic);
-            });
+            }
         });
 
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 windowConfigs.forEach(wc -> {
-                    windows
-                            .stream()
-                            .filter(w -> w.getCurrentDevice().getDevice().getIDstring().equals(wc.getDisplayId()))
-                            .findAny()
-                            .ifPresent(w -> {
-                                w.init();
-                                w.setCursor(blankCursor);
-                                w.setFullScreen(fullScreen);
-                            });
+                    ProjectionWindow w = windows.get(wc.getDisplayId());
+
+                    if (w != null) {
+                        w.init();
+                        w.setCursor(blankCursor);
+                        w.setFullScreen(fullScreen);
+                    }
                 });
             }
         });
@@ -176,11 +161,10 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
             @Override
             public void run() {
                 windowConfigs.forEach(wc -> {
-                    windows
-                            .stream()
-                            .filter(w -> w.getCurrentDevice().getDevice().getIDstring().equals(wc.getDisplayId()))
-                            .findAny()
-                            .ifPresent(ProjectionWindow::makeVisible);
+                    ProjectionWindow w = windows.get(wc.getDisplayId());
+                    if (w != null) {
+                        w.makeVisible();
+                    }
                 });
 
                 projectionCanvas.init();
@@ -188,7 +172,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
                 running = true;
                 drawThread = new Thread(WindowManager.this);
-                drawThread.setPriority(Thread.MAX_PRIORITY);
                 drawThread.start();
                 starting = false;
             }
@@ -197,18 +180,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
     @Override
     public void run() {
-        HashMap<String, BufferStrategy> bufferStrategies = new HashMap();
-
-        windowConfigs.forEach(wc -> {
-            windows.stream()
-                    .filter(w -> w.getCurrentDevice().getDevice().getIDstring().equals(wc.getDisplayId()))
-                    .findAny()
-                    .ifPresent(window -> {
-                        BufferStrategy strategy = window.getBufferStrategy();
-                        bufferStrategies.put(wc.getDisplayId(), strategy);
-                    });
-        });
-
         Graphics2D targetGraphics = targetRender.createGraphics();
 
         if (initializationCallback != null) {
@@ -260,37 +231,22 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                 });
             });
 
-            synchronized (sync) {
-                if (drawing) {
-                    try {
-                        sync.wait();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                drawing = true;
-            }
-
             windowConfigs.forEach(windowConfig -> {
                 BufferedImage screen = screenImages.get(windowConfig.getDisplayId());
-                Graphics2D g = outputGraphics.get(windowConfig.getDisplayId());
-                g.drawImage(screen, 0, 0, null);
+                ProjectionWindow window = windows.get(windowConfig.getDisplayId());
+                if (window != null) {
+                    window.updateOutput(screen);
+                }
             });
 
+            drawing = true;
+
             SwingUtilities.invokeLater(() -> {
-                bufferStrategies.forEach((displayId, bufferStrategy) -> {
-                    BufferedImage screenImage = outputs.get(displayId);
-
-                    do {
-                        do {
-                            Graphics g = bufferStrategy.getDrawGraphics();
-                            g.drawImage(screenImage, 0, 0, null);
-                            g.dispose();
-                        } while (bufferStrategy.contentsRestored());
-
-                        bufferStrategy.show();
-                    } while (bufferStrategy.contentsLost());
+                windowConfigs.forEach(windowConfig -> {
+                    ProjectionWindow window = windows.get(windowConfig.getDisplayId());
+                    if (window != null) {
+                        window.repaint();
+                    }
                 });
 
                 synchronized (sync) {
@@ -298,14 +254,21 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                     sync.notify();
                 }
             });
+
+            synchronized (sync) {
+                if (drawing && running) {
+                    try {
+                        sync.wait(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
         }
 
-        windows.forEach(ProjectionWindow::shutdown);
+        windows.values().forEach(ProjectionWindow::shutdown);
         targetGraphics.dispose();
         screenGraphics.forEach((id, g) -> {
-            g.dispose();
-        });
-        outputGraphics.forEach((id, g) -> {
             g.dispose();
         });
 
@@ -314,14 +277,14 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
     @Override
     public int getWidth() {
-        int screenStart = windowConfigs.stream().map(wc -> wc.getX()).min(Integer::compareTo).orElse(0);
+        int screenStart = windowConfigs.stream().map(WindowConfig::getX).min(Integer::compareTo).orElse(0);
         int screenEnd = windowConfigs.stream().map(wc -> wc.getX() + wc.getWidth()).max(Integer::compareTo).orElse(800);
         return screenEnd - screenStart;
     }
 
     @Override
     public int getHeight() {
-        int screenStart = windowConfigs.stream().map(wc -> wc.getY()).min(Integer::compareTo).orElse(0);
+        int screenStart = windowConfigs.stream().map(WindowConfig::getY).min(Integer::compareTo).orElse(0);
         int screenEnd = windowConfigs.stream().map(wc -> wc.getY() + wc.getHeight()).max(Integer::compareTo).orElse(600);
         return screenEnd - screenStart;
     }
@@ -387,7 +350,12 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
     public void setDevices(List<GraphicsFinder.Device> devices) {
         stopEngine();
-        this.windows = devices.stream().map(ProjectionWindow::new).collect(Collectors.toList());
+        this.windows.clear();
+
+        devices.forEach(device -> {
+            this.windows.put(device.getDevice().getIDstring(), new ProjectionWindow(device));
+        });
+
         startEngine();
     }
 
@@ -399,7 +367,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
     @Override
     public List<WindowConfig> getDefaultConfigs() {
-        return this.windows.stream()
+        return this.windows.values().stream()
                 .map(ProjectionWindow::getCurrentDevice)
                 .map(device -> {
                     WindowConfig wc = new WindowConfig();

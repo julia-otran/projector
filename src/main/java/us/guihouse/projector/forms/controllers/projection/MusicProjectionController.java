@@ -40,6 +40,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.util.Callback;
 import us.guihouse.projector.models.Music;
+import us.guihouse.projector.models.MusicTheme;
 import us.guihouse.projector.other.ProjectorStringUtils;
 import us.guihouse.projector.projection.ProjectionManager;
 import us.guihouse.projector.projection.text.TextWrapper;
@@ -207,7 +208,14 @@ public class MusicProjectionController extends ProjectionController {
         });
 
         reprocessPhrases();
-        setTheme(ThemeFinder.getThemeByVideoName(music.getTheme()).getVideoFile());
+
+        MusicTheme theme = ThemeFinder.getThemeByVideoName(music.getTheme());
+
+        if (theme == null) {
+            setTheme(null);
+        } else {
+            setTheme(theme.getVideoFile());
+        }
     }
 
     private void setTheme(File theme) {

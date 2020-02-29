@@ -58,7 +58,7 @@ public class GraphicsDeviceHelper {
         windowManager.setDevices(GraphicsFinder
                 .getAvailableDevices()
                 .stream()
-                .filter(GraphicsFinder.Device::isProjectionDevice)
+                //.filter(GraphicsFinder.Device::isProjectionDevice)
                 .collect(Collectors.toList()));
     }
 

@@ -7,7 +7,6 @@ import us.guihouse.projector.utils.ThemeFinder;
 
 import java.awt.*;
 import java.io.File;
-import java.nio.file.FileSystems;
 import java.util.*;
 import java.util.List;
 
@@ -73,6 +72,7 @@ public class ProjectionBackgroundVideo implements Projectable {
 
     public void loadMedia() {
         ThemeFinder.getThemes().forEach(t -> {
+            media.add(t.getVideoFile());
             videoProjectors[0].getPlayer().prepareMedia(t.getVideoFile().getAbsolutePath());
             videoProjectors[1].getPlayer().prepareMedia(t.getVideoFile().getAbsolutePath());
         });
@@ -84,6 +84,10 @@ public class ProjectionBackgroundVideo implements Projectable {
         }
 
         if (!musicMap.containsKey(musicId)) {
+            if (media.isEmpty()) {
+                return;
+            }
+
             int id = Math.abs(random.nextInt()) % media.size();
             musicMap.put(musicId, media.get(id));
         }
@@ -137,13 +141,7 @@ public class ProjectionBackgroundVideo implements Projectable {
 
         @Override
         public void playing(MediaPlayer mediaPlayer) {
-            if (currentPlayer == 0) {
-                videoProjectors[0].setRender(true);
-                videoProjectors[1].setRender(false);
-                videoProjectors[1].getPlayer().setPosition(0);
-            } else {
-                mediaPlayer.pause();
-            }
+
         }
 
         @Override
@@ -168,13 +166,26 @@ public class ProjectionBackgroundVideo implements Projectable {
 
         @Override
         public void finished(MediaPlayer mediaPlayer) {
-            currentPlayer = 1;
-            videoProjectors[1].getPlayer().play();
+            if (currentPlayer != 1) {
+                currentPlayer = 1;
+                videoProjectors[1].getPlayer().play();
+            }
         }
 
         @Override
         public void timeChanged(MediaPlayer mediaPlayer, long l) {
-
+            if (l > 0) {
+                if (!videoProjectors[0].isRender()) {
+                    if (currentPlayer == 0) {
+                        videoProjectors[0].setRender(true);
+                        videoProjectors[1].setRender(false);
+                        videoProjectors[1].getPlayer().setPosition(0);
+                        videoProjectors[1].getPlayer().play();
+                    } else {
+                        mediaPlayer.pause();
+                    }
+                }
+            }
         }
 
         @Override
@@ -347,13 +358,7 @@ public class ProjectionBackgroundVideo implements Projectable {
 
         @Override
         public void playing(MediaPlayer mediaPlayer) {
-            if (currentPlayer == 1) {
-                videoProjectors[0].setRender(false);
-                videoProjectors[1].setRender(true);
-                videoProjectors[0].getPlayer().setPosition(0);
-            } else {
-                mediaPlayer.pause();
-            }
+
         }
 
         @Override
@@ -378,13 +383,25 @@ public class ProjectionBackgroundVideo implements Projectable {
 
         @Override
         public void finished(MediaPlayer mediaPlayer) {
-            currentPlayer = 0;
-            videoProjectors[0].getPlayer().play();
+            if (currentPlayer != 0) {
+                currentPlayer = 0;
+                videoProjectors[0].getPlayer().play();
+            }
         }
 
         @Override
         public void timeChanged(MediaPlayer mediaPlayer, long l) {
-
+            if (l > 0) {
+                if (!videoProjectors[1].isRender()) {
+                    if (currentPlayer == 1) {
+                        videoProjectors[1].setRender(true);
+                        videoProjectors[0].setRender(false);
+                        videoProjectors[0].getPlayer().setPosition(0);
+                    } else {
+                        mediaPlayer.pause();
+                    }
+                }
+            }
         }
 
         @Override

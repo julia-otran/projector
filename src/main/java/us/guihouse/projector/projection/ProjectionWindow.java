@@ -32,22 +32,52 @@ public class ProjectionWindow  {
     @Getter
     private GraphicsFinder.Device currentDevice;
 
+    private BufferedImage output;
+    private Graphics2D outputGraphics;
+
+    private final Object renderSync = new Object();
+    private final Object outputSync = new Object();
+
+    private boolean waitingPaint;
+
     ProjectionWindow(GraphicsFinder.Device device) {
         this.currentDevice = device;
     }
 
     void init() {
-        frame = new JFrame(currentDevice.getDevice().getDefaultConfiguration());
+        frame = new CustomFrame(currentDevice.getDevice().getDefaultConfiguration());
 
         frame.setExtendedState(Frame.MAXIMIZED_BOTH);
         frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         frame.setUndecorated(true);
-        frame.setIgnoreRepaint(true);
         frame.setLayout(null);
 
         Rectangle displayRect = currentDevice.getDevice().getDefaultConfiguration().getBounds();
         frame.setBounds(displayRect);
         frame.setBackground(Color.BLACK);
+
+        output = currentDevice.getDevice().getDefaultConfiguration().createCompatibleImage(frame.getWidth(), frame.getHeight());
+        //outputGraphics = output.createGraphics();
+
+        waitingPaint = false;
+    }
+
+    void updateOutput(BufferedImage src) {
+        synchronized (outputSync) {
+            src.copyData(output.getRaster());
+        }
+
+        if (waitingPaint) {
+            return;
+        }
+    }
+
+    void repaint() {
+        waitingPaint = true;
+
+        if (frame != null) {
+            frame.repaint();
+        }
     }
 
     void makeVisible() {
@@ -67,7 +97,6 @@ public class ProjectionWindow  {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    f.getBufferStrategy().dispose();
                     f.setVisible(false);
                     f.dispose();
                 }
@@ -85,7 +114,19 @@ public class ProjectionWindow  {
         }
     }
 
-    public BufferStrategy getBufferStrategy() {
-        return frame.getBufferStrategy();
+    class CustomFrame extends JFrame {
+
+        public CustomFrame(GraphicsConfiguration defaultConfiguration) {
+            super(defaultConfiguration);
+        }
+
+        @Override
+        public void paint(Graphics g) {
+            synchronized (outputSync) {
+                g.drawImage(output, 0, 0, null);
+            }
+
+            waitingPaint = false;
+        }
     }
 }
