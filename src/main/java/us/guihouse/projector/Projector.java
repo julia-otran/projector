@@ -44,6 +44,8 @@ public class Projector extends Application implements Runnable {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
+        System.setProperty("sun.java2d.opengl", "True");
+
         Thread javaFxThread = new Thread(() -> {
             launch(args);
         });

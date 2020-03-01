@@ -148,7 +148,12 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
 
     @FXML
     public void onOpenMusicList() {
+        listMusicStage.setX(sceneManager.getStage().getX());
+        listMusicStage.setY(sceneManager.getStage().getY());
         listMusicStage.show();
+        listMusicStage.requestFocus();
+        listMusicStage.setX(sceneManager.getStage().getX());
+        listMusicStage.setY(sceneManager.getStage().getY());
     }
 
     @FXML
@@ -469,8 +474,12 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
 
     @FXML
     public void onAddMusic() {
+        listMusicStage.setX(sceneManager.getStage().getX());
+        listMusicStage.setY(sceneManager.getStage().getY());
         listMusicStage.show();
         listMusicStage.requestFocus();
+        listMusicStage.setX(sceneManager.getStage().getX());
+        listMusicStage.setY(sceneManager.getStage().getY());
     }
 
     @FXML
