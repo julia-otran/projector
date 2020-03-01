@@ -27,7 +27,7 @@ public class BlendGenerator {
                 for (int y = 0; y < blend.getHeight(); y++) {
                     int color = Math.round(step2 * (blend.getHeight() - y - 1)) << 24;
 
-                    for (int x = 0; x < blend.getHeight(); x++) {
+                    for (int x = 0; x < blend.getWidth(); x++) {
                         img.setRGB(x, y, color);
                     }
                 }
@@ -38,7 +38,7 @@ public class BlendGenerator {
                 for (int y = 0; y < blend.getHeight(); y++) {
                     int color = Math.round(step3 * y) << 24;
 
-                    for (int x = 0; x < blend.getHeight(); x++) {
+                    for (int x = 0; x < blend.getWidth(); x++) {
                         img.setRGB(x, y, color);
                     }
                 }
