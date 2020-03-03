@@ -33,6 +33,8 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
     private final ProjectionCanvas projectionCanvas;
 
+    private final WindowManagerPresenter managerPresenter = new WindowManagerPresenter();
+
     private GraphicsDevice defaultDevice;
 
     private BufferedImage targetRender;
@@ -86,6 +88,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
         running = false;
 
         configLoader.stop();
+        managerPresenter.stop();
 
         preview.setProjectionCanvas(null);
 
@@ -162,6 +165,8 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                 projectionCanvas.init();
                 preview.setProjectionCanvas(projectionCanvas);
 
+                managerPresenter.start(windows);
+
                 running = true;
                 drawThread = new Thread(WindowManager.this);
                 drawThread.setPriority(Thread.MAX_PRIORITY);
@@ -234,11 +239,10 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
             windowConfigs.forEach(windowConfig -> {
                 BufferedImage screen = screenImages.get(windowConfig.getDisplayId());
-                ProjectionWindow window = windows.get(windowConfig.getDisplayId());
-                if (window != null) {
-                    window.updateOutput(screen);
-                }
+                managerPresenter.update(windowConfig.getDisplayId(), screen);
             });
+
+            Thread.yield();
         }
 
         windows.values().forEach(ProjectionWindow::shutdown);
