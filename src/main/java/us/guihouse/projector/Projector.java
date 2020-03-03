@@ -6,6 +6,8 @@
 package us.guihouse.projector;
 
 import com.mashape.unirest.http.Unirest;
+
+import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Set;
@@ -46,18 +48,7 @@ public class Projector extends Application implements Runnable {
     public static void main(String args[]) {
         System.setProperty("sun.java2d.opengl", "True");
 
-        Thread javaFxThread = new Thread(() -> {
-            launch(args);
-        });
-
-        javaFxThread.setPriority(Thread.MIN_PRIORITY);
-        javaFxThread.start();
-
-        try {
-            javaFxThread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        launch(args);
     }
 
     @Override
@@ -81,7 +72,12 @@ public class Projector extends Application implements Runnable {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+        Platform.runLater(() -> {
+            Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+        });
+        SwingUtilities.invokeLater(() -> {
+            Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+        });
 
         primaryStage.setTitle("Projector");
         primaryStage.setMaxWidth(Double.MAX_VALUE);

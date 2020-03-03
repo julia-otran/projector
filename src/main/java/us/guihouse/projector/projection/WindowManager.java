@@ -19,6 +19,7 @@ import lombok.Setter;
 import us.guihouse.projector.models.WindowConfig;
 import us.guihouse.projector.other.GraphicsFinder;
 import us.guihouse.projector.services.SettingsService;
+import us.guihouse.projector.utils.BlackLevelFixRescaleOp;
 import us.guihouse.projector.utils.BlendGenerator;
 import us.guihouse.projector.utils.WindowConfigsLoader;
 
@@ -40,7 +41,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     private HashMap<String, ProjectionWindow> windows = new HashMap<>();
     private HashMap<Integer, BufferedImage> blendAssets = new HashMap<>();
     private HashMap<String, AffineTransform> transformAssets = new HashMap<>();
-    private HashMap<String, RescaleOp> blackLevelRescaleOps = new HashMap<>();
     private HashMap<String, BufferedImage> screenImages = new HashMap<>();
     private HashMap<String, Graphics2D> screenGraphics = new HashMap<>();
 
@@ -53,8 +53,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     private boolean running = false;
     private boolean fullScreen = false;
     private boolean starting = false;
-    private boolean drawing = false;
-    private final Object sync = new Object();
 
     private final SettingsService settingsService;
 
@@ -85,9 +83,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     }
 
     private void stopEngine() {
-        synchronized (sync) {
-            running = false;
-        }
+        running = false;
 
         configLoader.stop();
 
@@ -130,15 +126,11 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                 int height = device.getDisplayMode().getHeight();
 
                 BufferedImage screenImage = device.getDefaultConfiguration().createCompatibleImage(width, height);
+                screenImage.setAccelerationPriority(1.0f);
                 Graphics2D screenGraphic = screenImage.createGraphics();
 
                 screenGraphics.put(wc.getDisplayId(), screenGraphic);
                 screenImages.put(wc.getDisplayId(), screenImage);
-
-                BufferedImage bLevelFixedImg = getDefaultDevice().getDefaultConfiguration().createCompatibleImage(getWidth(), getHeight());
-                bLevelFixedImg.setAccelerationPriority(1.0f);
-
-                bLevelFixed.put(wc.getDisplayId(), bLevelFixedImg);
             }
         });
 
@@ -172,6 +164,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
                 running = true;
                 drawThread = new Thread(WindowManager.this);
+                drawThread.setPriority(Thread.MAX_PRIORITY);
                 drawThread.start();
                 starting = false;
             }
@@ -180,6 +173,9 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
     @Override
     public void run() {
+        int frames = 0;
+        long timestamp = System.nanoTime();
+
         Graphics2D targetGraphics = targetRender.createGraphics();
 
         if (initializationCallback != null) {
@@ -187,17 +183,19 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
         }
 
         while (running) {
+            frames++;
+
+            long newTimestamp = System.nanoTime();
+            if (newTimestamp - timestamp > 1000000000) {
+                System.out.println(frames);
+                frames = 0;
+                timestamp = newTimestamp;
+            }
+
             projectionCanvas.paintComponent(targetGraphics);
 
-            windowConfigs.forEach(windowConfig -> {
-                BufferedImage bLevelFix = bLevelFixed.get(windowConfig.getDisplayId());
-                RescaleOp rescaleOp = blackLevelRescaleOps.get(windowConfig.getDisplayId());
-                rescaleOp.filter(targetRender, bLevelFix);
-            });
-
-            windowConfigs.forEach(windowConfig -> {
+            windowConfigs.parallelStream().forEach(windowConfig -> {
                 Graphics2D g = screenGraphics.get(windowConfig.getDisplayId());
-                BufferedImage bLevelFix = bLevelFixed.get(windowConfig.getDisplayId());
 
                 if (g == null) {
                     return;
@@ -213,10 +211,13 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
-                g.drawImage(bLevelFix, 0,0, null);
+                g.drawImage(targetRender, 0, 0, null);
 
                 g.setTransform(transform);
                 g.translate(windowConfig.getX(), windowConfig.getY());
+
+                BufferedImage bLevelFix = bLevelFixed.get(windowConfig.getDisplayId());
+                g.drawImage(bLevelFix, windowConfig.getBgFillX(), windowConfig.getBgFillY(), null);
 
                 windowConfig.getBlends().forEach(blend -> {
                     BufferedImage img = blendAssets.get(blend.getId());
@@ -238,32 +239,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                     window.updateOutput(screen);
                 }
             });
-
-            drawing = true;
-
-            SwingUtilities.invokeLater(() -> {
-                windowConfigs.forEach(windowConfig -> {
-                    ProjectionWindow window = windows.get(windowConfig.getDisplayId());
-                    if (window != null) {
-                        window.repaint();
-                    }
-                });
-
-                synchronized (sync) {
-                    drawing = false;
-                    sync.notify();
-                }
-            });
-
-            synchronized (sync) {
-                if (drawing && running) {
-                    try {
-                        sync.wait(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
         }
 
         windows.values().forEach(ProjectionWindow::shutdown);
@@ -318,31 +293,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
         return preview;
     }
 
-    /**
-     * @param window
-     */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static void setWindowCanFullScreen(Window window, boolean can) {
-        try {
-            Class util = Class.forName("com.apple.eawt.FullScreenUtilities");
-            Class params[] = new Class[]{Window.class, Boolean.TYPE};
-            Method method = util.getMethod("setWindowCanFullScreen", params);
-            method.invoke(util, window, can);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(ProjectionWindow.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoSuchMethodException ex) {
-            Logger.getLogger(ProjectionWindow.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SecurityException ex) {
-            Logger.getLogger(ProjectionWindow.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(ProjectionWindow.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(ProjectionWindow.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvocationTargetException ex) {
-            Logger.getLogger(ProjectionWindow.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
     @Override
     public GraphicsDevice getDefaultDevice() {
         return defaultDevice;
@@ -384,7 +334,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                     wc.setBgFillHeight(device.getDevice().getDisplayMode().getHeight());
 
                     wc.setBLevelOffset(0);
-                    wc.setBLevelScaleFactor(1.0f);
 
                     wc.setBlends(Collections.emptyList());
                     wc.setHelpLines(Collections.emptyList());
@@ -402,6 +351,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     private void generateAssets() {
         blendAssets.clear();
         transformAssets.clear();
+        bLevelFixed.clear();
 
         windowConfigs.forEach(wc -> {
             wc.getBlends().forEach(blend -> {
@@ -417,7 +367,16 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
             transformAssets.put(wc.getDisplayId(), t);
 
-            blackLevelRescaleOps.put(wc.getDisplayId(), new RescaleOp(wc.getBLevelScaleFactor(), wc.getBLevelOffset(), null));
+            BufferedImage img = new BufferedImage(wc.getBgFillWidth(), wc.getBgFillHeight(), BufferedImage.TYPE_INT_ARGB);
+            int bLevelPad = ((Math.round(wc.getBLevelOffset()) & 0xFF) << 24) | 0x00FFFFFF;
+
+            for (int x = 0; x < img.getWidth(); x++) {
+                for (int y = 0; y < img.getHeight(); y++) {
+                    img.setRGB(x, y, bLevelPad);
+                }
+            }
+
+            bLevelFixed.put(wc.getDisplayId(), img);
         });
 
     }

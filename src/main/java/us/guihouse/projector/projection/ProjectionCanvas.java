@@ -54,8 +54,11 @@ public class ProjectionCanvas implements ProjectionManager {
 
     protected void paintComponent(Graphics2D g) {
         if (currentProjectable == null) {
-            background.paintComponent(g);
-            bgVideo.paintComponent(g);
+            if (bgVideo.isRender()) {
+                bgVideo.paintComponent(g);
+            } else {
+                background.paintComponent(g);
+            }
         } else {
             currentProjectable.paintComponent(g);
         }

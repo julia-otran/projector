@@ -74,8 +74,6 @@ public class ProjectionVideo implements Projectable {
     @Override
     public void paintComponent(Graphics2D g) {
         if (render) {
-            g.setColor(Color.BLACK);
-            g.fillRect(0, 0, deviceW, deviceH);
             g.drawImage(image, null, projectionX, projectionY);
         }
     }
