@@ -1,5 +1,6 @@
 package us.guihouse.projector.utils;
 
+import javafx.scene.image.ImageView;
 import us.guihouse.projector.models.MusicTheme;
 
 import java.io.File;
@@ -11,8 +12,10 @@ import static us.guihouse.projector.utils.FilePaths.PROJECTOR_BACKGROUND_VIDEOS;
 import static us.guihouse.projector.utils.FilePaths.PROJECTOR_BACKGROUND_VIDEO_THUMBS;
 
 public class ThemeFinder {
-    public static List<MusicTheme> getThemes() {
-        List<MusicTheme> media = new ArrayList<>();
+    private static final List<MusicTheme> media = new ArrayList<>();
+
+    public static void loadThemes() {
+        media.clear();
 
         String[] pathNames = PROJECTOR_BACKGROUND_VIDEOS.toFile().list();
 
@@ -25,11 +28,20 @@ public class ThemeFinder {
                     MusicTheme t = new MusicTheme();
                     t.setVideoFile(file);
                     t.setImageFile(thumb);
+
+                    ImageView thumbImg = new ImageView(thumb.toURI().toString());
+                    thumbImg.setPreserveRatio(true);
+                    thumbImg.setFitWidth(200D);
+                    thumbImg.setFitHeight(200D);
+
+                    t.setImage(thumbImg);
                     media.add(t);
                 }
             }
         }
+    }
 
+    public static List<MusicTheme> getThemes() {
         return media;
     }
 

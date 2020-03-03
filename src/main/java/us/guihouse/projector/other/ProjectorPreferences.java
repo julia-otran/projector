@@ -23,6 +23,7 @@ public class ProjectorPreferences {
     private static final String BACKGROUND_OVERLAY_FILE_PATH = "BACKGROUND_OVERLAY_FILE_PATH";
     private static final String BACKGROUND_TYPE = "BACKGROUND_TYPE";
     private static final String DARKEN_BACKGROUND = "DARKEN_BACKGROUND";
+    private static final String WINDOW_CONFIG_FILE = "WINDOW_CONFIG_FILE";
 
     public static Preferences getPrefs() {
         if (prefs == null) {
@@ -34,6 +35,14 @@ public class ProjectorPreferences {
 
     public static String getSqlitePath() {
         return getPrefs().get(SQLITE_FILE, "");
+    }
+
+    public static String getWindowConfigFile() {
+        return prefs.get(WINDOW_CONFIG_FILE, null);
+    }
+
+    public static void setWindowConfigFile(String fileName) {
+        prefs.put(WINDOW_CONFIG_FILE, fileName);
     }
 
     public static void setSqlitePath(String path) {

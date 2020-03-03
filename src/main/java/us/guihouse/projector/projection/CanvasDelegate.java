@@ -7,6 +7,7 @@ package us.guihouse.projector.projection;
 
 import java.awt.GraphicsDevice;
 import us.guihouse.projector.services.SettingsService;
+import us.guihouse.projector.utils.WindowConfigsLoader;
 
 /**
  *
@@ -14,13 +15,13 @@ import us.guihouse.projector.services.SettingsService;
  */
 public interface CanvasDelegate {
 
-    public int getWidth();
+    int getWidth();
 
-    public int getHeight();
+    int getHeight();
 
-    public void setFullScreen(boolean fullScreen);
+    void setFullScreen(boolean fullScreen);
 
-    public SettingsService getSettingsService();
+    SettingsService getSettingsService();
 
-    public GraphicsDevice getDefaultDevice();
+    GraphicsDevice getDefaultDevice();
 }

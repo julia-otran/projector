@@ -73,7 +73,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
         preview = new PreviewPanel(this);
 
-        this.configLoader = new WindowConfigsLoader(this);
+        configLoader = new WindowConfigsLoader(this);
     }
 
     public ProjectionManager getManager() {
@@ -301,6 +301,10 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     public GraphicsDevice getDefaultDevice() {
         return defaultDevice;
     }
+    
+    public WindowConfigsLoader getWindowConfigsLoader() {
+        return configLoader;
+    }
 
     public void setDevices(List<GraphicsFinder.Device> devices) {
         stopEngine();
@@ -315,8 +319,13 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
     @Override
     public void updateConfigs(List<WindowConfig> windowConfigs) {
-        this.windowConfigs = windowConfigs;
-        generateAssets();
+        if (running) {
+            stopEngine();
+            this.windowConfigs = windowConfigs.stream().filter(WindowConfig::isProject).collect(Collectors.toList());
+            startEngine();
+        } else {
+            this.windowConfigs = windowConfigs.stream().filter(WindowConfig::isProject).collect(Collectors.toList());
+        }
     }
 
     @Override
@@ -326,6 +335,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                 .map(device -> {
                     WindowConfig wc = new WindowConfig();
                     wc.setDisplayId(device.getDevice().getIDstring());
+                    wc.setProject(device.isProjectionDevice());
 
                     wc.setWidth(device.getDevice().getDisplayMode().getWidth());
                     wc.setHeight(device.getDevice().getDisplayMode().getHeight());

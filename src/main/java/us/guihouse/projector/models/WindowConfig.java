@@ -7,8 +7,8 @@ import lombok.Data;
 public class WindowConfig {
 
     private String displayId;
+    private boolean project;
 
-    private float bLevelScaleFactor;
     private float bLevelOffset;
 
     private int x;

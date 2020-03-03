@@ -1,5 +1,6 @@
 package us.guihouse.projector.models;
 
+import javafx.scene.image.ImageView;
 import lombok.Data;
 
 import java.io.File;
@@ -8,4 +9,5 @@ import java.io.File;
 public class MusicTheme {
     private File videoFile;
     private File imageFile;
+    private ImageView image;
 }

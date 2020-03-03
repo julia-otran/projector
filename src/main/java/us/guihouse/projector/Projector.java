@@ -31,6 +31,7 @@ import us.guihouse.projector.forms.controllers.GraphicsDeviceHelper;
 import us.guihouse.projector.forms.controllers.SceneManager;
 import us.guihouse.projector.forms.controllers.WorkspaceController;
 import us.guihouse.projector.other.SQLiteJDBCDriverConnection;
+import us.guihouse.projector.utils.ThemeFinder;
 import us.guihouse.projector.utils.VlcPlayerFactory;
 
 import javax.swing.*;
@@ -53,6 +54,8 @@ public class Projector extends Application implements Runnable {
 
     @Override
     public void run() {
+        ThemeFinder.loadThemes();
+
         VlcPlayerFactory.init();
 
         SQLiteJDBCDriverConnection.connect();

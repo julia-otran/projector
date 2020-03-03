@@ -92,11 +92,7 @@ public class MusicFormController implements Initializable {
                             setText("Aleatório");
                             setGraphic(null);
                         } else {
-                            ImageView thumb = new ImageView(item.getImageFile().toURI().toString());
-                            thumb.setPreserveRatio(true);
-                            thumb.setFitWidth(200D);
-                            thumb.setFitHeight(200D);
-                            setGraphic(thumb);
+                            setGraphic(item.getImage());
                             setText(null);
                         }
                     }
@@ -257,13 +253,13 @@ public class MusicFormController implements Initializable {
         musicTextArea.setText(editingMusic.getPhrasesAsString());
 
         if (editingMusic.getTheme() == null) {
-            //themeCombo.getSelectionModel().select(randomTheme);
+            themeCombo.getSelectionModel().select(randomTheme);
         } else {
             MusicTheme theme = ThemeFinder.getThemeByVideoName(editingMusic.getTheme());
             if (theme != null) {
                 themeCombo.getSelectionModel().select(theme);
             } else {
-                //themeCombo.getSelectionModel().select(randomTheme);
+                themeCombo.getSelectionModel().select(randomTheme);
             }
         }
     }

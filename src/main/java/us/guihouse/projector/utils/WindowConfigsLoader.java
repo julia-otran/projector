@@ -5,8 +5,20 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.property.Property;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.ReadOnlyProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import lombok.Getter;
 import us.guihouse.projector.models.WindowConfig;
 import us.guihouse.projector.models.WindowConfigBlend;
+import us.guihouse.projector.other.ProjectorPreferences;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -19,7 +31,6 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
@@ -34,6 +45,10 @@ public class WindowConfigsLoader implements Runnable {
     private final WindowConfigsObserver observer;
     private final Gson gson = new Gson();
 
+    @Getter
+    private final ObservableList<String> configFiles = FXCollections.observableArrayList();
+    private final ReadOnlyObjectWrapper<String> loadedConfigFile = new ReadOnlyObjectWrapper<>();
+
     public interface WindowConfigsObserver {
         void updateConfigs(List<WindowConfig> windowConfigs);
         List<WindowConfig> getDefaultConfigs();
@@ -43,17 +58,34 @@ public class WindowConfigsLoader implements Runnable {
         this.observer = observer;
     }
 
+    public ReadOnlyProperty<String> loadedConfigFileProperty() {
+        return loadedConfigFile.getReadOnlyProperty();
+    }
+
     public void start() {
-        if (!PROJECTOR_WINDOW_CONFIG_FILE.exists()) {
-            if (!createDefaultFile()) {
-                observer.updateConfigs(observer.getDefaultConfigs());
-            }
+        File configsPath = PROJECTOR_WINDOW_CONFIG_PATH.toFile();
+
+        if (!configsPath.isDirectory()) {
+            configsPath.mkdirs();
         }
 
-        loadFile();
+        if (!loadSavedConfigs()) {
+            observer.updateConfigs(observer.getDefaultConfigs());
+        }
+
+        loadConfigFiles();
 
         thread = new Thread(this);
         thread.start();
+    }
+
+    private void loadConfigFiles() {
+        configFiles.clear();
+
+        String[] files = PROJECTOR_WINDOW_CONFIG_PATH.toFile().list();
+        if (files != null) {
+            configFiles.addAll(files);
+        }
     }
 
     public void stop() {
@@ -75,7 +107,7 @@ public class WindowConfigsLoader implements Runnable {
         }
 
         try {
-            PROJECTOR_DATA_PATH.register(watcher,
+            PROJECTOR_WINDOW_CONFIG_PATH.register(watcher,
                     ENTRY_CREATE,
                     ENTRY_DELETE,
                     ENTRY_MODIFY);
@@ -106,15 +138,17 @@ public class WindowConfigsLoader implements Runnable {
                     continue;
                 }
 
+                Platform.runLater(this::loadConfigFiles);
+
                 // The filename is the
                 // context of the event.
                 WatchEvent<Path> ev = (WatchEvent<Path>)event;
                 Path filename = ev.context();
 
-                Path child = PROJECTOR_DATA_PATH.resolve(filename);
+                Path child = PROJECTOR_WINDOW_CONFIG_PATH.resolve(filename);
 
-                if (child.endsWith(PROJECTOR_WINDOW_CONFIG_FILE_NAME)) {
-                    loadFile();
+                if (child.endsWith(ProjectorPreferences.getWindowConfigFile())) {
+                    loadSavedConfigs();
                 }
             }
 
@@ -128,40 +162,70 @@ public class WindowConfigsLoader implements Runnable {
         }
     }
 
-    private void loadFile() {
-        try {
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(
-                            new FileInputStream(PROJECTOR_WINDOW_CONFIG_FILE), StandardCharsets.UTF_8));
+    private boolean loadSavedConfigs() {
+        String fileName = ProjectorPreferences.getWindowConfigFile();
 
-            List<WindowConfig> configs = gson.fromJson(in, new TypeToken<List<WindowConfig>>(){}.getType());
+        if (fileName == null) {
+            return false;
+        }
 
-            int blendId = 0;
+        File configFile = FileSystems.getDefault().getPath(PROJECTOR_WINDOW_CONFIG_PATH.toString(), fileName).toFile();
 
-            for (WindowConfig wc : configs) {
-                for (WindowConfigBlend b : wc.getBlends()) {
-                    b.setId(blendId);
-                    blendId++;
-                }
-            }
+        if (!configFile.canRead()) {
+            return false;
+        }
 
-            observer.updateConfigs(configs);
-        } catch (JsonIOException | JsonSyntaxException | FileNotFoundException ex) {
-            ex.printStackTrace();
+        return loadConfigs(configFile);
+    }
+
+    public void loadConfigs(String fileName) {
+        File configFile = FileSystems.getDefault().getPath(PROJECTOR_WINDOW_CONFIG_PATH.toString(), fileName).toFile();
+
+        if (configFile.canRead()) {
+            loadConfigs(configFile);
         }
     }
 
-    private boolean createDefaultFile() {
-        File settingsFolder = PROJECTOR_DATA_PATH.toFile();
+    private boolean loadConfigs(File configFile) {
+        if (configFile != null && configFile.canRead()) {
+            try {
+                BufferedReader in = new BufferedReader(
+                        new InputStreamReader(
+                                new FileInputStream(configFile), StandardCharsets.UTF_8));
 
-        if (!settingsFolder.exists()) {
-            if (!settingsFolder.mkdir()) {
-                return false;
+                List<WindowConfig> configs = gson.fromJson(in, new TypeToken<List<WindowConfig>>() {}.getType());
+
+                ProjectorPreferences.setWindowConfigFile(configFile.getName());
+
+                Platform.runLater(() -> {
+                    loadedConfigFile.set(configFile.getName());
+                });
+
+                int blendId = 0;
+
+                for (WindowConfig wc : configs) {
+                    for (WindowConfigBlend b : wc.getBlends()) {
+                        b.setId(blendId);
+                        blendId++;
+                    }
+                }
+
+                observer.updateConfigs(configs);
+
+                return true;
+            } catch (JsonIOException | JsonSyntaxException | FileNotFoundException ex) {
+                ex.printStackTrace();
             }
         }
 
+        return false;
+    }
+
+    private boolean createConfigFileFromDefaults(String name) {
+        File file = FileSystems.getDefault().getPath(PROJECTOR_WINDOW_CONFIG_PATH.toString(), name).toFile();
+
         try {
-            if (!PROJECTOR_WINDOW_CONFIG_FILE.createNewFile()) {
+            if (file.exists() || !file.createNewFile()) {
                 return false;
             }
         } catch (IOException e) {
@@ -174,7 +238,7 @@ public class WindowConfigsLoader implements Runnable {
 
         try {
             OutputStreamWriter writer =
-                    new OutputStreamWriter(new FileOutputStream(PROJECTOR_WINDOW_CONFIG_FILE), StandardCharsets.UTF_8);
+                    new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8);
             writer.write(json);
             writer.close();
         } catch (IOException e) {
@@ -182,6 +246,7 @@ public class WindowConfigsLoader implements Runnable {
             return false;
         }
 
+        loadConfigs(file);
         return true;
     }
 }

@@ -18,6 +18,7 @@ import us.guihouse.projector.other.GraphicsFinder;
 import us.guihouse.projector.projection.ProjectionManager;
 import us.guihouse.projector.projection.WindowManager;
 import us.guihouse.projector.services.SettingsService;
+import us.guihouse.projector.utils.WindowConfigsLoader;
 
 /**
  *
@@ -54,15 +55,14 @@ public class GraphicsDeviceHelper {
     public void reloadDevices() {
         GraphicsFinder.Device defaulDevice = GraphicsFinder.getDefaultDevice();
         windowManager.setDefaultDevice(defaulDevice.getDevice());
-
-        windowManager.setDevices(GraphicsFinder
-                .getAvailableDevices()
-                .stream()
-                //.filter(GraphicsFinder.Device::isProjectionDevice)
-                .collect(Collectors.toList()));
+        windowManager.setDevices(GraphicsFinder.getAvailableDevices());
     }
 
     JPanel getPreviewPanel() {
         return windowManager.getPreviewPanel();
+    }
+
+    WindowConfigsLoader getWindowConfigsLoader() {
+        return windowManager.getWindowConfigsLoader();
     }
 }
