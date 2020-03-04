@@ -34,6 +34,12 @@
         <Menu mnemonicParsing="false" text="Configurações">
           <items>
             <MenuItem mnemonicParsing="false" onAction="#onChangeFont" text="Alterar Fonte" />
+            <Menu mnemonicParsing="false" text="Telas">
+                     <items>
+                        <Menu fx:id="windowConfigsPresetsMenu" mnemonicParsing="false" text="Presets" />
+                        <MenuItem mnemonicParsing="false" onAction="#onCreateWindowConfigPreset" text="Criar Preset" />
+                        <MenuItem mnemonicParsing="false" onAction="#onRedetectScreens" text="Redectar Telas" />
+                     </items></Menu>
             <CheckMenuItem fx:id="fullScreenCheckMenuItem" mnemonicParsing="false" onAction="#onChangeFullScreen" text="Modo Tela Cheia" />
             <Menu mnemonicParsing="false" text="Modo de Projeção de Letras">
               <items>
@@ -45,7 +51,6 @@
                 <RadioMenuItem fx:id="multilineProjectionMenuItem" mnemonicParsing="false" onAction="#onMultilineProjection" text="Várias linhas" toggleGroup="$multilineProjection" />
               </items>
             </Menu>
-            <Menu fx:id="projectionScreenMenu" mnemonicParsing="false" text="Tela de Projeção" />
           </items>
         </Menu>
         <Menu mnemonicParsing="false" text="Ajuda">

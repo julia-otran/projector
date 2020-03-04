@@ -72,10 +72,6 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        buildReloadItem();
-        projectionScreenMenu.getItems().clear();
-        projectionScreenMenu.getItems().add(reloadItem);
-
         menuBar.setVisible(false);
         mainPane.setVisible(false);
         loadingPane.setVisible(true);
@@ -84,6 +80,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     public void init(GraphicsDeviceHelper graphicsHelper) {
         this.graphicsHelper = graphicsHelper;
 
+        buildPresetsMenu();
         preparePreview();
         initializeProjectablesList();
         onCropBackgroundChanged();
@@ -135,7 +132,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     private RadioMenuItem multilineProjectionMenuItem;
 
     @FXML
-    private Menu projectionScreenMenu;
+    private Menu windowConfigsPresetsMenu;
 
     @FXML
     private CheckMenuItem fullScreenCheckMenuItem;
@@ -159,7 +156,11 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     @FXML
     public void onShowStatistics() {
         createStatisticsStage();
+        statisticsStage.setX(sceneManager.getStage().getX());
+        statisticsStage.setY(sceneManager.getStage().getY());
         statisticsStage.show();
+        statisticsStage.setX(sceneManager.getStage().getX());
+        statisticsStage.setY(sceneManager.getStage().getY());
     }
 
     @FXML
@@ -221,18 +222,20 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     public void onHelpManual() {
     }
 
-    private MenuItem reloadItem;
+    @FXML
+    public void onRedetectScreens() {
+        graphicsHelper.reloadDevices();
+    }
 
+    @FXML
+    public void onCreateWindowConfigPreset() {
 
-    private void buildReloadItem() {
-        reloadItem = new MenuItem();
-        reloadItem.setText("Redetectar Telas");
-        reloadItem.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                graphicsHelper.reloadDevices();
-            }
-        });
+    }
+
+    private void buildPresetsMenu() {
+        CheckMenuItem checkItem = new CheckMenuItem();
+        checkItem.setText("Teste");
+        windowConfigsPresetsMenu.getItems().add(checkItem);
     }
 
     // ------------------------------

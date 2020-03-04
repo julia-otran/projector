@@ -65,18 +65,18 @@ public class WindowConfigsLoader implements Runnable {
     public void start() {
         File configsPath = PROJECTOR_WINDOW_CONFIG_PATH.toFile();
 
-        if (!configsPath.isDirectory()) {
-            configsPath.mkdirs();
+        if (configsPath.isDirectory() || configsPath.mkdirs()) {
+            loadConfigFiles();
+
+            if (!loadSavedConfigs()) {
+                loadDefaultConfigs();
+            }
+
+            thread = new Thread(this);
+            thread.start();
+        } else {
+            loadDefaultConfigs();
         }
-
-        if (!loadSavedConfigs()) {
-            observer.updateConfigs(observer.getDefaultConfigs());
-        }
-
-        loadConfigFiles();
-
-        thread = new Thread(this);
-        thread.start();
     }
 
     private void loadConfigFiles() {
@@ -97,7 +97,7 @@ public class WindowConfigsLoader implements Runnable {
     }
 
     public void run() {
-        WatchService watcher = null;
+        WatchService watcher;
 
         try {
             watcher = FileSystems.getDefault().newWatchService();
@@ -184,6 +184,14 @@ public class WindowConfigsLoader implements Runnable {
         if (configFile.canRead()) {
             loadConfigs(configFile);
         }
+    }
+
+    public void loadDefaultConfigs() {
+        ProjectorPreferences.setWindowConfigFile(null);
+        observer.updateConfigs(observer.getDefaultConfigs());
+        Platform.runLater(() -> {
+            loadedConfigFile.set(null);
+        });
     }
 
     private boolean loadConfigs(File configFile) {
