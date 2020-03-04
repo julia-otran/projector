@@ -3,14 +3,9 @@ package us.guihouse.projector.projection;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.awt.image.RescaleOp;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.swing.*;
 
@@ -19,7 +14,6 @@ import lombok.Setter;
 import us.guihouse.projector.models.WindowConfig;
 import us.guihouse.projector.other.GraphicsFinder;
 import us.guihouse.projector.services.SettingsService;
-import us.guihouse.projector.utils.BlackLevelFixRescaleOp;
 import us.guihouse.projector.utils.BlendGenerator;
 import us.guihouse.projector.utils.WindowConfigsLoader;
 

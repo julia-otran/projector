@@ -5,9 +5,7 @@
  */
 package us.guihouse.projector.projection;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import javax.swing.*;
@@ -25,10 +23,9 @@ public class PreviewPanel extends JPanel implements Runnable {
 
     public PreviewPanel(CanvasDelegate delegate) {
         this.delegate = delegate;
-    }
-
-    ProjectionCanvas getProjectionCanvas() {
-        return projectionCanvas;
+        JLabel testLabel = new JLabel();
+        testLabel.setText("X");
+        add(testLabel);
     }
 
     void setProjectionCanvas(ProjectionCanvas projectionCanvas) {
@@ -97,8 +94,10 @@ public class PreviewPanel extends JPanel implements Runnable {
             }
 
             if (repainting) {
-                return;
+                continue;
             }
+
+            repainting = true;
 
             SwingUtilities.invokeLater(new Runnable(){
                 @Override

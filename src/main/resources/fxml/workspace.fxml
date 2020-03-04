@@ -1,17 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import java.lang.*?>
-<?import java.util.*?>
 <?import javafx.collections.*?>
-<?import javafx.embed.swing.*?>
 <?import javafx.geometry.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.canvas.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.media.*?>
 <?import javafx.scene.text.*?>
-<?import javafx.scene.web.*?>
 
 <VBox id="RootBox" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.guihouse.projector.forms.controllers.WorkspaceController">
   <children>
@@ -120,7 +114,7 @@
                 </VBox>
               </content>
             </TitledPane>
-            <TitledPane fx:id="previewPane" animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="300.0" prefWidth="300.0" text="Pré Visualização" VBox.vgrow="SOMETIMES" />
+            <TitledPane fx:id="previewPane" animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="300.0" minHeight="300.0" prefHeight="300.0" prefWidth="300.0" text="Pré Visualização" VBox.vgrow="SOMETIMES" />
           </children>
         </VBox>
         <AnchorPane>

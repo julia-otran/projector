@@ -5,13 +5,16 @@
  */
 package us.guihouse.projector.forms.controllers;
 
-import java.awt.Font;
+import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javafx.application.Platform;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -23,8 +26,11 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
@@ -41,6 +47,8 @@ import us.guihouse.projector.projection.text.WrapperFactory;
 import us.guihouse.projector.repositories.ProjectionListRepository;
 import us.guihouse.projector.scenes.*;
 import us.guihouse.projector.services.ManageMusicService;
+
+import javax.swing.*;
 
 import static us.guihouse.projector.utils.FilePaths.ALLOWED_WINDOW_CONFIG_FILE_NAME_PATTERN;
 
@@ -629,8 +637,22 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
 
     private void preparePreview() {
         previewNode = new SwingNode();
-        previewPane.setContent(previewNode);
+
         previewNode.setContent(graphicsHelper.getPreviewPanel());
+        previewPane.setContent(previewNode);
+
+        updatePreviewSize();
+        previewPane.widthProperty().addListener((prop, oldValue, newValue) -> updatePreviewSize());
+        previewPane.heightProperty().addListener((prop, oldValue, newValue) -> updatePreviewSize());
+    }
+
+    private void updatePreviewSize() {
+        final Dimension size = new Dimension();
+        size.setSize(previewPane.getWidth(), previewPane.getHeight());
+
+        SwingUtilities.invokeLater(() -> {
+            graphicsHelper.getPreviewPanel().setPreferredSize(size);
+        });
     }
 
     // ------------------------------
