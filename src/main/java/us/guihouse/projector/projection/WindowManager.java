@@ -85,10 +85,11 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     }
 
     private void stopEngine() {
+        managerPresenter.stop();
+
         running = false;
 
         configLoader.stop();
-        managerPresenter.stop();
 
         preview.setProjectionCanvas(null);
 

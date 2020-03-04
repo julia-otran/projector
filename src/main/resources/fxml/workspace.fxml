@@ -38,7 +38,7 @@
                      <items>
                         <Menu fx:id="windowConfigsPresetsMenu" mnemonicParsing="false" text="Presets" />
                         <MenuItem mnemonicParsing="false" onAction="#onCreateWindowConfigPreset" text="Criar Preset" />
-                        <MenuItem mnemonicParsing="false" onAction="#onRedetectScreens" text="Redectar Telas" />
+                        <MenuItem mnemonicParsing="false" onAction="#onReloadScreens" text="Redectar Telas" />
                      </items></Menu>
             <CheckMenuItem fx:id="fullScreenCheckMenuItem" mnemonicParsing="false" onAction="#onChangeFullScreen" text="Modo Tela Cheia" />
             <Menu mnemonicParsing="false" text="Modo de Projeção de Letras">

@@ -16,9 +16,8 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
 import javafx.embed.swing.SwingNode;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
@@ -37,12 +36,13 @@ import us.guihouse.projector.models.SimpleProjectionList;
 import us.guihouse.projector.other.AwtFontChooseDialog;
 import us.guihouse.projector.other.ProjectableItemListCell;
 import us.guihouse.projector.other.YouTubeVideoResolve;
-import us.guihouse.projector.projection.TextWrapperFactoryChangeListener;
 import us.guihouse.projector.projection.text.TextWrapper;
 import us.guihouse.projector.projection.text.WrapperFactory;
 import us.guihouse.projector.repositories.ProjectionListRepository;
 import us.guihouse.projector.scenes.*;
 import us.guihouse.projector.services.ManageMusicService;
+
+import static us.guihouse.projector.utils.FilePaths.ALLOWED_WINDOW_CONFIG_FILE_NAME_PATTERN;
 
 /**
  * FXML Controller class
@@ -90,12 +90,13 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
         initProjectionList();
         updateProjectionList();
 
-        graphicsHelper.getProjectionManager().addTextWrapperChangeListener(new TextWrapperFactoryChangeListener() {
-            @Override
-            public void onWrapperFactoryChanged(WrapperFactory factory) {
-                wrapperFactory = factory;
-                updateTextWrapper();
-            }
+        graphicsHelper.getWindowConfigsLoader().getConfigFiles().addListener((ListChangeListener<String>) c -> buildPresetsMenu());
+
+        graphicsHelper.getWindowConfigsLoader().loadedConfigFileProperty().addListener((prop, oldValue, newValue) -> updateSelectedPreset(newValue));
+
+        graphicsHelper.getProjectionManager().addTextWrapperChangeListener(factory -> {
+            wrapperFactory = factory;
+            updateTextWrapper();
         });
 
         darkenBackgroundMenuItem.setSelected(graphicsHelper.getProjectionManager().getDarkenBackground());
@@ -223,19 +224,67 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     }
 
     @FXML
-    public void onRedetectScreens() {
+    public void onReloadScreens() {
         graphicsHelper.reloadDevices();
     }
 
     @FXML
     public void onCreateWindowConfigPreset() {
+        TextInputDialog inputDialog = new TextInputDialog();
+        inputDialog.setTitle("Digitar nome do novo preset");
+        inputDialog.setHeaderText("Digite o nome para criar o novo preset (somente letras, numeros, espaços)");
+        inputDialog.setContentText("Nome:");
 
+        Optional<String> newValue = inputDialog.showAndWait();
+
+        newValue.ifPresent(value -> {
+            if (ALLOWED_WINDOW_CONFIG_FILE_NAME_PATTERN.matcher(value).matches()) {
+                if (graphicsHelper.getWindowConfigsLoader().createConfigFileFromDefaults(value + ".json")) {
+                    Alert a = new Alert(Alert.AlertType.INFORMATION);
+                    a.setTitle("OK");
+                    a.setHeaderText("Preset criado");
+                    a.setContentText("O novo arquivo de preset foi criado");
+                    a.show();
+                } else {
+                    Alert a = new Alert(Alert.AlertType.ERROR);
+                    a.setTitle("Erro");
+                    a.setHeaderText("Falha ao criar novo preset");
+                    a.setContentText("Verifique se já não existe um com mesmo nome.");
+                    a.show();
+                }
+            } else {
+                Alert a = new Alert(Alert.AlertType.ERROR);
+                a.setTitle("Erro");
+                a.setHeaderText("Falha ao criar novo preset");
+                a.setContentText("O nome especificado é inválido.");
+                a.show();
+            }
+        });
+    }
+
+    private void updateSelectedPreset(String selected) {
+        windowConfigsPresetsMenu.getItems().stream()
+                .filter(i -> i instanceof CheckMenuItem)
+                .map(i -> (CheckMenuItem)i)
+                .forEach(i -> i.setSelected(i.getText().equals(selected)));
     }
 
     private void buildPresetsMenu() {
-        CheckMenuItem checkItem = new CheckMenuItem();
-        checkItem.setText("Teste");
-        windowConfigsPresetsMenu.getItems().add(checkItem);
+        windowConfigsPresetsMenu.getItems().clear();
+
+        graphicsHelper.getWindowConfigsLoader().getConfigFiles().forEach(cf -> {
+            CheckMenuItem checkItem = new CheckMenuItem();
+            checkItem.setText(cf);
+            checkItem.setSelected(cf.equals(graphicsHelper.getWindowConfigsLoader().loadedConfigFileProperty().getValue()));
+            checkItem.setOnAction(x -> {
+                if (cf.equals(graphicsHelper.getWindowConfigsLoader().loadedConfigFileProperty().getValue())) {
+                    graphicsHelper.getWindowConfigsLoader().loadDefaultConfigs();
+                } else {
+                    graphicsHelper.getWindowConfigsLoader().loadConfigs(cf);
+                }
+            });
+            windowConfigsPresetsMenu.getItems().add(checkItem);
+        });
     }
 
     // ------------------------------

@@ -229,7 +229,7 @@ public class WindowConfigsLoader implements Runnable {
         return false;
     }
 
-    private boolean createConfigFileFromDefaults(String name) {
+    public boolean createConfigFileFromDefaults(String name) {
         File file = FileSystems.getDefault().getPath(PROJECTOR_WINDOW_CONFIG_PATH.toString(), name).toFile();
 
         try {

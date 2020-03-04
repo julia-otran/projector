@@ -38,11 +38,15 @@ public class ProjectorPreferences {
     }
 
     public static String getWindowConfigFile() {
-        return prefs.get(WINDOW_CONFIG_FILE, null);
+        return getPrefs().get(WINDOW_CONFIG_FILE, null);
     }
 
     public static void setWindowConfigFile(String fileName) {
-        prefs.put(WINDOW_CONFIG_FILE, fileName);
+        if (fileName == null) {
+            getPrefs().remove(WINDOW_CONFIG_FILE);
+        } else {
+            getPrefs().put(WINDOW_CONFIG_FILE, fileName);
+        }
     }
 
     public static void setSqlitePath(String path) {
