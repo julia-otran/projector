@@ -15,6 +15,7 @@ import java.awt.Shape;
 import java.awt.Toolkit;
 import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -59,6 +60,8 @@ public class ProjectionLabel implements Projectable {
     private final BasicStroke outlineStroke = new BasicStroke(8.0f);
     private static final Color OVERLAY = new Color(0, 0, 0, 230);
 
+    private BufferedImage preRenderText;
+
     public ProjectionLabel(CanvasDelegate canvasDelegate) {
         this.canvasDelegate = canvasDelegate;
         factoryChangeListeners = new ArrayList<>();
@@ -88,6 +91,7 @@ public class ProjectionLabel implements Projectable {
     public void setDarkenBackground(boolean darken) {
         this.darkenBackground = darken;
         ProjectorPreferences.setDarkenBackground(darken);
+        rebuildLayout();
     }
 
     public int getPaddingX() {
@@ -113,39 +117,49 @@ public class ProjectionLabel implements Projectable {
         rebuildLayout();
     }
 
+    private void renderText() {
+        BufferedImage newImage = new BufferedImage(canvasDelegate.getWidth(), canvasDelegate.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = newImage.createGraphics();
+
+        if (!drawLines.isEmpty()) {
+            if (darkenBackground) {
+                g.setColor(OVERLAY);
+                g.fillRect(0, 0, canvasDelegate.getWidth(), canvasDelegate.getHeight());
+            }
+
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+            g.setStroke(outlineStroke);
+
+            AffineTransform oldTransform = g.getTransform();
+
+            drawLines.forEach((pt) -> {
+                g.translate(pt.getX(), pt.getY());
+                // create a glyph vector from your text
+                GlyphVector glyphVector = getFont().createGlyphVector(g.getFontRenderContext(), pt.getText());
+
+                // get the shape object
+                Shape textShape = glyphVector.getOutline();
+
+                g.setColor(Color.black);
+                g.draw(textShape);
+
+                g.setColor(Color.white);
+                g.fill(textShape);
+
+                g.setTransform(oldTransform);
+            });
+        }
+
+        g.dispose();
+        preRenderText = newImage;
+    }
+
     @Override
     public void paintComponent(Graphics2D g) {
-        if (drawLines.isEmpty()) {
-            return;
+        if (preRenderText != null) {
+            g.drawImage(preRenderText, 0, 0, null);
         }
-
-        if (darkenBackground) {
-            g.setColor(OVERLAY);
-            g.fillRect(0, 0, canvasDelegate.getWidth(), canvasDelegate.getHeight());
-        }
-
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        g.setStroke(outlineStroke);
-
-        AffineTransform oldTransform = g.getTransform();
-
-        drawLines.forEach((pt) -> {
-            g.translate(pt.getX(), pt.getY());
-            // create a glyph vector from your text
-            GlyphVector glyphVector = getFont().createGlyphVector(g.getFontRenderContext(), pt.getText());
-
-            // get the shape object
-            Shape textShape = glyphVector.getOutline();
-
-            g.setColor(Color.black);
-            g.draw(textShape);
-
-            g.setColor(Color.white);
-            g.fill(textShape);
-
-            g.setTransform(oldTransform);
-        });
     }
 
     @Override
@@ -157,10 +171,12 @@ public class ProjectionLabel implements Projectable {
     public void rebuildLayout() {
         if (text == null) {
             drawLines = Collections.EMPTY_LIST;
+            preRenderText = null;
             return;
         }
 
         if (font == null) {
+            preRenderText = null;
             return;
         }
 
@@ -168,6 +184,7 @@ public class ProjectionLabel implements Projectable {
 
         if (lines == null || text.isEmpty() || lines.isEmpty()) {
             drawLines = Collections.EMPTY_LIST;
+            preRenderText = null;
             return;
         }
 
@@ -203,10 +220,13 @@ public class ProjectionLabel implements Projectable {
 
         if (pendingLines.stream().allMatch(l -> l.getText().isEmpty())) {
             drawLines = Collections.EMPTY_LIST;
+            preRenderText = null;
             return;
         }
 
         drawLines = pendingLines;
+
+        renderText();
     }
 
     private int getFreeWidth() {
