@@ -1,4 +1,4 @@
-package us.guihouse.projector.projection;
+package us.guihouse.projector.projection.video;
 
 import uk.co.caprica.vlcj.binding.internal.libvlc_media_t;
 import uk.co.caprica.vlcj.player.MediaPlayer;

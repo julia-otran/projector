@@ -1,17 +1,14 @@
-package us.guihouse.projector.projection;
+package us.guihouse.projector.projection.video;
 
-import javafx.beans.binding.ObjectExpression;
-import uk.co.caprica.vlcj.binding.internal.libvlc_media_t;
 import uk.co.caprica.vlcj.player.MediaPlayer;
-import uk.co.caprica.vlcj.player.MediaPlayerEventListener;
+import us.guihouse.projector.projection.CanvasDelegate;
+import us.guihouse.projector.projection.Projectable;
 import us.guihouse.projector.utils.ThemeFinder;
 
 import java.awt.*;
 import java.io.File;
 import java.util.*;
 import java.util.List;
-
-import static us.guihouse.projector.utils.FilePaths.PROJECTOR_BACKGROUND_VIDEOS;
 
 public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgroundVideoLoop.LoopCallback {
     private CanvasDelegate canvasDelegate;

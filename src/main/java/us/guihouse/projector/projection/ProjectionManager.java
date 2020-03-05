@@ -8,10 +8,10 @@ package us.guihouse.projector.projection;
 import java.awt.Font;
 import java.io.File;
 
-import us.guihouse.projector.models.Music;
 import us.guihouse.projector.projection.models.BackgroundModel;
 import us.guihouse.projector.projection.text.WrappedText;
 import us.guihouse.projector.projection.text.WrapperFactory;
+import us.guihouse.projector.projection.video.ProjectionPlayer;
 
 /**
  *

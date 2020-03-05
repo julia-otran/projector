@@ -21,10 +21,12 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.input.DragEvent;
 import javafx.scene.layout.Border;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
@@ -34,7 +36,7 @@ import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventListener;
 import us.guihouse.projector.other.ResizeableSwingNode;
 import us.guihouse.projector.projection.ProjectionManager;
-import us.guihouse.projector.projection.ProjectionPlayer;
+import us.guihouse.projector.projection.video.ProjectionPlayer;
 import us.guihouse.projector.services.FileDragDropService;
 
 /**
@@ -76,10 +78,7 @@ public class PlayerController extends ProjectionController implements FileDragDr
     private Button endProjectionButton;
 
     @FXML
-    private Group playerGroup;
-
-    @FXML
-    private Pane playerContainer;
+    private BorderPane playerContainer;
 
     // Player controls
     @FXML
@@ -107,8 +106,6 @@ public class PlayerController extends ProjectionController implements FileDragDr
 
     @FXML
     private ToggleButton withSoundButton;
-
-    private SwingNode node;
 
     @FXML
     public void onBeginProjection() {
@@ -145,22 +142,9 @@ public class PlayerController extends ProjectionController implements FileDragDr
             return;
         }
 
-        playerGroup.setAutoSizeChildren(false);
-
-        node = new ResizeableSwingNode();
-        node.setContent(projectionPlayer.getPreviewPanel());
-        playerGroup.getChildren().add(node);
-
-        ChangeListener listener = new ChangeListener() {
-            @Override
-            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-                node.resize(playerContainer.getWidth(), playerContainer.getHeight());
-                projectionPlayer.setPreviewPanelSize(playerContainer.getWidth(), playerContainer.getHeight());
-            }
-        };
-
-        playerContainer.widthProperty().addListener(listener);
-        playerContainer.heightProperty().addListener(listener);
+        playerContainer.setCenter(projectionPlayer.getPreviewPanel());
+        projectionPlayer.getPreviewPanel().fitWidthProperty().bind(playerBox.widthProperty());
+        projectionPlayer.getPreviewPanel().fitHeightProperty().bind(playerContainer.heightProperty());
 
         playerBox.setVisible(false);
         chooseFileBox.setVisible(true);

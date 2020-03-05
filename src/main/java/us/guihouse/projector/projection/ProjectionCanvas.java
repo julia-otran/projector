@@ -13,6 +13,8 @@ import java.util.List;
 import us.guihouse.projector.projection.models.BackgroundModel;
 import us.guihouse.projector.projection.text.WrappedText;
 import us.guihouse.projector.projection.text.WrapperFactory;
+import us.guihouse.projector.projection.video.ProjectionBackgroundVideo;
+import us.guihouse.projector.projection.video.ProjectionPlayer;
 
 /**
  *

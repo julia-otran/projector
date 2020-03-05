@@ -1,13 +1,14 @@
-package us.guihouse.projector.projection;
+package us.guihouse.projector.projection.video;
 
 import lombok.Getter;
 import lombok.Setter;
-import uk.co.caprica.vlcj.player.MediaPlayerFactory;
 import uk.co.caprica.vlcj.player.direct.BufferFormat;
 import uk.co.caprica.vlcj.player.direct.BufferFormatCallback;
 import uk.co.caprica.vlcj.player.direct.DirectMediaPlayer;
 import uk.co.caprica.vlcj.player.direct.RenderCallbackAdapter;
 import uk.co.caprica.vlcj.player.direct.format.RV32BufferFormat;
+import us.guihouse.projector.projection.CanvasDelegate;
+import us.guihouse.projector.projection.Projectable;
 import us.guihouse.projector.utils.VlcPlayerFactory;
 
 import javax.swing.*;
@@ -78,7 +79,11 @@ public class ProjectionVideo implements Projectable {
         }
     }
 
-    protected BufferedImage generateBuffer(int w, int h) {
+    public BufferedImage getImage() {
+        return image;
+    }
+
+    protected void generateBuffer(int w, int h) {
         float scaleW = deviceW / (float) w;
         float scaleH = deviceH / (float) h;
 
@@ -100,8 +105,6 @@ public class ProjectionVideo implements Projectable {
         image.setAccelerationPriority(1.0f);
 
         renderCallback.setImage(image);
-
-        return image;
     }
 
     @Override
@@ -116,7 +119,6 @@ public class ProjectionVideo implements Projectable {
     public final static class MyRenderCallback extends RenderCallbackAdapter {
 
         private BufferedImage image;
-        private JComponent preview;
 
         MyRenderCallback() {
             super(new int[0]);
@@ -126,16 +128,8 @@ public class ProjectionVideo implements Projectable {
             this.image = image;
         }
 
-        public void setPreview(JComponent preview) {
-            this.preview = preview;
-        }
-
         @Override
-        public void onDisplay(DirectMediaPlayer mediaPlayer, int[] data) {
-            if (preview != null) {
-                preview.repaint();
-            }
-        }
+        public void onDisplay(DirectMediaPlayer mediaPlayer, int[] data) { }
 
         @Override
         public int[] rgbBuffer() {
@@ -150,8 +144,8 @@ public class ProjectionVideo implements Projectable {
 
         @Override
         public BufferFormat getBufferFormat(int sourceWidth, int sourceHeight) {
-            BufferedImage img = generateBuffer(sourceWidth, sourceHeight);
-            return new RV32BufferFormat(img.getWidth(), img.getHeight());
+            generateBuffer(sourceWidth, sourceHeight);
+            return new RV32BufferFormat(image.getWidth(), image.getHeight());
         }
     }
 }
