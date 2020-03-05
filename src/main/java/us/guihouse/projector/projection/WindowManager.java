@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.swing.*;
 
+import javafx.scene.image.ImageView;
 import lombok.Getter;
 import lombok.Setter;
 import us.guihouse.projector.models.WindowConfig;
@@ -23,7 +24,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
     private List<WindowConfig> windowConfigs = Collections.emptyList();
 
-    private final PreviewPanel preview;
+    private final PreviewImageView preview;
 
     private final ProjectionCanvas projectionCanvas;
 
@@ -65,7 +66,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
         // Create a new blank cursor.
         blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImg, new Point(0, 0), "blank cursor");
 
-        preview = new PreviewPanel(this);
+        preview = new PreviewImageView(this);
 
         configLoader = new WindowConfigsLoader(this);
     }
@@ -288,7 +289,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
         return settingsService;
     }
 
-    public JPanel getPreviewPanel() {
+    public ImageView getPreviewPanel() {
         return preview;
     }
 

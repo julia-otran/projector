@@ -633,26 +633,14 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     // ------------------------------
     @FXML
     private TitledPane previewPane;
-    private SwingNode previewNode;
 
     private void preparePreview() {
-        previewNode = new SwingNode();
-
-        previewNode.setContent(graphicsHelper.getPreviewPanel());
-        previewPane.setContent(previewNode);
-
-        updatePreviewSize();
-        previewPane.widthProperty().addListener((prop, oldValue, newValue) -> updatePreviewSize());
-        previewPane.heightProperty().addListener((prop, oldValue, newValue) -> updatePreviewSize());
-    }
-
-    private void updatePreviewSize() {
-        final Dimension size = new Dimension();
-        size.setSize(previewPane.getWidth(), previewPane.getHeight());
-
-        SwingUtilities.invokeLater(() -> {
-            graphicsHelper.getPreviewPanel().setPreferredSize(size);
-        });
+        StackPane background = new StackPane();
+        background.setStyle("-fx-background-color: BLACK");
+        background.getChildren().add(graphicsHelper.getPreviewPanel());
+        previewPane.setContent(background);
+        graphicsHelper.getPreviewPanel().fitWidthProperty().bind(previewPane.widthProperty());
+        graphicsHelper.getPreviewPanel().fitHeightProperty().bind(previewPane.heightProperty());
     }
 
     // ------------------------------

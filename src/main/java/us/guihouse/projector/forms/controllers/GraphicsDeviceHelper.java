@@ -12,6 +12,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javax.swing.JPanel;
 
+import javafx.scene.image.ImageView;
 import lombok.Getter;
 import lombok.Setter;
 import us.guihouse.projector.other.GraphicsFinder;
@@ -58,7 +59,7 @@ public class GraphicsDeviceHelper {
         windowManager.setDevices(GraphicsFinder.getAvailableDevices());
     }
 
-    JPanel getPreviewPanel() {
+    ImageView getPreviewPanel() {
         return windowManager.getPreviewPanel();
     }
 
