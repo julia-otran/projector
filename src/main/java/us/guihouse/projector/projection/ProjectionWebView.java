@@ -5,14 +5,17 @@
  */
 package us.guihouse.projector.projection;
 
-import java.awt.Dimension;
-import java.awt.Graphics2D;
+import java.awt.*;
+
+import com.sun.javafx.embed.EmbeddedSceneInterface;
 import javafx.embed.swing.JFXPanel;
 import javafx.embed.swing.SwingNode;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.web.WebView;
+
+import javax.swing.*;
 
 /**
  *
@@ -27,6 +30,7 @@ public class ProjectionWebView implements Projectable {
     private WebView webView;
     private JFXPanel panel;
     private Dimension maxSize;
+    private Scene scene;
 
     public ProjectionWebView(CanvasDelegate delegate) {
         this.delegate = delegate;
@@ -47,19 +51,66 @@ public class ProjectionWebView implements Projectable {
         int width = delegate.getWidth();
         int height = delegate.getHeight();
 
-        panel.setBounds(0, 0, width, height);
+        webView.setPrefWidth(width);
+        webView.setPrefHeight(height);
+        webView.setMinWidth(width);
+        webView.setMinHeight(height);
+
+        node.minWidth(width);
+        node.minHeight(height);
+        node.resize(width, height);
+
+        panel.setMinimumSize(new Dimension(width, height));
         panel.setPreferredSize(new Dimension(width, height));
+
+        SwingUtilities.invokeLater(() -> {
+            Component root = panel;
+
+            while (root != null) {
+                root.setMinimumSize(new Dimension(width, height));
+                root.setBounds(0, 0, width, height);
+                root = root.getParent();
+            }
+        });
     }
 
     @Override
     public void init() {
         if (webView == null) {
-            this.webView = new WebView();
-            this.panel = new JFXPanel();
-            panel.setScene(new Scene(webView));
-            this.node = new SwingNode();
+            webView = new WebView();
+
+            int width = delegate.getWidth();
+            int height = delegate.getHeight();
+
+            scene = new Scene(webView, width, height);
+
+            panel = new JFXPanel() {
+                @Override
+                public void setBounds(int x, int y, int width, int height) {
+                    if (width >= delegate.getWidth() || height >= delegate.getHeight()) {
+                        super.setBounds(x, y, width, height);
+                    } else {
+                        System.out.println("bug");
+                    }
+                }
+            };
+
+            panel.setScene(scene);
+
+            this.node = new SwingNode() {
+                @Override
+                public boolean isResizable() {
+                    return false;
+                }
+            };
+
             node.setContent(panel);
+
             this.container = new Pane();
+
+            container.setMinWidth(width);
+            container.setMinHeight(height);
+
             container.getChildren().add(node);
         }
 
