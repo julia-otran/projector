@@ -89,8 +89,6 @@ public class ProjectionWebView implements Projectable {
                 public void setBounds(int x, int y, int width, int height) {
                     if (width >= delegate.getWidth() || height >= delegate.getHeight()) {
                         super.setBounds(x, y, width, height);
-                    } else {
-                        System.out.println("bug");
                     }
                 }
             };
