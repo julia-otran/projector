@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>us.guihouse.projector</groupId>
     <artifactId>projector-core</artifactId>
+    <packaging>jar</packaging>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    </properties>
+    <parent>
+        <version>2.0</version>
+        <artifactId>projector</artifactId>
+        <groupId>us.guihouse.projector</groupId>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
 
     <name>Projector</name>
 
@@ -15,28 +17,28 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>13.0.2</version>
+            <version>${javafx.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
-            <version>13.0.2</version>
+            <version>${javafx.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-swing</artifactId>
-            <version>13.0.2</version>
+            <version>${javafx.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-web</artifactId>
-            <version>13.0.2</version>
+            <version>${javafx.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -96,4 +98,13 @@
             <version>2.8.6</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+            </plugin>
+        </plugins>
+    </build>
 </project>
