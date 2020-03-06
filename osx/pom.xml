@@ -14,34 +14,34 @@
         <classifier>mac</classifier>
     </properties>
 
-    <name>Projector</name>
+    <name>Projector OSx</name>
 
     <dependencies>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>${javafx.version}</version>
+            <version>${fx.version}</version>
             <classifier>${classifier}</classifier>
         </dependency>
 
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
-            <version>${javafx.version}</version>
+            <version>${fx.version}</version>
             <classifier>${classifier}</classifier>
         </dependency>
 
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-swing</artifactId>
-            <version>${javafx.version}</version>
+            <version>${fx.version}</version>
             <classifier>${classifier}</classifier>
         </dependency>
 
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-web</artifactId>
-            <version>${javafx.version}</version>
+            <version>${fx.version}</version>
             <classifier>${classifier}</classifier>
         </dependency>
 

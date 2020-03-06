@@ -11,34 +11,34 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <name>Projector</name>
+    <name>Projector Core</name>
 
     <dependencies>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>${javafx.version}</version>
+            <version>${fx.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
-            <version>${javafx.version}</version>
+            <version>${fx.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-swing</artifactId>
-            <version>${javafx.version}</version>
+            <version>${fx.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-web</artifactId>
-            <version>${javafx.version}</version>
+            <version>${fx.version}</version>
             <scope>provided</scope>
         </dependency>
 
