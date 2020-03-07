@@ -33,7 +33,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     private GraphicsDevice defaultDevice;
 
     private BufferedImage targetRender;
-    private HashMap<String, BufferedImage> bLevelFixed = new HashMap<>();
+    private HashMap<String, BufferedImage> bLevelFixAssets = new HashMap<>();
 
     private HashMap<String, ProjectionWindow> windows = new HashMap<>();
     private HashMap<Integer, BufferedImage> blendAssets = new HashMap<>();
@@ -114,7 +114,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
         screenGraphics.clear();
         screenImages.clear();
-        bLevelFixed.clear();
 
         windowConfigs.forEach(wc -> {
             ProjectionWindow w = windows.get(wc.getDisplayId());
@@ -217,7 +216,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                 g.setTransform(transform);
                 g.translate(windowConfig.getX(), windowConfig.getY());
 
-                BufferedImage bLevelFix = bLevelFixed.get(windowConfig.getDisplayId());
+                BufferedImage bLevelFix = bLevelFixAssets.get(windowConfig.getDisplayId());
                 g.drawImage(bLevelFix, windowConfig.getBgFillX(), windowConfig.getBgFillY(), null);
 
                 windowConfig.getBlends().forEach(blend -> {
@@ -361,7 +360,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     private void generateAssets() {
         blendAssets.clear();
         transformAssets.clear();
-        bLevelFixed.clear();
+        bLevelFixAssets.clear();
 
         windowConfigs.forEach(wc -> {
             wc.getBlends().forEach(blend -> {
@@ -386,7 +385,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                 }
             }
 
-            bLevelFixed.put(wc.getDisplayId(), img);
+            bLevelFixAssets.put(wc.getDisplayId(), img);
         });
 
     }
