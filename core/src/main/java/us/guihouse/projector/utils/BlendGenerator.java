@@ -5,6 +5,14 @@ import us.guihouse.projector.models.WindowConfigBlend;
 import java.awt.image.BufferedImage;
 
 public class BlendGenerator {
+    private static int curve(float x, WindowConfigBlend blend) {
+        if (blend.getUseCurve() == null || !blend.getUseCurve()) {
+            return Math.round(x);
+        }
+
+        return Math.round(((x * x) / 65025.0f) * 255);
+    }
+
     public static BufferedImage makeBlender(WindowConfigBlend blend) {
 
         BufferedImage img = new BufferedImage(blend.getWidth(), blend.getHeight(), BufferedImage.TYPE_INT_ARGB);
@@ -14,7 +22,7 @@ public class BlendGenerator {
                 float step1 = 255.0F / (blend.getWidth() - 1);
 
                 for (int x = 0; x < blend.getWidth(); x++) {
-                    int color = Math.round(step1 * (blend.getWidth() - x - 1)) << 24;
+                    int color = curve(step1 * (blend.getWidth() - x - 1), blend) << 24;
 
                     for (int y = 0; y < blend.getHeight(); y++) {
                         img.setRGB(x, y, color);
@@ -25,7 +33,7 @@ public class BlendGenerator {
                 float step2 = 255.0F / (blend.getHeight() - 1);
 
                 for (int y = 0; y < blend.getHeight(); y++) {
-                    int color = Math.round(step2 * (blend.getHeight() - y - 1)) << 24;
+                    int color = curve(step2 * (blend.getHeight() - y - 1), blend) << 24;
 
                     for (int x = 0; x < blend.getWidth(); x++) {
                         img.setRGB(x, y, color);
@@ -36,7 +44,7 @@ public class BlendGenerator {
                 float step3 = 255.0F / (blend.getHeight() - 1);
 
                 for (int y = 0; y < blend.getHeight(); y++) {
-                    int color = Math.round(step3 * y) << 24;
+                    int color = curve(step3 * y, blend) << 24;
 
                     for (int x = 0; x < blend.getWidth(); x++) {
                         img.setRGB(x, y, color);
@@ -47,7 +55,7 @@ public class BlendGenerator {
                 float step = 255.0F / (blend.getWidth() - 1);
 
                 for (int x = 0; x < blend.getWidth(); x++) {
-                    int color = Math.round(step * x) << 24;
+                    int color = curve(step * x, blend) << 24;
 
                     for (int y = 0; y < blend.getHeight(); y++) {
                         img.setRGB(x, y, color);

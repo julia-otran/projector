@@ -10,4 +10,5 @@ public class WindowConfigBlend {
     private int height;
     private int direction;
     private int id;
+    private Boolean useCurve;
 }

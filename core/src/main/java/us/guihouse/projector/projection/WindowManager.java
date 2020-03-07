@@ -187,7 +187,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
             long newTimestamp = System.nanoTime();
             if (newTimestamp - timestamp > 1000000000) {
-                System.out.println(frames);
+                // System.out.println(frames);
                 frames = 0;
                 timestamp = newTimestamp;
             }
