@@ -1,5 +1,6 @@
 package us.guihouse.projector.projection;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 
@@ -7,6 +8,7 @@ public class WindowManagerPresenter implements Runnable {
     private boolean running;
     private Thread thread;
     private final HashMap<String, BufferedImage> outputs = new HashMap<>();
+
     private HashMap<String, ProjectionWindow> windows;
 
     public void start(HashMap<String, ProjectionWindow> windows) {
@@ -15,7 +17,9 @@ public class WindowManagerPresenter implements Runnable {
         outputs.clear();
         windows.forEach((id, w) -> {
             if (w.getFrame() != null) {
-                BufferedImage img = w.getCurrentDevice().getDevice().getDefaultConfiguration().createCompatibleImage(w.getFrame().getWidth(), w.getFrame().getHeight());
+                GraphicsDevice dev = w.getCurrentDevice().getDevice();
+
+                BufferedImage img = dev.getDefaultConfiguration().createCompatibleImage(dev.getDisplayMode().getWidth(), dev.getDisplayMode().getHeight());
                 outputs.put(id, img);
             }
         });

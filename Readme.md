@@ -8,7 +8,7 @@ Sinta-se a vontade para abrir um `pull request`e contribuir conosco.
 Build
 =====
 - Nós usamos o maven para gerar a build.
-- Utilizar Java 13.0.2
+- Utilizar Java 8
 
 Basta executar o seguinte comando:
 
@@ -24,7 +24,7 @@ Instalação
 
 ## Windows
 
-1. Instalar o Java 13.0.2
+1. Instalar o Java 8
 2. Instalar o VLC Player (versão 2.x)
    ### Atenção
    - Se você instalou o JDK 64 bits, tem que instalar o VLC 64bits. Fique atento: Por padrão o site do VLC disponibiliza a versão 32bits, que não irá funcionar com o java x64

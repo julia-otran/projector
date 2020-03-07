@@ -8,6 +8,7 @@ package us.guihouse.projector.projection;
 import java.awt.*;
 
 import com.sun.javafx.embed.EmbeddedSceneInterface;
+import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.embed.swing.SwingNode;
 import javafx.scene.Node;
@@ -51,26 +52,28 @@ public class ProjectionWebView implements Projectable {
         int width = delegate.getWidth();
         int height = delegate.getHeight();
 
-        webView.setPrefWidth(width);
-        webView.setPrefHeight(height);
-        webView.setMinWidth(width);
-        webView.setMinHeight(height);
+        Platform.runLater(() -> {
+            webView.setPrefWidth(width);
+            webView.setPrefHeight(height);
+            webView.setMinWidth(width);
+            webView.setMinHeight(height);
 
-        node.minWidth(width);
-        node.minHeight(height);
-        node.resize(width, height);
+//            node.minWidth(width);
+//            node.minHeight(height);
+            node.resize(width, height);
 
-        panel.setMinimumSize(new Dimension(width, height));
-        panel.setPreferredSize(new Dimension(width, height));
+            SwingUtilities.invokeLater(() -> {
+                panel.setMinimumSize(new Dimension(width, height));
+                panel.setPreferredSize(new Dimension(width, height));
 
-        SwingUtilities.invokeLater(() -> {
-            Component root = panel;
+                Component root = panel;
 
-            while (root != null) {
-                root.setMinimumSize(new Dimension(width, height));
-                root.setBounds(0, 0, width, height);
-                root = root.getParent();
-            }
+                while (root != null) {
+                    root.setMinimumSize(new Dimension(width, height));
+                    root.setBounds(0, 0, width, height);
+                    root = root.getParent();
+                }
+            });
         });
     }
 

@@ -17,6 +17,7 @@
     <name>Projector Linux</name>
 
     <dependencies>
+        <!--
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
@@ -44,6 +45,8 @@
             <version>${fx.version}</version>
             <classifier>${classifier}</classifier>
         </dependency>
+
+        -->
 
         <dependency>
             <groupId>us.guihouse.projector</groupId>
