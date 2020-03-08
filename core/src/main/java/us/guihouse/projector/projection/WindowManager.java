@@ -164,7 +164,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
                 running = true;
                 drawThread = new Thread(WindowManager.this);
-                drawThread.setPriority(Thread.MAX_PRIORITY);
                 drawThread.start();
                 starting = false;
             }
@@ -316,11 +315,27 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     public void updateConfigs(List<WindowConfig> windowConfigs) {
         if (running) {
             stopEngine();
-            this.windowConfigs = windowConfigs.stream().filter(WindowConfig::isProject).collect(Collectors.toList());
+            loadWindowConfigs(windowConfigs);
             startEngine();
         } else {
-            this.windowConfigs = windowConfigs.stream().filter(WindowConfig::isProject).collect(Collectors.toList());
+            loadWindowConfigs(windowConfigs);
         }
+    }
+
+    private void loadWindowConfigs(List<WindowConfig> windowConfigs) {
+        this.windowConfigs = windowConfigs.stream()
+                .filter(WindowConfig::isProject)
+                .peek(wc -> {
+                    if (wc.getDisplayBounds() != null) {
+                        this.windows.forEach((id, w) -> {
+                            Rectangle deviceBounds = w.getCurrentDevice().getDevice().getDefaultConfiguration().getBounds();
+                            if (deviceBounds.equals(wc.getDisplayBounds())) {
+                                wc.setDisplayId(id);
+                            }
+                        });
+                    }
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -331,6 +346,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                     WindowConfig wc = new WindowConfig();
                     wc.setDisplayId(device.getDevice().getIDstring());
                     wc.setProject(device.isProjectionDevice());
+                    wc.setDisplayBounds(device.getDevice().getDefaultConfiguration().getBounds());
 
                     wc.setWidth(device.getDevice().getDisplayMode().getWidth());
                     wc.setHeight(device.getDevice().getDisplayMode().getHeight());

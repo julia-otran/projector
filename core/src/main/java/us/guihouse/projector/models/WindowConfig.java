@@ -1,5 +1,6 @@
 package us.guihouse.projector.models;
 
+import java.awt.*;
 import java.util.List;
 import lombok.Data;
 
@@ -7,6 +8,7 @@ import lombok.Data;
 public class WindowConfig {
 
     private String displayId;
+    private Rectangle displayBounds;
     private boolean project;
 
     private float bLevelOffset;

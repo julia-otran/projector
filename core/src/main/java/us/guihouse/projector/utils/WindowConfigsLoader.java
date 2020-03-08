@@ -147,7 +147,7 @@ public class WindowConfigsLoader implements Runnable {
 
                 Path child = PROJECTOR_WINDOW_CONFIG_PATH.resolve(filename);
 
-                if (child.endsWith(ProjectorPreferences.getWindowConfigFile())) {
+                if (ProjectorPreferences.getWindowConfigFile() != null && child.endsWith(ProjectorPreferences.getWindowConfigFile())) {
                     loadSavedConfigs();
                 }
             }

@@ -60,7 +60,7 @@ public class WindowManagerPresenter implements Runnable {
             });
 
             try {
-                Thread.sleep(5);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
