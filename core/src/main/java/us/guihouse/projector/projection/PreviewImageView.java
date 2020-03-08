@@ -61,17 +61,16 @@ public class PreviewImageView extends ImageView implements Runnable {
             if (updateThread != null) {
                 try {
                     updateThread.join();
-                    updateThread = null;
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+                updateThread = null;
             }
         } else {
-            if (updateThread == null) {
-                running = true;
-                updateThread = new Thread(this);
-                updateThread.start();
-            }
+            running = true;
+            repainting = false;
+            updateThread = new Thread(this);
+            updateThread.start();
         }
     }
 
