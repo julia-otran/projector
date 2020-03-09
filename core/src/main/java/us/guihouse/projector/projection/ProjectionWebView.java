@@ -58,8 +58,8 @@ public class ProjectionWebView implements Projectable {
             webView.setMinWidth(width);
             webView.setMinHeight(height);
 
-//            node.minWidth(width);
-//            node.minHeight(height);
+            node.minWidth(width);
+            node.minHeight(height);
             node.resize(width, height);
 
             SwingUtilities.invokeLater(() -> {

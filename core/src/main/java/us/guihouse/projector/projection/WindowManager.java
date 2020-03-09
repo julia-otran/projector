@@ -41,6 +41,9 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     private HashMap<String, BufferedImage> screenImages = new HashMap<>();
     private HashMap<String, Graphics2D> screenGraphics = new HashMap<>();
 
+    private int width;
+    private int height;
+
     private Thread drawThread;
 
     @Getter
@@ -191,6 +194,8 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                 timestamp = newTimestamp;
             }
 
+            targetGraphics.setColor(Color.BLACK);
+            targetGraphics.fillRect(0, 0, getWidth(), getHeight());
             projectionCanvas.paintComponent(targetGraphics);
 
             windowConfigs.parallelStream().forEach(windowConfig -> {
@@ -250,16 +255,12 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
     @Override
     public int getWidth() {
-        int screenStart = windowConfigs.stream().map(WindowConfig::getX).min(Integer::compareTo).orElse(0);
-        int screenEnd = windowConfigs.stream().map(wc -> wc.getX() + wc.getWidth()).max(Integer::compareTo).orElse(800);
-        return screenEnd - screenStart;
+        return width;
     }
 
     @Override
     public int getHeight() {
-        int screenStart = windowConfigs.stream().map(WindowConfig::getY).min(Integer::compareTo).orElse(0);
-        int screenEnd = windowConfigs.stream().map(wc -> wc.getY() + wc.getHeight()).max(Integer::compareTo).orElse(600);
-        return screenEnd - screenStart;
+        return height;
     }
 
     @Override
@@ -374,6 +375,14 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     }
 
     private void generateAssets() {
+        int screenXStart = windowConfigs.stream().map(WindowConfig::getX).min(Integer::compareTo).orElse(0);
+        int screenXEnd = windowConfigs.stream().map(wc -> wc.getX() + wc.getWidth()).max(Integer::compareTo).orElse(800);
+        width = screenXEnd - screenXStart;
+
+        int screenYStart = windowConfigs.stream().map(WindowConfig::getY).min(Integer::compareTo).orElse(0);
+        int screenYEnd = windowConfigs.stream().map(wc -> wc.getY() + wc.getHeight()).max(Integer::compareTo).orElse(600);
+        height = screenYEnd - screenYStart;
+
         blendAssets.clear();
         transformAssets.clear();
         bLevelFixAssets.clear();

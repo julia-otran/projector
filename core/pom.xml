@@ -5,7 +5,7 @@
     <packaging>jar</packaging>
 
     <parent>
-        <version>2.1</version>
+        <version>2.2</version>
         <artifactId>projector</artifactId>
         <groupId>us.guihouse.projector</groupId>
         <relativePath>../pom.xml</relativePath>
@@ -14,7 +14,6 @@
     <name>Projector Core</name>
 
     <dependencies>
-        <!--
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
@@ -42,8 +41,6 @@
             <version>${fx.version}</version>
             <scope>provided</scope>
         </dependency>
-
-        -->
 
         <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
         <dependency>
