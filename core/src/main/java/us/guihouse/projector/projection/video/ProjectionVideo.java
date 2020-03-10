@@ -8,15 +8,24 @@ import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import uk.co.caprica.vlcj.player.embedded.videosurface.CallbackVideoSurface;
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormat;
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormatCallback;
+import uk.co.caprica.vlcj.player.embedded.videosurface.callback.RenderCallback;
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.RenderCallbackAdapter;
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.format.RV32BufferFormat;
 import us.guihouse.projector.projection.CanvasDelegate;
 import us.guihouse.projector.projection.Projectable;
 import us.guihouse.projector.utils.VlcPlayerFactory;
+import javafx.scene.image.PixelBuffer;
 
 import java.awt.*;
+import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
+import java.awt.image.Raster;
+import java.awt.image.SampleModel;
+import java.awt.image.WritableRaster;
 import java.nio.ByteBuffer;
 
 public class ProjectionVideo implements Projectable {
@@ -27,6 +36,8 @@ public class ProjectionVideo implements Projectable {
     protected BufferedImage image;
     private BufferFormat bufferFormat;
     private final Object sync = new Object();
+    private Raster raster;
+    private ByteBuffer buffer;
 
     protected int deviceW;
     protected int deviceH;
@@ -119,13 +130,23 @@ public class ProjectionVideo implements Projectable {
         this.projectionX = (deviceW - this.width) / 2;
         this.projectionY = (deviceH - this.height) / 2;
 
-        image = device.getDefaultConfiguration().createCompatibleImage(width, height);
-        //image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        image.setAccelerationPriority(1.0f);
+        //image = device.getDefaultConfiguration().createCompatibleImage(width, height);
+        image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
+
+        int[] bOffs = {0, 1, 2, 3};
+
+        raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE,
+                width, height,
+                width*4, 4,
+                bOffs, null);
+
+        image.setData(raster);
+
+        assert ((DataBufferByte)raster.getDataBuffer()).getData().length == width * height * 4;
 
         bufferFormat = new RV32BufferFormat(width, height);
         //renderCallback.setBuffer(new int[width * height]);
-        renderCallback.setBuffer(((DataBufferInt) image.getRaster().getDataBuffer()).getData());
+//        renderCallback.setBuffer(((DataBufferInt) image.getRaster().getDataBuffer()).getData());
     }
 
     @Override
@@ -137,18 +158,23 @@ public class ProjectionVideo implements Projectable {
         return player;
     }
 
-    private final class MyRenderCallback extends RenderCallbackAdapter {
+    private final class MyRenderCallback implements RenderCallback {
         MyRenderCallback() {
             super();
         }
 
-        @Override
-        protected void onDisplay(MediaPlayer mediaPlayer, int[] buffer) {
+//        @Override
+//        protected void onDisplay(MediaPlayer mediaPlayer, int[] buffer) {
 //            int[] dst = ((DataBufferInt)image.getRaster().getDataBuffer()).getData();
 //            int length = Math.min(buffer.length, dst.length);
 //            synchronized (sync) {
 //                System.arraycopy(buffer, 0, dst, 0, length);
 //            }
+//        }
+
+        @Override
+        public void display(MediaPlayer mediaPlayer, ByteBuffer[] nativeBuffers, BufferFormat bufferFormat) {
+            buffer.get(((DataBufferByte)raster.getDataBuffer()).getData());
         }
 
 //        public void setImage(BufferedImage image) {
@@ -177,7 +203,8 @@ public class ProjectionVideo implements Projectable {
 
         @Override
         public void allocatedBuffers(ByteBuffer[] buffers) {
-
+            assert buffers[0].capacity() == width * height * 4;
+            buffer = buffers[0];
         }
     }
 }
