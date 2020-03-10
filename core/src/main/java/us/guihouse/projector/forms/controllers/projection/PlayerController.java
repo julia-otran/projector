@@ -32,9 +32,10 @@ import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import uk.co.caprica.vlcj.binding.internal.libvlc_media_t;
-import uk.co.caprica.vlcj.player.MediaPlayer;
-import uk.co.caprica.vlcj.player.MediaPlayerEventListener;
-import us.guihouse.projector.other.ResizeableSwingNode;
+import uk.co.caprica.vlcj.media.MediaRef;
+import uk.co.caprica.vlcj.media.TrackType;
+import uk.co.caprica.vlcj.player.base.MediaPlayer;
+import uk.co.caprica.vlcj.player.base.MediaPlayerEventListener;
 import us.guihouse.projector.projection.ProjectionManager;
 import us.guihouse.projector.projection.video.ProjectionPlayer;
 import us.guihouse.projector.services.FileDragDropService;
@@ -152,7 +153,7 @@ public class PlayerController extends ProjectionController implements FileDragDr
         withoutSoundButton.fire();
         withoutSoundButton.setSelected(true);
 
-        projectionPlayer.getPlayer().addMediaPlayerEventListener(this);
+        projectionPlayer.getPlayer().events().addMediaPlayerEventListener(this);
 
         timeBar.valueChangingProperty().addListener(new ChangeListener<Boolean>() {
             @Override
@@ -165,7 +166,7 @@ public class PlayerController extends ProjectionController implements FileDragDr
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 if (!automaticMoving) {
-                    projectionPlayer.getPlayer().setPosition(timeBar.valueProperty().floatValue());
+                    projectionPlayer.getPlayer().controls().setPosition(timeBar.valueProperty().floatValue());
                 }
             }
         });
@@ -189,40 +190,40 @@ public class PlayerController extends ProjectionController implements FileDragDr
     @Override
     public void stop() {
         onEscapeKeyPressed();
-        projectionPlayer.getPlayer().stop();
+        projectionPlayer.getPlayer().controls().stop();
         projectionManager.stop(projectionPlayer);
 
     }
 
     @FXML
     public void playButtonClick() {
-        projectionPlayer.getPlayer().play();
+        projectionPlayer.getPlayer().controls().play();
     }
 
     @FXML
     public void pauseButtonClick() {
-        projectionPlayer.getPlayer().pause();
+        projectionPlayer.getPlayer().controls().pause();
     }
 
     @FXML
     public void stopButtonClick() {
-        projectionPlayer.getPlayer().stop();
-        projectionPlayer.getPlayer().setPosition(0);
+        projectionPlayer.getPlayer().controls().stop();
+        projectionPlayer.getPlayer().controls().setPosition(0);
     }
 
     @FXML
     public void repeatButtonClick() {
-        projectionPlayer.getPlayer().setRepeat(repeatButton.isSelected());
+        projectionPlayer.getPlayer().controls().setRepeat(repeatButton.isSelected());
     }
 
     @FXML
     public void withoutSoundButtonClick() {
-        projectionPlayer.getPlayer().mute(true);
+        projectionPlayer.getPlayer().audio().setMute(true);
     }
 
     @FXML
     public void withSoundButtonClick() {
-        projectionPlayer.getPlayer().mute(false);
+        projectionPlayer.getPlayer().audio().setMute(false);
     }
 
     // Drag and drop
@@ -293,8 +294,10 @@ public class PlayerController extends ProjectionController implements FileDragDr
     }
 
     @Override
-    public void mediaChanged(MediaPlayer mediaPlayer, libvlc_media_t libvlc_media_t, String s) {
-
+    public void mediaChanged(MediaPlayer mediaPlayer, MediaRef media) {
+        Platform.runLater(() -> {
+            notifyTitleChange(mediaPlayer.media().info().mrl());
+        });
     }
 
     @Override
@@ -446,17 +449,17 @@ public class PlayerController extends ProjectionController implements FileDragDr
     }
 
     @Override
-    public void elementaryStreamAdded(MediaPlayer mediaPlayer, int i, int i1) {
+    public void elementaryStreamAdded(MediaPlayer mediaPlayer, TrackType type, int id) {
 
     }
 
     @Override
-    public void elementaryStreamDeleted(MediaPlayer mediaPlayer, int i, int i1) {
+    public void elementaryStreamDeleted(MediaPlayer mediaPlayer, TrackType type, int id) {
 
     }
 
     @Override
-    public void elementaryStreamSelected(MediaPlayer mediaPlayer, int i, int i1) {
+    public void elementaryStreamSelected(MediaPlayer mediaPlayer, TrackType type, int id) {
 
     }
 
@@ -494,67 +497,4 @@ public class PlayerController extends ProjectionController implements FileDragDr
     public void mediaPlayerReady(MediaPlayer mediaPlayer) {
 
     }
-
-    @Override
-    public void mediaMetaChanged(MediaPlayer mediaPlayer, int i) {
-
-    }
-
-    @Override
-    public void mediaSubItemAdded(MediaPlayer mediaPlayer, libvlc_media_t libvlc_media_t) {
-
-    }
-
-    @Override
-    public void mediaDurationChanged(MediaPlayer mediaPlayer, long l) {
-
-    }
-
-    @Override
-    public void mediaParsedChanged(MediaPlayer mediaPlayer, int i) {
-
-    }
-
-    @Override
-    public void mediaParsedStatus(MediaPlayer mediaPlayer, int i) {
-
-    }
-
-    @Override
-    public void mediaFreed(MediaPlayer mediaPlayer) {
-
-    }
-
-    @Override
-    public void mediaStateChanged(MediaPlayer mediaPlayer, int i) {
-
-    }
-
-    @Override
-    public void mediaSubItemTreeAdded(MediaPlayer mediaPlayer, libvlc_media_t libvlc_media_t) {
-
-    }
-
-    @Override
-    public void newMedia(MediaPlayer mediaPlayer) {
-        Platform.runLater(() -> {
-            notifyTitleChange(mediaPlayer.getMediaMetaData().getTitle());
-        });
-    }
-
-    @Override
-    public void subItemPlayed(MediaPlayer mediaPlayer, int i) {
-
-    }
-
-    @Override
-    public void subItemFinished(MediaPlayer mediaPlayer, int i) {
-
-    }
-
-    @Override
-    public void endOfSubItems(MediaPlayer mediaPlayer) {
-
-    }
-
 }
