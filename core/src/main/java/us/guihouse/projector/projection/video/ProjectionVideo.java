@@ -37,7 +37,7 @@ public class ProjectionVideo implements Projectable {
     private BufferFormat bufferFormat;
     private final Object sync = new Object();
     private Raster raster;
-    private ByteBuffer buffer;
+    private byte[] imgBuffer;
 
     protected int deviceW;
     protected int deviceH;
@@ -132,17 +132,19 @@ public class ProjectionVideo implements Projectable {
 
         //image = device.getDefaultConfiguration().createCompatibleImage(width, height);
         image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
+        raster = image.getRaster();
+//        int[] bOffs = {3, 2, 1, 0};
+//
+//        raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE,
+//                width, height,
+//                width*4, 4,
+//                bOffs, null);
+//
+//        image.setData(raster);
 
-        int[] bOffs = {0, 1, 2, 3};
+        imgBuffer = ((DataBufferByte)raster.getDataBuffer()).getData();
 
-        raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE,
-                width, height,
-                width*4, 4,
-                bOffs, null);
-
-        image.setData(raster);
-
-        assert ((DataBufferByte)raster.getDataBuffer()).getData().length == width * height * 4;
+        assert imgBuffer.length == width * height * 4;
 
         bufferFormat = new RV32BufferFormat(width, height);
         //renderCallback.setBuffer(new int[width * height]);
@@ -174,7 +176,12 @@ public class ProjectionVideo implements Projectable {
 
         @Override
         public void display(MediaPlayer mediaPlayer, ByteBuffer[] nativeBuffers, BufferFormat bufferFormat) {
-            buffer.get(((DataBufferByte)raster.getDataBuffer()).getData());
+            int size = bufferFormat.getWidth() * bufferFormat.getHeight() * 4;
+
+            ByteBuffer buffer = nativeBuffers[0];
+            buffer.get(imgBuffer, 0, size);
+            buffer.rewind();
+
         }
 
 //        public void setImage(BufferedImage image) {
@@ -204,7 +211,6 @@ public class ProjectionVideo implements Projectable {
         @Override
         public void allocatedBuffers(ByteBuffer[] buffers) {
             assert buffers[0].capacity() == width * height * 4;
-            buffer = buffers[0];
         }
     }
 }
