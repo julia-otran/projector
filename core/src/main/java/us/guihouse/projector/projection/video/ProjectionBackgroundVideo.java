@@ -1,6 +1,6 @@
 package us.guihouse.projector.projection.video;
 
-import uk.co.caprica.vlcj.player.MediaPlayer;
+import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import us.guihouse.projector.projection.CanvasDelegate;
 import us.guihouse.projector.projection.Projectable;
 import us.guihouse.projector.utils.ThemeFinder;
@@ -52,13 +52,13 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
     @Override
     public void init() {
         videoProjectors[0].init();
-        videoProjectors[0].getPlayer().mute(true);
-        videoProjectors[0].getPlayer().addMediaPlayerEventListener(new ProjectionBackgroundVideoLoop(0, this));
+        videoProjectors[0].getPlayer().audio().setMute(true);
+        videoProjectors[0].getPlayer().events().addMediaPlayerEventListener(new ProjectionBackgroundVideoLoop(0, this));
         videoProjectors[0].setRender(false);
 
         videoProjectors[1].init();
-        videoProjectors[1].getPlayer().mute(true);
-        videoProjectors[1].getPlayer().addMediaPlayerEventListener(new ProjectionBackgroundVideoLoop(1, this));
+        videoProjectors[1].getPlayer().audio().setMute(true);
+        videoProjectors[1].getPlayer().events().addMediaPlayerEventListener(new ProjectionBackgroundVideoLoop(1, this));
         videoProjectors[1].setRender(false);
 
         loadMedia();
@@ -113,15 +113,15 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
         playing = true;
         currentPlayer = 0;
         videoProjectors[0].setRender(true);
-        videoProjectors[0].getPlayer().playMedia(toPlay.getAbsolutePath());
-        videoProjectors[1].getPlayer().prepareMedia(toPlay.getAbsolutePath());
+        videoProjectors[0].getPlayer().media().play(toPlay.getAbsolutePath());
+        videoProjectors[1].getPlayer().media().prepare(toPlay.getAbsolutePath());
     }
 
     public void stopBackground() {
         videoProjectors[0].setRender(false);
         videoProjectors[1].setRender(false);
-        videoProjectors[0].getPlayer().stop();
-        videoProjectors[1].getPlayer().stop();
+        videoProjectors[0].getPlayer().controls().stop();
+        videoProjectors[1].getPlayer().controls().stop();
         playing = false;
     }
 
@@ -132,7 +132,7 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
                 swapPlayersIfNeeded();
             }
         } else {
-            mediaPlayer.pause();
+            mediaPlayer.controls().pause();
         }
     }
 
@@ -143,15 +143,15 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
                 if (!videoProjectors[0].isRender()) {
                     videoProjectors[0].setRender(true);
                     videoProjectors[1].setRender(false);
-                    videoProjectors[1].getPlayer().setPosition(0);
-                    videoProjectors[1].getPlayer().play();
+                    videoProjectors[1].getPlayer().controls().setPosition(0);
+                    videoProjectors[1].getPlayer().controls().play();
                 }
             } else {
                 if (!videoProjectors[1].isRender()) {
                     videoProjectors[1].setRender(true);
                     videoProjectors[0].setRender(false);
-                    videoProjectors[0].getPlayer().setPosition(0);
-                    videoProjectors[0].getPlayer().play();
+                    videoProjectors[0].getPlayer().controls().setPosition(0);
+                    videoProjectors[0].getPlayer().controls().play();
                 }
             }
         }
@@ -166,14 +166,14 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
 
     private void swapPlayersIfNeeded() {
         if (currentPlayer == 0) {
-            if (!videoProjectors[1].getPlayer().isPlaying()) {
+            if (!videoProjectors[1].getPlayer().status().isPlaying()) {
                 currentPlayer = 1;
-                videoProjectors[1].getPlayer().play();
+                videoProjectors[1].getPlayer().controls().play();
             }
         } else {
-            if (!videoProjectors[0].getPlayer().isPlaying()) {
+            if (!videoProjectors[0].getPlayer().status().isPlaying()) {
                 currentPlayer = 0;
-                videoProjectors[0].getPlayer().play();
+                videoProjectors[0].getPlayer().controls().play();
             }
         }
     }

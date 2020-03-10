@@ -48,7 +48,7 @@ public class ProjectionPlayer extends ProjectionVideo {
     }
 
     public void loadMedia(File file) {
-        this.player.prepareMedia(file.getAbsolutePath());
+        this.player.media().prepare(file.getAbsolutePath());
         this.loadedMedia = file;
     }
 
@@ -57,7 +57,7 @@ public class ProjectionPlayer extends ProjectionVideo {
         super.rebuildLayout();
 
         if (loadedMedia != null) {
-            this.player.prepareMedia(loadedMedia.getAbsolutePath());
+            this.player.media().prepare(loadedMedia.getAbsolutePath());
         }
     }
 
