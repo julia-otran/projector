@@ -77,8 +77,6 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
     public void loadMedia() {
         ThemeFinder.getThemes().forEach(t -> {
             media.add(t.getVideoFile());
-            videoProjectors[0].getPlayer().prepareMedia(t.getVideoFile().getAbsolutePath());
-            videoProjectors[1].getPlayer().prepareMedia(t.getVideoFile().getAbsolutePath());
         });
     }
 
@@ -116,7 +114,7 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
         currentPlayer = 0;
         videoProjectors[0].setRender(true);
         videoProjectors[0].getPlayer().playMedia(toPlay.getAbsolutePath());
-        videoProjectors[1].getPlayer().playMedia(toPlay.getAbsolutePath());
+        videoProjectors[1].getPlayer().prepareMedia(toPlay.getAbsolutePath());
     }
 
     public void stopBackground() {
