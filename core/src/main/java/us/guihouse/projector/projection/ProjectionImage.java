@@ -152,6 +152,10 @@ public class ProjectionImage implements Projectable {
         int width = canvasDelegate.getWidth();
         int height = canvasDelegate.getHeight();
 
+        if (width == 0 || height == 0) {
+            return;
+        }
+
         double scaleX = width / imgW;
         double scaleY = height / imgH;
 
