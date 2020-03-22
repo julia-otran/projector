@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module version="4">
+<module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" version="4">
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_13">
     <output url="file://$MODULE_DIR$/target/classes" />
     <output-test url="file://$MODULE_DIR$/target/test-classes" />
@@ -8,16 +8,25 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="projector-core" />
+    <orderEntry type="library" name="Maven: uk.co.caprica:vlcj:3.12.1" level="project" />
     <orderEntry type="library" name="Maven: org.openjfx:javafx-base:linux:13.0.2" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-base:win:13.0.2" level="project" />
     <orderEntry type="library" name="Maven: org.openjfx:javafx-graphics:linux:13.0.2" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-graphics:win:13.0.2" level="project" />
     <orderEntry type="library" name="Maven: org.openjfx:javafx-base:13.0.2" level="project" />
     <orderEntry type="library" name="Maven: org.openjfx:javafx-media:linux:13.0.2" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-media:win:13.0.2" level="project" />
     <orderEntry type="library" name="Maven: org.openjfx:javafx-graphics:13.0.2" level="project" />
     <orderEntry type="library" name="Maven: org.openjfx:javafx-controls:linux:13.0.2" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-controls:win:13.0.2" level="project" />
     <orderEntry type="library" name="Maven: org.openjfx:javafx-fxml:linux:13.0.2" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-fxml:win:13.0.2" level="project" />
     <orderEntry type="library" name="Maven: org.openjfx:javafx-controls:13.0.2" level="project" />
     <orderEntry type="library" name="Maven: org.openjfx:javafx-swing:linux:13.0.2" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-swing:win:13.0.2" level="project" />
     <orderEntry type="library" name="Maven: org.openjfx:javafx-web:linux:13.0.2" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-web:win:13.0.2" level="project" />
     <orderEntry type="library" name="Maven: org.openjfx:javafx-media:13.0.2" level="project" />
     <orderEntry type="module" module-name="projector-core" />
     <orderEntry type="library" name="Maven: org.jsoup:jsoup:1.8.3" level="project" />

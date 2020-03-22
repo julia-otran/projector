@@ -20,18 +20,6 @@ public class ProjectableItemListCell extends ListCell<ProjectionListItem> {
     @Getter
     private final CellCallback<ProjectionListItem> cellCallback;
 
-    @Override
-    protected void finalize() throws Throwable {
-        setOnDragDetected(null);
-        setOnDragOver(null);
-        setOnDragEntered(null);
-        setOnDragExited(null);
-        setOnDragDropped(null);
-        setOnDragDone(null);
-        setOnKeyPressed(null);
-        super.finalize();
-    }
-
     public ProjectableItemListCell(CellCallback<ProjectionListItem> cellCallback) {
         this.cellCallback = cellCallback;
         ListCell thisCell = this;
@@ -112,12 +100,9 @@ public class ProjectableItemListCell extends ListCell<ProjectionListItem> {
     public void updateItem(ProjectionListItem item, boolean empty) {
         super.updateItem(item, empty);
 
-        if (empty) {
+        if (empty || item == null) {
             setText(null);
-        }
-
-        if (item != null) {
-            //finally every thing is just setup
+        } else {
             setText(item.getTitle());
         }
     }
