@@ -57,9 +57,6 @@ public class Projector extends Application implements Runnable {
 
         VlcPlayerFactory.init();
 
-        SQLiteJDBCDriverConnection.connect();
-        SQLiteJDBCDriverConnection.migrate();
-
         final GraphicsDeviceHelper graphicsHelper = new GraphicsDeviceHelper();
 
         graphicsHelper.setInitCallback(() -> {
@@ -74,6 +71,9 @@ public class Projector extends Application implements Runnable {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        SQLiteJDBCDriverConnection.connect();
+        SQLiteJDBCDriverConnection.migrate();
+
         Platform.runLater(() -> {
             Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
         });
