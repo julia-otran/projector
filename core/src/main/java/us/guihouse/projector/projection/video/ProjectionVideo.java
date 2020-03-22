@@ -3,29 +3,18 @@ package us.guihouse.projector.projection.video;
 import lombok.Getter;
 import lombok.Setter;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
-import uk.co.caprica.vlcj.player.component.EmbeddedMediaListPlayerComponent;
-import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import uk.co.caprica.vlcj.player.embedded.videosurface.CallbackVideoSurface;
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormat;
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormatCallback;
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.RenderCallback;
-import uk.co.caprica.vlcj.player.embedded.videosurface.callback.RenderCallbackAdapter;
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.format.RV32BufferFormat;
 import us.guihouse.projector.projection.CanvasDelegate;
 import us.guihouse.projector.projection.Projectable;
 import us.guihouse.projector.utils.VlcPlayerFactory;
-import javafx.scene.image.PixelBuffer;
 
 import java.awt.*;
-import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
-import java.awt.image.Raster;
-import java.awt.image.SampleModel;
-import java.awt.image.WritableRaster;
 import java.nio.ByteBuffer;
 
 public class ProjectionVideo implements Projectable {
@@ -35,9 +24,9 @@ public class ProjectionVideo implements Projectable {
 
     protected BufferedImage image;
     private BufferFormat bufferFormat;
-    private final Object sync = new Object();
-    private Raster raster;
-    private byte[] imgBuffer;
+
+    protected int videoW;
+    protected int videoH;
 
     protected int deviceW;
     protected int deviceH;
@@ -87,7 +76,7 @@ public class ProjectionVideo implements Projectable {
         videoSurface = VlcPlayerFactory.getFactory().videoSurfaces().newVideoSurface(bufferFormatCallback, renderCallback, true);
         this.videoSurface.attach(this.player);
 
-        this.player.video().setAdjustVideo(true);
+        this.player.video().setAdjustVideo(false);
     }
 
     @Override
@@ -98,9 +87,7 @@ public class ProjectionVideo implements Projectable {
     @Override
     public void paintComponent(Graphics2D g) {
         if (render) {
-            //synchronized (sync) {
-                g.drawImage(image, null, projectionX, projectionY);
-            //}
+            g.drawImage(image, projectionX, projectionY, width, height, null);
         }
     }
 
@@ -109,9 +96,8 @@ public class ProjectionVideo implements Projectable {
     }
 
     protected void generateBuffer(int w, int h) {
-        if (image != null) {
-            return;
-        }
+        videoW = w;
+        videoH = h;
 
         float scaleW = deviceW / (float) w;
         float scaleH = deviceH / (float) h;
@@ -127,28 +113,12 @@ public class ProjectionVideo implements Projectable {
         this.width = Math.round(scale * w);
         this.height = Math.round(scale * h);
 
-        this.projectionX = (deviceW - this.width) / 2;
-        this.projectionY = (deviceH - this.height) / 2;
+        this.projectionX = (deviceW - width) / 2;
+        this.projectionY = (deviceH - height) / 2;
 
-        //image = device.getDefaultConfiguration().createCompatibleImage(width, height);
-        image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
-        raster = image.getRaster();
-//        int[] bOffs = {3, 2, 1, 0};
-//
-//        raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE,
-//                width, height,
-//                width*4, 4,
-//                bOffs, null);
-//
-//        image.setData(raster);
+        image = device.getDefaultConfiguration().createCompatibleImage(w, h);
 
-        imgBuffer = ((DataBufferByte)raster.getDataBuffer()).getData();
-
-        assert imgBuffer.length == width * height * 4;
-
-        bufferFormat = new RV32BufferFormat(width, height);
-        //renderCallback.setBuffer(new int[width * height]);
-//        renderCallback.setBuffer(((DataBufferInt) image.getRaster().getDataBuffer()).getData());
+        bufferFormat = new RV32BufferFormat(w, h);
     }
 
     @Override
@@ -162,39 +132,12 @@ public class ProjectionVideo implements Projectable {
 
     private final class MyRenderCallback implements RenderCallback {
         MyRenderCallback() {
-            super();
         }
-
-//        @Override
-//        protected void onDisplay(MediaPlayer mediaPlayer, int[] buffer) {
-//            int[] dst = ((DataBufferInt)image.getRaster().getDataBuffer()).getData();
-//            int length = Math.min(buffer.length, dst.length);
-//            synchronized (sync) {
-//                System.arraycopy(buffer, 0, dst, 0, length);
-//            }
-//        }
 
         @Override
         public void display(MediaPlayer mediaPlayer, ByteBuffer[] nativeBuffers, BufferFormat bufferFormat) {
-            int size = bufferFormat.getWidth() * bufferFormat.getHeight() * 4;
-
-            ByteBuffer buffer = nativeBuffers[0];
-            buffer.get(imgBuffer, 0, size);
-            buffer.rewind();
-
+            nativeBuffers[0].asIntBuffer().get(((DataBufferInt) image.getRaster().getDataBuffer()).getData());
         }
-
-//        public void setImage(BufferedImage image) {
-//            this.image = image;
-//        }
-
-//        @Override
-//        public void onDisplay(DirectMediaPlayer mediaPlayer, int[] data) { }
-//
-//        @Override
-//        public int[] rgbBuffer() {
-//            return ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-//        }
     }
 
     private final class MyBufferFormatCallback implements BufferFormatCallback {
@@ -210,7 +153,7 @@ public class ProjectionVideo implements Projectable {
 
         @Override
         public void allocatedBuffers(ByteBuffer[] buffers) {
-            assert buffers[0].capacity() == width * height * 4;
+            assert buffers[0].capacity() == videoW * videoH * 4;
         }
     }
 }
