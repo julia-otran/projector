@@ -160,7 +160,7 @@ public class BgImageController extends ProjectionController {
 
     private void loadImagesByType() {
         if (staticRadio.isSelected()) {
-            if (backgroundModel.getStaticBackgroundFile().canRead()) {
+            if (backgroundModel.getStaticBackgroundFile() != null && backgroundModel.getStaticBackgroundFile().canRead()) {
                 Image background = new Image(backgroundModel.getStaticBackgroundFile().toURI().toString());
                 backgroundImageView.setImage(background);
             }

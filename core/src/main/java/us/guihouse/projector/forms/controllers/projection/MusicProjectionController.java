@@ -21,19 +21,18 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.skin.TableViewSkin;
+import javafx.scene.control.skin.VirtualFlow;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -66,6 +65,9 @@ public class MusicProjectionController extends ProjectionController {
     private TableView<SelectionText> phrasesTable;
 
     @FXML
+    private ListView<SelectionText> miniPhrasesListView;
+
+    @FXML
     private TextField searchTextField;
 
     private ManageMusicService manageMusicService;
@@ -86,6 +88,52 @@ public class MusicProjectionController extends ProjectionController {
     public void initialize(URL url, ResourceBundle rb) {
         data = phrasesTable.getItems();
 
+        miniPhrasesListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        miniPhrasesListView.setCellFactory(new Callback<ListView<SelectionText>, ListCell<SelectionText>>() {
+            @Override
+            public ListCell<SelectionText> call(ListView<SelectionText> selectionTextListView) {
+                ListCell<SelectionText> cell = new ListCell<>() {
+                    {
+                        setStyle("-fx-font-size: 10px;");
+                    }
+
+                    @Override
+                    protected void updateItem(SelectionText selectionText, boolean empty) {
+                        if (empty) {
+                            setText("");
+                            setGraphic(null);
+                        } else {
+                            setText(selectionText.text.getJoinedLines());
+                        }
+                    }
+
+                    @Override
+                    public void updateSelected(boolean b) {
+                        super.updateSelected(b);
+
+                        if (b) {
+                            setStyle("-fx-background-color: -fx-focus-color");
+                        } else {
+                            setStyle("");
+                        }
+                    }
+                };
+
+                cell.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                    @Override
+                    public void handle(MouseEvent mouseEvent) {
+                        if(mouseEvent.getButton().equals(MouseButton.PRIMARY)){
+                            phrasesTable.getSelectionModel().select(cell.getIndex());
+                            phrasesTable.scrollTo(cell.getIndex());
+                            phrasesTable.requestFocus();
+                        }
+                    }
+                });
+
+                return cell;
+            }
+        });
+
         TableColumn<SelectionText, List<String>> col = (TableColumn<SelectionText, List<String>>) phrasesTable.getColumns().get(0);
         col.setCellValueFactory(new PropertyValueFactory<>("lines"));
         col.setCellFactory(new Callback<TableColumn<SelectionText, List<String>>, TableCell<SelectionText, List<String>>>() {
@@ -94,6 +142,7 @@ public class MusicProjectionController extends ProjectionController {
                 return new MusicPhraseCell();
             }
         });
+        col.prefWidthProperty().bind(phrasesTable.widthProperty());
 
         phrasesTable.setRowFactory(row -> new TableRow<SelectionText>() {
             @Override
@@ -176,10 +225,16 @@ public class MusicProjectionController extends ProjectionController {
                     return;
                 }
 
+                miniPhrasesListView.getSelectionModel().clearSelection();
+                miniPhrasesListView.getSelectionModel().select(newValue.intValue());
+
                 enableClear();
                 clearMarker();
 
                 WrappedText text = data.get(pos).text;
+
+                TableViewSkin<?> skin = (TableViewSkin<?>) phrasesTable.getSkin();
+                VirtualFlow<?> flow = ((VirtualFlow<?>)skin.getChildren().get(1));
 
                 if (text.isEmpty()) {
                     if (oldValue != null) {
@@ -195,6 +250,7 @@ public class MusicProjectionController extends ProjectionController {
                                 @Override
                                 public void run() {
                                     phrasesTable.getSelectionModel().select(pos2);
+                                    flow.scrollPixels(50);
                                 }
                             });
                         }
@@ -203,6 +259,12 @@ public class MusicProjectionController extends ProjectionController {
                     projecting = true;
                     projectionManager.setText(text);
                     playTheme();
+                    int firstIndex = flow.getFirstVisibleCell().getIndex();
+                    int center = firstIndex + ((flow.getLastVisibleCell().getIndex() - firstIndex) / 2);
+
+                    if (newValue.intValue() > center && newValue.intValue() > oldValue.intValue()) {
+                        phrasesTable.scrollTo(firstIndex + 2);
+                    }
                 }
             }
         });
@@ -270,6 +332,9 @@ public class MusicProjectionController extends ProjectionController {
 
             data.add(st);
         }
+
+        miniPhrasesListView.getItems().clear();
+        miniPhrasesListView.getItems().addAll(data);
     }
 
     private void markIfPosible(final Number position) {
@@ -292,6 +357,7 @@ public class MusicProjectionController extends ProjectionController {
         clearScreenButton.setText(clearText);
         clearScreenButton.disableProperty().set(true);
         projectionManager.setText(WrappedText.blankText());
+        miniPhrasesListView.getSelectionModel().clearSelection();
     }
 
     private void enableClear() {
@@ -356,6 +422,8 @@ public class MusicProjectionController extends ProjectionController {
             SelectionText st = data.get(positions[i]);
             if (st.hasTerm(term)) {
                 phrasesTable.scrollTo(st);
+                miniPhrasesListView.scrollTo(st);
+                miniPhrasesListView.getSelectionModel().select(st);
                 markIfPosible(positions[i]);
                 return;
             }
