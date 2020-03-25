@@ -1,7 +1,8 @@
 package us.guihouse.projector.utils;
 
 import com.sun.jna.NativeLibrary;
-import uk.co.caprica.vlcj.player.MediaPlayerFactory;
+
+import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
 import us.guihouse.projector.other.OsCheck;
 
 import java.util.ArrayList;

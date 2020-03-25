@@ -1,8 +1,9 @@
 package us.guihouse.projector.projection.video;
 
-import uk.co.caprica.vlcj.binding.internal.libvlc_media_t;
-import uk.co.caprica.vlcj.player.MediaPlayer;
-import uk.co.caprica.vlcj.player.MediaPlayerEventListener;
+import uk.co.caprica.vlcj.media.MediaRef;
+import uk.co.caprica.vlcj.media.TrackType;
+import uk.co.caprica.vlcj.player.base.MediaPlayer;
+import uk.co.caprica.vlcj.player.base.MediaPlayerEventListener;
 
 public class ProjectionBackgroundVideoLoop implements MediaPlayerEventListener {
     private final int playerIndex;
@@ -20,7 +21,7 @@ public class ProjectionBackgroundVideoLoop implements MediaPlayerEventListener {
     }
 
     @Override
-    public void mediaChanged(MediaPlayer mediaPlayer, libvlc_media_t libvlc_media_t, String s) {
+    public void mediaChanged(MediaPlayer mediaPlayer, MediaRef media) {
 
     }
 
@@ -109,17 +110,17 @@ public class ProjectionBackgroundVideoLoop implements MediaPlayerEventListener {
     }
 
     @Override
-    public void elementaryStreamAdded(MediaPlayer mediaPlayer, int i, int i1) {
+    public void elementaryStreamAdded(MediaPlayer mediaPlayer, TrackType type, int id) {
 
     }
 
     @Override
-    public void elementaryStreamDeleted(MediaPlayer mediaPlayer, int i, int i1) {
+    public void elementaryStreamDeleted(MediaPlayer mediaPlayer, TrackType type, int id) {
 
     }
 
     @Override
-    public void elementaryStreamSelected(MediaPlayer mediaPlayer, int i, int i1) {
+    public void elementaryStreamSelected(MediaPlayer mediaPlayer, TrackType type, int id) {
 
     }
 
@@ -155,66 +156,6 @@ public class ProjectionBackgroundVideoLoop implements MediaPlayerEventListener {
 
     @Override
     public void mediaPlayerReady(MediaPlayer mediaPlayer) {
-
-    }
-
-    @Override
-    public void mediaMetaChanged(MediaPlayer mediaPlayer, int i) {
-
-    }
-
-    @Override
-    public void mediaSubItemAdded(MediaPlayer mediaPlayer, libvlc_media_t libvlc_media_t) {
-
-    }
-
-    @Override
-    public void mediaDurationChanged(MediaPlayer mediaPlayer, long l) {
-
-    }
-
-    @Override
-    public void mediaParsedChanged(MediaPlayer mediaPlayer, int i) {
-
-    }
-
-    @Override
-    public void mediaParsedStatus(MediaPlayer mediaPlayer, int i) {
-
-    }
-
-    @Override
-    public void mediaFreed(MediaPlayer mediaPlayer) {
-
-    }
-
-    @Override
-    public void mediaStateChanged(MediaPlayer mediaPlayer, int i) {
-
-    }
-
-    @Override
-    public void mediaSubItemTreeAdded(MediaPlayer mediaPlayer, libvlc_media_t libvlc_media_t) {
-
-    }
-
-    @Override
-    public void newMedia(MediaPlayer mediaPlayer) {
-
-    }
-
-    @Override
-    public void subItemPlayed(MediaPlayer mediaPlayer, int i) {
-
-    }
-
-    @Override
-    public void subItemFinished(MediaPlayer mediaPlayer, int i) {
-
-    }
-
-    @Override
-    public void endOfSubItems(MediaPlayer mediaPlayer) {
 
     }
 }
