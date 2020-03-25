@@ -257,6 +257,10 @@ public class ProjectionImage implements Projectable {
 
     }
 
+    public boolean getCropBackground() {
+        return cropBackground;
+    }
+
     public void setCropBackground(boolean cropBackground) {
         if (this.cropBackground != cropBackground) {
             this.cropBackground = cropBackground;

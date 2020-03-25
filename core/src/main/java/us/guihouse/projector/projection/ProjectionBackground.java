@@ -5,6 +5,7 @@
  */
 package us.guihouse.projector.projection;
 
+import us.guihouse.projector.other.ProjectorPreferences;
 import us.guihouse.projector.projection.models.BackgroundModel;
 
 import java.awt.Color;
@@ -31,6 +32,7 @@ public class ProjectionBackground extends ProjectionImage {
         bgColor = new Color(20, 20, 20);
 
         this.setModel(getCanvasDelegate().getSettingsService().getLastBackground());
+        this.setCropBackground(ProjectorPreferences.getCropBackground());
     }
 
     @Override

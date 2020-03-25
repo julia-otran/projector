@@ -54,4 +54,6 @@ public interface ProjectionManager {
     void stop(Projectable projectable);
 
     void setMusicForBackground(Integer musicId, File preferred);
+
+    boolean getCropBackground();
 }

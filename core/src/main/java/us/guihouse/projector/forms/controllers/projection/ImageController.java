@@ -82,6 +82,9 @@ public class ImageController extends ProjectionController implements Runnable {
     @FXML
     private Slider changeMsecSlider;
 
+    @FXML
+    private CheckBox cropImageCheckBox;
+
     private ProjectionImage projectable;
 
     private String oldLabelText;
@@ -368,5 +371,10 @@ public class ImageController extends ProjectionController implements Runnable {
         double secs = changeMsecSlider.getValue();
         String time = milisecondsFormatter.format(secs);
         timeLabel.setText(time);
+    }
+
+    @FXML
+    public void onCropImageChanged() {
+        projectable.setCropBackground(cropImageCheckBox.isSelected());
     }
 }

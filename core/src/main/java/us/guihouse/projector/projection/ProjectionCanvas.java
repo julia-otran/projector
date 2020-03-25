@@ -10,6 +10,8 @@ import java.awt.Graphics2D;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import us.guihouse.projector.other.ProjectorPreferences;
 import us.guihouse.projector.projection.models.BackgroundModel;
 import us.guihouse.projector.projection.text.WrappedText;
 import us.guihouse.projector.projection.text.WrapperFactory;
@@ -111,6 +113,7 @@ public class ProjectionCanvas implements ProjectionManager {
     @Override
     public void setCropBackground(boolean selected) {
         background.setCropBackground(selected);
+        ProjectorPreferences.setCropBackground(selected);
     }
 
     @Override
@@ -170,5 +173,10 @@ public class ProjectionCanvas implements ProjectionManager {
         } else {
             bgVideo.stopBackground();
         }
+    }
+
+    @Override
+    public boolean getCropBackground() {
+        return background.getCropBackground();
     }
 }

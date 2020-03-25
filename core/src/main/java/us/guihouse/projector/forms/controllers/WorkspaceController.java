@@ -91,7 +91,6 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
         buildPresetsMenu();
         preparePreview();
         initializeProjectablesList();
-        onCropBackgroundChanged();
         onChangeFullScreen();
         createListMusicStage();
 
@@ -108,6 +107,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
         });
 
         darkenBackgroundMenuItem.setSelected(graphicsHelper.getProjectionManager().getDarkenBackground());
+        cropBackgroundMenuItem.setSelected(graphicsHelper.getProjectionManager().getCropBackground());
 
         menuBar.setVisible(true);
         mainPane.setVisible(true);
