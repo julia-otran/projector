@@ -295,6 +295,8 @@ public class PlayerController extends ProjectionController implements FileDragDr
 
     private void openMedia(File file) {
         projectionPlayer.loadMedia(file);
+        notifyTitleChange(file.getName());
+
         chooseFileBox.setVisible(false);
         playerBox.setVisible(true);
 
@@ -305,9 +307,7 @@ public class PlayerController extends ProjectionController implements FileDragDr
 
     @Override
     public void mediaChanged(MediaPlayer mediaPlayer, MediaRef media) {
-        Platform.runLater(() -> {
-            notifyTitleChange(mediaPlayer.media().info().mrl());
-        });
+
     }
 
     @Override
@@ -322,41 +322,29 @@ public class PlayerController extends ProjectionController implements FileDragDr
 
     @Override
     public void playing(MediaPlayer mediaPlayer) {
-        Platform.runLater(new Runnable() {
-
-            @Override
-            public void run() {
-                playButton.disableProperty().set(true);
-                pauseButton.disableProperty().set(false);
-                stopButton.disableProperty().set(false);
-            }
+        Platform.runLater(() -> {
+            playButton.disableProperty().set(true);
+            pauseButton.disableProperty().set(false);
+            stopButton.disableProperty().set(false);
         });
     }
 
     @Override
     public void paused(MediaPlayer mediaPlayer) {
-        Platform.runLater(new Runnable() {
-
-            @Override
-            public void run() {
-                playButton.disableProperty().set(false);
-                pauseButton.disableProperty().set(true);
-                stopButton.disableProperty().set(false);
-            }
+        Platform.runLater(() -> {
+            playButton.disableProperty().set(false);
+            pauseButton.disableProperty().set(true);
+            stopButton.disableProperty().set(false);
         });
 
     }
 
     @Override
     public void stopped(MediaPlayer mediaPlayer) {
-        Platform.runLater(new Runnable() {
-
-            @Override
-            public void run() {
-                playButton.disableProperty().set(false);
-                pauseButton.disableProperty().set(true);
-                stopButton.disableProperty().set(true);
-            }
+        Platform.runLater(() -> {
+            playButton.disableProperty().set(false);
+            pauseButton.disableProperty().set(true);
+            stopButton.disableProperty().set(true);
         });
     }
 
@@ -385,41 +373,33 @@ public class PlayerController extends ProjectionController implements FileDragDr
 
         currentTime = l / 1000;
 
-        Platform.runLater(new Runnable() {
+        Platform.runLater(() -> {
+            long secs = currentTime % 60;
+            long mins = (currentTime / 60) % 60;
+            long hours = currentTime / 3600;
 
-            @Override
-            public void run() {
-                long secs = currentTime % 60;
-                long mins = (currentTime / 60) % 60;
-                long hours = currentTime / 3600;
-
-                timeLabel.setText(String.format("%02d:%02d:%02d", hours, mins, secs));
-            }
+            timeLabel.setText(String.format("%02d:%02d:%02d", hours, mins, secs));
         });
     }
 
     @Override
     public void positionChanged(MediaPlayer mediaPlayer, float v) {
-        Platform.runLater(new Runnable() {
-
-            @Override
-            public void run() {
-                if (manualMoving) {
-                    return;
-                }
-
-                automaticMoving = true;
-
-                if (Float.compare(v, 0) < 0) {
-                    timeBar.valueProperty().set(0);
-                } else if (Float.compare(v, 1) > 0) {
-                    timeBar.valueProperty().set(1);
-                } else {
-                    timeBar.valueProperty().set(v);
-                }
-
-                automaticMoving = false;
+        Platform.runLater(() -> {
+            if (manualMoving) {
+                return;
             }
+
+            automaticMoving = true;
+
+            if (Float.compare(v, 0) < 0) {
+                timeBar.valueProperty().set(0);
+            } else if (Float.compare(v, 1) > 0) {
+                timeBar.valueProperty().set(1);
+            } else {
+                timeBar.valueProperty().set(v);
+            }
+
+            automaticMoving = false;
         });
     }
 
