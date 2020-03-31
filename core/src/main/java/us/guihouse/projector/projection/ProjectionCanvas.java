@@ -11,6 +11,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.beans.property.Property;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.ReadOnlyProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import lombok.Getter;
 import us.guihouse.projector.other.ProjectorPreferences;
 import us.guihouse.projector.projection.models.BackgroundModel;
 import us.guihouse.projector.projection.text.WrappedText;
@@ -29,7 +34,7 @@ public class ProjectionCanvas implements ProjectionManager {
     private final ProjectionLabel label;
     private final ProjectionBackgroundVideo bgVideo;
 
-    private Projectable currentProjectable;
+    private final ReadOnlyObjectWrapper<Projectable> currentProjectable = new ReadOnlyObjectWrapper<>();
 
     private final List<Projectable> initializeList;
 
@@ -57,14 +62,14 @@ public class ProjectionCanvas implements ProjectionManager {
     }
 
     protected void paintComponent(Graphics2D g) {
-        if (currentProjectable == null) {
+        if (currentProjectable.getValue() == null) {
             if (bgVideo.isRender()) {
                 bgVideo.paintComponent(g);
             } else {
                 background.paintComponent(g);
             }
         } else {
-            currentProjectable.paintComponent(g);
+            currentProjectable.getValue().paintComponent(g);
         }
 
         label.paintComponent(g);
@@ -101,6 +106,11 @@ public class ProjectionCanvas implements ProjectionManager {
     }
 
     @Override
+    public ReadOnlyProperty<Projectable> projectableProperty() {
+        return currentProjectable.getReadOnlyProperty();
+    }
+
+    @Override
     public void setBackgroundModel(BackgroundModel backgroundModel) {
         background.setModel(backgroundModel);
     }
@@ -125,8 +135,8 @@ public class ProjectionCanvas implements ProjectionManager {
     }
 
     @Override
-    public void setProjectable(Projectable webView) {
-        this.currentProjectable = webView;
+    public void setProjectable(Projectable projectable) {
+        this.currentProjectable.setValue(projectable);
     }
 
     @Override

@@ -36,6 +36,7 @@ import uk.co.caprica.vlcj.media.MediaRef;
 import uk.co.caprica.vlcj.media.TrackType;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import uk.co.caprica.vlcj.player.base.MediaPlayerEventListener;
+import us.guihouse.projector.projection.Projectable;
 import us.guihouse.projector.projection.ProjectionManager;
 import us.guihouse.projector.projection.video.ProjectionPlayer;
 import us.guihouse.projector.services.FileDragDropService;
@@ -110,8 +111,6 @@ public class PlayerController extends ProjectionController implements FileDragDr
 
     @FXML
     public void onBeginProjection() {
-        beginProjectionButton.disableProperty().set(true);
-        endProjectionButton.disableProperty().set(false);
         getProjectionManager().setProjectable(projectionPlayer);
 
         withSoundButton.fire();
@@ -120,8 +119,6 @@ public class PlayerController extends ProjectionController implements FileDragDr
 
     @FXML
     public void onEndProjection() {
-        beginProjectionButton.disableProperty().set(false);
-        endProjectionButton.disableProperty().set(true);
         getProjectionManager().setProjectable(null);
 
         withoutSoundButton.fire();
@@ -178,6 +175,19 @@ public class PlayerController extends ProjectionController implements FileDragDr
                 openMedia(file);
             }
         }
+
+        getProjectionManager().projectableProperty().addListener(new ChangeListener<Projectable>() {
+            @Override
+            public void changed(ObservableValue<? extends Projectable> observableValue, Projectable oldValue, Projectable newValue) {
+                if (newValue == projectionPlayer) {
+                    beginProjectionButton.disableProperty().set(true);
+                    endProjectionButton.disableProperty().set(false);
+                } else {
+                    beginProjectionButton.disableProperty().set(false);
+                    endProjectionButton.disableProperty().set(true);
+                }
+            }
+        });
     }
 
     @Override

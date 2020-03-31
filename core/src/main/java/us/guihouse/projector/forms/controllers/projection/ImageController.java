@@ -32,6 +32,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
 import us.guihouse.projector.forms.controllers.projection.ProjectionController;
+import us.guihouse.projector.projection.Projectable;
 import us.guihouse.projector.projection.ProjectionImage;
 import us.guihouse.projector.projection.ProjectionManager;
 import us.guihouse.projector.projection.models.BackgroundProvide;
@@ -90,6 +91,8 @@ public class ImageController extends ProjectionController implements Runnable {
     private String oldLabelText;
 
     private DecimalFormat milisecondsFormatter = new DecimalFormat("#0.000");
+
+    private Thread timerThread = null;
 
     private class ImageListCell extends ListCell<Image> {
         @Override
@@ -168,6 +171,19 @@ public class ImageController extends ProjectionController implements Runnable {
         });
 
         loadOpenedImages();
+
+        getProjectionManager().projectableProperty().addListener(new ChangeListener<Projectable>() {
+            @Override
+            public void changed(ObservableValue<? extends Projectable> observableValue, Projectable oldValue, Projectable newValue) {
+                if (newValue == projectable) {
+                    beginProjectionButton.disableProperty().set(true);
+                    endProjectionButton.disableProperty().set(false);
+                } else {
+                    beginProjectionButton.disableProperty().set(false);
+                    endProjectionButton.disableProperty().set(true);
+                }
+            }
+        });
     }
 
     private List<Image> toAdd = new ArrayList<>();
@@ -299,17 +315,12 @@ public class ImageController extends ProjectionController implements Runnable {
     @FXML
     public void onBeginProjection() {
         getProjectionManager().setProjectable(projectable);
-
-        beginProjectionButton.disableProperty().set(true);
-        endProjectionButton.disableProperty().set(false);
         start();
     }
 
     @FXML
     public void onEndProjection() {
         getProjectionManager().setProjectable(null);
-        beginProjectionButton.disableProperty().set(false);
-        endProjectionButton.disableProperty().set(true);
         stopRunning();
     }
 
@@ -320,8 +331,13 @@ public class ImageController extends ProjectionController implements Runnable {
     }
 
     private void start() {
+        if (running) {
+            return;
+        }
+
         running = true;
-        Platform.runLater(this);
+        timerThread = new Thread(this);
+        timerThread.start();
     }
 
     private void stopRunning() {
@@ -332,32 +348,40 @@ public class ImageController extends ProjectionController implements Runnable {
 
     @Override
     public void run() {
-        if (!running) {
-            return;
-        }
+        while (running) {
+            long current = System.currentTimeMillis();
+            double interval = changeMsecSlider.valueProperty().doubleValue() * 1000;
 
-        start();
+            if (current - time < Math.round(interval)) {
+                continue;
+            }
 
-        long current = System.currentTimeMillis();
-        double interval = changeMsecSlider.valueProperty().doubleValue() * 1000;
+            if (time == 0) {
+                time = current;
+                continue;
+            }
 
-        if (current - time < Math.round(interval)) {
-            return;
-        }
-
-        if (time == 0) {
             time = current;
-            return;
+
+            int newIndex = getProjectingIndex() + 1;
+            final int nextIndex;
+
+            if (newIndex >= imagesList.getItems().size()) {
+                nextIndex = 0;
+            } else {
+                nextIndex = newIndex;
+            }
+
+            Platform.runLater(() -> {
+                imagesList.getSelectionModel().clearAndSelect(nextIndex);
+            });
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
-
-        time = current;
-
-        int nextIndex = getProjectingIndex() + 1;
-        if (nextIndex >= imagesList.getItems().size()) {
-            nextIndex = 0;
-        }
-
-        imagesList.getSelectionModel().clearAndSelect(nextIndex);
     }
 
     @Override

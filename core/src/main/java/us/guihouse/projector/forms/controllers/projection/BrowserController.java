@@ -22,6 +22,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
 import javafx.scene.web.WebEngine;
+import us.guihouse.projector.projection.Projectable;
 import us.guihouse.projector.projection.ProjectionManager;
 import us.guihouse.projector.projection.ProjectionWebView;
 
@@ -64,15 +65,11 @@ public class BrowserController extends ProjectionController {
 
     @FXML
     public void onBeginProjection() {
-        beginProjectionButton.disableProperty().set(true);
-        endProjectionButton.disableProperty().set(false);
         getProjectionManager().setProjectable(projectionWebView);
     }
 
     @FXML
     public void onEndProjection() {
-        beginProjectionButton.disableProperty().set(false);
-        endProjectionButton.disableProperty().set(true);
         getProjectionManager().setProjectable(null);
     }
 
@@ -156,6 +153,19 @@ public class BrowserController extends ProjectionController {
         });
 
         engine.load(url);
+
+        getProjectionManager().projectableProperty().addListener(new ChangeListener<Projectable>() {
+            @Override
+            public void changed(ObservableValue<? extends Projectable> observableValue, Projectable oldValue, Projectable newValue) {
+                if (newValue == projectionWebView) {
+                    beginProjectionButton.disableProperty().set(true);
+                    endProjectionButton.disableProperty().set(false);
+                } else {
+                    beginProjectionButton.disableProperty().set(false);
+                    endProjectionButton.disableProperty().set(true);
+                }
+            }
+        });
     }
 
     @Override

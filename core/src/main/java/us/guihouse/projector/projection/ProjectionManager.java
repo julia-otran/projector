@@ -8,6 +8,7 @@ package us.guihouse.projector.projection;
 import java.awt.Font;
 import java.io.File;
 
+import javafx.beans.property.ReadOnlyProperty;
 import us.guihouse.projector.projection.models.BackgroundModel;
 import us.guihouse.projector.projection.text.WrappedText;
 import us.guihouse.projector.projection.text.WrapperFactory;
@@ -33,11 +34,13 @@ public interface ProjectionManager {
 
     void setProjectable(Projectable webView);
 
-    public WrapperFactory getWrapperFactory();
+    WrapperFactory getWrapperFactory();
 
-    public BackgroundModel getBackgroundModel();
+    BackgroundModel getBackgroundModel();
 
-    public void setBackgroundModel(BackgroundModel background);
+    ReadOnlyProperty<Projectable> projectableProperty();
+
+    void setBackgroundModel(BackgroundModel background);
 
     public void setFullScreen(boolean fullScreen);
 
