@@ -22,8 +22,12 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
 
     public ProjectionBackgroundVideo(CanvasDelegate delegate) {
         this.canvasDelegate = delegate;
-        videoProjectors[0] = new ProjectionVideo(delegate, true);
-        videoProjectors[1] = new ProjectionVideo(delegate, true);
+        videoProjectors[0] = new ProjectionVideo(delegate);
+        videoProjectors[1] = new ProjectionVideo(delegate);
+
+        videoProjectors[0].setCropVideo(true);
+        videoProjectors[1].setCropVideo(true);
+
         playing = false;
     }
 
@@ -46,7 +50,6 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
     public void rebuildLayout() {
         videoProjectors[0].rebuildLayout();
         videoProjectors[1].rebuildLayout();
-        init();
     }
 
     @Override
@@ -62,10 +65,6 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
         videoProjectors[1].setRender(false);
 
         loadMedia();
-
-        if (playing) {
-            playMedia(currentMedia);
-        }
     }
 
     @Override

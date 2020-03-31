@@ -37,6 +37,7 @@ public class ProjectionCanvas implements ProjectionManager {
     private final ReadOnlyObjectWrapper<Projectable> currentProjectable = new ReadOnlyObjectWrapper<>();
 
     private final List<Projectable> initializeList;
+    private boolean initialized = false;
 
     ProjectionCanvas(CanvasDelegate delegate) {
         this.delegate = delegate;
@@ -54,7 +55,12 @@ public class ProjectionCanvas implements ProjectionManager {
     }
 
     public void init() {
-        initializeList.forEach(Projectable::init);
+        if (initialized) {
+            initializeList.forEach(Projectable::rebuildLayout);
+        } else {
+            initializeList.forEach(Projectable::init);
+            initialized = true;
+        }
     }
 
     public void finish() {

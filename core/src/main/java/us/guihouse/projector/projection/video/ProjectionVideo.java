@@ -23,34 +23,29 @@ public class ProjectionVideo implements Projectable {
     protected MediaPlayer player;
 
     protected BufferedImage image;
-    private BufferFormat bufferFormat;
 
-    protected int videoW;
-    protected int videoH;
+    protected int videoW = 0;
+    protected int videoH = 0;
 
-    protected int deviceW;
-    protected int deviceH;
+    protected int width = 0;
+    protected int height = 0;
 
-    protected int width;
-    protected int height;
+    private int projectionX = 0;
+    private int projectionY = 0;
 
-    private int projectionX;
-    private int projectionY;
-
-    private final boolean cropVideo;
+    @Getter
+    private boolean cropVideo = false;
 
     @Getter
     @Setter
     private boolean render = true;
 
-    protected GraphicsDevice device;
     protected ProjectionVideo.MyRenderCallback renderCallback;
     protected ProjectionVideo.MyBufferFormatCallback bufferFormatCallback;
     protected CallbackVideoSurface videoSurface;
 
-    public ProjectionVideo(CanvasDelegate delegate, boolean cropVideo) {
+    public ProjectionVideo(CanvasDelegate delegate) {
         this.delegate = delegate;
-        this.cropVideo = cropVideo;
     }
 
     @Override
@@ -60,33 +55,49 @@ public class ProjectionVideo implements Projectable {
 
     @Override
     public void rebuildLayout() {
-        if (this.player != null) {
-            this.player.release();
+        if (videoW == 0 || videoH == 0) {
+            return;
         }
 
-        device = delegate.getDefaultDevice();
-        this.deviceW = delegate.getWidth();
-        this.deviceH = delegate.getHeight();
-        this.image = null;
+        float scaleW = delegate.getWidth() / (float) videoW;
+        float scaleH = delegate.getHeight() / (float) videoH;
 
+        float scale;
+
+        if (cropVideo) {
+            scale = Math.max(scaleW, scaleH);
+        } else {
+            scale = Math.min(scaleW, scaleH);
+        }
+
+        this.width = Math.round(scale * videoW);
+        this.height = Math.round(scale * videoH);
+
+        this.projectionX = (delegate.getWidth() - width) / 2;
+        this.projectionY = (delegate.getHeight() - height) / 2;
+    }
+
+    @Override
+    public void init() {
         renderCallback = new ProjectionVideo.MyRenderCallback();
         bufferFormatCallback = new ProjectionVideo.MyBufferFormatCallback();
 
         this.player = VlcPlayerFactory.getFactory().mediaPlayers().newMediaPlayer();
         videoSurface = VlcPlayerFactory.getFactory().videoSurfaces().newVideoSurface(bufferFormatCallback, renderCallback, true);
         this.videoSurface.attach(this.player);
-
         this.player.video().setAdjustVideo(false);
+
+        rebuildLayout();
     }
 
-    @Override
-    public void init() {
+    public void setCropVideo(boolean cropVideo) {
+        this.cropVideo = cropVideo;
         rebuildLayout();
     }
 
     @Override
     public void paintComponent(Graphics2D g) {
-        if (render) {
+        if (render && width > 0 && height > 0) {
             g.drawImage(image, projectionX, projectionY, width, height, null);
         }
     }
@@ -99,26 +110,9 @@ public class ProjectionVideo implements Projectable {
         videoW = w;
         videoH = h;
 
-        float scaleW = deviceW / (float) w;
-        float scaleH = deviceH / (float) h;
+        image = delegate.getDefaultDevice().getDefaultConfiguration().createCompatibleImage(w, h);
 
-        float scale;
-
-        if (cropVideo) {
-            scale = Math.max(scaleW, scaleH);
-        } else {
-            scale = Math.min(scaleW, scaleH);
-        }
-
-        this.width = Math.round(scale * w);
-        this.height = Math.round(scale * h);
-
-        this.projectionX = (deviceW - width) / 2;
-        this.projectionY = (deviceH - height) / 2;
-
-        image = device.getDefaultConfiguration().createCompatibleImage(w, h);
-
-        bufferFormat = new RV32BufferFormat(w, h);
+        rebuildLayout();
     }
 
     @Override
@@ -148,7 +142,7 @@ public class ProjectionVideo implements Projectable {
         @Override
         public BufferFormat getBufferFormat(int sourceWidth, int sourceHeight) {
             generateBuffer(sourceWidth, sourceHeight);
-            return bufferFormat;
+            return new RV32BufferFormat(sourceWidth, sourceHeight);
         }
 
         @Override

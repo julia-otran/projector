@@ -24,7 +24,7 @@ public class ProjectionPlayer extends ProjectionVideo {
     private File loadedMedia;
 
     public ProjectionPlayer(CanvasDelegate delegate) {
-        super(delegate, false);
+        super(delegate);
     }
 
     @Override
@@ -50,15 +50,6 @@ public class ProjectionPlayer extends ProjectionVideo {
     public void loadMedia(File file) {
         this.player.media().prepare(file.getAbsolutePath());
         this.loadedMedia = file;
-    }
-
-    @Override
-    public void rebuildLayout() {
-        super.rebuildLayout();
-
-        if (loadedMedia != null) {
-            this.player.media().prepare(loadedMedia.getAbsolutePath());
-        }
     }
 
     @Override
