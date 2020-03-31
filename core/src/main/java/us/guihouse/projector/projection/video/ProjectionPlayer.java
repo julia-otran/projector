@@ -64,21 +64,24 @@ public class ProjectionPlayer extends ProjectionVideo {
     @Override
     protected void generateBuffer(int w, int h) {
         super.generateBuffer(w, h);
-        preview.recreatePreview();
+        preview.recreatePreview(w, h);
     }
 
     public class PlayerPreview extends ImageView implements Runnable {
         private WritableImage fxImage;
         private Thread previewThread;
         private boolean running;
-        private boolean rendering;
 
         public PlayerPreview() {
             setPreserveRatio(true);
         }
 
-        public void recreatePreview() {
+        public void recreatePreview(int width, int height) {
             fxImage = new WritableImage(width, height);
+
+            Platform.runLater(() -> {
+                setImage(fxImage);
+            });
         }
 
         public void start() {
@@ -104,29 +107,19 @@ public class ProjectionPlayer extends ProjectionVideo {
         public void run() {
             while (running) {
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(200);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
 
-                if (rendering) {
-                    continue;
-                }
-
                 BufferedImage src = ProjectionPlayer.this.getImage();
+                WritableImage dst = fxImage;
 
-                if (fxImage == null || src == null) {
+                if (dst == null || src == null) {
                     continue;
                 }
 
-                rendering = true;
-
-                SwingFXUtils.toFXImage(src, fxImage);
-
-                Platform.runLater(() -> {
-                    setImage(fxImage);
-                    rendering = false;
-                });
+                SwingFXUtils.toFXImage(src, dst);
             }
         }
     }
