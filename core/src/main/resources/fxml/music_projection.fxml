@@ -22,7 +22,7 @@
                 </ImageView>
                 <TextField fx:id="searchTextField" prefHeight="28.0" prefWidth="231.0" promptText="Ir para" />
                 <Button fx:id="clearScreenButton" disable="true" focusTraversable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onClearScreen" prefHeight="28.0" prefWidth="204.0" text="Clique em uma frase para projetar" />
-            <Button fx:id="removeBackgroundButton" disable="true" mnemonicParsing="false" onAction="#removeBackground" prefHeight="27.0" prefWidth="121.0" text="Remover Fundo" />
+                <Button fx:id="removeBackgroundButton" disable="true" mnemonicParsing="false" onAction="#removeBackground" prefHeight="28.0" prefWidth="121.0" text="Remover Fundo" />
             </items>
         </ToolBar>
       <HBox prefHeight="353.0" prefWidth="600.0" VBox.vgrow="ALWAYS">
