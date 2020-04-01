@@ -16,6 +16,7 @@ import javafx.embed.swing.SwingNode;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleButton;
@@ -110,6 +111,9 @@ public class PlayerController extends ProjectionController implements FileDragDr
     private ToggleButton withSoundButton;
 
     @FXML
+    private CheckBox fullScreenCheckBox;
+
+    @FXML
     public void onBeginProjection() {
         getProjectionManager().setProjectable(projectionPlayer);
 
@@ -188,6 +192,8 @@ public class PlayerController extends ProjectionController implements FileDragDr
                 }
             }
         });
+
+        fullScreenCheckBox.setSelected(projectionPlayer.isCropVideo());
     }
 
     @Override
@@ -291,6 +297,11 @@ public class PlayerController extends ProjectionController implements FileDragDr
         if (chosen != null && chosen.canRead()) {
             openMedia(chosen);
         }
+    }
+
+    @FXML
+    public void onFullScreenAction() {
+        projectionPlayer.setCropVideo(fullScreenCheckBox.isSelected());
     }
 
     private void openMedia(File file) {
