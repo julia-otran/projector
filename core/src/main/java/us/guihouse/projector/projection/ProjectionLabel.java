@@ -60,12 +60,14 @@ public class ProjectionLabel implements Projectable {
     private final BasicStroke outlineStroke = new BasicStroke(8.0f);
     private static final Color OVERLAY = new Color(0, 0, 0, 230);
 
-    private BufferedImage preRenderText;
+    private final PaintableCrossFader fader;
 
     public ProjectionLabel(CanvasDelegate canvasDelegate) {
         this.canvasDelegate = canvasDelegate;
         factoryChangeListeners = new ArrayList<>();
         darkenBackground = ProjectorPreferences.getDarkenBackground();
+        fader = new PaintableCrossFader();
+        fader.setStepPerFrame(0.1f);
     }
 
     @Override
@@ -152,14 +154,13 @@ public class ProjectionLabel implements Projectable {
         }
 
         g.dispose();
-        preRenderText = newImage;
+
+        fader.crossFadeIn(new ImagePaintable(newImage));
     }
 
     @Override
     public void paintComponent(Graphics2D g) {
-        if (preRenderText != null) {
-            g.drawImage(preRenderText, 0, 0, null);
-        }
+        fader.paintComponent(g);
     }
 
     @Override
@@ -171,12 +172,12 @@ public class ProjectionLabel implements Projectable {
     public void rebuildLayout() {
         if (text == null) {
             drawLines = Collections.EMPTY_LIST;
-            preRenderText = null;
+            fader.fadeOut();
             return;
         }
 
         if (font == null) {
-            preRenderText = null;
+            fader.fadeOut();
             return;
         }
 
@@ -184,7 +185,7 @@ public class ProjectionLabel implements Projectable {
 
         if (lines == null || text.isEmpty() || lines.isEmpty()) {
             drawLines = Collections.EMPTY_LIST;
-            preRenderText = null;
+            fader.fadeOut();
             return;
         }
 
@@ -220,7 +221,7 @@ public class ProjectionLabel implements Projectable {
 
         if (pendingLines.stream().allMatch(l -> l.getText().isEmpty())) {
             drawLines = Collections.EMPTY_LIST;
-            preRenderText = null;
+            fader.fadeOut();
             return;
         }
 
@@ -254,5 +255,18 @@ public class ProjectionLabel implements Projectable {
 
     private FontMetrics getFontMetrics() {
         return this.fontMetrics;
+    }
+
+    static class ImagePaintable implements Paintable {
+        private final BufferedImage image;
+
+        ImagePaintable(BufferedImage image) {
+            this.image = image;
+        }
+
+        @Override
+        public void paintComponent(Graphics2D g) {
+            g.drawImage(image, 0, 0, null);
+        }
     }
 }

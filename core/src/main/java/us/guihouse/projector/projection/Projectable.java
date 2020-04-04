@@ -12,9 +12,7 @@ import java.awt.Graphics2D;
  *
  * @author guilherme
  */
-public interface Projectable {
-
-    void paintComponent(Graphics2D g);
+public interface Projectable extends Paintable {
 
     CanvasDelegate getCanvasDelegate();
 

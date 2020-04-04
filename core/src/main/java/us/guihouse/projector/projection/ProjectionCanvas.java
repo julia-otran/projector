@@ -11,11 +11,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import lombok.Getter;
 import us.guihouse.projector.other.ProjectorPreferences;
 import us.guihouse.projector.projection.models.BackgroundModel;
 import us.guihouse.projector.projection.text.WrappedText;
@@ -33,6 +30,7 @@ public class ProjectionCanvas implements ProjectionManager {
     private final ProjectionBackground background;
     private final ProjectionLabel label;
     private final ProjectionBackgroundVideo bgVideo;
+    private final PaintableCrossFader fader;
 
     private final ReadOnlyObjectWrapper<Projectable> currentProjectable = new ReadOnlyObjectWrapper<>();
 
@@ -52,6 +50,25 @@ public class ProjectionCanvas implements ProjectionManager {
         bgVideo = new ProjectionBackgroundVideo(delegate);
         initializeList.add(bgVideo);
 
+        fader = new PaintableCrossFader();
+        setupFader();
+    }
+
+    private void setupFader() {
+        currentProjectable.addListener((prop, oldVal, newVal) -> updateFader());
+        bgVideo.isRender().addListener((prop, oldVal, newVal) -> updateFader());
+    }
+
+    private void updateFader() {
+        if (currentProjectable.getValue() == null) {
+            if (bgVideo.isRender().get()) {
+                fader.fadeIn(bgVideo);
+            } else {
+                fader.fadeIn(background);
+            }
+        } else {
+            fader.fadeIn(currentProjectable.get());
+        }
     }
 
     public void init() {
@@ -61,6 +78,8 @@ public class ProjectionCanvas implements ProjectionManager {
             initializeList.forEach(Projectable::init);
             initialized = true;
         }
+
+        fader.fadeIn(background);
     }
 
     public void finish() {
@@ -68,16 +87,7 @@ public class ProjectionCanvas implements ProjectionManager {
     }
 
     protected void paintComponent(Graphics2D g) {
-        if (currentProjectable.getValue() == null) {
-            if (bgVideo.isRender()) {
-                bgVideo.paintComponent(g);
-            } else {
-                background.paintComponent(g);
-            }
-        } else {
-            currentProjectable.getValue().paintComponent(g);
-        }
-
+        fader.paintComponent(g);
         label.paintComponent(g);
     }
 

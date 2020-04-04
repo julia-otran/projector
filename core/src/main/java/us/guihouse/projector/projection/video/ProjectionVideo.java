@@ -1,5 +1,7 @@
 package us.guihouse.projector.projection.video;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import lombok.Getter;
 import lombok.Setter;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
@@ -37,8 +39,7 @@ public class ProjectionVideo implements Projectable {
     private boolean cropVideo = false;
 
     @Getter
-    @Setter
-    private boolean render = true;
+    private BooleanProperty render = new SimpleBooleanProperty(true);
 
     protected ProjectionVideo.MyRenderCallback renderCallback;
     protected ProjectionVideo.MyBufferFormatCallback bufferFormatCallback;
@@ -97,7 +98,7 @@ public class ProjectionVideo implements Projectable {
 
     @Override
     public void paintComponent(Graphics2D g) {
-        if (render && width > 0 && height > 0) {
+        if (render.get() && width > 0 && height > 0) {
             g.drawImage(image, projectionX, projectionY, width, height, null);
         }
     }

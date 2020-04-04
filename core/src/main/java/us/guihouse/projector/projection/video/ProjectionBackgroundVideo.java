@@ -1,5 +1,9 @@
 package us.guihouse.projector.projection.video;
 
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import lombok.Getter;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import us.guihouse.projector.projection.CanvasDelegate;
 import us.guihouse.projector.projection.Projectable;
@@ -20,6 +24,8 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
     private boolean playing;
     private int currentPlayer = 0;
 
+    private final ReadOnlyBooleanWrapper render = new ReadOnlyBooleanWrapper();
+
     public ProjectionBackgroundVideo(CanvasDelegate delegate) {
         this.canvasDelegate = delegate;
         videoProjectors[0] = new ProjectionVideo(delegate);
@@ -29,10 +35,17 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
         videoProjectors[1].setCropVideo(true);
 
         playing = false;
+
+        videoProjectors[0].getRender().addListener((prop, oldVal, newVal) -> updateRender());
+        videoProjectors[1].getRender().addListener((prop, oldVal, newVal) -> updateRender());
     }
 
-    public boolean isRender() {
-        return videoProjectors[0].isRender() || videoProjectors[1].isRender();
+    private void updateRender() {
+        render.set(videoProjectors[0].getRender().get() || videoProjectors[1].getRender().get());
+    }
+
+    public ReadOnlyBooleanProperty isRender() {
+        return render.getReadOnlyProperty();
     }
 
     @Override
@@ -57,12 +70,12 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
         videoProjectors[0].init();
         videoProjectors[0].getPlayer().audio().setMute(true);
         videoProjectors[0].getPlayer().events().addMediaPlayerEventListener(new ProjectionBackgroundVideoLoop(0, this));
-        videoProjectors[0].setRender(false);
+        videoProjectors[0].getRender().setValue(false);
 
         videoProjectors[1].init();
         videoProjectors[1].getPlayer().audio().setMute(true);
         videoProjectors[1].getPlayer().events().addMediaPlayerEventListener(new ProjectionBackgroundVideoLoop(1, this));
-        videoProjectors[1].setRender(false);
+        videoProjectors[1].getRender().setValue(false);
 
         loadMedia();
     }
@@ -111,14 +124,14 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
         currentMedia = toPlay;
         playing = true;
         currentPlayer = 0;
-        videoProjectors[0].setRender(true);
+        videoProjectors[0].getRender().setValue(true);
         videoProjectors[0].getPlayer().media().play(toPlay.getAbsolutePath());
         videoProjectors[1].getPlayer().media().prepare(toPlay.getAbsolutePath());
     }
 
     public void stopBackground() {
-        videoProjectors[0].setRender(false);
-        videoProjectors[1].setRender(false);
+        videoProjectors[0].getRender().setValue(false);
+        videoProjectors[1].getRender().setValue(false);
         videoProjectors[0].getPlayer().controls().stop();
         videoProjectors[1].getPlayer().controls().stop();
         playing = false;
@@ -139,16 +152,16 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
     public void playing(MediaPlayer mediaPlayer, int playerIndex) {
         if (playerIndex == currentPlayer) {
             if (playerIndex == 0) {
-                if (!videoProjectors[0].isRender()) {
-                    videoProjectors[0].setRender(true);
-                    videoProjectors[1].setRender(false);
+                if (!videoProjectors[0].getRender().get()) {
+                    videoProjectors[0].getRender().set(true);
+                    videoProjectors[1].getRender().set(false);
                     videoProjectors[1].getPlayer().controls().setPosition(0);
                     videoProjectors[1].getPlayer().controls().play();
                 }
             } else {
-                if (!videoProjectors[1].isRender()) {
-                    videoProjectors[1].setRender(true);
-                    videoProjectors[0].setRender(false);
+                if (!videoProjectors[1].getRender().get()) {
+                    videoProjectors[1].getRender().set(true);
+                    videoProjectors[0].getRender().set(false);
                     videoProjectors[0].getPlayer().controls().setPosition(0);
                     videoProjectors[0].getPlayer().controls().play();
                 }
