@@ -55,7 +55,7 @@ public class ProjectionLabel implements Projectable {
     private boolean darkenBackground;
 
     // Internal control
-    private List<StringWithPosition> drawLines = Collections.EMPTY_LIST;
+    private List<StringWithPosition> drawLines = Collections.emptyList();
 
     private final BasicStroke outlineStroke = new BasicStroke(8.0f);
     private static final Color OVERLAY = new Color(0, 0, 0, 230);
@@ -171,7 +171,7 @@ public class ProjectionLabel implements Projectable {
     @Override
     public void rebuildLayout() {
         if (text == null) {
-            drawLines = Collections.EMPTY_LIST;
+            drawLines = Collections.emptyList();
             fader.fadeOut();
             return;
         }
@@ -184,7 +184,7 @@ public class ProjectionLabel implements Projectable {
         List<String> lines = text.getLines();
 
         if (lines == null || text.isEmpty() || lines.isEmpty()) {
-            drawLines = Collections.EMPTY_LIST;
+            drawLines = Collections.emptyList();
             fader.fadeOut();
             return;
         }
@@ -220,7 +220,7 @@ public class ProjectionLabel implements Projectable {
         }
 
         if (pendingLines.stream().allMatch(l -> l.getText().isEmpty())) {
-            drawLines = Collections.EMPTY_LIST;
+            drawLines = Collections.emptyList();
             fader.fadeOut();
             return;
         }
