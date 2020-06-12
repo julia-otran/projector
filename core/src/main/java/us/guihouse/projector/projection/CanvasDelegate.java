@@ -6,6 +6,9 @@
 package us.guihouse.projector.projection;
 
 import java.awt.GraphicsDevice;
+import java.util.List;
+
+import us.guihouse.projector.projection.models.VirtualScreen;
 import us.guihouse.projector.services.SettingsService;
 import us.guihouse.projector.utils.WindowConfigsLoader;
 
@@ -15,9 +18,11 @@ import us.guihouse.projector.utils.WindowConfigsLoader;
  */
 public interface CanvasDelegate {
 
-    int getWidth();
+    int getMainWidth();
 
-    int getHeight();
+    int getMainHeight();
+
+    List<VirtualScreen> getVirtualScreens();
 
     void setFullScreen(boolean fullScreen);
 

@@ -3,7 +3,6 @@ package us.guihouse.projector.projection.video;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import lombok.Getter;
-import lombok.Setter;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import uk.co.caprica.vlcj.player.embedded.videosurface.CallbackVideoSurface;
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormat;
@@ -12,12 +11,14 @@ import uk.co.caprica.vlcj.player.embedded.videosurface.callback.RenderCallback;
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.format.RV32BufferFormat;
 import us.guihouse.projector.projection.CanvasDelegate;
 import us.guihouse.projector.projection.Projectable;
+import us.guihouse.projector.projection.models.VirtualScreen;
 import us.guihouse.projector.utils.VlcPlayerFactory;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 
 public class ProjectionVideo implements Projectable {
     private final CanvasDelegate delegate;
@@ -29,17 +30,17 @@ public class ProjectionVideo implements Projectable {
     protected int videoW = 0;
     protected int videoH = 0;
 
-    protected int width = 0;
-    protected int height = 0;
+    private final HashMap<String, Integer> width = new HashMap<>();
+    private final HashMap<String, Integer> height = new HashMap<>();
 
-    private int projectionX = 0;
-    private int projectionY = 0;
+    private final HashMap<String, Integer> projectionX = new HashMap<>();
+    private final HashMap<String, Integer> projectionY = new HashMap<>();
 
     @Getter
     private boolean cropVideo = false;
 
     @Getter
-    private BooleanProperty render = new SimpleBooleanProperty(true);
+    private final BooleanProperty render = new SimpleBooleanProperty(true);
 
     protected ProjectionVideo.MyRenderCallback renderCallback;
     protected ProjectionVideo.MyBufferFormatCallback bufferFormatCallback;
@@ -60,22 +61,32 @@ public class ProjectionVideo implements Projectable {
             return;
         }
 
-        float scaleW = delegate.getWidth() / (float) videoW;
-        float scaleH = delegate.getHeight() / (float) videoH;
+        width.clear();
+        height.clear();
+        projectionX.clear();
+        projectionY.clear();
 
-        float scale;
+        delegate.getVirtualScreens().forEach(vs -> {
+            float scaleW = vs.getWidth() / (float) videoW;
+            float scaleH = vs.getHeight() / (float) videoH;
 
-        if (cropVideo) {
-            scale = Math.max(scaleW, scaleH);
-        } else {
-            scale = Math.min(scaleW, scaleH);
-        }
+            float scale;
 
-        this.width = Math.round(scale * videoW);
-        this.height = Math.round(scale * videoH);
+            if (cropVideo) {
+                scale = Math.max(scaleW, scaleH);
+            } else {
+                scale = Math.min(scaleW, scaleH);
+            }
 
-        this.projectionX = (delegate.getWidth() - width) / 2;
-        this.projectionY = (delegate.getHeight() - height) / 2;
+            int scaledWidth = Math.round(scale * videoW);
+            int scaledHeight = Math.round(scale * videoH);
+
+            width.put(vs.getVirtualScreenId(), scaledWidth);
+            height.put(vs.getVirtualScreenId(), scaledHeight);
+
+            projectionX.put(vs.getVirtualScreenId(), (delegate.getMainWidth() - scaledWidth) / 2);
+            projectionY.put(vs.getVirtualScreenId(), (delegate.getMainHeight() - scaledHeight) / 2);
+        });
     }
 
     @Override
@@ -97,9 +108,16 @@ public class ProjectionVideo implements Projectable {
     }
 
     @Override
-    public void paintComponent(Graphics2D g) {
-        if (render.get() && width > 0 && height > 0) {
-            g.drawImage(image, projectionX, projectionY, width, height, null);
+    public void paintComponent(Graphics2D g, VirtualScreen vs) {
+        int rWidth = width.getOrDefault(vs.getVirtualScreenId(), 0);
+        int rHeight = height.getOrDefault(vs.getVirtualScreenId(), 0);
+        int rProjectionX = projectionX.getOrDefault(vs.getVirtualScreenId(), 0);
+        int rProjectionY = projectionY.getOrDefault(vs.getVirtualScreenId(), 0);
+
+        if (render.get() && rWidth > 0 && rHeight > 0) {
+            g.setColor(Color.BLACK);
+            g.fillRect(0, 0, vs.getWidth(), vs.getHeight());
+            g.drawImage(image, rProjectionX, rProjectionY, rWidth, rHeight, null);
         }
     }
 

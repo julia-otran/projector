@@ -7,6 +7,7 @@ import lombok.Getter;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import us.guihouse.projector.projection.CanvasDelegate;
 import us.guihouse.projector.projection.Projectable;
+import us.guihouse.projector.projection.models.VirtualScreen;
 import us.guihouse.projector.utils.ThemeFinder;
 
 import java.awt.*;
@@ -49,9 +50,9 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
     }
 
     @Override
-    public void paintComponent(Graphics2D g) {
-        videoProjectors[0].paintComponent(g);
-        videoProjectors[1].paintComponent(g);
+    public void paintComponent(Graphics2D g, VirtualScreen vs) {
+        videoProjectors[0].paintComponent(g, vs);
+        videoProjectors[1].paintComponent(g, vs);
     }
 
     @Override

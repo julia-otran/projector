@@ -9,6 +9,7 @@ import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
+import us.guihouse.projector.projection.models.VirtualScreen;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -38,8 +39,8 @@ public class PreviewImageView extends ImageView implements Runnable {
     }
 
     private void updateTargetRenderIfNeeded() {
-        int width = delegate.getWidth();
-        int height = delegate.getHeight();
+        int width = delegate.getMainWidth();
+        int height = delegate.getMainHeight();
 
         if (targetRender == null || targetRender.getWidth() != width || targetRender.getHeight() != height) {
             if (targetGraphics != null) {
@@ -98,9 +99,11 @@ public class PreviewImageView extends ImageView implements Runnable {
             targetGraphics.setColor(Color.BLACK);
             targetGraphics.fillRect(0, 0, width, height);
 
-            if (projectionCanvas != null) {
-                int dw = delegate.getWidth();
-                int dh = delegate.getHeight();
+            VirtualScreen main = delegate.getVirtualScreens().stream().filter(VirtualScreen::isMainScreen).findFirst().orElse(null);
+
+            if (projectionCanvas != null && main != null) {
+                int dw = delegate.getMainWidth();
+                int dh = delegate.getMainHeight();
 
                 double scaleX = width / (double) dw;
                 double scaleY = height / (double) dh;
@@ -114,7 +117,7 @@ public class PreviewImageView extends ImageView implements Runnable {
                 AffineTransform old = targetGraphics.getTransform();
                 targetGraphics.translate(px, py);
                 targetGraphics.scale(scale, scale);
-                projectionCanvas.paintComponent(targetGraphics);
+                projectionCanvas.paintComponent(targetGraphics, main);
                 targetGraphics.setTransform(old);
 
                 SwingFXUtils.toFXImage(targetRender, fxTargetRender);

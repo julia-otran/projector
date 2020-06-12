@@ -6,8 +6,9 @@
 package us.guihouse.projector.projection;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.util.HashMap;
 
-import com.sun.javafx.embed.EmbeddedSceneInterface;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.embed.swing.SwingNode;
@@ -15,6 +16,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.web.WebView;
+import us.guihouse.projector.projection.models.VirtualScreen;
 
 import javax.swing.*;
 
@@ -32,14 +34,26 @@ public class ProjectionWebView implements Projectable {
     private JFXPanel panel;
     private Dimension maxSize;
     private Scene scene;
+    private final HashMap<VirtualScreen, AffineTransform> transforms = new HashMap<>();
 
     public ProjectionWebView(CanvasDelegate delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public void paintComponent(Graphics2D g) {
+    public void paintComponent(Graphics2D g, VirtualScreen vs) {
+        g.setColor(Color.BLACK);
+        g.fillRect(0, 0, vs.getWidth(), vs.getHeight());
+
+        AffineTransform old = g.getTransform();
+
+        AffineTransform dst = (AffineTransform) old.clone();
+        dst.concatenate(transforms.get(vs));
+        g.setTransform(dst);
+
         panel.paint(g);
+
+        g.setTransform(old);
     }
 
     @Override
@@ -49,8 +63,29 @@ public class ProjectionWebView implements Projectable {
 
     @Override
     public void rebuildLayout() {
-        int width = delegate.getWidth();
-        int height = delegate.getHeight();
+        int width = delegate.getMainWidth();
+        int height = delegate.getMainHeight();
+
+        transforms.clear();
+
+        delegate.getVirtualScreens().forEach(vs -> {
+            float scaleX = vs.getWidth() / (float) width;
+            float scaleY = vs.getHeight() / (float) height;
+
+            float scale = Math.min(scaleX, scaleY);
+
+            int scaledWidth = Math.round(scale * width);
+            int scaledHeight = Math.round(scale * height);
+
+            int x = (vs.getWidth() - scaledWidth) / 2;
+            int y = (vs.getHeight() - scaledHeight) / 2;
+
+            AffineTransform t = new AffineTransform();
+            t.setToScale(scale, scale);
+            t.setToTranslation(x, y);
+
+            transforms.put(vs, t);
+        });
 
         Platform.runLater(() -> {
             webView.setPrefWidth(width);
@@ -82,15 +117,15 @@ public class ProjectionWebView implements Projectable {
         if (webView == null) {
             webView = new WebView();
 
-            int width = delegate.getWidth();
-            int height = delegate.getHeight();
+            int width = delegate.getMainWidth();
+            int height = delegate.getMainHeight();
 
             scene = new Scene(webView, width, height);
 
             panel = new JFXPanel() {
                 @Override
                 public void setBounds(int x, int y, int width, int height) {
-                    if (width >= delegate.getWidth() || height >= delegate.getHeight()) {
+                    if (width >= delegate.getMainWidth() || height >= delegate.getMainHeight()) {
                         super.setBounds(x, y, width, height);
                     }
                 }

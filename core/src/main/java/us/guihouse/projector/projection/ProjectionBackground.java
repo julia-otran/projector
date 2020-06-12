@@ -7,16 +7,10 @@ package us.guihouse.projector.projection;
 
 import us.guihouse.projector.other.ProjectorPreferences;
 import us.guihouse.projector.projection.models.BackgroundModel;
+import us.guihouse.projector.projection.models.VirtualScreen;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.imageio.ImageIO;
 
 /**
  *
@@ -24,6 +18,7 @@ import javax.imageio.ImageIO;
  */
 public class ProjectionBackground extends ProjectionImage {
     private final Color bgColor;
+    private final Color chromaBgColor;
     
     ProjectionBackground(CanvasDelegate canvasDelegate) {
         super(canvasDelegate);
@@ -31,18 +26,25 @@ public class ProjectionBackground extends ProjectionImage {
         // Place some color to prevent monitor from sleeping
         bgColor = new Color(20, 20, 20);
 
+        chromaBgColor = new Color(0, 255, 0);
+
         this.setModel(getCanvasDelegate().getSettingsService().getLastBackground());
         this.setCropBackground(ProjectorPreferences.getCropBackground());
     }
 
     @Override
-    public void paintComponent(Graphics2D g) {
-        if (!hasImage()) {
+    public void paintComponent(Graphics2D g, VirtualScreen vs) {
+        if (vs.isChromaScreen()) {
+            g.setColor(chromaBgColor);
+        } else {
             g.setColor(bgColor);
-            g.fillRect(0, 0, canvasDelegate.getWidth(), canvasDelegate.getHeight());
         }
-        
-        super.paintComponent(g);
+
+        g.fillRect(0, 0, vs.getWidth(), vs.getHeight());
+
+        if (!vs.isChromaScreen()) {
+            super.paintComponent(g, vs);
+        }
     }
     
     @Override

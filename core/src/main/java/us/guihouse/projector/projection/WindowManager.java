@@ -3,6 +3,7 @@ package us.guihouse.projector.projection;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -14,13 +15,14 @@ import lombok.Getter;
 import lombok.Setter;
 import us.guihouse.projector.models.WindowConfig;
 import us.guihouse.projector.other.GraphicsFinder;
+import us.guihouse.projector.projection.models.VirtualScreen;
 import us.guihouse.projector.services.SettingsService;
 import us.guihouse.projector.utils.BlendGenerator;
 import us.guihouse.projector.utils.WindowConfigsLoader;
 
 public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoader.WindowConfigsObserver {
 
-    private WindowConfigsLoader configLoader;
+    private final WindowConfigsLoader configLoader;
 
     private List<WindowConfig> windowConfigs = Collections.emptyList();
 
@@ -32,17 +34,17 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
     private GraphicsDevice defaultDevice;
 
-    private BufferedImage targetRender;
-    private HashMap<String, BufferedImage> bLevelFixAssets = new HashMap<>();
+    private final List<VirtualScreen> virtualScreens = new ArrayList<>();
+    private final HashMap<String, BufferedImage> virtualScreensRender = new HashMap<>();
+    private final HashMap<String, Graphics2D> virtualScreensGraphics = new HashMap<>();
 
-    private HashMap<String, ProjectionWindow> windows = new HashMap<>();
-    private HashMap<Integer, BufferedImage> blendAssets = new HashMap<>();
-    private HashMap<String, AffineTransform> transformAssets = new HashMap<>();
-    private HashMap<String, BufferedImage> screenImages = new HashMap<>();
-    private HashMap<String, Graphics2D> screenGraphics = new HashMap<>();
+    private final HashMap<String, BufferedImage> bLevelFixAssets = new HashMap<>();
 
-    private int width;
-    private int height;
+    private final HashMap<String, ProjectionWindow> windows = new HashMap<>();
+    private final HashMap<Integer, BufferedImage> blendAssets = new HashMap<>();
+    private final HashMap<String, AffineTransform> transformAssets = new HashMap<>();
+    private final HashMap<String, BufferedImage> screenImages = new HashMap<>();
+    private final HashMap<String, Graphics2D> screenGraphics = new HashMap<>();
 
     private Thread drawThread;
 
@@ -112,9 +114,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
         starting = true;
 
-        targetRender = getDefaultDevice().getDefaultConfiguration().createCompatibleImage(getWidth(), getHeight());
-        targetRender.setAccelerationPriority(1.0f);
-
         screenGraphics.clear();
         screenImages.clear();
 
@@ -178,8 +177,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
         int frames = 0;
         long timestamp = System.nanoTime();
 
-        Graphics2D targetGraphics = targetRender.createGraphics();
-
         if (initializationCallback != null) {
             initializationCallback.run();
         }
@@ -194,9 +191,12 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                 timestamp = newTimestamp;
             }
 
-            targetGraphics.setColor(Color.BLACK);
-            targetGraphics.fillRect(0, 0, getWidth(), getHeight());
-            projectionCanvas.paintComponent(targetGraphics);
+            virtualScreens
+                .parallelStream()
+                .forEach(virtualScreen -> {
+                    Graphics2D targetGraphics = virtualScreensGraphics.get(virtualScreen.getVirtualScreenId());
+                    projectionCanvas.paintComponent(targetGraphics, virtualScreen);
+                });
 
             windowConfigs.parallelStream().forEach(windowConfig -> {
                 Graphics2D g = screenGraphics.get(windowConfig.getDisplayId());
@@ -215,7 +215,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
-                g.drawImage(targetRender, 0, 0, null);
+                g.drawImage(virtualScreensRender.get(windowConfig.getVirtualScreenId()), 0, 0, null);
 
                 g.setTransform(transform);
                 g.translate(windowConfig.getX(), windowConfig.getY());
@@ -245,7 +245,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
         }
 
         windows.values().forEach(ProjectionWindow::shutdown);
-        targetGraphics.dispose();
         screenGraphics.forEach((id, g) -> {
             g.dispose();
         });
@@ -254,13 +253,26 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     }
 
     @Override
-    public int getWidth() {
-        return width;
+    public int getMainWidth() {
+        return virtualScreens.stream()
+                .filter(VirtualScreen::isMainScreen)
+                .map(VirtualScreen::getWidth)
+                .findFirst()
+                .orElse(1280);
     }
 
     @Override
-    public int getHeight() {
-        return height;
+    public int getMainHeight() {
+        return virtualScreens.stream()
+                .filter(VirtualScreen::isMainScreen)
+                .map(VirtualScreen::getHeight)
+                .findFirst()
+                .orElse(720);
+    }
+
+    @Override
+    public List<VirtualScreen> getVirtualScreens() {
+        return virtualScreens;
     }
 
     @Override
@@ -327,6 +339,10 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
         this.windowConfigs = windowConfigs.stream()
                 .filter(WindowConfig::isProject)
                 .peek(wc -> {
+                    if (wc.getVirtualScreenId() == null || wc.getVirtualScreenId().isBlank()) {
+                        wc.setVirtualScreenId(VirtualScreen.MAIN_SCREEN_ID);
+                    }
+
                     if (wc.getDisplayBounds() != null) {
                         this.windows.forEach((id, w) -> {
                             Rectangle deviceBounds = w.getCurrentDevice().getDevice().getDefaultConfiguration().getBounds();
@@ -346,18 +362,19 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                 .map(device -> {
                     WindowConfig wc = new WindowConfig();
                     wc.setDisplayId(device.getDevice().getIDstring());
+                    wc.setVirtualScreenId(VirtualScreen.MAIN_SCREEN_ID);
                     wc.setProject(device.isProjectionDevice());
                     wc.setDisplayBounds(device.getDevice().getDefaultConfiguration().getBounds());
 
-                    wc.setWidth(device.getDevice().getDisplayMode().getWidth());
-                    wc.setHeight(device.getDevice().getDisplayMode().getHeight());
+                    wc.setWidth(device.getDevice().getDefaultConfiguration().getBounds().width);
+                    wc.setHeight(device.getDevice().getDefaultConfiguration().getBounds().height);
                     wc.setX(0);
                     wc.setY(0);
 
                     wc.setBgFillX(0);
                     wc.setBgFillY(0);
-                    wc.setBgFillWidth(device.getDevice().getDisplayMode().getWidth());
-                    wc.setBgFillHeight(device.getDevice().getDisplayMode().getHeight());
+                    wc.setBgFillWidth(device.getDevice().getDefaultConfiguration().getBounds().width);
+                    wc.setBgFillHeight(device.getDevice().getDefaultConfiguration().getBounds().height);
 
                     wc.setBLevelOffset(0);
 
@@ -375,13 +392,36 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     }
 
     private void generateAssets() {
-        int screenXStart = windowConfigs.stream().map(WindowConfig::getX).min(Integer::compareTo).orElse(0);
-        int screenXEnd = windowConfigs.stream().map(wc -> wc.getX() + wc.getWidth()).max(Integer::compareTo).orElse(800);
-        width = screenXEnd - screenXStart;
+        virtualScreens.clear();
+        virtualScreensRender.clear();
+        virtualScreensGraphics.forEach((id, graphics) -> graphics.dispose());
+        virtualScreensGraphics.clear();
 
-        int screenYStart = windowConfigs.stream().map(WindowConfig::getY).min(Integer::compareTo).orElse(0);
-        int screenYEnd = windowConfigs.stream().map(wc -> wc.getY() + wc.getHeight()).max(Integer::compareTo).orElse(600);
-        height = screenYEnd - screenYStart;
+        windowConfigs
+                .stream()
+                .collect(Collectors.groupingBy(WindowConfig::getVirtualScreenId))
+                .forEach((virtualScreenId, windowConfigs) -> {
+                    VirtualScreen vs = new VirtualScreen();
+
+                    vs.setVirtualScreenId(virtualScreenId);
+                    vs.setWindows(windowConfigs);
+
+                    int screenXStart = windowConfigs.stream().map(WindowConfig::getX).min(Integer::compareTo).orElse(0);
+                    int screenXEnd = windowConfigs.stream().map(wc -> wc.getX() + wc.getWidth()).max(Integer::compareTo).orElse(1280);
+                    vs.setWidth(screenXEnd - screenXStart);
+
+                    int screenYStart = windowConfigs.stream().map(WindowConfig::getY).min(Integer::compareTo).orElse(0);
+                    int screenYEnd = windowConfigs.stream().map(wc -> wc.getY() + wc.getHeight()).max(Integer::compareTo).orElse(720);
+                    vs.setHeight(screenYEnd - screenYStart);
+
+                    virtualScreens.add(vs);
+
+                    BufferedImage render = getDefaultDevice().getDefaultConfiguration().createCompatibleImage(vs.getWidth(), vs.getHeight());
+                    render.setAccelerationPriority(1.0f);
+
+                    virtualScreensRender.put(virtualScreenId, render);
+                    virtualScreensGraphics.put(virtualScreenId, render.createGraphics());
+                });
 
         blendAssets.clear();
         transformAssets.clear();

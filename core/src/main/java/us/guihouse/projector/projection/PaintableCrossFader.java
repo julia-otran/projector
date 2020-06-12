@@ -2,14 +2,21 @@ package us.guihouse.projector.projection;
 
 import lombok.Getter;
 import lombok.Setter;
+import us.guihouse.projector.projection.models.VirtualScreen;
 
 import java.awt.*;
 
 public class PaintableCrossFader {
+    public PaintableCrossFader(VirtualScreen vs) {
+        this.screen = vs;
+    }
+
     enum FadeDirection {
         IN, OUT, IN_OUT
     }
 
+    @Getter
+    private final VirtualScreen screen;
     private Paintable current;
     private Paintable previous;
     private float currentFadeAlpha;
@@ -57,10 +64,10 @@ public class PaintableCrossFader {
                 Composite old = g.getComposite();
                 AlphaComposite fade = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f - currentFadeAlpha);
                 g.setComposite(fade);
-                previous.paintComponent(g);
+                previous.paintComponent(g, screen);
                 g.setComposite(old);
             } else {
-                previous.paintComponent(g);
+                previous.paintComponent(g, screen);
             }
         }
 
@@ -68,7 +75,7 @@ public class PaintableCrossFader {
             Composite old = g.getComposite();
             AlphaComposite fade = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, currentFadeAlpha);
             g.setComposite(fade);
-            current.paintComponent(g);
+            current.paintComponent(g, screen);
             g.setComposite(old);
         }
     }

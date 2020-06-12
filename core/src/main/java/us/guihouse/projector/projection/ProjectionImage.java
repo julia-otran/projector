@@ -7,10 +7,12 @@ package us.guihouse.projector.projection;
 
 import us.guihouse.projector.projection.models.BackgroundModel;
 import us.guihouse.projector.projection.models.BackgroundProvide;
+import us.guihouse.projector.projection.models.VirtualScreen;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
 
 /**
  *
@@ -22,21 +24,11 @@ public class ProjectionImage implements Projectable {
 
     private final Color bgColor;
 
-    private BufferedImage scaledBackground;
-    private BufferedImage scaledOverlay;
-    private BufferedImage scaledLogo;
-
-    private int overlayCenter;
-    private double backgroundScale;
+    private final HashMap<String, BufferedImage> scaledBackground = new HashMap<>();
 
     private boolean cropBackground;
     private boolean enableAnimation = false;
     private BackgroundProvide model;
-
-    private int xDelta = 0;
-    private float deltaRate = 0;
-    private float stable = 0;
-    private int step = 0;
 
     ProjectionImage(CanvasDelegate canvasDelegate) {
         this(canvasDelegate, new Color(0, 0, 0));
@@ -47,68 +39,24 @@ public class ProjectionImage implements Projectable {
         this.bgColor = bgColor;
     }
 
-    public boolean hasImage() {
-        return scaledBackground != null || scaledOverlay != null || scaledLogo != null;
+    public boolean isEmpty() {
+        return scaledBackground.isEmpty();
     }
 
     @Override
-    public void paintComponent(Graphics2D g) {
-        if (!hasImage()) {
+    public void paintComponent(Graphics2D g, VirtualScreen vs) {
+        if (isEmpty()) {
             return;
         }
 
         g.setColor(bgColor);
-        g.fillRect(0, 0, canvasDelegate.getWidth(), canvasDelegate.getHeight());
+        g.fillRect(0, 0, vs.getWidth(), vs.getHeight());
 
-        if (scaledBackground != null) {
-            g.drawImage(scaledBackground, 0, 0, null);
+        BufferedImage render = scaledBackground.get(vs.getVirtualScreenId());
+
+        if (render != null) {
+            g.drawImage(render, 0, 0, null);
         }
-
-        if (scaledOverlay != null) {
-            generateDelta();
-
-            Composite old = g.getComposite();
-
-            float alpha = 0.5f;
-
-            AlphaComposite composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
-            g.setComposite(composite);
-
-            int dx2 = canvasDelegate.getWidth();
-            int dy2 = canvasDelegate.getHeight();
-
-            int sx1;
-            int sx2;
-
-            if (enableAnimation) {
-                sx1 = overlayCenter + xDelta;
-                sx2 = overlayCenter + xDelta + canvasDelegate.getWidth();
-            } else {
-                sx1 = overlayCenter;
-                sx2 = overlayCenter + canvasDelegate.getWidth();
-            }
-
-            int sy2 = canvasDelegate.getHeight();
-
-            g.drawImage(scaledOverlay, 0, 0, dx2, dy2, sx1, 0, sx2, sy2, null);
-            g.setComposite(old);
-        }
-
-        if (scaledLogo != null) {
-            g.drawImage(scaledLogo, 0, 0, null);
-        }
-    }
-
-    private void generateDelta() {
-        if (step > 40) {
-            deltaRate = (float) ((Math.random() * 0.025) - 0.0125);
-            step = -40;
-            stable = -1 * Math.round(deltaRate * step * step);
-        }
-
-        step++;
-
-        xDelta = Math.round(stable + (deltaRate * step * step));
     }
 
     @Override
@@ -118,9 +66,7 @@ public class ProjectionImage implements Projectable {
 
     @Override
     public void rebuildLayout() {
-        scaledBackground = null;
-        scaledOverlay = null;
-        scaledLogo = null;
+        scaledBackground.clear();
 
         if (model == null || BackgroundModel.Type.NONE.equals(model.getType())) {
             return;
@@ -130,121 +76,55 @@ public class ProjectionImage implements Projectable {
             if (model.getStaticBackground() != null) {
                 scaleBackground(model.getStaticBackground());
             }
-        } else {
-            if (model.getBackground() != null) {
-                scaleBackground(model.getBackground());
-            }
-
-            if (model.getLogo() != null) {
-                scaleLogo();
-            }
-
-            if (model.getOverlay() != null) {
-                scaleOverlay();
-            }
         }
     }
 
     private void scaleBackground(BufferedImage img) {
-        double imgW = img.getWidth();
-        double imgH = img.getHeight();
+        scaledBackground.clear();
 
-        int width = canvasDelegate.getWidth();
-        int height = canvasDelegate.getHeight();
+        canvasDelegate.getVirtualScreens()
+            .forEach(vs -> {
+                double imgW = img.getWidth();
+                double imgH = img.getHeight();
 
-        if (width == 0 || height == 0) {
-            return;
-        }
+                int width = vs.getWidth();
+                int height = vs.getHeight();
 
-        double scaleX = width / imgW;
-        double scaleY = height / imgH;
+                if (width == 0 || height == 0) {
+                    return;
+                }
 
-        if (cropBackground) {
-            backgroundScale = Math.max(scaleX, scaleY);
-        } else {
-            backgroundScale = Math.min(scaleX, scaleY);
-        }
+                double scaleX = width / imgW;
+                double scaleY = height / imgH;
+                double backgroundScale;
 
-        int newW = (int) Math.round(imgW * backgroundScale);
-        int newH = (int) Math.round(imgH * backgroundScale);
+                if (cropBackground) {
+                    backgroundScale = Math.max(scaleX, scaleY);
+                } else {
+                    backgroundScale = Math.min(scaleX, scaleY);
+                }
 
-        int x = (width - newW) / 2;
-        int y = (height - newH) / 2;
+                int newW = (int) Math.round(imgW * backgroundScale);
+                int newH = (int) Math.round(imgH * backgroundScale);
 
-        AffineTransform at = new AffineTransform();
-        at.translate(x, y);
-        at.scale(backgroundScale, backgroundScale);
+                int x = (width - newW) / 2;
+                int y = (height - newH) / 2;
 
-        BufferedImage scaling = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2 = scaling.createGraphics();
-        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.setTransform(at);
-        g2.drawImage(img, 0, 0, null);
-        g2.dispose();
+                AffineTransform at = new AffineTransform();
+                at.translate(x, y);
+                at.scale(backgroundScale, backgroundScale);
 
-        this.scaledBackground = scaling;
-    }
+                BufferedImage scaling = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g2 = scaling.createGraphics();
+                g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setTransform(at);
+                g2.drawImage(img, 0, 0, null);
+                g2.dispose();
 
-    private void scaleLogo() {
-        BufferedImage img = model.getLogo();
-        double imgW = img.getWidth();
-        double imgH = img.getHeight();
-
-        int width = canvasDelegate.getWidth();
-        int height = canvasDelegate.getHeight();
-
-        int newW = (int) Math.round(imgW * backgroundScale);
-        int newH = (int) Math.round(imgH * backgroundScale);
-
-        int x = (width - newW) / 2;
-        int y = (height - newH) / 2;
-
-        AffineTransform at = new AffineTransform();
-        at.translate(x, y);
-        at.scale(backgroundScale, backgroundScale);
-
-        BufferedImage scaling = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2 = scaling.createGraphics();
-        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.setTransform(at);
-        g2.drawImage(img, 0, 0, null);
-        g2.dispose();
-
-        this.scaledLogo = scaling;
-    }
-
-    private void scaleOverlay() {
-        BufferedImage img = model.getOverlay();
-        double imgW = img.getWidth();
-        double imgH = img.getHeight();
-
-        int width = canvasDelegate.getWidth();
-        int height = canvasDelegate.getHeight();
-
-        int newW = (int) Math.round(imgW * backgroundScale);
-        int newH = (int) Math.round(imgH * backgroundScale);
-
-        int y = (height - newH) / 2;
-
-        AffineTransform at = new AffineTransform();
-        at.translate(0, y);
-        at.scale(backgroundScale, backgroundScale);
-
-        BufferedImage scaling = new BufferedImage(newW, height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2 = scaling.createGraphics();
-        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.setTransform(at);
-        g2.drawImage(img, 0, 0, null);
-        g2.dispose();
-
-        this.overlayCenter = (newW - width) / 2;
-        this.scaledOverlay = scaling;
+                this.scaledBackground.put(vs.getVirtualScreenId(), scaling);
+            });
     }
 
     @Override

@@ -8,6 +8,7 @@ import lombok.Data;
 public class WindowConfig {
 
     private String displayId;
+    private String virtualScreenId;
     private Rectangle displayBounds;
     private boolean project;
 

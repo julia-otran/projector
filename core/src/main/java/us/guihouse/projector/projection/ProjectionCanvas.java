@@ -9,12 +9,14 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyProperty;
 import us.guihouse.projector.other.ProjectorPreferences;
 import us.guihouse.projector.projection.models.BackgroundModel;
+import us.guihouse.projector.projection.models.VirtualScreen;
 import us.guihouse.projector.projection.text.WrappedText;
 import us.guihouse.projector.projection.text.WrapperFactory;
 import us.guihouse.projector.projection.video.ProjectionBackgroundVideo;
@@ -30,7 +32,8 @@ public class ProjectionCanvas implements ProjectionManager {
     private final ProjectionBackground background;
     private final ProjectionLabel label;
     private final ProjectionBackgroundVideo bgVideo;
-    private final PaintableCrossFader fader;
+
+    private final HashMap<String, PaintableCrossFader> faders = new HashMap<>();
 
     private final ReadOnlyObjectWrapper<Projectable> currentProjectable = new ReadOnlyObjectWrapper<>();
 
@@ -50,25 +53,26 @@ public class ProjectionCanvas implements ProjectionManager {
         bgVideo = new ProjectionBackgroundVideo(delegate);
         initializeList.add(bgVideo);
 
-        fader = new PaintableCrossFader();
         setupFader();
     }
 
     private void setupFader() {
-        currentProjectable.addListener((prop, oldVal, newVal) -> updateFader());
-        bgVideo.isRender().addListener((prop, oldVal, newVal) -> updateFader());
+        currentProjectable.addListener((prop, oldVal, newVal) -> updateFaders());
+        bgVideo.isRender().addListener((prop, oldVal, newVal) -> updateFaders());
     }
 
-    private void updateFader() {
-        if (currentProjectable.getValue() == null) {
-            if (bgVideo.isRender().get()) {
-                fader.fadeIn(bgVideo);
+    private void updateFaders() {
+        faders.forEach((screenId, fader) -> {
+            if (currentProjectable.getValue() == null) {
+                if (bgVideo.isRender().get() && !fader.getScreen().isChromaScreen()) {
+                    fader.fadeIn(bgVideo);
+                } else {
+                    fader.fadeIn(background);
+                }
             } else {
-                fader.fadeIn(background);
+                fader.fadeIn(currentProjectable.get());
             }
-        } else {
-            fader.fadeIn(currentProjectable.get());
-        }
+        });
     }
 
     public void init() {
@@ -79,16 +83,29 @@ public class ProjectionCanvas implements ProjectionManager {
             initialized = true;
         }
 
-        fader.fadeIn(background);
+        faders.clear();
+
+        delegate.getVirtualScreens().forEach(vs -> {
+            faders.put(vs.getVirtualScreenId(), new PaintableCrossFader(vs));
+        });
+
+        faders.forEach((screen, fader) -> {
+            fader.fadeIn(background);
+        });
     }
 
     public void finish() {
         initializeList.forEach(Projectable::finish);
     }
 
-    protected void paintComponent(Graphics2D g) {
-        fader.paintComponent(g);
-        label.paintComponent(g);
+    protected void paintComponent(Graphics2D g, VirtualScreen vs) {
+        PaintableCrossFader fader = faders.get(vs.getVirtualScreenId());
+
+        if (fader != null) {
+            fader.paintComponent(g);
+        }
+
+        label.paintComponent(g, vs);
     }
 
     @Override

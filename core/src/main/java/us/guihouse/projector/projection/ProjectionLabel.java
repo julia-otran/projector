@@ -18,13 +18,14 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import javafx.application.Platform;
 import lombok.Getter;
-import lombok.Setter;
 import us.guihouse.projector.other.ProjectorPreferences;
 import us.guihouse.projector.projection.models.StringWithPosition;
+import us.guihouse.projector.projection.models.VirtualScreen;
 import us.guihouse.projector.projection.text.WrappedText;
 import us.guihouse.projector.projection.text.WrapperFactory;
 
@@ -60,14 +61,12 @@ public class ProjectionLabel implements Projectable {
     private final BasicStroke outlineStroke = new BasicStroke(8.0f);
     private static final Color OVERLAY = new Color(0, 0, 0, 230);
 
-    private final PaintableCrossFader fader;
+    private final HashMap<String, PaintableCrossFader> faders = new HashMap<>();
 
     public ProjectionLabel(CanvasDelegate canvasDelegate) {
         this.canvasDelegate = canvasDelegate;
         factoryChangeListeners = new ArrayList<>();
         darkenBackground = ProjectorPreferences.getDarkenBackground();
-        fader = new PaintableCrossFader();
-        fader.setStepPerFrame(0.1f);
     }
 
     @Override
@@ -120,13 +119,13 @@ public class ProjectionLabel implements Projectable {
     }
 
     private void renderText() {
-        BufferedImage newImage = new BufferedImage(canvasDelegate.getWidth(), canvasDelegate.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        BufferedImage newImage = new BufferedImage(canvasDelegate.getMainWidth(), canvasDelegate.getMainHeight(), BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = newImage.createGraphics();
 
         if (!drawLines.isEmpty()) {
             if (darkenBackground) {
                 g.setColor(OVERLAY);
-                g.fillRect(0, 0, canvasDelegate.getWidth(), canvasDelegate.getHeight());
+                g.fillRect(0, 0, canvasDelegate.getMainWidth(), canvasDelegate.getMainHeight());
             }
 
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -155,12 +154,16 @@ public class ProjectionLabel implements Projectable {
 
         g.dispose();
 
-        fader.crossFadeIn(new ImagePaintable(newImage));
+        faders.forEach((screenId, fader) -> fader.crossFadeIn(new ImagePaintable(newImage)));
     }
 
     @Override
-    public void paintComponent(Graphics2D g) {
-        fader.paintComponent(g);
+    public void paintComponent(Graphics2D g, VirtualScreen vs) {
+        PaintableCrossFader fader = faders.get(vs.getVirtualScreenId());
+
+        if (fader != null) {
+            fader.paintComponent(g);
+        }
     }
 
     @Override
@@ -168,16 +171,28 @@ public class ProjectionLabel implements Projectable {
         return canvasDelegate;
     }
 
+    private void fadeOut() {
+        faders.forEach((screenId, fader) -> fader.fadeOut());
+    }
+
     @Override
     public void rebuildLayout() {
+        faders.clear();
+
+        canvasDelegate.getVirtualScreens().forEach(vs -> {
+            PaintableCrossFader fader = new PaintableCrossFader(vs);
+            fader.setStepPerFrame(0.1f);
+            faders.put(vs.getVirtualScreenId(), fader);
+        });
+
         if (text == null) {
             drawLines = Collections.emptyList();
-            fader.fadeOut();
+            fadeOut();
             return;
         }
 
         if (font == null) {
-            fader.fadeOut();
+            fadeOut();
             return;
         }
 
@@ -185,7 +200,7 @@ public class ProjectionLabel implements Projectable {
 
         if (lines == null || text.isEmpty() || lines.isEmpty()) {
             drawLines = Collections.emptyList();
-            fader.fadeOut();
+            fadeOut();
             return;
         }
 
@@ -196,11 +211,11 @@ public class ProjectionLabel implements Projectable {
         int between = fontMetrics.getLeading() + fontMetrics.getDescent();
 
         int totalHeight = (fontHeight * lines.size()) + between * (lineCount - 1);
-        int emptyHeight = canvasDelegate.getHeight() - totalHeight;
+        int emptyHeight = canvasDelegate.getMainHeight() - totalHeight;
 
         int translateY = fontHeight + (emptyHeight / 2) - paddingY;
 
-        int width = canvasDelegate.getWidth();
+        int width = canvasDelegate.getMainWidth();
 
         List<StringWithPosition> pendingLines = new ArrayList<>();
 
@@ -221,7 +236,7 @@ public class ProjectionLabel implements Projectable {
 
         if (pendingLines.stream().allMatch(l -> l.getText().isEmpty())) {
             drawLines = Collections.emptyList();
-            fader.fadeOut();
+            fadeOut();
             return;
         }
 
@@ -231,11 +246,11 @@ public class ProjectionLabel implements Projectable {
     }
 
     private int getFreeWidth() {
-        return canvasDelegate.getWidth() - 2 * paddingX;
+        return canvasDelegate.getMainWidth() - 2 * paddingX;
     }
 
     private int getFreeHeight() {
-        return canvasDelegate.getHeight() - 2 * paddingY;
+        return canvasDelegate.getMainHeight() - 2 * paddingY;
     }
 
     public WrapperFactory getWrapperFactory() {
@@ -265,7 +280,7 @@ public class ProjectionLabel implements Projectable {
         }
 
         @Override
-        public void paintComponent(Graphics2D g) {
+        public void paintComponent(Graphics2D g, VirtualScreen vs) {
             g.drawImage(image, 0, 0, null);
         }
     }
