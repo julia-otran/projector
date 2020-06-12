@@ -78,6 +78,7 @@ public class ProjectionLabel implements Projectable {
     @Override
     public void init() {
         setFont(new java.awt.Font(Font.SANS_SERIF, 0, DEFAULT_FONT_SIZE));
+        rebuildLayout();
     }
 
     @Override
@@ -98,7 +99,7 @@ public class ProjectionLabel implements Projectable {
     public void setDarkenBackground(boolean darken) {
         this.darkenBackground = darken;
         ProjectorPreferences.setDarkenBackground(darken);
-        rebuildLayout();
+        renderText();
     }
 
     public int getPaddingX() {
@@ -121,46 +122,60 @@ public class ProjectionLabel implements Projectable {
 
     public void setText(WrappedText text) {
         this.text = text;
-        rebuildLayout();
+        generateLines();
     }
 
     private void renderText() {
-        BufferedImage newImage = new BufferedImage(canvasDelegate.getMainWidth(), canvasDelegate.getMainHeight(), BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g = newImage.createGraphics();
+        canvasDelegate.getVirtualScreens().forEach(vs -> {
+            BufferedImage newImage = new BufferedImage(vs.getWidth(), vs.getHeight(), BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = newImage.createGraphics();
 
-        if (!drawLines.isEmpty()) {
-            if (darkenBackground) {
-                g.setColor(OVERLAY);
-                g.fillRect(0, 0, canvasDelegate.getMainWidth(), canvasDelegate.getMainHeight());
+            if (!drawLines.isEmpty()) {
+                if (darkenBackground && !vs.isChromaScreen()) {
+                    g.setColor(OVERLAY);
+                    g.fillRect(0, 0, canvasDelegate.getMainWidth(), canvasDelegate.getMainHeight());
+                }
+
+                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                g.setStroke(outlineStroke);
+
+                AffineTransform placement = chromaScreenTransforms.get(vs.getVirtualScreenId());
+
+                if (placement != null) {
+                    AffineTransform preTransform = g.getTransform();
+                    preTransform.concatenate(placement);
+                    g.setTransform(preTransform);
+                }
+
+                AffineTransform oldTransform = g.getTransform();
+
+                drawLines.forEach((pt) -> {
+                    g.translate(pt.getX(), pt.getY());
+                    // create a glyph vector from your text
+                    GlyphVector glyphVector = getFont().createGlyphVector(g.getFontRenderContext(), pt.getText());
+
+                    // get the shape object
+                    Shape textShape = glyphVector.getOutline();
+
+                    g.setColor(Color.black);
+                    g.draw(textShape);
+
+                    g.setColor(Color.white);
+                    g.fill(textShape);
+
+                    g.setTransform(oldTransform);
+                });
             }
 
-            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-            g.setStroke(outlineStroke);
+            g.dispose();
 
-            AffineTransform oldTransform = g.getTransform();
+            PaintableCrossFader fader = faders.get(vs.getVirtualScreenId());
 
-            drawLines.forEach((pt) -> {
-                g.translate(pt.getX(), pt.getY());
-                // create a glyph vector from your text
-                GlyphVector glyphVector = getFont().createGlyphVector(g.getFontRenderContext(), pt.getText());
-
-                // get the shape object
-                Shape textShape = glyphVector.getOutline();
-
-                g.setColor(Color.black);
-                g.draw(textShape);
-
-                g.setColor(Color.white);
-                g.fill(textShape);
-
-                g.setTransform(oldTransform);
-            });
-        }
-
-        g.dispose();
-
-        faders.forEach((screenId, fader) -> fader.crossFadeIn(new ImagePaintable(newImage)));
+            if (fader != null) {
+                fader.crossFadeIn(new ImagePaintable(newImage));
+            }
+        });
     }
 
     @Override
@@ -168,19 +183,7 @@ public class ProjectionLabel implements Projectable {
         PaintableCrossFader fader = faders.get(vs.getVirtualScreenId());
 
         if (fader != null) {
-
-            AffineTransform t = chromaScreenTransforms.get(vs.getVirtualScreenId());
-            AffineTransform old = g.getTransform();
-
-            if (t != null) {
-                AffineTransform t2 = (AffineTransform) t.clone();
-                t2.concatenate(old);
-                g.setTransform(t2);
-            }
-
             fader.paintComponent(g);
-
-            g.setTransform(old);
         }
     }
 
@@ -201,12 +204,12 @@ public class ProjectionLabel implements Projectable {
             PaintableCrossFader fader = new PaintableCrossFader(vs);
             fader.setStepPerFrame(0.1f);
             faders.put(vs.getVirtualScreenId(), fader);
-
-            if (vs.isChromaScreen()) {
-                chromaScreenTransforms.put(vs.getVirtualScreenId(), new AffineTransform());
-            }
         });
 
+        generateLines();
+    }
+
+    private void generateLines() {
         if (text == null) {
             drawLines = Collections.emptyList();
             fadeOut();
@@ -264,12 +267,10 @@ public class ProjectionLabel implements Projectable {
 
         drawLines = pendingLines;
 
-        renderText();
-
         canvasDelegate.getVirtualScreens().forEach(vs -> {
-            AffineTransform chromaScreenTransform = chromaScreenTransforms.get(vs.getVirtualScreenId());
+            AffineTransform chromaScreenTransform = new AffineTransform();
 
-            if (chromaScreenTransform != null) {
+            if (vs.isChromaScreen()) {
                 int chromaTranslateX = (vs.getWidth() - Math.round(canvasDelegate.getMainWidth() * CHROMA_OUTPUT_SCALE)) / 2;
 
                 int bottomBlankSpace = Math.round(emptyHeight * CHROMA_OUTPUT_SCALE / 2) + Math.round(CHROMA_PADDING_BOTTOM / 900f * vs.getHeight());
@@ -288,7 +289,11 @@ public class ProjectionLabel implements Projectable {
                 chromaScreenTransform.translate(chromaTranslateX, chromaTranslateY);
                 chromaScreenTransform.scale(CHROMA_OUTPUT_SCALE, CHROMA_OUTPUT_SCALE);
             }
+
+            chromaScreenTransforms.put(vs.getVirtualScreenId(), chromaScreenTransform);
         });
+
+        renderText();
     }
 
     private int getFreeWidth() {
