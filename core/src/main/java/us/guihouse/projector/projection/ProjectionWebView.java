@@ -34,7 +34,7 @@ public class ProjectionWebView implements Projectable {
     private JFXPanel panel;
     private Dimension maxSize;
     private Scene scene;
-    private final HashMap<VirtualScreen, AffineTransform> transforms = new HashMap<>();
+    private final HashMap<String, AffineTransform> transforms = new HashMap<>();
 
     public ProjectionWebView(CanvasDelegate delegate) {
         this.delegate = delegate;
@@ -47,8 +47,8 @@ public class ProjectionWebView implements Projectable {
 
         AffineTransform old = g.getTransform();
 
-        AffineTransform dst = (AffineTransform) old.clone();
-        dst.concatenate(transforms.get(vs));
+        AffineTransform dst = g.getTransform();
+        dst.concatenate(transforms.get(vs.getVirtualScreenId()));
         g.setTransform(dst);
 
         panel.paint(g);
@@ -84,7 +84,7 @@ public class ProjectionWebView implements Projectable {
             t.translate(x, y);
             t.scale(scale, scale);
 
-            transforms.put(vs, t);
+            transforms.put(vs.getVirtualScreenId(), t);
         });
 
         Platform.runLater(() -> {

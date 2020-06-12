@@ -84,8 +84,8 @@ public class ProjectionVideo implements Projectable {
             width.put(vs.getVirtualScreenId(), scaledWidth);
             height.put(vs.getVirtualScreenId(), scaledHeight);
 
-            projectionX.put(vs.getVirtualScreenId(), (delegate.getMainWidth() - scaledWidth) / 2);
-            projectionY.put(vs.getVirtualScreenId(), (delegate.getMainHeight() - scaledHeight) / 2);
+            projectionX.put(vs.getVirtualScreenId(), (vs.getWidth() - scaledWidth) / 2);
+            projectionY.put(vs.getVirtualScreenId(), (vs.getHeight() - scaledHeight) / 2);
         });
     }
 
