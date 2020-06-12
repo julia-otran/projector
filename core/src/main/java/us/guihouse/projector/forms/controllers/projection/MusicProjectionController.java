@@ -31,6 +31,8 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.skin.TableViewSkin;
 import javafx.scene.control.skin.VirtualFlow;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
@@ -80,6 +82,8 @@ public class MusicProjectionController extends ProjectionController {
     final Collator collator = Collator.getInstance();
     private File theme;
     private boolean projecting = false;
+
+    private Integer markedPosition = null;
 
     /**
      * Initializes the controller class.
@@ -209,6 +213,20 @@ public class MusicProjectionController extends ProjectionController {
             }
         });
 
+        phrasesTable.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent keyEvent) {
+                if (keyEvent.getCode().equals(KeyCode.DOWN)) {
+                    if (markedPosition != null) {
+                        int scrollTo = markedPosition;
+                        phrasesTable.getSelectionModel().select(scrollTo);
+                        phrasesTable.scrollTo(scrollTo);
+                        markedPosition = null;
+                    }
+                }
+            }
+        });
+
         phrasesTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         phrasesTable.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             @Override
@@ -250,20 +268,35 @@ public class MusicProjectionController extends ProjectionController {
                                 @Override
                                 public void run() {
                                     phrasesTable.getSelectionModel().select(pos2);
-                                    flow.scrollPixels(50);
+                                    if (flow != null) {
+                                        flow.scrollPixels(50);
+                                    }
                                 }
                             });
                         }
                     }
                 } else {
+                    if (newValue.equals(0)) {
+                        Platform.runLater(() -> markedPosition = null);
+                    } else {
+                        markedPosition = null;
+                    }
                     projecting = true;
                     projectionManager.setText(text);
                     playTheme();
-                    int firstIndex = flow.getFirstVisibleCell().getIndex();
-                    int center = firstIndex + ((flow.getLastVisibleCell().getIndex() - firstIndex) / 2);
 
-                    if (newValue.intValue() > center && newValue.intValue() > oldValue.intValue()) {
-                        phrasesTable.scrollTo(firstIndex + 2);
+                    if (flow != null) {
+                        IndexedCell<?> firstVisibleCell = flow.getFirstVisibleCell();
+                        IndexedCell<?> lastVisibleCell = flow.getLastVisibleCell();
+
+                        if (firstVisibleCell != null && lastVisibleCell != null) {
+                            int firstIndex = firstVisibleCell.getIndex();
+                            int center = firstIndex + ((lastVisibleCell.getIndex() - firstIndex) / 2);
+
+                            if (newValue.intValue() > center && newValue.intValue() > oldValue.intValue()) {
+                                phrasesTable.scrollTo(firstIndex + 2);
+                            }
+                        }
                     }
                 }
             }
@@ -350,6 +383,8 @@ public class MusicProjectionController extends ProjectionController {
         SelectionText st = data.get(n);
         st.selected.set(true);
         phrasesTable.refresh();
+
+        markedPosition = n;
     }
 
     private void performClear() {

@@ -449,7 +449,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
             if (keyEvent.getCode() == KeyCode.DELETE) {
                 try {
                     listRepository.deleteItem(projectablesListView.getSelectionModel().getSelectedItem());
-                    reloadProjectables();
+                    Platform.runLater(this::reloadProjectables);
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }

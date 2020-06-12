@@ -62,7 +62,7 @@ public class WindowManagerPresenter implements Runnable {
 
             long newTimestamp = System.nanoTime();
             if (newTimestamp - timestamp > 1000000000) {
-                System.out.println(frames);
+                //System.out.println(frames);
                 frames = 0;
                 timestamp = newTimestamp;
             }
