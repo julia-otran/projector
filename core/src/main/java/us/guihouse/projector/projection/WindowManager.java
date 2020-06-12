@@ -122,8 +122,8 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
             if (w != null) {
                 GraphicsDevice device = w.getCurrentDevice().getDevice();
-                int width = device.getDisplayMode().getWidth();
-                int height = device.getDisplayMode().getHeight();
+                int width = device.getDefaultConfiguration().getBounds().width;
+                int height = device.getDefaultConfiguration().getBounds().height;
 
                 BufferedImage screenImage = device.getDefaultConfiguration().createCompatibleImage(width, height);
                 screenImage.setAccelerationPriority(1.0f);
@@ -186,7 +186,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
             long newTimestamp = System.nanoTime();
             if (newTimestamp - timestamp > 1000000000) {
-                // System.out.println(frames);
+                //System.out.println(frames);
                 frames = 0;
                 timestamp = newTimestamp;
             }

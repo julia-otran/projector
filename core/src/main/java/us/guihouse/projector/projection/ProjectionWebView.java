@@ -81,8 +81,8 @@ public class ProjectionWebView implements Projectable {
             int y = (vs.getHeight() - scaledHeight) / 2;
 
             AffineTransform t = new AffineTransform();
-            t.setToScale(scale, scale);
-            t.setToTranslation(x, y);
+            t.translate(x, y);
+            t.scale(scale, scale);
 
             transforms.put(vs, t);
         });

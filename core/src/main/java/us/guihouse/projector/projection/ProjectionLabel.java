@@ -39,6 +39,10 @@ public class ProjectionLabel implements Projectable {
 
     private static final int DEFAULT_PADDING_X = 120;
     private static final int DEFAULT_PADDING_Y = 40;
+    private static final int CHROMA_PADDING_BOTTOM = 160;
+    private static final int CHROMA_PADDING_BOTTOM_MIN = 64;
+
+    private static final float CHROMA_OUTPUT_SCALE = 0.4f;
 
     private static final int DEFAULT_FONT_SIZE = 112;
 
@@ -62,6 +66,8 @@ public class ProjectionLabel implements Projectable {
     private static final Color OVERLAY = new Color(0, 0, 0, 230);
 
     private final HashMap<String, PaintableCrossFader> faders = new HashMap<>();
+
+    private final HashMap<String, AffineTransform> chromaScreenTransforms = new HashMap<>();
 
     public ProjectionLabel(CanvasDelegate canvasDelegate) {
         this.canvasDelegate = canvasDelegate;
@@ -162,7 +168,19 @@ public class ProjectionLabel implements Projectable {
         PaintableCrossFader fader = faders.get(vs.getVirtualScreenId());
 
         if (fader != null) {
+
+            AffineTransform t = chromaScreenTransforms.get(vs.getVirtualScreenId());
+            AffineTransform old = g.getTransform();
+
+            if (t != null) {
+                AffineTransform t2 = (AffineTransform) t.clone();
+                t2.concatenate(old);
+                g.setTransform(t2);
+            }
+
             fader.paintComponent(g);
+
+            g.setTransform(old);
         }
     }
 
@@ -183,6 +201,10 @@ public class ProjectionLabel implements Projectable {
             PaintableCrossFader fader = new PaintableCrossFader(vs);
             fader.setStepPerFrame(0.1f);
             faders.put(vs.getVirtualScreenId(), fader);
+
+            if (vs.isChromaScreen()) {
+                chromaScreenTransforms.put(vs.getVirtualScreenId(), new AffineTransform());
+            }
         });
 
         if (text == null) {
@@ -243,6 +265,30 @@ public class ProjectionLabel implements Projectable {
         drawLines = pendingLines;
 
         renderText();
+
+        canvasDelegate.getVirtualScreens().forEach(vs -> {
+            AffineTransform chromaScreenTransform = chromaScreenTransforms.get(vs.getVirtualScreenId());
+
+            if (chromaScreenTransform != null) {
+                int chromaTranslateX = (vs.getWidth() - Math.round(canvasDelegate.getMainWidth() * CHROMA_OUTPUT_SCALE)) / 2;
+
+                int bottomBlankSpace = Math.round(emptyHeight * CHROMA_OUTPUT_SCALE / 2) + Math.round(CHROMA_PADDING_BOTTOM / 900f * vs.getHeight());
+                int chromaTranslateY = vs.getHeight() - bottomBlankSpace;
+
+                int cropCheck = chromaTranslateY +
+                        Math.round(totalHeight * CHROMA_OUTPUT_SCALE) +
+                        Math.round(emptyHeight * CHROMA_OUTPUT_SCALE / 2) +
+                        Math.round(CHROMA_PADDING_BOTTOM_MIN / 900f * vs.getHeight());
+
+                if (cropCheck > vs.getHeight()) {
+                    int delta = cropCheck - vs.getHeight();
+                    chromaTranslateY -= delta;
+                }
+
+                chromaScreenTransform.translate(chromaTranslateX, chromaTranslateY);
+                chromaScreenTransform.scale(CHROMA_OUTPUT_SCALE, CHROMA_OUTPUT_SCALE);
+            }
+        });
     }
 
     private int getFreeWidth() {

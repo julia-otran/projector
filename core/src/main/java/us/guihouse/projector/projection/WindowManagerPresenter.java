@@ -5,6 +5,9 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 
 public class WindowManagerPresenter implements Runnable {
+    private int frames = 0;
+    private long timestamp = 0;
+
     private boolean running;
     private Thread thread;
     private final HashMap<String, BufferedImage> outputs = new HashMap<>();
@@ -19,7 +22,7 @@ public class WindowManagerPresenter implements Runnable {
             if (w.getFrame() != null) {
                 GraphicsDevice dev = w.getCurrentDevice().getDevice();
 
-                BufferedImage img = dev.getDefaultConfiguration().createCompatibleImage(dev.getDisplayMode().getWidth(), dev.getDisplayMode().getHeight());
+                BufferedImage img = dev.getDefaultConfiguration().createCompatibleImage(dev.getDefaultConfiguration().getBounds().width, dev.getDefaultConfiguration().getBounds().height);
                 outputs.put(id, img);
             }
         });
@@ -55,12 +58,21 @@ public class WindowManagerPresenter implements Runnable {
     @Override
     public void run() {
         while (running) {
+            frames++;
+
+            long newTimestamp = System.nanoTime();
+            if (newTimestamp - timestamp > 1000000000) {
+                System.out.println(frames);
+                frames = 0;
+                timestamp = newTimestamp;
+            }
+
             outputs.forEach((id, img) -> {
                 windows.get(id).updateOutput(outputs.get(id));
             });
 
             try {
-                Thread.sleep(10);
+                Thread.sleep(5);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
