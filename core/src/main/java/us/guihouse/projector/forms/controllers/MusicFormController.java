@@ -7,18 +7,18 @@ package us.guihouse.projector.forms.controllers;
  */
 
 import java.net.URL;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.image.ImageView;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import us.guihouse.projector.dtos.ImportingMusicDTO;
@@ -50,7 +50,7 @@ public class MusicFormController implements Initializable {
     @FXML
     private TextArea musicTextArea;
 
-    private MusicTheme randomTheme = new MusicTheme();
+    private final MusicTheme randomTheme = new MusicTheme();
 
     /**
      * Initializes the controller class.
@@ -58,7 +58,7 @@ public class MusicFormController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         themeCombo.getItems().clear();
-        themeCombo.setConverter(new StringConverter<MusicTheme>() {
+        themeCombo.setConverter(new StringConverter<>() {
             @Override
             public String toString(MusicTheme object) {
                 if (object.equals(randomTheme)) {
@@ -77,10 +77,11 @@ public class MusicFormController implements Initializable {
                 return ThemeFinder.getThemeByVideoName(string);
             }
         });
-        themeCombo.setCellFactory(new Callback<ListView<MusicTheme>, ListCell<MusicTheme>>() {
+        themeCombo.setCellFactory(new Callback<>() {
             @Override
             public ListCell<MusicTheme> call(ListView<MusicTheme> param) {
-                ListCell<MusicTheme> cell = new ListCell<MusicTheme>() {
+
+                return new ListCell<>() {
                     @Override
                     protected void updateItem(MusicTheme item, boolean empty) {
                         super.updateItem(item, empty);
@@ -97,8 +98,6 @@ public class MusicFormController implements Initializable {
                         }
                     }
                 };
-
-                return cell;
             }
         });
     }    
@@ -256,11 +255,7 @@ public class MusicFormController implements Initializable {
             themeCombo.getSelectionModel().select(randomTheme);
         } else {
             MusicTheme theme = ThemeFinder.getThemeByVideoName(editingMusic.getTheme());
-            if (theme != null) {
-                themeCombo.getSelectionModel().select(theme);
-            } else {
-                themeCombo.getSelectionModel().select(randomTheme);
-            }
+            themeCombo.getSelectionModel().select(Objects.requireNonNullElse(theme, randomTheme));
         }
     }
 
@@ -268,6 +263,6 @@ public class MusicFormController implements Initializable {
         creatingArtist = music.getArtist();
         init();
         titleTextField.setText(music.getName());
-        musicTextArea.setText(music.getPhrases().stream().collect(Collectors.joining("\n")));
+        musicTextArea.setText(String.join("\n", music.getPhrases()));
     }
 }

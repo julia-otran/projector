@@ -5,7 +5,6 @@
  */
 package us.guihouse.projector.other;
 
-import static java.awt.SystemColor.text;
 import java.text.Normalizer;
 import java.util.regex.Pattern;
 

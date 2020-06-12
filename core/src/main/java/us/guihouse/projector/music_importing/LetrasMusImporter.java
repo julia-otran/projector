@@ -49,7 +49,7 @@ public class LetrasMusImporter extends MusicUrlImporter {
         }
 
         if (phrases.isEmpty()) {
-            throw new ImportError("Cannot read phrases");
+            throw new ImportError();
         }
 
         music.setPhrases(phrases);

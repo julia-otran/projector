@@ -39,10 +39,6 @@ public class MusicProjectionScene extends ProjectionItemSubScene {
         return (MusicProjectionController) super.getController(); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public void loadMusicWithId(Integer musicId) {
-        getController().loadMusicWithId(musicId);
-    }
-
     public void setManageMusicService(ManageMusicService svc) {
         getController().setManageMusicService(svc);
     }

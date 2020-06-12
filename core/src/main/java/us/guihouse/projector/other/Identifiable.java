@@ -10,5 +10,4 @@ package us.guihouse.projector.other;
  * @author guilherme
  */
 public interface Identifiable {
-    public String getIdentity();
 }

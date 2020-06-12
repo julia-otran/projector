@@ -15,100 +15,105 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="rootBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.guihouse.projector.forms.controllers.projection.PlayerController">
-    <children>
-        <VBox fx:id="chooseFileBox" alignment="TOP_CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onDragDropped="#onDragDropped" onDragExited="#onDragExit" onDragOver="#onDragOver" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-            <children>
-                <Label fx:id="dragDropLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="126.0" layoutY="200.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Arraste e solte aqui um vídeo para ser projetado." textAlignment="CENTER" underline="true" VBox.vgrow="NEVER">
-                    <VBox.margin>
-                        <Insets top="10.0" />
-                    </VBox.margin>
-                    <font>
-                        <Font size="14.0" />
-                    </font>
-                </Label>
-            </children>
-        </VBox>
-        <VBox fx:id="playerBox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" VBox.vgrow="ALWAYS">
-            <children>
-                <HBox alignment="CENTER_LEFT" VBox.vgrow="NEVER">
-                    <children>
-                        <Button fx:id="beginProjectionButton" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onBeginProjection" text="Projetar na Tela" HBox.hgrow="ALWAYS">
-                            <HBox.margin>
-                                <Insets />
-                            </HBox.margin>
-                        </Button>
-                        <Button fx:id="endProjectionButton" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onEndProjection" text="Interromper Projeção (ESC)" HBox.hgrow="ALWAYS" />
-                  <CheckBox fx:id="fullScreenCheckBox" mnemonicParsing="false" onAction="#onFullScreenAction" text="Tela Inteira">
-                     <HBox.margin>
-                        <Insets left="10.0" />
-                     </HBox.margin>
-                  </CheckBox>
-                    </children>
-                </HBox>
-                <BorderPane fx:id="playerContainer" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-border-color: #AAAAAA; -fx-background-color: #000000" VBox.vgrow="ALWAYS">
-                    <children>
-                    </children>
-                    <VBox.margin>
-                        <Insets bottom="5.0" top="5.0" />
-                    </VBox.margin>
-                </BorderPane>
-                <HBox VBox.vgrow="NEVER">
-                    <children>
-                        <Button fx:id="playButton" mnemonicParsing="false" onAction="#playButtonClick" prefHeight="28.0" prefWidth="28.0" text="▶" HBox.hgrow="NEVER">
-                            <font>
-                                <Font size="12.0" />
-                            </font>
-                        </Button>
-                        <Button fx:id="pauseButton" mnemonicParsing="false" onAction="#pauseButtonClick" prefHeight="28.0" prefWidth="28.0" HBox.hgrow="NEVER">
-                            <graphic>
-                                <ImageView fitHeight="10.0" fitWidth="10.0">
-                                    <image>
-                                        <Image url="@../icons/icon-pause.png" />
-                                    </image>
-                                </ImageView>
-                            </graphic>
-                        </Button>
-                        <Button fx:id="stopButton" mnemonicParsing="false" onAction="#stopButtonClick" prefHeight="28.0" prefWidth="28.0" HBox.hgrow="NEVER">
-                            <graphic>
-                                <ImageView fitHeight="15.0" fitWidth="15.0">
-                                    <image>
-                                        <Image url="@../icons/icon-stop.png" />
-                                    </image>
-                                </ImageView>
-                            </graphic>
-                        </Button>
-                        <ToggleButton fx:id="repeatButton" mnemonicParsing="false" onAction="#repeatButtonClick" prefHeight="28.0" prefWidth="28.0">
-                            <graphic>
-                                <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
-                                    <image>
-                                        <Image url="@../icons/icon-repeat.png" />
-                                    </image>
-                                </ImageView>
-                            </graphic>
-                        </ToggleButton>
-                        <Slider fx:id="timeBar" blockIncrement="0.05" max="1.0" HBox.hgrow="ALWAYS">
-                            <HBox.margin>
-                                <Insets bottom="5.0" left="5.0" top="5.0" />
-                            </HBox.margin>
-                        </Slider>
-                        <Label fx:id="timeLabel" text="00:00:00">
-                            <HBox.margin>
-                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                            </HBox.margin>
-                        </Label>
-                        <ToggleButton fx:id="withoutSoundButton" mnemonicParsing="false" onAction="#withoutSoundButtonClick" selected="true" text="Sem Som" HBox.hgrow="NEVER">
-                            <toggleGroup>
-                                <ToggleGroup fx:id="soundToggle" />
-                            </toggleGroup>
-                        </ToggleButton>
-                        <ToggleButton fx:id="withSoundButton" mnemonicParsing="false" onAction="#withSoundButtonClick" text="Com Som" toggleGroup="$soundToggle" />
-                    </children>
-                </HBox>
-            </children>
-        </VBox>
-    </children>
+<AnchorPane id="rootBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+            prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="us.guihouse.projector.forms.controllers.projection.PlayerController">
     <padding>
-        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
     </padding>
+    <VBox fx:id="chooseFileBox" alignment="TOP_CENTER" maxHeight="1.7976931348623157E308"
+          maxWidth="1.7976931348623157E308" onDragDropped="#onDragDropped" onDragExited="#onDragExit"
+          onDragOver="#onDragOver" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <Label fx:id="dragDropLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="126.0" layoutY="200.0"
+               maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+               text="Arraste e solte aqui um vídeo para ser projetado." textAlignment="CENTER" underline="true"
+               VBox.vgrow="NEVER">
+            <VBox.margin>
+                <Insets top="10.0"/>
+            </VBox.margin>
+            <font>
+                <Font size="14.0"/>
+            </font>
+        </Label>
+    </VBox>
+    <VBox fx:id="playerBox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="200.0"
+          prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+          AnchorPane.topAnchor="0.0" VBox.vgrow="ALWAYS">
+        <HBox alignment="CENTER_LEFT" VBox.vgrow="NEVER">
+            <Button fx:id="beginProjectionButton" maxHeight="1.7976931348623157E308"
+                    maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onBeginProjection"
+                    text="Projetar na Tela" HBox.hgrow="ALWAYS">
+                <HBox.margin>
+                    <Insets/>
+                </HBox.margin>
+            </Button>
+            <Button fx:id="endProjectionButton" maxHeight="1.7976931348623157E308"
+                    maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onEndProjection"
+                    text="Interromper Projeção (ESC)" HBox.hgrow="ALWAYS"/>
+            <CheckBox fx:id="fullScreenCheckBox" mnemonicParsing="false" onAction="#onFullScreenAction"
+                      text="Tela Inteira">
+                <HBox.margin>
+                    <Insets left="10.0"/>
+                </HBox.margin>
+            </CheckBox>
+        </HBox>
+        <BorderPane fx:id="playerContainer" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                    style="-fx-border-color: #AAAAAA; -fx-background-color: #000000" VBox.vgrow="ALWAYS">
+            <VBox.margin>
+                <Insets bottom="5.0" top="5.0"/>
+            </VBox.margin>
+        </BorderPane>
+        <HBox VBox.vgrow="NEVER">
+            <Button fx:id="playButton" mnemonicParsing="false" onAction="#playButtonClick" prefHeight="28.0"
+                    prefWidth="28.0" text="▶" HBox.hgrow="NEVER">
+                <font>
+                    <Font size="12.0"/>
+                </font>
+            </Button>
+            <Button fx:id="pauseButton" mnemonicParsing="false" onAction="#pauseButtonClick" prefHeight="28.0"
+                    prefWidth="28.0" HBox.hgrow="NEVER">
+                <graphic>
+                    <ImageView fitHeight="10.0" fitWidth="10.0">
+                        <Image url="@../icons/icon-pause.png"/>
+                    </ImageView>
+                </graphic>
+            </Button>
+            <Button fx:id="stopButton" mnemonicParsing="false" onAction="#stopButtonClick" prefHeight="28.0"
+                    prefWidth="28.0" HBox.hgrow="NEVER">
+                <graphic>
+                    <ImageView fitHeight="15.0" fitWidth="15.0">
+                        <Image url="@../icons/icon-stop.png"/>
+                    </ImageView>
+                </graphic>
+            </Button>
+            <ToggleButton fx:id="repeatButton" mnemonicParsing="false" onAction="#repeatButtonClick"
+                          prefHeight="28.0" prefWidth="28.0">
+                <graphic>
+                    <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
+                        <Image url="@../icons/icon-repeat.png"/>
+                    </ImageView>
+                </graphic>
+            </ToggleButton>
+            <Slider fx:id="timeBar" blockIncrement="0.05" max="1.0" HBox.hgrow="ALWAYS">
+                <HBox.margin>
+                    <Insets bottom="5.0" left="5.0" top="5.0"/>
+                </HBox.margin>
+            </Slider>
+            <Label fx:id="timeLabel" text="00:00:00">
+                <HBox.margin>
+                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                </HBox.margin>
+            </Label>
+            <ToggleButton fx:id="withoutSoundButton" mnemonicParsing="false" onAction="#withoutSoundButtonClick"
+                          selected="true" text="Sem Som" HBox.hgrow="NEVER">
+                <toggleGroup>
+                    <ToggleGroup fx:id="soundToggle"/>
+                </toggleGroup>
+            </ToggleButton>
+            <ToggleButton fx:id="withSoundButton" mnemonicParsing="false" onAction="#withSoundButtonClick"
+                          text="Com Som" toggleGroup="$soundToggle"/>
+        </HBox>
+    </VBox>
 </AnchorPane>

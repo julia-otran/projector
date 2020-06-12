@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -31,8 +29,6 @@ import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
-import us.guihouse.projector.forms.controllers.projection.ProjectionController;
-import us.guihouse.projector.projection.Projectable;
 import us.guihouse.projector.projection.ProjectionImage;
 import us.guihouse.projector.projection.ProjectionManager;
 import us.guihouse.projector.projection.models.BackgroundProvide;
@@ -71,8 +67,8 @@ public class ImageController extends ProjectionController implements Runnable {
     private ImageView imageView;
 
     private boolean running = false;
-    private List<BufferedImage> awtImages = new ArrayList<>();
-    private List<File> openedImages = new ArrayList<>();
+    private final List<BufferedImage> awtImages = new ArrayList<>();
+    private final List<File> openedImages = new ArrayList<>();
 
     @FXML
     private ListView<Image> imagesList;
@@ -90,11 +86,9 @@ public class ImageController extends ProjectionController implements Runnable {
 
     private String oldLabelText;
 
-    private DecimalFormat milisecondsFormatter = new DecimalFormat("#0.000");
+    private final DecimalFormat milisecondsFormatter = new DecimalFormat("#0.000");
 
-    private Thread timerThread = null;
-
-    private class ImageListCell extends ListCell<Image> {
+    private static class ImageListCell extends ListCell<Image> {
         @Override
         protected void updateItem(Image item, boolean empty) {
             super.updateItem(item, empty);
@@ -119,75 +113,35 @@ public class ImageController extends ProjectionController implements Runnable {
         projectable.setCropBackground(false);
         oldLabelText = dragDropLabel.getText();
 
-        Callback<ListView<Image>, ListCell<Image>> cellFactory = new Callback<ListView<Image>, ListCell<Image>>() {
-            @Override public ListCell<Image> call(ListView<Image> listView) {
-                return new ImageListCell();
-            }
-        };
+        Callback<ListView<Image>, ListCell<Image>> cellFactory = listView -> new ImageListCell();
 
         imagesList.setCellFactory(cellFactory);
 
-        imagesList.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                projectable.setModel(new BackgroundProvide() {
-                    @Override
-                    public BufferedImage getBackground() {
-                        return null;
-                    }
+        imagesList.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
+            projectable.setModel(() -> awtImages.get(newValue.intValue()));
 
-                    @Override
-                    public BufferedImage getLogo() {
-                        return null;
-                    }
-
-                    @Override
-                    public BufferedImage getOverlay() {
-                        return null;
-                    }
-
-                    @Override
-                    public BufferedImage getStaticBackground() {
-                        return awtImages.get(newValue.intValue());
-                    }
-
-                    @Override
-                    public Type getType() {
-                        return Type.STATIC;
-                    }
-                });
-
-                imageView.setImage(imagesList.getItems().get(newValue.intValue()));
-            }
+            imageView.setImage(imagesList.getItems().get(newValue.intValue()));
         });
 
         formatTimeLabel();
 
-        changeMsecSlider.valueProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                formatTimeLabel();
-            }
-        });
+        changeMsecSlider.valueProperty().addListener((observable, oldValue, newValue) -> formatTimeLabel());
 
         loadOpenedImages();
 
-        getProjectionManager().projectableProperty().addListener(new ChangeListener<Projectable>() {
-            @Override
-            public void changed(ObservableValue<? extends Projectable> observableValue, Projectable oldValue, Projectable newValue) {
-                if (newValue == projectable) {
-                    beginProjectionButton.disableProperty().set(true);
-                    endProjectionButton.disableProperty().set(false);
-                } else {
-                    beginProjectionButton.disableProperty().set(false);
-                    endProjectionButton.disableProperty().set(true);
-                }
+        getProjectionManager().projectableProperty().addListener((observableValue, oldValue, newValue) -> {
+            if (newValue == projectable) {
+                beginProjectionButton.disableProperty().set(true);
+                endProjectionButton.disableProperty().set(false);
+            } else {
+                beginProjectionButton.disableProperty().set(false);
+                endProjectionButton.disableProperty().set(true);
             }
         });
     }
 
-    private List<Image> toAdd = new ArrayList<>();
-    private List<File> toAddFiles = new ArrayList<>();
+    private final List<Image> toAdd = new ArrayList<>();
+    private final List<File> toAddFiles = new ArrayList<>();
 
     @FXML
     public void onDragOver(DragEvent event) {
@@ -212,7 +166,7 @@ public class ImageController extends ProjectionController implements Runnable {
                 event.acceptTransferModes(TransferMode.LINK);
             }
         } else {
-            setError("Mídia inaceitável");
+            setError();
         }
     }
 
@@ -289,9 +243,9 @@ public class ImageController extends ProjectionController implements Runnable {
         setOriginal();
     }
 
-    private void setError(String error) {
+    private void setError() {
         dragDropLabel.setVisible(true);
-        dragDropLabel.setText(error);
+        dragDropLabel.setText("Mídia inaceitável");
         imagePane.setBorder(new Border(new BorderStroke(Color.RED, BorderStrokeStyle.SOLID, null, new BorderWidths(3))));
     }
 
@@ -336,7 +290,7 @@ public class ImageController extends ProjectionController implements Runnable {
         }
 
         running = true;
-        timerThread = new Thread(this);
+        Thread timerThread = new Thread(this);
         timerThread.start();
     }
 
@@ -346,6 +300,7 @@ public class ImageController extends ProjectionController implements Runnable {
 
     private long time;
 
+    @SuppressWarnings("BusyWait")
     @Override
     public void run() {
         while (running) {
@@ -372,9 +327,7 @@ public class ImageController extends ProjectionController implements Runnable {
                 nextIndex = newIndex;
             }
 
-            Platform.runLater(() -> {
-                imagesList.getSelectionModel().clearAndSelect(nextIndex);
-            });
+            Platform.runLater(() -> imagesList.getSelectionModel().clearAndSelect(nextIndex));
 
             try {
                 Thread.sleep(100);

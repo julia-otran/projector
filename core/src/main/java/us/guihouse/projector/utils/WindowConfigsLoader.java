@@ -6,13 +6,8 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
-import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import lombok.Getter;
@@ -189,9 +184,7 @@ public class WindowConfigsLoader implements Runnable {
     public void loadDefaultConfigs() {
         ProjectorPreferences.setWindowConfigFile(null);
         observer.updateConfigs(observer.getDefaultConfigs());
-        Platform.runLater(() -> {
-            loadedConfigFile.set(null);
-        });
+        Platform.runLater(() -> loadedConfigFile.set(null));
     }
 
     private boolean loadConfigs(File configFile) {
@@ -205,9 +198,7 @@ public class WindowConfigsLoader implements Runnable {
 
                 ProjectorPreferences.setWindowConfigFile(configFile.getName());
 
-                Platform.runLater(() -> {
-                    loadedConfigFile.set(configFile.getName());
-                });
+                Platform.runLater(() -> loadedConfigFile.set(configFile.getName()));
 
                 int blendId = 0;
 

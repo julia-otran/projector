@@ -1,4 +1,4 @@
-/**
+/*
  * helper class to check the operating system this Java VM runs in
  *
  * please keep the notes below as a pseudo-license
@@ -17,9 +17,9 @@ public final class OsCheck {
    */
   public enum OSType {
     Windows, MacOS, Linux, Other
-  };
+  }
 
-  // cached result of OS detection
+    // cached result of OS detection
   protected static OSType detectedOS;
 
   /**

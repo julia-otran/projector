@@ -27,7 +27,6 @@ public class PreviewImageView extends ImageView implements Runnable {
     private BufferedImage targetRender;
     private Graphics2D targetGraphics;
     private WritableImage fxTargetRender;
-    private final Object sync = new Object();
 
     private boolean repainting = false;
     private boolean running = false;
@@ -75,6 +74,7 @@ public class PreviewImageView extends ImageView implements Runnable {
         }
     }
 
+    @SuppressWarnings("BusyWait")
     @Override
     public void run() {
         while (running) {

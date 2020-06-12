@@ -22,7 +22,7 @@ public class ProjectableItemListCell extends ListCell<ProjectionListItem> {
 
     public ProjectableItemListCell(CellCallback<ProjectionListItem> cellCallback) {
         this.cellCallback = cellCallback;
-        ListCell thisCell = this;
+        ListCell<ProjectionListItem> thisCell = this;
 
         setOnDragDetected(event -> {
             if (getItem() == null) {

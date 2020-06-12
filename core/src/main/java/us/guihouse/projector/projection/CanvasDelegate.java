@@ -10,7 +10,6 @@ import java.util.List;
 
 import us.guihouse.projector.projection.models.VirtualScreen;
 import us.guihouse.projector.services.SettingsService;
-import us.guihouse.projector.utils.WindowConfigsLoader;
 
 /**
  *

@@ -5,16 +5,11 @@
  */
 package us.guihouse.projector.projection;
 
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-
 /**
  *
  * @author guilherme
  */
 public interface Projectable extends Paintable {
-
-    CanvasDelegate getCanvasDelegate();
 
     void rebuildLayout();
 

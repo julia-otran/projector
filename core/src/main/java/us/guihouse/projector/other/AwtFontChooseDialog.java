@@ -25,16 +25,16 @@ import javax.swing.JLabel;
  *
  * @author guilherme
  */
-public class AwtFontChooseDialog extends Dialog implements ChangeListener {
+public class AwtFontChooseDialog extends Dialog<Object> implements ChangeListener<Number> {
 
     public interface OnFontSelected {
-        public void onFontChosed(Font font);
+        void onFontChosen(Font font);
     }
     
     private Font font;
     
     private final JLabel previewLabel;
-    private final ListView<String> fontnames;
+    private final ListView<String> fontNames;
     private final ListView<String> styles;
     private final ListView<String> sizes;
     
@@ -59,16 +59,14 @@ public class AwtFontChooseDialog extends Dialog implements ChangeListener {
         final Button btCancel = (Button) this.getDialogPane().lookupButton(cancel);
         final Button btConfirm = (Button) this.getDialogPane().lookupButton(confirm);
         
-        btCancel.addEventFilter(ActionEvent.ACTION, event -> {
-            AwtFontChooseDialog.this.close();
-        });
+        btCancel.addEventFilter(ActionEvent.ACTION, event -> AwtFontChooseDialog.this.close());
         
         btConfirm.addEventFilter(ActionEvent.ACTION, event -> {
-            callback.onFontChosed(font);
+            callback.onFontChosen(font);
             AwtFontChooseDialog.this.close();
         });
         
-        fontnames = new ListView<>();
+        fontNames = new ListView<>();
         styles = new ListView<>();
         sizes = new ListView<>();
         
@@ -77,7 +75,7 @@ public class AwtFontChooseDialog extends Dialog implements ChangeListener {
         previewLabel.setText("AaBbÇç");
         previewLabel.setMaximumSize(new Dimension(350, 200));
         
-        hbox.getChildren().add(fontnames);
+        hbox.getChildren().add(fontNames);
         hbox.getChildren().add(styles);
         hbox.getChildren().add(sizes);
         
@@ -87,9 +85,9 @@ public class AwtFontChooseDialog extends Dialog implements ChangeListener {
         previewNode.setContent(previewLabel);
         vbox.getChildren().add(previewNode);
         
-        fontnames.getItems().addAll(getFontNames());
-        fontnames.getSelectionModel().select(current.getFamily());
-        fontnames.getSelectionModel().selectedIndexProperty().addListener(this);
+        fontNames.getItems().addAll(getFontNames());
+        fontNames.getSelectionModel().select(current.getFamily());
+        fontNames.getSelectionModel().selectedIndexProperty().addListener(this);
         
         sizes.getItems().addAll(getFontSizes());
         sizes.getSelectionModel().select(Integer.toString(current.getSize()));
@@ -108,7 +106,7 @@ public class AwtFontChooseDialog extends Dialog implements ChangeListener {
         int maxSize = 2048;
         int step = 16;
         
-        String sizes[] = new String[maxSize / step];
+        String[] sizes = new String[maxSize / step];
         
         int i = 0;
         for (int s=16; s <= maxSize; s += step) {
@@ -137,22 +135,13 @@ public class AwtFontChooseDialog extends Dialog implements ChangeListener {
         return 0;
     }
     
-    private static int getStyleFromIndex(int i) {
-        switch (i) {
-            case 1: return Font.BOLD;
-            case 2: return Font.ITALIC;
-            case 3: return Font.BOLD + Font.ITALIC;
-            default: return Font.PLAIN;
-        }
-    } 
-    
     @Override
-    public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+    public void changed(ObservableValue observable, Number oldValue, Number newValue) {
         updateFont();
     }
     
     private void updateFont() {
-        String familyName = fontnames.getSelectionModel().getSelectedItem();
+        String familyName = fontNames.getSelectionModel().getSelectedItem();
         int size;
         
         try {
@@ -161,8 +150,15 @@ public class AwtFontChooseDialog extends Dialog implements ChangeListener {
             size = 16;
         }
         
-        int style = getStyleFromIndex(styles.getSelectionModel().getSelectedIndex());
-        
+        int style;
+
+        switch (styles.getSelectionModel().getSelectedIndex()) {
+            case 1: style = Font.BOLD; break;
+            case 2: style = Font.ITALIC; break;
+            case 3: style = Font.BOLD + Font.ITALIC; break;
+            default: style = Font.PLAIN;
+        }
+
         this.font = new Font(familyName, style, size);
         previewLabel.setFont(font);
     }

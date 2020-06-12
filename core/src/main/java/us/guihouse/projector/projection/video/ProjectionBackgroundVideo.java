@@ -2,8 +2,6 @@ package us.guihouse.projector.projection.video;
 
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
-import javafx.beans.property.ReadOnlyObjectWrapper;
-import lombok.Getter;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import us.guihouse.projector.projection.CanvasDelegate;
 import us.guihouse.projector.projection.Projectable;
@@ -16,19 +14,17 @@ import java.util.*;
 import java.util.List;
 
 public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgroundVideoLoop.LoopCallback {
-    private CanvasDelegate canvasDelegate;
-    private List<File> media = new ArrayList<>();
+    private final List<File> media = new ArrayList<>();
     private File currentMedia = null;
-    private Map<Integer, File> musicMap = new HashMap<>();
-    private Random random = new Random();
-    private ProjectionVideo videoProjectors[] = new ProjectionVideo[2];
+    private final Map<Integer, File> musicMap = new HashMap<>();
+    private final Random random = new Random();
+    private final ProjectionVideo[] videoProjectors = new ProjectionVideo[2];
     private boolean playing;
     private int currentPlayer = 0;
 
     private final ReadOnlyBooleanWrapper render = new ReadOnlyBooleanWrapper();
 
     public ProjectionBackgroundVideo(CanvasDelegate delegate) {
-        this.canvasDelegate = delegate;
         videoProjectors[0] = new ProjectionVideo(delegate);
         videoProjectors[1] = new ProjectionVideo(delegate);
 
@@ -53,11 +49,6 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
     public void paintComponent(Graphics2D g, VirtualScreen vs) {
         videoProjectors[0].paintComponent(g, vs);
         videoProjectors[1].paintComponent(g, vs);
-    }
-
-    @Override
-    public CanvasDelegate getCanvasDelegate() {
-        return this.canvasDelegate;
     }
 
     @Override
@@ -88,9 +79,7 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
     }
 
     public void loadMedia() {
-        ThemeFinder.getThemes().forEach(t -> {
-            media.add(t.getVideoFile());
-        });
+        ThemeFinder.getThemes().forEach(t -> media.add(t.getVideoFile()));
     }
 
     public void startBackground(Integer musicId, File preferred) {

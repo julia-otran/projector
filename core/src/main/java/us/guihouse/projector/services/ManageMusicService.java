@@ -14,8 +14,6 @@ import us.guihouse.projector.other.SQLiteJDBCDriverConnection;
 import us.guihouse.projector.repositories.ArtistRepository;
 import us.guihouse.projector.repositories.MusicRepository;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,9 +27,7 @@ import us.guihouse.projector.dtos.ImportingMusicDTO;
 import us.guihouse.projector.dtos.ListMusicDTO;
 import us.guihouse.projector.repositories.MetricsRepository;
 import us.guihouse.projector.utils.promise.BackgroundExecutor;
-import us.guihouse.projector.utils.promise.Callback;
 import us.guihouse.projector.utils.promise.Promise;
-import us.guihouse.projector.utils.promise.Task;
 
 /**
  *
@@ -39,27 +35,21 @@ import us.guihouse.projector.utils.promise.Task;
  */
 public class ManageMusicService {
 
-    public class SaveException extends Exception {
+    public static class SaveException extends Exception {
         public SaveException() { }
         public SaveException(String msg, Throwable cause) {
             super(msg, cause);
         } 
     }
 
-    public class MusicAlreadyPresentException extends SaveException {
-
-        private final Music music;
+    public static class MusicAlreadyPresentException extends SaveException {
 
         public MusicAlreadyPresentException(Music music) {
-            this.music = music;
         }
 
-        public Music getMusic() {
-            return music;
-        }
     }
 
-    public class PersistenceException extends SaveException { 
+    public static class PersistenceException extends SaveException {
         public PersistenceException(){ }
         
         public PersistenceException(String msg, Throwable cause) {
@@ -67,10 +57,10 @@ public class ManageMusicService {
         } 
     }
     
-    public class InvalidData extends SaveException { }
-    public class InavlidArtist extends InvalidData { }
-    public class InvalidName extends InvalidData { }
-    public class InvalidPhrases extends InvalidData { }
+    public static class InvalidData extends SaveException { }
+    public static class InavlidArtist extends InvalidData { }
+    public static class InvalidName extends InvalidData { }
+    public static class InvalidPhrases extends InvalidData { }
 
     private final ArtistRepository artistRepo = new ArtistRepository();
     private final MusicRepository musicRepo = new MusicRepository();
@@ -175,12 +165,8 @@ public class ManageMusicService {
         }
         
         Music m = musicRepo.findByNameAndArtist(music.getName(), a);
-        
-        if (m == null) {
-            return false;
-        }
-        
-        return true;
+
+        return m != null;
     }
 
     public Integer createMusic(String name, String artist, String phrases, String theme) throws MusicAlreadyPresentException, PersistenceException, InavlidArtist, InvalidName, InvalidPhrases {
@@ -241,7 +227,7 @@ public class ManageMusicService {
         }
     }
 
-    public void updateMusic(Integer id, String name, String artist, String phrases, String theme) throws MusicAlreadyPresentException, PersistenceException, InavlidArtist {
+    public void updateMusic(Integer id, String name, String artist, String phrases, String theme) throws PersistenceException, InavlidArtist {
         try {
             SQLiteJDBCDriverConnection.getConn().setAutoCommit(false);
             Artist a = findOrCrateArtist(artist);
@@ -306,28 +292,25 @@ public class ManageMusicService {
     }
 
     public Promise<List<Statistic>> getStatistics(IntervalChoice interval, Weekday weekday) {
-        return Promise.create(new Task<Void, List<Statistic>>() {
-            @Override
-            public void execute(Void input, Callback<List<Statistic>> callback) {
-                try {
+        return Promise.create((input, callback) -> {
+            try {
 
-                    List<Statistic> statistics = metricRepo.getStatistics(interval, weekday);
+                List<Statistic> statistics = metricRepo.getStatistics(interval, weekday);
 
-                    statistics.stream().forEach(s -> {
-                        try {
-                            s.setMusic(musicRepo.findById(s.getMusicId()));
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
-                        }
-                    });
+                statistics.forEach(s -> {
+                    try {
+                        s.setMusic(musicRepo.findById(s.getMusicId()));
+                    } catch (SQLException ex) {
+                        ex.printStackTrace();
+                    }
+                });
 
-                    callback.success(statistics);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    callback.error(e);
-                }
+                callback.success(statistics);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                callback.error(e);
             }
-        }, new BackgroundExecutor());
+        }, new BackgroundExecutor<>());
 
     }
 }

@@ -14,11 +14,10 @@ import java.util.Map;
 
 public class ProjectionListRepository {
     public List<SimpleProjectionList> activeLists() throws SQLException {
-        PreparedStatement stmt = SQLiteJDBCDriverConnection
-                .getConn()
-                .prepareStatement("SELECT id, title FROM projection_lists WHERE active = 1 ORDER BY id DESC");
 
-        try {
+        try (PreparedStatement stmt = SQLiteJDBCDriverConnection
+                .getConn()
+                .prepareStatement("SELECT id, title FROM projection_lists WHERE active = 1 ORDER BY id DESC")) {
             ResultSet rs = stmt.executeQuery();
             List<SimpleProjectionList> list = new ArrayList<>();
 
@@ -32,8 +31,6 @@ public class ProjectionListRepository {
             }
 
             return list;
-        } finally {
-            stmt.close();
         }
     }
 
@@ -64,11 +61,9 @@ public class ProjectionListRepository {
                 + "WHERE projection_list_id = ? "
                 + "ORDER BY order_number ASC";
 
-        PreparedStatement stmt = SQLiteJDBCDriverConnection
+        try (PreparedStatement stmt = SQLiteJDBCDriverConnection
                 .getConn()
-                .prepareStatement(sql);
-
-        try {
+                .prepareStatement(sql)) {
             stmt.setInt(1, projectionListId);
             ResultSet rs = stmt.executeQuery();
 
@@ -80,8 +75,6 @@ public class ProjectionListRepository {
                 item.setOrder(rs.getInt("order_number"));
                 items.add(item);
             }
-        } finally {
-            stmt.close();
         }
 
         return items;
@@ -94,19 +87,15 @@ public class ProjectionListRepository {
                 + "FROM projection_list_item_properties "
                 + "WHERE projection_list_item_id = ?";
 
-        PreparedStatement stmt = SQLiteJDBCDriverConnection
+        try (PreparedStatement stmt = SQLiteJDBCDriverConnection
                 .getConn()
-                .prepareStatement(sql);
-
-        try {
+                .prepareStatement(sql)) {
             stmt.setLong(1, itemId);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
                 properties.put(rs.getString("key"), rs.getString("value"));
             }
-        } finally {
-            stmt.close();
         }
 
         return properties;
@@ -118,16 +107,13 @@ public class ProjectionListRepository {
         item.setType(type);
 
         String maxOrderSql = "SELECT MAX(order_number) FROM projection_list_items WHERE projection_list_id = ?";
-        PreparedStatement orderStmt =  SQLiteJDBCDriverConnection
-                .getConn()
-                .prepareStatement(maxOrderSql);
 
-        try {
+        try (PreparedStatement orderStmt = SQLiteJDBCDriverConnection
+                .getConn()
+                .prepareStatement(maxOrderSql)) {
             orderStmt.setInt(1, list.getId());
             ResultSet rs = orderStmt.executeQuery();
             item.setOrder(rs.getInt(1) + 1);
-        } finally {
-            orderStmt.close();
         }
 
         String sql = "INSERT INTO projection_list_items(title, type, projection_list_id, order_number) VALUES(?, ?, ?, ?)";
@@ -136,14 +122,12 @@ public class ProjectionListRepository {
                 .getConn()
                 .prepareStatement(sql);
 
-        try {
+        try (stmt) {
             stmt.setString(1, item.getTitle());
             stmt.setString(2, item.getType().name());
             stmt.setInt(3, list.getId());
             stmt.setInt(4, item.getOrder());
             stmt.execute();
-        } finally {
-            stmt.close();
         }
 
         ResultSet keys = stmt.getGeneratedKeys();
@@ -156,31 +140,24 @@ public class ProjectionListRepository {
     public void updateItemProperties(long itemId, Map<String, String> properties) throws SQLException {
         String sql = "DELETE FROM projection_list_item_properties WHERE projection_list_item_id = ?";
 
-        PreparedStatement stmt = SQLiteJDBCDriverConnection
+        try (PreparedStatement stmt = SQLiteJDBCDriverConnection
                 .getConn()
-                .prepareStatement(sql);
-
-        try {
+                .prepareStatement(sql)) {
             stmt.setLong(1, itemId);
             stmt.execute();
-        } finally {
-            stmt.close();
         }
 
         final String insertSql = "INSERT INTO projection_list_item_properties(projection_list_item_id, key, value) VALUES (?, ?, ?)";
 
-        PreparedStatement insert = SQLiteJDBCDriverConnection
+        try (PreparedStatement insert = SQLiteJDBCDriverConnection
                 .getConn()
-                .prepareStatement(insertSql);
-        try {
+                .prepareStatement(insertSql)) {
             for (Map.Entry<String, String> entry : properties.entrySet()) {
                 insert.setLong(1, itemId);
                 insert.setString(2, entry.getKey());
                 insert.setString(3, entry.getValue());
                 insert.execute();
             }
-        } finally {
-            insert.close();
         }
     }
 
@@ -189,32 +166,24 @@ public class ProjectionListRepository {
 
         String sql = "UPDATE projection_list_items SET title = ? WHERE id = ?";
 
-        PreparedStatement stmt = SQLiteJDBCDriverConnection
+        try (PreparedStatement stmt = SQLiteJDBCDriverConnection
                 .getConn()
-                .prepareStatement(sql);
-
-        try {
+                .prepareStatement(sql)) {
             stmt.setString(1, projectionListItem.getTitle());
             stmt.setLong(2, projectionListItem.getId());
             stmt.execute();
-        } finally {
-            stmt.close();
         }
     }
 
     public void updateItemSort(ProjectionListItem item) throws SQLException {
         String sql = "UPDATE projection_list_items SET order_number = ? WHERE id = ?";
 
-        PreparedStatement stmt = SQLiteJDBCDriverConnection
+        try (PreparedStatement stmt = SQLiteJDBCDriverConnection
                 .getConn()
-                .prepareStatement(sql);
-
-        try {
+                .prepareStatement(sql)) {
             stmt.setInt(1, item.getOrder());
             stmt.setLong(2, item.getId());
             stmt.execute();
-        } finally {
-            stmt.close();
         }
     }
 
@@ -223,30 +192,22 @@ public class ProjectionListRepository {
 
         String sql = "DELETE FROM projection_list_items WHERE id = ?";
 
-        PreparedStatement stmt = SQLiteJDBCDriverConnection
+        try (PreparedStatement stmt = SQLiteJDBCDriverConnection
                 .getConn()
-                .prepareStatement(sql);
-
-        try {
+                .prepareStatement(sql)) {
             stmt.setLong(1, item.getId());
             stmt.execute();
-        } finally {
-            stmt.close();
         }
     }
 
     public void deleteList(SimpleProjectionList selectedItem) throws SQLException {
         String sql = "UPDATE projection_lists SET active = 0 WHERE id = ?";
 
-        PreparedStatement stmt = SQLiteJDBCDriverConnection
+        try (PreparedStatement stmt = SQLiteJDBCDriverConnection
                 .getConn()
-                .prepareStatement(sql);
-
-        try {
+                .prepareStatement(sql)) {
             stmt.setInt(1, selectedItem.getId());
             stmt.execute();
-        } finally {
-            stmt.close();
         }
     }
 }

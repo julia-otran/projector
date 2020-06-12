@@ -7,26 +7,19 @@ package us.guihouse.projector;
 
 import com.mashape.unirest.http.Unirest;
 
-import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sun.jna.Native;
-import com.sun.jna.NativeLibrary;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
-import javafx.stage.Window;
-import javafx.stage.WindowEvent;
 import us.guihouse.projector.forms.controllers.GraphicsDeviceHelper;
 import us.guihouse.projector.forms.controllers.SceneManager;
 import us.guihouse.projector.forms.controllers.WorkspaceController;
@@ -46,7 +39,7 @@ public class Projector extends Application implements Runnable {
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         System.setProperty("sun.java2d.opengl", "True");
         launch(args);
     }
@@ -59,12 +52,10 @@ public class Projector extends Application implements Runnable {
 
         final GraphicsDeviceHelper graphicsHelper = new GraphicsDeviceHelper();
 
-        graphicsHelper.setInitCallback(() -> {
-            Platform.runLater(() -> {
-                graphicsHelper.setInitCallback(null);
-                controller.init(graphicsHelper);
-            });
-        });
+        graphicsHelper.setInitCallback(() -> Platform.runLater(() -> {
+            graphicsHelper.setInitCallback(null);
+            controller.init(graphicsHelper);
+        }));
 
         graphicsHelper.init();
     }
@@ -74,12 +65,8 @@ public class Projector extends Application implements Runnable {
         SQLiteJDBCDriverConnection.connect();
         SQLiteJDBCDriverConnection.migrate();
 
-        Platform.runLater(() -> {
-            Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-        });
-        SwingUtilities.invokeLater(() -> {
-            Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-        });
+        Platform.runLater(() -> Thread.currentThread().setPriority(Thread.MIN_PRIORITY));
+        SwingUtilities.invokeLater(() -> Thread.currentThread().setPriority(Thread.MIN_PRIORITY));
 
         primaryStage.setTitle("Projector");
         primaryStage.setMaxWidth(Double.MAX_VALUE);
@@ -110,18 +97,11 @@ public class Projector extends Application implements Runnable {
                 return primaryStage;
             }
 
-            @Override
-            public Window getWindow() {
-                return workspaceScene.getWindow();
-            }
         });
         
-        workspaceScene.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent t) {
-                if(t.getCode() == KeyCode.ESCAPE) {
-                    controller.onEscapeKeyPressed();
-                }
+        workspaceScene.addEventFilter(KeyEvent.KEY_PRESSED, t -> {
+            if (t.getCode() == KeyCode.ESCAPE) {
+                controller.onEscapeKeyPressed();
             }
         });
         
@@ -129,31 +109,18 @@ public class Projector extends Application implements Runnable {
 
         primaryStage.show();
         
-        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-            @Override
-            public void handle(WindowEvent event) {
-                controller.stop();
+        primaryStage.setOnCloseRequest(event -> {
+            controller.stop();
 
-                VlcPlayerFactory.finish();
+            VlcPlayerFactory.finish();
 
-                try {
-                    Unirest.shutdown();
-                } catch (IOException ex) {
-                    Logger.getLogger(Projector.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        Platform.runLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                System.exit(0);
-                            }
-                        });
-                    }
-                });
+            try {
+                Unirest.shutdown();
+            } catch (IOException ex) {
+                Logger.getLogger(Projector.class.getName()).log(Level.SEVERE, null, ex);
             }
+
+            SwingUtilities.invokeLater(() -> Platform.runLater(() -> System.exit(0)));
         });
 
         new Thread(this).start();

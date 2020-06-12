@@ -12,7 +12,6 @@ public class ProjectionListItem implements Identifiable {
 
     private ProjectionListItemType type;
 
-    @Override
     public String getIdentity() {
         return Long.toString(id);
     }

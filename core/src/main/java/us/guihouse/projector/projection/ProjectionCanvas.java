@@ -85,13 +85,9 @@ public class ProjectionCanvas implements ProjectionManager {
 
         faders.clear();
 
-        delegate.getVirtualScreens().forEach(vs -> {
-            faders.put(vs.getVirtualScreenId(), new PaintableCrossFader(vs));
-        });
+        delegate.getVirtualScreens().forEach(vs -> faders.put(vs.getVirtualScreenId(), new PaintableCrossFader(vs)));
 
-        faders.forEach((screen, fader) -> {
-            fader.fadeIn(background);
-        });
+        faders.forEach((screen, fader) -> fader.fadeIn(background));
     }
 
     public void finish() {
@@ -186,11 +182,6 @@ public class ProjectionCanvas implements ProjectionManager {
         initializeList.add(pl);
         pl.init();
         return pl;
-    }
-
-    @Override
-    public void setAnimateBackground(boolean selected) {
-        background.setEnableAnimation(selected);
     }
 
     @Override

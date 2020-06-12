@@ -16,22 +16,19 @@ public class Promise<X> {
     @Getter
     @Setter
     private Runnable dispatch;
-    
-    private Task task;
-    private Task errorTask;
-    private Executor executor;
+
+    private Task<X, ?> task;
+    private Task<Object, X> errorTask;
+
+    private Executor<X> successExecutor;
+    private Executor<Object> errorExecutor;
+
     private Callback next;
     
-    public static <X> Promise<X> create(Task<Void, X> task, Executor<Void, X> executor) {
-        Promise<X> p = new Promise<X>();
+    public static <X> Promise<X> create(Task<Void, X> task, Executor<Void> executor) {
+        Promise<X> p = new Promise<>();
         
-        p.setDispatch(new Runnable() {
-            @Override
-            public void run() {
-                executor.execute(null, task, p.getCallback());
-            }
-            
-        });
+        p.setDispatch(() -> executor.execute(null, task, p.getCallback()));
         
         return p;
     }
@@ -40,31 +37,32 @@ public class Promise<X> {
         dispatch.run();
     }
     
-    public <Y> Promise<Y> then(Task<X, Y> task, Executor<X, Y> executor) {
-        Promise<Y> p = new Promise<Y>();
+    public <Y> Promise<Y> then(Task<X, Y> task, Executor<X> executor) {
+        Promise<Y> p = new Promise<>();
         
         p.setDispatch(this.getDispatch());
         this.task = task;
-        this.executor = executor;
+        this.successExecutor = executor;
         this.next = p.getCallback();
         return p;
     }
-    
-    public Promise<X> handle(Task<Object, X> task, Executor<Object, X> executor) {
-        Promise<X> p = new Promise<X>();
+
+    public Promise<X> handle(Task<Object, X> task, Executor<Object> executor) {
+        Promise<X> p = new Promise<>();
+
         p.setDispatch(this.getDispatch());
         this.errorTask = task;
-        this.executor = executor;
+        this.errorExecutor = executor;
         this.next = p.getCallback();
         return p;
     }
-    
+
     private Callback<X> getCallback() {
-        return new Callback<X>() {
+        return new Callback<>() {
             @Override
             public void success(X out) {
                 if (task != null) {
-                    executor.execute(out, task, next);
+                    successExecutor.execute(out, task, next);
                 } else if (next != null) {
                     next.success(out);
                 }
@@ -73,12 +71,12 @@ public class Promise<X> {
             @Override
             public void error(Object obj) {
                 if (errorTask != null) {
-                    executor.execute(obj, errorTask, next);
+                    errorExecutor.execute(obj, errorTask, next);
                 } else if (next != null) {
                     next.error(obj);
                 }
             }
-            
+
         };
     }
 }

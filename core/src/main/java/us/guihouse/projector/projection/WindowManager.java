@@ -134,41 +134,33 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
             }
         });
 
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                windowConfigs.forEach(wc -> {
-                    ProjectionWindow w = windows.get(wc.getDisplayId());
+        SwingUtilities.invokeLater(() -> windowConfigs.forEach(wc -> {
+            ProjectionWindow w = windows.get(wc.getDisplayId());
 
-                    if (w != null) {
-                        w.init();
-                        w.setCursor(blankCursor);
-                        w.setFullScreen(fullScreen);
-                    }
-                });
+            if (w != null) {
+                w.init();
+                w.setCursor(blankCursor);
+                w.setFullScreen(fullScreen);
             }
-        });
+        }));
 
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                windowConfigs.forEach(wc -> {
-                    ProjectionWindow w = windows.get(wc.getDisplayId());
-                    if (w != null) {
-                        w.makeVisible();
-                    }
-                });
+        SwingUtilities.invokeLater(() -> {
+            windowConfigs.forEach(wc -> {
+                ProjectionWindow w = windows.get(wc.getDisplayId());
+                if (w != null) {
+                    w.makeVisible();
+                }
+            });
 
-                projectionCanvas.init();
-                preview.setProjectionCanvas(projectionCanvas);
+            projectionCanvas.init();
+            preview.setProjectionCanvas(projectionCanvas);
 
-                managerPresenter.start(windows);
+            managerPresenter.start(windows);
 
-                running = true;
-                drawThread = new Thread(WindowManager.this);
-                drawThread.start();
-                starting = false;
-            }
+            running = true;
+            drawThread = new Thread(WindowManager.this);
+            drawThread.start();
+            starting = false;
         });
     }
 
@@ -245,9 +237,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
         }
 
         windows.values().forEach(ProjectionWindow::shutdown);
-        screenGraphics.forEach((id, g) -> {
-            g.dispose();
-        });
+        screenGraphics.forEach((id, g) -> g.dispose());
 
         drawThread = null;
     }
@@ -317,9 +307,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
         stopEngine();
         this.windows.clear();
 
-        devices.forEach(device -> {
-            this.windows.put(device.getDevice().getIDstring(), new ProjectionWindow(device));
-        });
+        devices.forEach(device -> this.windows.put(device.getDevice().getIDstring(), new ProjectionWindow(device)));
 
         startEngine();
     }
@@ -428,9 +416,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
         bLevelFixAssets.clear();
 
         windowConfigs.forEach(wc -> {
-            wc.getBlends().forEach(blend -> {
-                blendAssets.put(blend.getId(), BlendGenerator.makeBlender(blend));
-            });
+            wc.getBlends().forEach(blend -> blendAssets.put(blend.getId(), BlendGenerator.makeBlender(blend)));
 
             AffineTransform t = new AffineTransform();
 

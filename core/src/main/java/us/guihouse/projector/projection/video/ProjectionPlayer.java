@@ -21,8 +21,6 @@ import us.guihouse.projector.projection.CanvasDelegate;
 public class ProjectionPlayer extends ProjectionVideo {
     private PlayerPreview preview;
 
-    private File loadedMedia;
-
     public ProjectionPlayer(CanvasDelegate delegate) {
         super(delegate);
     }
@@ -49,7 +47,6 @@ public class ProjectionPlayer extends ProjectionVideo {
 
     public void loadMedia(File file) {
         this.player.media().prepare(file.getAbsolutePath());
-        this.loadedMedia = file;
     }
 
     @Override
@@ -70,9 +67,7 @@ public class ProjectionPlayer extends ProjectionVideo {
         public void recreatePreview(int width, int height) {
             fxImage = new WritableImage(width, height);
 
-            Platform.runLater(() -> {
-                setImage(fxImage);
-            });
+            Platform.runLater(() -> setImage(fxImage));
         }
 
         public void start() {
@@ -94,6 +89,7 @@ public class ProjectionPlayer extends ProjectionVideo {
             }
         }
 
+        @SuppressWarnings("BusyWait")
         @Override
         public void run() {
             while (running) {

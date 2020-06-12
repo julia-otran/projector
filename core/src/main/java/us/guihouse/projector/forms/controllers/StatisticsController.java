@@ -1,12 +1,8 @@
 package us.guihouse.projector.forms.controllers;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.BarChart;
-import javafx.scene.chart.CategoryAxis;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ProgressIndicator;
@@ -17,12 +13,10 @@ import us.guihouse.projector.enums.IntervalChoice;
 import us.guihouse.projector.enums.Weekday;
 import us.guihouse.projector.models.Statistic;
 import us.guihouse.projector.services.ManageMusicService;
-import us.guihouse.projector.utils.promise.Callback;
 import us.guihouse.projector.utils.promise.JavaFxExecutor;
 import us.guihouse.projector.utils.promise.Task;
 
 import java.net.URL;
-import java.util.Calendar;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -50,7 +44,7 @@ public class StatisticsController implements Initializable {
 
     private List<Statistic> data;
 
-    private XYChart.Series series;
+    private XYChart.Series<String, Integer> series;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -65,22 +59,12 @@ public class StatisticsController implements Initializable {
         weekdayChoice.getItems().addAll(Weekday.values());
         weekdayChoice.getSelectionModel().select(Weekday.ALL);
 
-        intervalChoice.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<IntervalChoice>() {
-            @Override
-            public void changed(ObservableValue<? extends IntervalChoice> observable, IntervalChoice oldValue, IntervalChoice newValue) {
-                loadStatistics();
-            }
-        });
+        intervalChoice.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> loadStatistics());
 
 
-        weekdayChoice.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Weekday>() {
-            @Override
-            public void changed(ObservableValue<? extends Weekday> observable, Weekday oldValue, Weekday newValue) {
-                loadStatistics();
-            }
-        });
+        weekdayChoice.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> loadStatistics());
 
-        this.series = new XYChart.Series<String, Integer>();
+        this.series = new XYChart.Series<>();
         this.series.setName("Plays X Musicas");
         barChart.getData().addAll(series);
     }
@@ -91,13 +75,10 @@ public class StatisticsController implements Initializable {
         IntervalChoice selectedInterval = intervalChoice.getSelectionModel().getSelectedItem();
         Weekday selectedWeekday = weekdayChoice.getSelectionModel().getSelectedItem();
 
-        manageMusicService.getStatistics(selectedInterval, selectedWeekday).then(new Task<List<Statistic>, Void>() {
-            @Override
-            public void execute(List<Statistic> input, Callback<Void> callback) {
-                data = input;
-                loadData();
-                loaded();
-            }
+        manageMusicService.getStatistics(selectedInterval, selectedWeekday).then((Task<List<Statistic>, Void>) (input, callback) -> {
+            data = input;
+            loadData();
+            loaded();
         }, new JavaFxExecutor<>()).execute();
     }
 

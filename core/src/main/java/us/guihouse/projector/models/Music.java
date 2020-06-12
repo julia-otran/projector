@@ -7,13 +7,12 @@ package us.guihouse.projector.models;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import lombok.AccessLevel;
@@ -48,28 +47,20 @@ public class Music {
     }
 
     private void setupNameAndArtistProp() {
-        final ChangeListener<String> listener = new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                updateNameAndArtistProp();
-            }
-        };
+        final ChangeListener<String> listener = (observable, oldValue, newValue) -> updateNameAndArtistProp();
 
         nameProperty.addListener(listener);
 
-        artistProperty.addListener(new ChangeListener<Artist>() {
-            @Override
-            public void changed(ObservableValue<? extends Artist> observable, Artist oldValue, Artist newValue) {
-                if (oldValue != null) {
-                    oldValue.getNameProperty().removeListener(listener);
-                }
-
-                if (newValue != null) {
-                    newValue.getNameProperty().addListener(listener);
-                }
-
-                updateNameAndArtistProp();
+        artistProperty.addListener((observable, oldValue, newValue) -> {
+            if (oldValue != null) {
+                oldValue.getNameProperty().removeListener(listener);
             }
+
+            if (newValue != null) {
+                newValue.getNameProperty().addListener(listener);
+            }
+
+            updateNameAndArtistProp();
         });
     }
 
@@ -90,6 +81,7 @@ public class Music {
         }
 
         if (name.isEmpty() && artistName.isEmpty()) {
+            nameAndArtistProperty.set("");
         } else if (name.isEmpty()) {
             nameAndArtistProperty.set(artistName);
         } else if (artistName.isEmpty()) {
@@ -112,8 +104,7 @@ public class Music {
     }
 
     public String getName() {
-        String name = nameProperty.getValue();
-        return name;
+        return nameProperty.getValue();
     }
 
     public void setName(String name) {
@@ -140,7 +131,7 @@ public class Music {
     }
 
     public String getPhrasesAsString() {
-        return phrasesList.stream().collect(Collectors.joining("\n"));
+        return String.join("\n", phrasesList);
     }
 
     public String getTheme() {

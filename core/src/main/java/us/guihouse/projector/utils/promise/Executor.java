@@ -9,6 +9,6 @@ package us.guihouse.projector.utils.promise;
  *
  * @author guilherme
  */
-public interface Executor<IN, OUT> {
-    public void execute(IN input, Task<IN, OUT> task, Callback<OUT> callback);
+public interface Executor<IN> {
+    <OUT> void execute(IN input, Task<IN, OUT> task, Callback<OUT> callback);
 }

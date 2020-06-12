@@ -35,7 +35,6 @@ public class SingleLineTextWrapper extends MultilineTextWrapper {
         List<String> strings = new ArrayList<>();
         
         super.splitIntoLines(str)
-            .stream()
             .forEach(line -> {
                 int countCommas = countCommas(line);
                 if (countCommas > 0) {

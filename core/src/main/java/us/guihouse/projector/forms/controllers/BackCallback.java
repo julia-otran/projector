@@ -13,5 +13,5 @@ public interface BackCallback {
     void goBack();
     void goBackWithId(Integer id);
 
-    public void goBackAndReload();
+    void goBackAndReload();
 }

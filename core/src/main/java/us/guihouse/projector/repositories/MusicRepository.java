@@ -13,11 +13,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import us.guihouse.projector.dtos.ListMusicDTO;
-import us.guihouse.projector.enums.IntervalChoice;
-import us.guihouse.projector.enums.Weekday;
 import us.guihouse.projector.models.Artist;
 import us.guihouse.projector.models.Music;
-import us.guihouse.projector.models.Statistic;
 import us.guihouse.projector.other.SQLiteJDBCDriverConnection;
 
 /**
@@ -34,11 +31,9 @@ public class MusicRepository {
                 "LEFT JOIN music_themes ON music_themes.music_id = musics.id " +
                 "WHERE name = ? AND artist_id = ?";
 
-        PreparedStatement stmt = SQLiteJDBCDriverConnection
+        try (PreparedStatement stmt = SQLiteJDBCDriverConnection
                 .getConn()
-                .prepareStatement(sql);
-
-        try {
+                .prepareStatement(sql)) {
             stmt.setString(1, name);
 
             if (artist == null) {
@@ -55,11 +50,11 @@ public class MusicRepository {
                 m.setName(rs.getString("name"));
                 m.setPhrases(Arrays.asList(rs.getString("phrases").split("\n")));
                 m.setTheme(rs.getString("theme"));
-                m.setArtist(new Artist(artist));
+                if (artist != null) {
+                    m.setArtist(new Artist(artist));
+                }
                 return m;
             }
-        } finally {
-            stmt.close();
         }
 
         return null;
@@ -103,18 +98,14 @@ public class MusicRepository {
                 + "LEFT JOIN artists ON artists.id = musics.artist_id "
                 + "LIMIT " + LIST_LIMIT + ";";
 
-        PreparedStatement stmt = SQLiteJDBCDriverConnection
+        try (PreparedStatement stmt = SQLiteJDBCDriverConnection
                 .getConn()
-                .prepareStatement(sql);
-
-        try {
+                .prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
                 result.add(deserializeDto(rs, null));
             }
-        } finally {
-            stmt.close();
         }
 
         return result;
@@ -130,11 +121,9 @@ public class MusicRepository {
                 + "WHERE musics.name LIKE ? OR artists.name LIKE ? Or musics.phrases LIKE ? "
                 + "LIMIT " + LIST_LIMIT + ";";
 
-        PreparedStatement stmt = SQLiteJDBCDriverConnection
+        try (PreparedStatement stmt = SQLiteJDBCDriverConnection
                 .getConn()
-                .prepareStatement(sql);
-
-        try {
+                .prepareStatement(sql)) {
             stmt.setString(1, "%" + searchTerm + "%");
             stmt.setString(2, "%" + searchTerm + "%");
             stmt.setString(3, "%" + searchTerm + "%");
@@ -144,8 +133,6 @@ public class MusicRepository {
             while (rs.next()) {
                 result.add(deserializeDto(rs, searchTerm));
             }
-        } finally {
-            stmt.close();
         }
 
         return result;
@@ -160,19 +147,15 @@ public class MusicRepository {
                 + "LEFT JOIN music_themes ON music_themes.music_id = musics.id "
                 + "WHERE musics.id = ?";
 
-        PreparedStatement stmt = SQLiteJDBCDriverConnection
+        try (PreparedStatement stmt = SQLiteJDBCDriverConnection
                 .getConn()
-                .prepareStatement(sql);
-
-        try {
+                .prepareStatement(sql)) {
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
                 return deserialize(rs);
             }
-        } finally {
-            stmt.close();
         }
 
         return null;
@@ -207,30 +190,22 @@ public class MusicRepository {
     private void saveTheme(Integer musicId, String themeName) throws SQLException {
         String delSql = "DELETE FROM music_themes WHERE music_id = ?";
 
-        PreparedStatement delStmt = SQLiteJDBCDriverConnection
+        try (PreparedStatement delStmt = SQLiteJDBCDriverConnection
                 .getConn()
-                .prepareStatement(delSql);
-
-        try {
+                .prepareStatement(delSql)) {
             delStmt.setInt(1, musicId);
             delStmt.execute();
-        } finally {
-            delStmt.close();
         }
 
         if (themeName != null) {
             String themeSql = "INSERT INTO music_themes(music_id, theme_name) VALUES (?, ?)";
 
-            PreparedStatement stmt = SQLiteJDBCDriverConnection
+            try (PreparedStatement stmt = SQLiteJDBCDriverConnection
                     .getConn()
-                    .prepareStatement(themeSql);
-
-            try {
+                    .prepareStatement(themeSql)) {
                 stmt.setInt(1, musicId);
                 stmt.setString(2, themeName);
                 stmt.execute();
-            } finally {
-                stmt.close();
             }
         }
     }
@@ -268,16 +243,15 @@ public class MusicRepository {
         m.setId(rs.getInt("music_id"));
         m.setName(rs.getString("music_name"));
 
-        String phrases[] = rs.getString("phrases").split("\n");
+        String[] phrases = rs.getString("phrases").split("\n");
         String firsts;
 
         if (searchingTerm == null) {
-            firsts = Arrays.asList(phrases).stream().limit(5).collect(Collectors.joining("\n"));
+            firsts = Arrays.stream(phrases).limit(5).collect(Collectors.joining("\n"));
         } else {
             final String searchingTermLower = searchingTerm.toLowerCase();
 
-            firsts = Arrays.asList(phrases)
-                    .stream()
+            firsts = Arrays.stream(phrases)
                     .filter(s -> s.toLowerCase().contains(searchingTermLower))
                     .limit(5)
                     .collect(Collectors.joining("\n"));

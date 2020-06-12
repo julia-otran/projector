@@ -42,17 +42,15 @@ public interface ProjectionManager {
 
     void setBackgroundModel(BackgroundModel background);
 
-    public void setFullScreen(boolean fullScreen);
+    void setFullScreen(boolean fullScreen);
 
-    public void setCropBackground(boolean selected);
+    void setCropBackground(boolean selected);
 
-    public ProjectionPlayer createPlayer();
+    ProjectionPlayer createPlayer();
 
-    void setAnimateBackground(boolean selected);
+    boolean getDarkenBackground();
 
-    public boolean getDarkenBackground();
-
-    public void setDarkenBackground(boolean darkenBg);
+    void setDarkenBackground(boolean darkenBg);
 
     void stop(Projectable projectable);
 

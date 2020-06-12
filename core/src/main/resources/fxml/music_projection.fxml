@@ -11,29 +11,27 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox id="RootBox" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.guihouse.projector.forms.controllers.projection.MusicProjectionController">
-    <children>
-        <ToolBar prefHeight="40.0" prefWidth="200.0">
-            <items>
-                <ImageView fitHeight="19.0" fitWidth="17.0" preserveRatio="true">
-                    <image>
-                        <Image url="@../icons/icon-ios7-search-strong-128.png" />
-                    </image>
-                </ImageView>
-                <TextField fx:id="searchTextField" prefHeight="28.0" prefWidth="231.0" promptText="Ir para" />
-                <Button fx:id="clearScreenButton" disable="true" focusTraversable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onClearScreen" prefHeight="28.0" prefWidth="204.0" text="Clique em uma frase para projetar" />
-                <Button fx:id="removeBackgroundButton" disable="true" mnemonicParsing="false" onAction="#removeBackground" prefHeight="28.0" prefWidth="121.0" text="Remover Fundo" />
-            </items>
-        </ToolBar>
-      <HBox prefHeight="353.0" prefWidth="600.0" VBox.vgrow="ALWAYS">
-         <children>
-            <ListView fx:id="miniPhrasesListView" focusTraversable="false" prefHeight="360.0" prefWidth="276.0" HBox.hgrow="NEVER" />
-              <TableView fx:id="phrasesTable" prefHeight="342.0" prefWidth="600.0" HBox.hgrow="ALWAYS">
-                  <columns>
-                      <TableColumn minWidth="200.0" prefWidth="450.0" sortable="false" text="Letra" />
-                  </columns>
-              </TableView>
-         </children>
-      </HBox>
-    </children>
+<VBox id="RootBox" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="us.guihouse.projector.forms.controllers.projection.MusicProjectionController">
+    <ToolBar prefHeight="40.0" prefWidth="200.0">
+        <ImageView fitHeight="19.0" fitWidth="17.0" preserveRatio="true">
+            <Image url="@../icons/icon-ios7-search-strong-128.png"/>
+        </ImageView>
+        <TextField fx:id="searchTextField" prefHeight="28.0" prefWidth="231.0" promptText="Ir para"/>
+        <Button fx:id="clearScreenButton" disable="true" focusTraversable="false" maxHeight="1.7976931348623157E308"
+                maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onClearScreen"
+                prefHeight="28.0" prefWidth="204.0" text="Clique em uma frase para projetar"/>
+        <Button fx:id="removeBackgroundButton" disable="true" mnemonicParsing="false" onAction="#removeBackground"
+                prefHeight="28.0" prefWidth="121.0" text="Remover Fundo"/>
+    </ToolBar>
+    <HBox prefHeight="353.0" prefWidth="600.0" VBox.vgrow="ALWAYS">
+        <ListView fx:id="miniPhrasesListView" focusTraversable="false" prefHeight="360.0" prefWidth="276.0"
+                  HBox.hgrow="NEVER"/>
+        <TableView fx:id="phrasesTable" prefHeight="342.0" prefWidth="600.0" HBox.hgrow="ALWAYS">
+            <columns>
+                <TableColumn minWidth="200.0" prefWidth="450.0" sortable="false" text="Letra"/>
+            </columns>
+        </TableView>
+    </HBox>
 </VBox>

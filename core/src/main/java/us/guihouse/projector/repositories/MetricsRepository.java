@@ -16,7 +16,6 @@ import java.sql.SQLException;
 import java.time.ZoneOffset;
 import java.sql.Date;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,16 +32,13 @@ public class MetricsRepository {
         LocalDate now = LocalDate.now(ZoneOffset.UTC.normalized());
         String sql = "INSERT INTO musics_plays(music_id, date) VALUES (?, ?)";
 
-        PreparedStatement stmt = SQLiteJDBCDriverConnection
+        try (PreparedStatement stmt = SQLiteJDBCDriverConnection
                 .getConn()
-                .prepareStatement(sql);
-        try {        
+                .prepareStatement(sql)) {
             stmt.setInt(1, music.getId());
             stmt.setDate(2, Date.valueOf(now));
 
             stmt.execute();
-        } finally {
-            stmt.close();
         }
     }
 
@@ -53,11 +49,9 @@ public class MetricsRepository {
                 "FROM musics_plays " +
                 "WHERE date > ? ";
 
-        PreparedStatement stmt = SQLiteJDBCDriverConnection
+        try (PreparedStatement stmt = SQLiteJDBCDriverConnection
                 .getConn()
-                .prepareStatement(sql);
-
-        try {
+                .prepareStatement(sql)) {
             stmt.setDate(1, Date.valueOf(interval.getIntervalBegin()));
 
             ResultSet rs = stmt.executeQuery();
@@ -89,8 +83,6 @@ public class MetricsRepository {
                     .sorted((s1, s2) -> Integer.compare(s2.getPlayCount(), s1.getPlayCount()))
                     .limit(STATISTICS_LIMIT)
                     .collect(Collectors.toList());
-        } finally {
-            stmt.close();
         }
     }
 }

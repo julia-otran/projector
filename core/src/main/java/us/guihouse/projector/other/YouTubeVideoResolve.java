@@ -76,7 +76,7 @@ public class YouTubeVideoResolve implements Callback<String> {
     private final String url;
     private EventHandler<YTVideoSearchEvent> handler;
     private Future<HttpResponse<String>> currentRequest;
-    private Dialog currentDialog;
+    private Dialog<Object> currentDialog;
     
     YouTubeVideoResolve(String url) {
        this.url = url;
@@ -124,21 +124,18 @@ public class YouTubeVideoResolve implements Callback<String> {
         
         final String found2 = found;
         
-        Platform.runLater(new Runnable(){
-            @Override
-            public void run() {
-                currentRequest = null;
-                
-                if (currentDialog != null) {
-                    currentDialog.close();
-                    currentDialog = null;
-                }
+        Platform.runLater(() -> {
+            currentRequest = null;
 
-                if (found2 != null) {
-                    resolve(found2);
-                } else {
-                    reject(true);
-                }
+            if (currentDialog != null) {
+                currentDialog.close();
+                currentDialog = null;
+            }
+
+            if (found2 != null) {
+                resolve(found2);
+            } else {
+                reject(true);
             }
         });
 
@@ -146,35 +143,29 @@ public class YouTubeVideoResolve implements Callback<String> {
 
     @Override
     public void failed(UnirestException ue) {
-        Platform.runLater(new Runnable(){
-            @Override
-            public void run() {
-                currentRequest = null;
-                
-                if (currentDialog != null) {
-                    currentDialog.close();
-                    currentDialog = null;
-                }
-                
-                reject(true);
+        Platform.runLater(() -> {
+            currentRequest = null;
+
+            if (currentDialog != null) {
+                currentDialog.close();
+                currentDialog = null;
             }
+
+            reject(true);
         });
     }
 
     @Override
     public void cancelled() {
-        Platform.runLater(new Runnable(){
-            @Override
-            public void run() {
-                currentRequest = null;
-                
-                if (currentDialog != null) {
-                    currentDialog.close();
-                    currentDialog = null;
-                }
-                
-                reject(false);
+        Platform.runLater(() -> {
+            currentRequest = null;
+
+            if (currentDialog != null) {
+                currentDialog.close();
+                currentDialog = null;
             }
+
+            reject(false);
         });
     }
     
@@ -191,7 +182,7 @@ public class YouTubeVideoResolve implements Callback<String> {
         
         ButtonType cancel = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
         
-        Dialog dialog = new Dialog();
+        Dialog<Object> dialog = new Dialog<>();
         dialog.getDialogPane().getButtonTypes().add(cancel);
         dialog.getDialogPane().setHeaderText("Carregando...");
         dialog.getDialogPane().setContent(vbox);

@@ -47,14 +47,8 @@ public class ProjectionBackground extends ProjectionImage {
         }
     }
     
-    @Override
-    public CanvasDelegate getCanvasDelegate() {
+    private CanvasDelegate getCanvasDelegate() {
         return canvasDelegate;
-    }
-
-    @Override
-    public void init() {
-        super.init();
     }
 
     public void setModel(BackgroundModel model) {

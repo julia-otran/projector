@@ -31,7 +31,7 @@ public abstract class MusicUrlImporter implements Callback<String> {
 
     private final String url;
     private Future<HttpResponse<String>> currentRequest;
-    private Dialog currentDialog;
+    private Dialog<Object> currentDialog;
     private ImportCallback callback;
 
     protected MusicUrlImporter(String url) {
@@ -45,10 +45,6 @@ public abstract class MusicUrlImporter implements Callback<String> {
         currentRequest = Unirest.get(url)
                 .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
                 .asStringAsync(this);
-    }
-
-    public String getUrl() {
-        return url;
     }
 
     protected abstract ImportingMusicDTO parseMusic(String data) throws ImportError;
@@ -66,7 +62,7 @@ public abstract class MusicUrlImporter implements Callback<String> {
         
         ButtonType cancel = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
         
-        Dialog dialog = new Dialog();
+        Dialog<Object> dialog = new Dialog<>();
         dialog.getDialogPane().getButtonTypes().add(cancel);
         dialog.getDialogPane().setHeaderText("Carregando...");
         dialog.getDialogPane().setContent(vbox);
@@ -103,56 +99,47 @@ public abstract class MusicUrlImporter implements Callback<String> {
         
         final ImportingMusicDTO importing = im;
         
-        Platform.runLater(new Runnable(){
-            @Override
-            public void run() {
-                currentRequest = null;
-                
-                if (currentDialog != null) {
-                    currentDialog.close();
-                    currentDialog = null;
-                }
+        Platform.runLater(() -> {
+            currentRequest = null;
 
-                if (importing != null) {
-                    resolve(importing);
-                } else {
-                    reject(true);
-                }
+            if (currentDialog != null) {
+                currentDialog.close();
+                currentDialog = null;
             }
-        });
-    }
 
-    @Override
-    public void failed(UnirestException ue) {
-        Platform.runLater(new Runnable(){
-            @Override
-            public void run() {
-                currentRequest = null;
-                
-                if (currentDialog != null) {
-                    currentDialog.close();
-                    currentDialog = null;
-                }
-                
+            if (importing != null) {
+                resolve(importing);
+            } else {
                 reject(true);
             }
         });
     }
 
     @Override
-    public void cancelled() {
-        Platform.runLater(new Runnable(){
-            @Override
-            public void run() {
-                currentRequest = null;
-                
-                if (currentDialog != null) {
-                    currentDialog.close();
-                    currentDialog = null;
-                }
-                
-                reject(false);
+    public void failed(UnirestException ue) {
+        Platform.runLater(() -> {
+            currentRequest = null;
+
+            if (currentDialog != null) {
+                currentDialog.close();
+                currentDialog = null;
             }
+
+            reject(true);
+        });
+    }
+
+    @Override
+    public void cancelled() {
+        Platform.runLater(() -> {
+            currentRequest = null;
+
+            if (currentDialog != null) {
+                currentDialog.close();
+                currentDialog = null;
+            }
+
+            reject(false);
         });
     }
 }

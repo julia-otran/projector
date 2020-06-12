@@ -19,14 +19,14 @@ import us.guihouse.projector.projection.ProjectionManager;
  * @author guilherme
  */
 public class BgImageScene {
-    public static Parent createScene(ProjectionManager mgr, SceneManager smgr) throws IOException {
+    public static Parent createScene(ProjectionManager mgr, SceneManager sceneManager) throws IOException {
         URL url = ImageController.class.getClassLoader().getResource("fxml/bg_image.fxml");
         FXMLLoader loader = new FXMLLoader(url);
        
         Parent root = loader.load();
         BgImageController pc = loader.getController();
         
-        pc.setSceneManager(smgr);
+        pc.setSceneManager(sceneManager);
         pc.initWithProjectionManager(mgr);
         
         return root;

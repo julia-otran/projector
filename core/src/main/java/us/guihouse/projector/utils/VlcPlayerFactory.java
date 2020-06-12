@@ -30,7 +30,7 @@ public class VlcPlayerFactory {
     }
 
     public static void finish() {
-
+        factory.release();
     }
 
     public static MediaPlayerFactory getFactory() {

@@ -21,36 +21,13 @@ import java.util.logging.Logger;
  */
 public class ArtistRepository {
 
-    public Artist findById(int id) throws SQLException {
-        PreparedStatement stmt = SQLiteJDBCDriverConnection
-                .getConn()
-                .prepareStatement("SELECT id, name FROM artists WHERE id = ?");
-
-        try {
-            stmt.setInt(1, id);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                Artist a = new Artist();
-                a.getIdProperty().setValue(rs.getInt("id"));
-                a.getNameProperty().setValue(rs.getString("name"));
-                return a;
-            }
-        } finally {
-            stmt.close();
-        }
-
-        return null;
-    }
-
     public List<Artist> findAll() {
         List<Artist> result = new ArrayList<>();
         try {
-            PreparedStatement stmt = SQLiteJDBCDriverConnection
-                    .getConn()
-                    .prepareStatement("SELECT id, name FROM artists;");
 
-            try {
+            try (PreparedStatement stmt = SQLiteJDBCDriverConnection
+                    .getConn()
+                    .prepareStatement("SELECT id, name FROM artists;")) {
                 ResultSet rs = stmt.executeQuery();
                 Artist a;
 
@@ -60,8 +37,6 @@ public class ArtistRepository {
                     a.getNameProperty().setValue(rs.getString("name"));
                     result.add(a);
                 }
-            } finally {
-                stmt.close();
             }
         } catch (SQLException ex) {
             Logger.getLogger(ArtistRepository.class.getName()).log(Level.SEVERE, null, ex);
@@ -71,11 +46,10 @@ public class ArtistRepository {
     }
 
     public Artist findByName(String name) throws SQLException {
-        PreparedStatement stmt = SQLiteJDBCDriverConnection
-                .getConn()
-                .prepareStatement("SELECT id, name FROM artists WHERE name = ?");
 
-        try {
+        try (PreparedStatement stmt = SQLiteJDBCDriverConnection
+                .getConn()
+                .prepareStatement("SELECT id, name FROM artists WHERE name = ?")) {
             stmt.setString(1, name);
             ResultSet rs = stmt.executeQuery();
 
@@ -85,8 +59,6 @@ public class ArtistRepository {
                 a.getNameProperty().setValue(rs.getString("name"));
                 return a;
             }
-        } finally {
-            stmt.close();
         }
 
         return null;
@@ -101,11 +73,9 @@ public class ArtistRepository {
 
         a = new Artist();
 
-        PreparedStatement stmt = SQLiteJDBCDriverConnection
+        try (PreparedStatement stmt = SQLiteJDBCDriverConnection
                 .getConn()
-                .prepareStatement("INSERT INTO artists (name) VALUES (?)");
-
-        try {
+                .prepareStatement("INSERT INTO artists (name) VALUES (?)")) {
             stmt.setString(1, name);
             stmt.execute();
 
@@ -118,8 +88,6 @@ public class ArtistRepository {
             }
 
             throw new SQLException();
-        } finally {
-            stmt.close();
         }
     }
 }

@@ -8,8 +8,6 @@ package us.guihouse.projector.forms.controllers.projection;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -22,7 +20,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
 import javafx.scene.web.WebEngine;
-import us.guihouse.projector.projection.Projectable;
 import us.guihouse.projector.projection.ProjectionManager;
 import us.guihouse.projector.projection.ProjectionWebView;
 
@@ -35,7 +32,6 @@ public class BrowserController extends ProjectionController {
 
     public static final String URL_PROPERTY = "URL";
 
-    private String url;
     private Transform currentTransform;
 
     /**
@@ -87,10 +83,10 @@ public class BrowserController extends ProjectionController {
         super.initWithProjectionManager(projectionManager);
         this.projectionWebView = projectionManager.createWebView();
 
-        this.url = this.getObserver().getProperty(URL_PROPERTY);
+        String url = this.getObserver().getProperty(URL_PROPERTY);
 
-        if (this.url == null) {
-            this.url = "https://google.com.br";
+        if (url == null) {
+            url = "https://google.com.br";
         }
 
         Node displayNode = projectionWebView.getNode();
@@ -102,24 +98,21 @@ public class BrowserController extends ProjectionController {
         browserPane.setContent(scalePane);
         scalePane.getChildren().add(displayNode);
 
-        ChangeListener sizeChangeListener = new ChangeListener() {
-            @Override
-            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-                double ww = projectionWebView.getWebView().getWidth();
-                double wh = projectionWebView.getWebView().getHeight();
-                double pw = browserPane.getWidth();
-                double ph = browserPane.getHeight();
+        ChangeListener<Number> sizeChangeListener = (observable, oldValue, newValue) -> {
+            double ww = projectionWebView.getWebView().getWidth();
+            double wh = projectionWebView.getWebView().getHeight();
+            double pw = browserPane.getWidth();
+            double ph = browserPane.getHeight();
 
-                double sw = pw / ww;
-                double sh = ph / wh;
-                double s = Math.min(sw, sh);
+            double sw = pw / ww;
+            double sh = ph / wh;
+            double s = Math.min(sw, sh);
 
-                scalePane.setPrefSize(pw * s, ph * s);
+            scalePane.setPrefSize(pw * s, ph * s);
 
-                scalePane.getTransforms().remove(currentTransform);
-                currentTransform = new Scale(s, s, 0.0, 0.0);
-                scalePane.getTransforms().add(currentTransform);
-            }
+            scalePane.getTransforms().remove(currentTransform);
+            currentTransform = new Scale(s, s, 0.0, 0.0);
+            scalePane.getTransforms().add(currentTransform);
         };
 
         projectionWebView.getWebView().widthProperty().addListener(sizeChangeListener);
@@ -131,39 +124,30 @@ public class BrowserController extends ProjectionController {
         WebEngine engine = projectionWebView.getWebView().getEngine();
         browserProgressBar.progressProperty().bind(engine.getLoadWorker().progressProperty());
 
-        engine.getLoadWorker().titleProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                if (newValue != null && !newValue.isEmpty()) {
-                    notifyTitleChange(newValue);
-                }
+        engine.getLoadWorker().titleProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null && !newValue.isEmpty()) {
+                notifyTitleChange(newValue);
             }
         });
 
-        engine.getLoadWorker().stateProperty().addListener(new ChangeListener<Worker.State>() {
-            @Override
-            public void changed(ObservableValue<? extends Worker.State> observable, Worker.State oldValue, Worker.State newValue) {
-                String newTitle = engine.getTitle();
-                if (newTitle != null && !newTitle.isEmpty()) {
-                    notifyTitleChange(newTitle);
-                }
-                adddressTextField.setText(engine.getLocation());
-                getObserver().updateProperty(URL_PROPERTY, engine.getLocation());
+        engine.getLoadWorker().stateProperty().addListener((observable, oldValue, newValue) -> {
+            String newTitle = engine.getTitle();
+            if (newTitle != null && !newTitle.isEmpty()) {
+                notifyTitleChange(newTitle);
             }
+            adddressTextField.setText(engine.getLocation());
+            getObserver().updateProperty(URL_PROPERTY, engine.getLocation());
         });
 
         engine.load(url);
 
-        getProjectionManager().projectableProperty().addListener(new ChangeListener<Projectable>() {
-            @Override
-            public void changed(ObservableValue<? extends Projectable> observableValue, Projectable oldValue, Projectable newValue) {
-                if (newValue == projectionWebView) {
-                    beginProjectionButton.disableProperty().set(true);
-                    endProjectionButton.disableProperty().set(false);
-                } else {
-                    beginProjectionButton.disableProperty().set(false);
-                    endProjectionButton.disableProperty().set(true);
-                }
+        getProjectionManager().projectableProperty().addListener((observableValue, oldValue, newValue) -> {
+            if (newValue == projectionWebView) {
+                beginProjectionButton.disableProperty().set(true);
+                endProjectionButton.disableProperty().set(false);
+            } else {
+                beginProjectionButton.disableProperty().set(false);
+                endProjectionButton.disableProperty().set(true);
             }
         });
     }

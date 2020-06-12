@@ -45,10 +45,6 @@ public abstract class ProjectionItemSubScene extends SubScene implements Control
         super(root, width, height);
     }
 
-    public SceneObserver getObserver() {
-        return observer;
-    }
-
     public void setObserver(SceneObserver observer) {
         this.observer = observer;
     }

@@ -20,14 +20,13 @@ import java.util.HashMap;
  */
 public class ProjectionImage implements Projectable {
 
-    protected CanvasDelegate canvasDelegate;
+    protected final CanvasDelegate canvasDelegate;
 
     private final Color bgColor;
 
     private final HashMap<String, BufferedImage> scaledBackground = new HashMap<>();
 
     private boolean cropBackground;
-    private boolean enableAnimation = false;
     private BackgroundProvide model;
 
     ProjectionImage(CanvasDelegate canvasDelegate) {
@@ -60,22 +59,15 @@ public class ProjectionImage implements Projectable {
     }
 
     @Override
-    public CanvasDelegate getCanvasDelegate() {
-        return canvasDelegate;
-    }
-
-    @Override
     public void rebuildLayout() {
         scaledBackground.clear();
 
-        if (model == null || BackgroundModel.Type.NONE.equals(model.getType())) {
+        if (model == null) {
             return;
         }
 
-        if (BackgroundModel.Type.STATIC.equals(model.getType())) {
-            if (model.getStaticBackground() != null) {
-                scaleBackground(model.getStaticBackground());
-            }
+        if (model.getStaticBackground() != null) {
+            scaleBackground(model.getStaticBackground());
         }
     }
 
@@ -155,13 +147,5 @@ public class ProjectionImage implements Projectable {
     public void setModel(BackgroundProvide model) {
         this.model = model;
         rebuildLayout();
-    }
-
-    public boolean isEnableAnimation() {
-        return enableAnimation;
-    }
-
-    public void setEnableAnimation(boolean enableAnimation) {
-        this.enableAnimation = enableAnimation;
     }
 }

@@ -10,11 +10,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.embed.swing.SwingNode;
 import javafx.fxml.FXML;
-import javafx.scene.Group;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -26,18 +22,12 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
-import uk.co.caprica.vlcj.binding.internal.libvlc_media_t;
 import uk.co.caprica.vlcj.media.MediaRef;
 import uk.co.caprica.vlcj.media.TrackType;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import uk.co.caprica.vlcj.player.base.MediaPlayerEventListener;
-import us.guihouse.projector.projection.Projectable;
 import us.guihouse.projector.projection.ProjectionManager;
 import us.guihouse.projector.projection.video.ProjectionPlayer;
 import us.guihouse.projector.services.FileDragDropService;
@@ -156,19 +146,11 @@ public class PlayerController extends ProjectionController implements FileDragDr
 
         projectionPlayer.getPlayer().events().addMediaPlayerEventListener(this);
 
-        timeBar.valueChangingProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                manualMoving = newValue;
-            }
-        });
+        timeBar.valueChangingProperty().addListener((observable, oldValue, newValue) -> manualMoving = newValue);
 
-        timeBar.valueProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                if (!automaticMoving) {
-                    projectionPlayer.getPlayer().controls().setPosition(timeBar.valueProperty().floatValue());
-                }
+        timeBar.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (!automaticMoving) {
+                projectionPlayer.getPlayer().controls().setPosition(timeBar.valueProperty().floatValue());
             }
         });
 
@@ -180,16 +162,13 @@ public class PlayerController extends ProjectionController implements FileDragDr
             }
         }
 
-        getProjectionManager().projectableProperty().addListener(new ChangeListener<Projectable>() {
-            @Override
-            public void changed(ObservableValue<? extends Projectable> observableValue, Projectable oldValue, Projectable newValue) {
-                if (newValue == projectionPlayer) {
-                    beginProjectionButton.disableProperty().set(true);
-                    endProjectionButton.disableProperty().set(false);
-                } else {
-                    beginProjectionButton.disableProperty().set(false);
-                    endProjectionButton.disableProperty().set(true);
-                }
+        getProjectionManager().projectableProperty().addListener((observableValue, oldValue, newValue) -> {
+            if (newValue == projectionPlayer) {
+                beginProjectionButton.disableProperty().set(true);
+                endProjectionButton.disableProperty().set(false);
+            } else {
+                beginProjectionButton.disableProperty().set(false);
+                endProjectionButton.disableProperty().set(true);
             }
         });
 
@@ -286,17 +265,6 @@ public class PlayerController extends ProjectionController implements FileDragDr
     public void onDropAbort() {
         setOriginal();
         dragDropLabel.setVisible(false);
-    }
-
-    @FXML
-    public void selectFileClick() {
-        FileChooser chooser = new FileChooser();
-        Stage stage = getSceneManager().getStage();
-        File chosen = chooser.showOpenDialog(stage);
-
-        if (chosen != null && chosen.canRead()) {
-            openMedia(chosen);
-        }
     }
 
     @FXML

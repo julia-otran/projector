@@ -53,8 +53,7 @@ public class ProjectionLabel implements Projectable {
     // Customizations
     private final List<TextWrapperFactoryChangeListener> factoryChangeListeners;
     private WrappedText text;
-    private int paddingX = DEFAULT_PADDING_X;
-    private int paddingY = DEFAULT_PADDING_Y;
+    private final int paddingY = DEFAULT_PADDING_Y;
 
     @Getter
     private boolean darkenBackground;
@@ -77,7 +76,7 @@ public class ProjectionLabel implements Projectable {
 
     @Override
     public void init() {
-        setFont(new java.awt.Font(Font.SANS_SERIF, 0, DEFAULT_FONT_SIZE));
+        setFont(new java.awt.Font(Font.SANS_SERIF, Font.PLAIN, DEFAULT_FONT_SIZE));
         rebuildLayout();
     }
 
@@ -100,24 +99,6 @@ public class ProjectionLabel implements Projectable {
         this.darkenBackground = darken;
         ProjectorPreferences.setDarkenBackground(darken);
         renderText();
-    }
-
-    public int getPaddingX() {
-        return paddingX;
-    }
-
-    public int getPaddingY() {
-        return paddingY;
-    }
-
-    public void setPadding(int paddingX, int paddingY) {
-        this.paddingX = paddingX;
-        this.paddingY = paddingY;
-        onFactoryChange();
-    }
-
-    public WrappedText getText() {
-        return text;
     }
 
     public void setText(WrappedText text) {
@@ -185,11 +166,6 @@ public class ProjectionLabel implements Projectable {
         if (fader != null) {
             fader.paintComponent(g);
         }
-    }
-
-    @Override
-    public CanvasDelegate getCanvasDelegate() {
-        return canvasDelegate;
     }
 
     private void fadeOut() {
@@ -297,7 +273,7 @@ public class ProjectionLabel implements Projectable {
     }
 
     private int getFreeWidth() {
-        return canvasDelegate.getMainWidth() - 2 * paddingX;
+        return canvasDelegate.getMainWidth() - 2 * DEFAULT_PADDING_X;
     }
 
     private int getFreeHeight() {
@@ -309,9 +285,7 @@ public class ProjectionLabel implements Projectable {
     }
 
     private void onFactoryChange() {
-        Platform.runLater(() -> {
-            factoryChangeListeners.forEach(l -> l.onWrapperFactoryChanged(getWrapperFactory()));
-        });
+        Platform.runLater(() -> factoryChangeListeners.forEach(l -> l.onWrapperFactoryChanged(getWrapperFactory())));
     }
 
     public void addWrapperChangeListener(TextWrapperFactoryChangeListener factoryChangeListener) {

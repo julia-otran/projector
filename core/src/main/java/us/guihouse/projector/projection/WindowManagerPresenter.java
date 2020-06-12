@@ -55,6 +55,7 @@ public class WindowManagerPresenter implements Runnable {
         }
     }
 
+    @SuppressWarnings("BusyWait")
     @Override
     public void run() {
         while (running) {
@@ -67,9 +68,7 @@ public class WindowManagerPresenter implements Runnable {
                 timestamp = newTimestamp;
             }
 
-            outputs.forEach((id, img) -> {
-                windows.get(id).updateOutput(outputs.get(id));
-            });
+            outputs.forEach((id, img) -> windows.get(id).updateOutput(outputs.get(id)));
 
             try {
                 Thread.sleep(5);

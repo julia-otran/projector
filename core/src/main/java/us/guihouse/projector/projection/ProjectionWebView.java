@@ -33,7 +33,6 @@ public class ProjectionWebView implements Projectable {
     private WebView webView;
     private JFXPanel panel;
     private Dimension maxSize;
-    private Scene scene;
     private final HashMap<String, AffineTransform> transforms = new HashMap<>();
 
     public ProjectionWebView(CanvasDelegate delegate) {
@@ -54,11 +53,6 @@ public class ProjectionWebView implements Projectable {
         panel.paint(g);
 
         g.setTransform(old);
-    }
-
-    @Override
-    public CanvasDelegate getCanvasDelegate() {
-        return delegate;
     }
 
     @Override
@@ -120,7 +114,7 @@ public class ProjectionWebView implements Projectable {
             int width = delegate.getMainWidth();
             int height = delegate.getMainHeight();
 
-            scene = new Scene(webView, width, height);
+            Scene scene = new Scene(webView, width, height);
 
             panel = new JFXPanel() {
                 @Override
@@ -158,20 +152,8 @@ public class ProjectionWebView implements Projectable {
 
     }
 
-    public Dimension getMaxSize() {
-        return maxSize;
-    }
-
-    public void setMaxSize(Dimension maxSize) {
-        this.maxSize = maxSize;
-    }
-
     public WebView getWebView() {
         return webView;
-    }
-
-    public void setWebView(WebView webView) {
-        this.webView = webView;
     }
 
     public Node getNode() {

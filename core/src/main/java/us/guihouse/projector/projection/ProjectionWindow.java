@@ -8,18 +8,11 @@ package us.guihouse.projector.projection;
 import java.awt.*;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import lombok.Getter;
 import us.guihouse.projector.other.GraphicsFinder;
-import us.guihouse.projector.other.OsCheck;
-import us.guihouse.projector.services.SettingsService;
 
 /**
  *
@@ -30,7 +23,7 @@ public class ProjectionWindow  {
     private JFrame frame;
 
     @Getter
-    private GraphicsFinder.Device currentDevice;
+    private final GraphicsFinder.Device currentDevice;
     private BufferStrategy strategy;
 
     ProjectionWindow(GraphicsFinder.Device device) {
@@ -80,13 +73,10 @@ public class ProjectionWindow  {
             final Frame f = frame;
             currentDevice.getDevice().setFullScreenWindow(null);
 
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    strategy.dispose();
-                    f.setVisible(false);
-                    f.dispose();
-                }
+            SwingUtilities.invokeLater(() -> {
+                strategy.dispose();
+                f.setVisible(false);
+                f.dispose();
             });
 
             frame = null;

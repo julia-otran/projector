@@ -5,9 +5,11 @@
  */
 package us.guihouse.projector.other;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.awt.KeyEventDispatcher;
 import java.awt.event.KeyEvent;
-import lombok.NonNull;
 
 /**
  *
@@ -20,11 +22,9 @@ public class GeneralKeyboardDispatcher implements KeyEventDispatcher {
         void onKeyboardEscPressed();
     }
 
-    private final Listener listener;
-
-    public GeneralKeyboardDispatcher(@NonNull Listener listener) {
-        this.listener = listener;
-    }
+    @Getter
+    @Setter
+    private Listener listener;
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent e) {

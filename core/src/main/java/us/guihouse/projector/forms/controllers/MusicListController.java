@@ -13,8 +13,7 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -31,7 +30,6 @@ import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 import us.guihouse.projector.dtos.ImportingMusicDTO;
 import us.guihouse.projector.dtos.ListMusicDTO;
 import us.guihouse.projector.music_importing.ImportCallback;
@@ -66,12 +64,7 @@ public class MusicListController implements Initializable, BackCallback, ImportC
     public void initialize(URL url, ResourceBundle rb) {
         initTable();
 
-        searchText.textProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                fillMusicsProtected(newValue);
-            }
-        });
+        searchText.textProperty().addListener((observable, oldValue, newValue) -> fillMusicsProtected(newValue));
 
         resultsTable.setRowFactory(tv -> {
             TableRow<ListMusicDTO> row = new TableRow<>();
@@ -157,12 +150,7 @@ public class MusicListController implements Initializable, BackCallback, ImportC
         TableColumn<ListMusicDTO, Integer> col = new TableColumn<>("Açoes");
 
         col.setCellValueFactory(new PropertyValueFactory<>("id"));
-        col.setCellFactory(new Callback<TableColumn<ListMusicDTO, Integer>, TableCell<ListMusicDTO, Integer>>() {
-            @Override
-            public TableCell<ListMusicDTO, Integer> call(TableColumn<ListMusicDTO, Integer> param) {
-                return new ActionsTableCell();
-            }
-        });
+        col.setCellFactory(param -> new ActionsTableCell());
 
         col.prefWidthProperty().setValue(300);
 
@@ -302,15 +290,9 @@ public class MusicListController implements Initializable, BackCallback, ImportC
             Parent root = MusicFormScene.editMusicFormScene(manageMusicService, this, id);
             oldRoot = currentStage.getScene().getRoot();
             currentStage.getScene().setRoot(root);
-        } catch (IOException ex) {
-            Logger.getLogger(MusicListController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ManageMusicService.PersistenceException ex) {
+        } catch (IOException | ManageMusicService.PersistenceException ex) {
             Logger.getLogger(MusicListController.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-
-    public Stage getCurrentStage() {
-        return currentStage;
     }
 
     public void setCurrentStage(Stage currentStage) {

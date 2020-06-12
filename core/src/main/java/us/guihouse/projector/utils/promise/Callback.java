@@ -10,6 +10,6 @@ package us.guihouse.projector.utils.promise;
  * @author guilherme
  */
 public interface Callback<OUT> {
-    public void success(OUT out);
-    public void error(Object obj);
+    void success(OUT out);
+    void error(Object obj);
 }

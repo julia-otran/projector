@@ -28,10 +28,6 @@ public class GraphicsFinder {
             this.isProjectionDevice = isProjectionDevice;
         }
 
-        public String getName() {
-            return getDeviceName(device);
-        }
-
         public boolean isProjectionDevice() {
             return isProjectionDevice;
         }
@@ -43,11 +39,10 @@ public class GraphicsFinder {
 
     public static List<Device> getAvailableDevices() {
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        GraphicsDevice devices[] = ge.getScreenDevices();
+        GraphicsDevice[] devices = ge.getScreenDevices();
         List<String> preferred = getPreferredProjectionDeviceID();
 
-        return Arrays.asList(devices)
-                .stream()
+        return Arrays.stream(devices)
                 .filter(GraphicsDevice::isFullScreenSupported)
                 .map(dev -> new Device(dev, preferred.contains(dev.getIDstring())))
                 .collect(Collectors.toList());
@@ -63,7 +58,7 @@ public class GraphicsFinder {
 
     private static List<String> getPreferredProjectionDeviceID() {
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        GraphicsDevice devices[] = ge.getScreenDevices();
+        GraphicsDevice[] devices = ge.getScreenDevices();
         GraphicsDevice main = ge.getDefaultScreenDevice();
 
         if (main == null) {

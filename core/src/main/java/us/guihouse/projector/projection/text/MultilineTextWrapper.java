@@ -9,7 +9,6 @@ import java.awt.FontMetrics;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,13 +20,11 @@ public class MultilineTextWrapper implements TextWrapper {
 
     private final FontMetrics fontMetrics;
     private final int maxWidth;
-    private final int maxHeight;
     private final int lineLimit;
 
     MultilineTextWrapper(FontMetrics fontMetrics, int maxWidth, int maxHeight) {
         this.fontMetrics = fontMetrics;
         this.maxWidth = maxWidth;
-        this.maxHeight = maxHeight;
 
         int lines = maxHeight / fontMetrics.getHeight();
 
@@ -96,8 +93,8 @@ public class MultilineTextWrapper implements TextWrapper {
 
         ArrayList<String> strings = new ArrayList<>();
 
-        for (Iterator<String> iter = lines.iterator(); iter.hasNext();) {
-            wrapLineInto(iter.next(), strings);
+        for (String line : lines) {
+            wrapLineInto(line, strings);
         }
 
         return new WrappedText(strings);
@@ -209,8 +206,7 @@ public class MultilineTextWrapper implements TextWrapper {
      * @return a non-empty list of strings
      */
     protected List<String> splitIntoLines(String str) {
-        return Arrays.asList(str.replace("\r\n", "\n").replace("\r", "\n").split("\n"))
-                .stream()
+        return Arrays.stream(str.replace("\r\n", "\n").replace("\r", "\n").split("\n"))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .collect(Collectors.toList());

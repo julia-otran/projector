@@ -7,7 +7,6 @@ package us.guihouse.projector.forms.controllers.projection;
 
 import java.io.File;
 import java.net.URL;
-import java.text.Collator;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -16,13 +15,9 @@ import javafx.application.Platform;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -32,9 +27,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.skin.TableViewSkin;
 import javafx.scene.control.skin.VirtualFlow;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -74,12 +67,11 @@ public class MusicProjectionController extends ProjectionController {
 
     private ManageMusicService manageMusicService;
     private Music music;
-    private Property<TextWrapper> textWrapperProperty = new SimpleObjectProperty<>();
+    private final Property<TextWrapper> textWrapperProperty = new SimpleObjectProperty<>();
 
     private ObservableList<SelectionText> data;
 
     private String clearText;
-    final Collator collator = Collator.getInstance();
     private File theme;
     private boolean projecting = false;
 
@@ -93,7 +85,7 @@ public class MusicProjectionController extends ProjectionController {
         data = phrasesTable.getItems();
 
         miniPhrasesListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        miniPhrasesListView.setCellFactory(new Callback<ListView<SelectionText>, ListCell<SelectionText>>() {
+        miniPhrasesListView.setCellFactory(new Callback<>() {
             @Override
             public ListCell<SelectionText> call(ListView<SelectionText> selectionTextListView) {
                 ListCell<SelectionText> cell = new ListCell<>() {
@@ -123,14 +115,11 @@ public class MusicProjectionController extends ProjectionController {
                     }
                 };
 
-                cell.setOnMouseClicked(new EventHandler<MouseEvent>() {
-                    @Override
-                    public void handle(MouseEvent mouseEvent) {
-                        if(mouseEvent.getButton().equals(MouseButton.PRIMARY)){
-                            phrasesTable.getSelectionModel().select(cell.getIndex());
-                            phrasesTable.scrollTo(cell.getIndex());
-                            phrasesTable.requestFocus();
-                        }
+                cell.setOnMouseClicked(mouseEvent -> {
+                    if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+                        phrasesTable.getSelectionModel().select(cell.getIndex());
+                        phrasesTable.scrollTo(cell.getIndex());
+                        phrasesTable.requestFocus();
                     }
                 });
 
@@ -140,15 +129,10 @@ public class MusicProjectionController extends ProjectionController {
 
         TableColumn<SelectionText, List<String>> col = (TableColumn<SelectionText, List<String>>) phrasesTable.getColumns().get(0);
         col.setCellValueFactory(new PropertyValueFactory<>("lines"));
-        col.setCellFactory(new Callback<TableColumn<SelectionText, List<String>>, TableCell<SelectionText, List<String>>>() {
-            @Override
-            public TableCell<SelectionText, List<String>> call(TableColumn<SelectionText, List<String>> param) {
-                return new MusicPhraseCell();
-            }
-        });
+        col.setCellFactory(param -> new MusicPhraseCell());
         col.prefWidthProperty().bind(phrasesTable.widthProperty());
 
-        phrasesTable.setRowFactory(row -> new TableRow<SelectionText>() {
+        phrasesTable.setRowFactory(row -> new TableRow<>() {
             @Override
             protected void updateItem(SelectionText item, boolean empty) {
                 super.updateItem(item, empty);
@@ -178,124 +162,90 @@ public class MusicProjectionController extends ProjectionController {
 
         notifyTitleChange(music.getNameWithArtistProperty().getValue());
 
-        music.getNameWithArtistProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                notifyTitleChange(newValue);
-            }
-        });
+        music.getNameWithArtistProperty().addListener((observable, oldValue, newValue) -> notifyTitleChange(newValue));
 
-        music.getPhrasesList().addListener(new ListChangeListener<String>() {
-            @Override
-            public void onChanged(ListChangeListener.Change<? extends String> c) {
-                reprocessPhrases();
-            }
-        });
+        music.getPhrasesList().addListener((ListChangeListener<String>) c -> reprocessPhrases());
 
-        music.getThemeProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                setTheme(ThemeFinder.getThemeByVideoName(newValue).getVideoFile());
-            }
-        });
+        music.getThemeProperty().addListener((observable, oldValue, newValue) -> setTheme(ThemeFinder.getThemeByVideoName(newValue).getVideoFile()));
 
-        textWrapperProperty.addListener(new ChangeListener<TextWrapper>() {
-            @Override
-            public void changed(ObservableValue<? extends TextWrapper> observable, TextWrapper oldValue, TextWrapper newValue) {
-                reprocessPhrases();
-            }
-        });
+        textWrapperProperty.addListener((observable, oldValue, newValue) -> reprocessPhrases());
 
-        searchTextField.textProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                focusToTerm(newValue);
-            }
-        });
+        searchTextField.textProperty().addListener((observable, oldValue, newValue) -> focusToTerm(newValue));
 
-        phrasesTable.setOnKeyPressed(new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent keyEvent) {
-                if (keyEvent.getCode().equals(KeyCode.DOWN)) {
-                    if (markedPosition != null) {
-                        int scrollTo = markedPosition;
-                        phrasesTable.getSelectionModel().select(scrollTo);
-                        phrasesTable.scrollTo(scrollTo);
-                        markedPosition = null;
-                    }
+        phrasesTable.setOnKeyPressed(keyEvent -> {
+            if (keyEvent.getCode().equals(KeyCode.DOWN)) {
+                if (markedPosition != null) {
+                    int scrollTo = markedPosition;
+                    phrasesTable.getSelectionModel().select(scrollTo);
+                    phrasesTable.scrollTo(scrollTo);
+                    markedPosition = null;
                 }
             }
         });
 
         phrasesTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        phrasesTable.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                if (newValue == null) {
-                    performClear();
-                    return;
-                }
+        phrasesTable.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null) {
+                performClear();
+                return;
+            }
 
-                int pos = newValue.intValue();
+            int pos = newValue.intValue();
 
-                if (pos < 0 || pos >= data.size()) {
-                    performClear();
-                    return;
-                }
+            if (pos < 0 || pos >= data.size()) {
+                performClear();
+                return;
+            }
 
-                miniPhrasesListView.getSelectionModel().clearSelection();
-                miniPhrasesListView.getSelectionModel().select(newValue.intValue());
+            miniPhrasesListView.getSelectionModel().clearSelection();
+            miniPhrasesListView.getSelectionModel().select(newValue.intValue());
 
-                enableClear();
-                clearMarker();
+            enableClear();
+            clearMarker();
 
-                WrappedText text = data.get(pos).text;
+            WrappedText text = data.get(pos).text;
 
-                TableViewSkin<?> skin = (TableViewSkin<?>) phrasesTable.getSkin();
-                VirtualFlow<?> flow = ((VirtualFlow<?>)skin.getChildren().get(1));
+            TableViewSkin<?> skin = (TableViewSkin<?>) phrasesTable.getSkin();
+            VirtualFlow<?> flow = ((VirtualFlow<?>) skin.getChildren().get(1));
 
-                if (text.isEmpty()) {
-                    if (oldValue != null) {
-                        if (oldValue.intValue() < pos) {
-                            pos++;
-                        } else {
-                            pos--;
-                        }
-
-                        if (pos >= 0 && pos < data.size()) {
-                            final int pos2 = pos;
-                            Platform.runLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    phrasesTable.getSelectionModel().select(pos2);
-                                    if (flow != null) {
-                                        flow.scrollPixels(50);
-                                    }
-                                }
-                            });
-                        }
-                    }
-                } else {
-                    if (newValue.equals(0)) {
-                        Platform.runLater(() -> markedPosition = null);
+            if (text.isEmpty()) {
+                if (oldValue != null) {
+                    if (oldValue.intValue() < pos) {
+                        pos++;
                     } else {
-                        markedPosition = null;
+                        pos--;
                     }
-                    projecting = true;
-                    projectionManager.setText(text);
-                    playTheme();
 
-                    if (flow != null) {
-                        IndexedCell<?> firstVisibleCell = flow.getFirstVisibleCell();
-                        IndexedCell<?> lastVisibleCell = flow.getLastVisibleCell();
-
-                        if (firstVisibleCell != null && lastVisibleCell != null) {
-                            int firstIndex = firstVisibleCell.getIndex();
-                            int center = firstIndex + ((lastVisibleCell.getIndex() - firstIndex) / 2);
-
-                            if (newValue.intValue() > center && newValue.intValue() > oldValue.intValue()) {
-                                phrasesTable.scrollTo(firstIndex + 2);
+                    if (pos >= 0 && pos < data.size()) {
+                        final int pos2 = pos;
+                        Platform.runLater(() -> {
+                            phrasesTable.getSelectionModel().select(pos2);
+                            if (flow != null) {
+                                flow.scrollPixels(50);
                             }
+                        });
+                    }
+                }
+            } else {
+                if (newValue.equals(0)) {
+                    Platform.runLater(() -> markedPosition = null);
+                } else {
+                    markedPosition = null;
+                }
+                projecting = true;
+                projectionManager.setText(text);
+                playTheme();
+
+                if (flow != null) {
+                    IndexedCell<?> firstVisibleCell = flow.getFirstVisibleCell();
+                    IndexedCell<?> lastVisibleCell = flow.getLastVisibleCell();
+
+                    if (firstVisibleCell != null && lastVisibleCell != null) {
+                        int firstIndex = firstVisibleCell.getIndex();
+                        int center = firstIndex + ((lastVisibleCell.getIndex() - firstIndex) / 2);
+
+                        if (newValue.intValue() > center && newValue.intValue() > oldValue.intValue()) {
+                            phrasesTable.scrollTo(firstIndex + 2);
                         }
                     }
                 }
@@ -414,9 +364,7 @@ public class MusicProjectionController extends ProjectionController {
     }
 
     private void clearMarker() {
-        data.stream().filter((st) -> (st.selected.get())).forEach((st) -> {
-            st.selected.set(false);
-        });
+        data.stream().filter((st) -> (st.selected.get())).forEach((st) -> st.selected.set(false));
         phrasesTable.refresh();
     }
 
@@ -436,7 +384,7 @@ public class MusicProjectionController extends ProjectionController {
             closestPhrase = 0;
         } 
         
-        int positions[] = new int[data.size()];
+        int[] positions = new int[data.size()];
         boolean neg = false;
         
         for (int i=0; i<data.size(); i++) {
@@ -487,7 +435,7 @@ public class MusicProjectionController extends ProjectionController {
 
         public SelectionText(WrappedText text) {
             this.text = text;
-            this.lines = FXCollections.observableArrayList(text.getLines());
+            ObservableList<String> lines = FXCollections.observableArrayList(text.getLines());
             this.selected = new SimpleBooleanProperty(false);
             this.firstLine = new SimpleBooleanProperty(false);
         }
@@ -495,18 +443,9 @@ public class MusicProjectionController extends ProjectionController {
         private final WrappedText text;
         private final SimpleBooleanProperty selected;
         private final SimpleBooleanProperty firstLine;
-        private final ObservableList<String> lines;
 
         public SimpleBooleanProperty selectedProperty() {
             return selected;
-        }
-
-        public SimpleBooleanProperty firstLineProperty() {
-            return firstLine;
-        }
-
-        public List<String> getLines() {
-            return lines;
         }
 
         private boolean hasTerm(String term) {

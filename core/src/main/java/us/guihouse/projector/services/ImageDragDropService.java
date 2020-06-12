@@ -11,8 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+
 import javafx.fxml.FXML;
 import javafx.scene.image.Image;
 import javafx.scene.input.DragEvent;
@@ -41,10 +40,6 @@ public class ImageDragDropService {
     private File imageFile;
     private Image dropping;
 
-    public ImageDragDropService(Client client) {
-        this(client, false);
-    }
-    
     public ImageDragDropService(Client client, boolean requireFile) {
         this.client = client;
         this.requireFile = requireFile;
@@ -67,9 +62,6 @@ public class ImageDragDropService {
                     is = new FileInputStream(file);
                     input = new Image(is);
                     imageFile = file;
-                } catch (IOException ex) {
-                    Logger.getLogger(ImageController.class.getName()).log(Level.SEVERE, null, ex);
-                    input = null;
                 } catch (Exception ex) {
                     Logger.getLogger(ImageController.class.getName()).log(Level.SEVERE, null, ex);
                     input = null;
@@ -122,16 +114,13 @@ public class ImageDragDropService {
         if (dropping.isBackgroundLoading()) {
             client.onFileLoading();
             
-            dropping.errorProperty().addListener(new ChangeListener<Boolean>() {
-                @Override
-                public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                    if (newValue) {
-                        client.onFileError("Imagem ou arquivo inválido.");
-                        client.showPreviewImage(null);
-                        dropping = null;
-                    } else {
-                        client.onFileOk();
-                    }
+            dropping.errorProperty().addListener((observable, oldValue, newValue) -> {
+                if (newValue) {
+                    client.onFileError("Imagem ou arquivo inválido.");
+                    client.showPreviewImage(null);
+                    dropping = null;
+                } else {
+                    client.onFileOk();
                 }
             });
         } else {

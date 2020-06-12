@@ -5,7 +5,6 @@
  */
 package us.guihouse.projector.other.file_filters;
 
-import java.io.File;
 import javafx.stage.FileChooser.ExtensionFilter;
 
 /**

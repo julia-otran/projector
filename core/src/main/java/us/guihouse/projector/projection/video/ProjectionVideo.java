@@ -51,11 +51,6 @@ public class ProjectionVideo implements Projectable {
     }
 
     @Override
-    public CanvasDelegate getCanvasDelegate() {
-        return delegate;
-    }
-
-    @Override
     public void rebuildLayout() {
         if (videoW == 0 || videoH == 0) {
             return;

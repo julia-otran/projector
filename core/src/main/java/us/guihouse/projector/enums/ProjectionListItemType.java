@@ -22,5 +22,5 @@ public enum ProjectionListItemType {
         }
 
         return null;
-    };
+    }
 }

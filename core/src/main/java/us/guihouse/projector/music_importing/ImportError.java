@@ -11,11 +11,8 @@ package us.guihouse.projector.music_importing;
  */
 class ImportError extends Exception {
 
-    ImportError(String message) {
-        super(message);
+    ImportError() {
+        super("Cannot read phrases");
     }
 
-    ImportError(Exception source) {
-        super(source);
-    }
 }

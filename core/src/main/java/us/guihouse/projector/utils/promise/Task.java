@@ -10,5 +10,5 @@ package us.guihouse.projector.utils.promise;
  * @author guilherme
  */
 public interface Task<IN, OUT> {
-    public void execute(IN input, Callback<OUT> callback);
+    void execute(IN input, Callback<OUT> callback);
 }

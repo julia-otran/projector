@@ -7,7 +7,6 @@ package us.guihouse.projector.projection.text;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  *
@@ -38,6 +37,6 @@ public class WrappedText {
     }
 
     public String getJoinedLines() {
-        return lines.stream().collect(Collectors.joining(" "));
+        return String.join(" ", lines);
     }
 }

@@ -11,17 +11,14 @@ import javafx.application.Platform;
  *
  * @author guilherme
  */
-public class JavaFxExecutor<IN, OUT> implements Executor<IN, OUT> {
+public class JavaFxExecutor<IN> implements Executor<IN> {
     @Override
-    public void execute(IN input, Task<IN, OUT> task, Callback<OUT> callback) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    task.execute(input, callback);
-                } catch (Exception ex) {
-                    callback.error(ex);
-                }
+    public <OUT> void execute(IN input, Task<IN, OUT> task, Callback<OUT> callback) {
+        Platform.runLater(() -> {
+            try {
+                task.execute(input, callback);
+            } catch (Exception ex) {
+                callback.error(ex);
             }
         });
     }

@@ -9,8 +9,7 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
@@ -52,18 +51,15 @@ public class TextController extends ProjectionController implements TextWrapperF
     public void initWithProjectionManager(ProjectionManager projectionManager) {
         super.initWithProjectionManager(projectionManager);
 
-        projectionText.textProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                int sz = newValue != null ? newValue.length() : 0;
-                if (sz == 0) {
-                    notifyTitleChange("Novo Texto");
-                    getObserver().updateProperty("TEXT", "");
-                } else {
-                    sz = Math.min(50, sz);
-                    notifyTitleChange(newValue.substring(0, sz));
-                    getObserver().updateProperty("TEXT", newValue);
-                }
+        projectionText.textProperty().addListener((observable, oldValue, newValue) -> {
+            int sz = newValue != null ? newValue.length() : 0;
+            if (sz == 0) {
+                notifyTitleChange("Novo Texto");
+                getObserver().updateProperty("TEXT", "");
+            } else {
+                sz = Math.min(50, sz);
+                notifyTitleChange(newValue.substring(0, sz));
+                getObserver().updateProperty("TEXT", newValue);
             }
         });
 
