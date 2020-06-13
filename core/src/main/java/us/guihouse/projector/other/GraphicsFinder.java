@@ -77,19 +77,4 @@ public class GraphicsFinder {
                 .filter(dev -> !dev.equals(mainId))
                 .collect(Collectors.toList());
     }
-
-    private static String getDeviceName(GraphicsDevice dev) {
-        StringBuilder builder = new StringBuilder();
-
-        int width = dev.getDisplayMode().getWidth();
-        int height = dev.getDisplayMode().getHeight();
-
-        return builder.append(dev.getIDstring())
-                .append(" (")
-                .append(width)
-                .append("x")
-                .append(height)
-                .append(")")
-                .toString();
-    }
 }

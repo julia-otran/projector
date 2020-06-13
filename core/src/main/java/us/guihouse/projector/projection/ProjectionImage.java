@@ -5,7 +5,6 @@
  */
 package us.guihouse.projector.projection;
 
-import us.guihouse.projector.projection.models.BackgroundModel;
 import us.guihouse.projector.projection.models.BackgroundProvide;
 import us.guihouse.projector.projection.models.VirtualScreen;
 

@@ -31,7 +31,6 @@ import javafx.scene.paint.Color;
 import javafx.util.Callback;
 import us.guihouse.projector.projection.ProjectionImage;
 import us.guihouse.projector.projection.ProjectionManager;
-import us.guihouse.projector.projection.models.BackgroundProvide;
 
 /**
  * FXML Controller class
