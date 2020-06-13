@@ -599,6 +599,10 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
             }
         }
 
+        if (projectionList == null) {
+            return true;
+        }
+
         try {
             ProjectionListItem item = listRepository.createItem(projectionList, "Musica", ProjectionListItemType.MUSIC);
             HashMap<String, String> musicProps = new HashMap<>();

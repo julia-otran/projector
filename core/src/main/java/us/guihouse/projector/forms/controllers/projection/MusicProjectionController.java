@@ -33,6 +33,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.util.Callback;
+import lombok.Getter;
 import us.guihouse.projector.models.Music;
 import us.guihouse.projector.models.MusicTheme;
 import us.guihouse.projector.other.ProjectorStringUtils;
@@ -432,14 +433,15 @@ public class MusicProjectionController extends ProjectionController {
     }
 
     public static class SelectionText {
-
         public SelectionText(WrappedText text) {
             this.text = text;
-            ObservableList<String> lines = FXCollections.observableArrayList(text.getLines());
+            this.lines = FXCollections.observableArrayList(text.getLines());
             this.selected = new SimpleBooleanProperty(false);
             this.firstLine = new SimpleBooleanProperty(false);
         }
 
+        @Getter
+        private final ObservableList<String> lines;
         private final WrappedText text;
         private final SimpleBooleanProperty selected;
         private final SimpleBooleanProperty firstLine;
@@ -467,7 +469,7 @@ public class MusicProjectionController extends ProjectionController {
         protected void updateItem(List<String> item, boolean empty) {
             super.updateItem(item, empty);
 
-            if (empty) {
+            if (empty || item == null) {
                 setGraphic(null);
             } else {
                 ensureLabels(item.size());
