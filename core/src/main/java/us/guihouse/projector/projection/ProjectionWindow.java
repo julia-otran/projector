@@ -19,6 +19,9 @@ import us.guihouse.projector.other.GraphicsFinder;
  * @author guilherme
  */
 public class ProjectionWindow  {
+    private static final BufferedImage BLANK_CURSOR_IMG = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+    private static final Cursor BLANK_CURSOR = Toolkit.getDefaultToolkit().createCustomCursor(BLANK_CURSOR_IMG, new Point(0, 0), "blank cursor");
+
     @Getter
     private JFrame frame;
 
@@ -37,6 +40,7 @@ public class ProjectionWindow  {
         frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         frame.setUndecorated(true);
         frame.setLayout(null);
+        frame.setCursor(BLANK_CURSOR);
 
         Rectangle displayRect = currentDevice.getDevice().getDefaultConfiguration().getBounds();
         frame.setBounds(displayRect);
@@ -45,27 +49,27 @@ public class ProjectionWindow  {
     }
 
     void updateOutput(BufferedImage src) {
-        do {
-            do {
+        if (strategy == null) {
+            return;
+        }
+
+        //do {
+            //do {
                 Graphics graphics = strategy.getDrawGraphics();
 
                 graphics.drawImage(src, 0, 0, null);
 
                 graphics.dispose();
-            } while (strategy.contentsRestored());
+            //} while (strategy.contentsRestored());
 
             strategy.show();
-        } while (strategy.contentsLost());
+        //} while (strategy.contentsLost());
     }
 
     void makeVisible() {
         frame.setVisible(true);
-        frame.createBufferStrategy(3);
+        frame.createBufferStrategy(1);
         strategy = frame.getBufferStrategy();
-    }
-
-    void setCursor(final Cursor cursor) {
-        frame.setCursor(cursor);
     }
 
     void shutdown() {
@@ -75,6 +79,7 @@ public class ProjectionWindow  {
 
             SwingUtilities.invokeLater(() -> {
                 strategy.dispose();
+                strategy = null;
                 f.setVisible(false);
                 f.dispose();
             });

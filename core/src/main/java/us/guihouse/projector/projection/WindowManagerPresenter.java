@@ -3,6 +3,7 @@ package us.guihouse.projector.projection;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
+import java.util.Map;
 
 public class WindowManagerPresenter implements Runnable {
     private int frames = 0;
@@ -47,10 +48,9 @@ public class WindowManagerPresenter implements Runnable {
     }
 
     public void update(String id, BufferedImage src) {
-        ProjectionWindow w = windows.get(id);
         BufferedImage dst = outputs.get(id);
 
-        if (w != null) {
+        if (dst != null) {
             src.copyData(dst.getRaster());
         }
     }
@@ -63,18 +63,14 @@ public class WindowManagerPresenter implements Runnable {
 
             long newTimestamp = System.nanoTime();
             if (newTimestamp - timestamp > 1000000000) {
-                //System.out.println(frames);
+                System.out.println(windows.entrySet().stream().findFirst().map(Map.Entry::getKey).orElse("") + " - " + frames);
                 frames = 0;
                 timestamp = newTimestamp;
             }
 
-            outputs.forEach((id, img) -> windows.get(id).updateOutput(outputs.get(id)));
+            outputs.forEach((id, img) -> windows.get(id).updateOutput(img));
 
-            try {
-                Thread.sleep(5);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            Thread.yield();
         }
     }
 }

@@ -3,9 +3,7 @@ package us.guihouse.projector.projection;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.swing.*;
@@ -30,7 +28,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
     private final ProjectionCanvas projectionCanvas;
 
-    private final WindowManagerPresenter managerPresenter = new WindowManagerPresenter();
+    private final HashMap<String, WindowManagerPresenter> managerPresenters = new HashMap<>();
 
     private GraphicsDevice defaultDevice;
 
@@ -58,18 +56,10 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
     private final SettingsService settingsService;
 
-    private final Cursor blankCursor;
-
     public WindowManager(SettingsService settingsService) {
         this.settingsService = settingsService;
 
         projectionCanvas = new ProjectionCanvas(this);
-
-        // Transparent 16 x 16 pixel cursor image.
-        BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-
-        // Create a new blank cursor.
-        blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImg, new Point(0, 0), "blank cursor");
 
         preview = new PreviewImageView(this);
 
@@ -85,7 +75,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     }
 
     private void stopEngine() {
-        managerPresenter.stop();
+        managerPresenters.forEach((key, mp) -> mp.stop());
 
         running = false;
 
@@ -139,7 +129,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
             if (w != null) {
                 w.init();
-                w.setCursor(blankCursor);
                 w.setFullScreen(fullScreen);
             }
         }));
@@ -155,7 +144,22 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
             projectionCanvas.init();
             preview.setProjectionCanvas(projectionCanvas);
 
-            managerPresenter.start(windows);
+            managerPresenters.clear();
+
+            virtualScreens.forEach(vs -> {
+                WindowManagerPresenter presenter = new WindowManagerPresenter();
+                managerPresenters.put(vs.getVirtualScreenId(), presenter);
+
+                HashMap<String, ProjectionWindow> targetWindows = new HashMap<>();
+
+                windows.forEach((id, window) -> {
+                    if (vs.getWindows().stream().anyMatch(w -> w.getDisplayId().equals(id))) {
+                        targetWindows.put(id, window);
+                    }
+                });
+
+                presenter.start(targetWindows);
+            });
 
             running = true;
             drawThread = new Thread(WindowManager.this);
@@ -230,7 +234,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
             windowConfigs.forEach(windowConfig -> {
                 BufferedImage screen = screenImages.get(windowConfig.getDisplayId());
-                managerPresenter.update(windowConfig.getDisplayId(), screen);
+                managerPresenters.get(windowConfig.getVirtualScreenId()).update(windowConfig.getDisplayId(), screen);
             });
 
             Thread.yield();

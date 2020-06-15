@@ -142,7 +142,7 @@ public class ProjectorPreferences {
     }
 
     public static int getChromaPaddingBottom() {
-        return getPrefs().getInt(CHROMA_SCREEN_FONT_SIZE, 150);
+        return getPrefs().getInt(CHROMA_SCREEN_PADDING_BOTTOM, 150);
     }
 
     public static void setChromaPaddingBottom(int paddingBottom) {
