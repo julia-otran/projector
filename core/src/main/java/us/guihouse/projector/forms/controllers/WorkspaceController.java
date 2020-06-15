@@ -13,6 +13,7 @@ import java.util.*;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.beans.property.Property;
@@ -46,6 +47,7 @@ import us.guihouse.projector.scenes.*;
 import us.guihouse.projector.services.ManageMusicService;
 
 import static us.guihouse.projector.utils.FilePaths.ALLOWED_WINDOW_CONFIG_FILE_NAME_PATTERN;
+import static us.guihouse.projector.utils.Patterns.INTEGER_NUMBER_PATTERN;
 
 /**
  * FXML Controller class
@@ -283,6 +285,75 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
         });
     }
 
+    @FXML
+    public void onMenuChromaPaddingBottomClick() {
+        TextInputDialog inputDialog = new TextInputDialog();
+        inputDialog.setTitle("Definir espaçamento inferior da tela chroma");
+        inputDialog.setHeaderText("Digite o valor em pixels do espaçamento inferior (Somente números)");
+        inputDialog.setContentText("Espaçamento Inferior:");
+
+        Optional<String> newValue = inputDialog.showAndWait();
+
+        newValue.ifPresent(value -> {
+            if (INTEGER_NUMBER_PATTERN.matcher(value).matches()) {
+                int paddingBottom = Integer.parseInt(value);
+                graphicsHelper.getProjectionManager().setChromaPaddingBottom(paddingBottom);
+            } else {
+                Alert a = new Alert(Alert.AlertType.ERROR);
+                a.setTitle("Erro");
+                a.setHeaderText("Falha ao definir espaçamento");
+                a.setContentText("O número é inválido.");
+                a.show();
+            }
+        });
+    }
+
+    @FXML
+    public void onMenuChromaMinPaddingBottomClick() {
+        TextInputDialog inputDialog = new TextInputDialog();
+        inputDialog.setTitle("Definir espaçamento inferior mínimo da tela chroma");
+        inputDialog.setHeaderText("Digite o valor em pixels do espaçamento inferior mínimo (Somente números)");
+        inputDialog.setContentText("Espaçamento Inferior Mínimo:");
+
+        Optional<String> newValue = inputDialog.showAndWait();
+
+        newValue.ifPresent(value -> {
+            if (INTEGER_NUMBER_PATTERN.matcher(value).matches()) {
+                int paddingBottom = Integer.parseInt(value);
+                graphicsHelper.getProjectionManager().setChromaMinPaddingBottom(paddingBottom);
+            } else {
+                Alert a = new Alert(Alert.AlertType.ERROR);
+                a.setTitle("Erro");
+                a.setHeaderText("Falha ao definir espaçamento");
+                a.setContentText("O número é inválido.");
+                a.show();
+            }
+        });
+    }
+
+    @FXML
+    public void onMenuChromaFontSizeClick() {
+        TextInputDialog inputDialog = new TextInputDialog();
+        inputDialog.setTitle("Definir tamanho da fonte da tela chroma");
+        inputDialog.setHeaderText("Digite o valor em pixels do tamanho da fonte (Somente números)");
+        inputDialog.setContentText("Tamanho da fonte:");
+
+        Optional<String> newValue = inputDialog.showAndWait();
+
+        newValue.ifPresent(value -> {
+            if (INTEGER_NUMBER_PATTERN.matcher(value).matches()) {
+                int fontSize = Integer.parseInt(value);
+                graphicsHelper.getProjectionManager().setChromaFontSize(fontSize);
+            } else {
+                Alert a = new Alert(Alert.AlertType.ERROR);
+                a.setTitle("Erro");
+                a.setHeaderText("Falha ao definir espaçamento");
+                a.setContentText("O número é inválido.");
+                a.show();
+            }
+        });
+    }
+
     // ------------------------------
     // Projection List
     // ------------------------------
@@ -460,12 +531,14 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
                 }
             }
 
-            for (Map.Entry<Long, ProjectionItemSubScene> entry : itemSubScenes.entrySet()) {
-                if (list.stream().noneMatch(item -> item.getId() == entry.getKey())) {
-                    ProjectionItemSubScene scene = itemSubScenes.remove(entry.getKey());
-                    scene.stop();
-                }
-            }
+            itemSubScenes.keySet()
+                    .stream()
+                    .filter(entry -> list.stream().noneMatch(item -> item.getId() == entry))
+                    .collect(Collectors.toList())
+                    .forEach(key -> {
+                        ProjectionItemSubScene scene = itemSubScenes.remove(key);
+                        scene.stop();
+                    });
         } catch (SQLException e) {
             Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, e.getMessage(), e);
         }

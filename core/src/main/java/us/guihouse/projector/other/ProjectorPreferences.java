@@ -25,6 +25,9 @@ public class ProjectorPreferences {
     private static final String BACKGROUND_CROP = "BACKGROUND_CROP";
     private static final String DARKEN_BACKGROUND = "DARKEN_BACKGROUND";
     private static final String WINDOW_CONFIG_FILE = "WINDOW_CONFIG_FILE";
+    private static final String CHROMA_SCREEN_FONT_SIZE = "CHROMA_SCREEN_FONT_SIZE";
+    private static final String CHROMA_SCREEN_PADDING_BOTTOM = "CHROMA_SCREEN_PADDING_BOTTOM";
+    private static final String CHROMA_SCREEN_MIN_PADDING_BOTTOM = "CHROMA_SCREEN_MIN_PADDING_BOTTOM";
 
     public static Preferences getPrefs() {
         if (prefs == null) {
@@ -129,4 +132,28 @@ public class ProjectorPreferences {
     public static boolean getCropBackground() { return getPrefs().getBoolean(BACKGROUND_CROP, true); }
 
     public static void setCropBackground(boolean crop) { getPrefs().putBoolean(BACKGROUND_CROP, crop); }
+
+    public static int getChromaFontSize() {
+        return getPrefs().getInt(CHROMA_SCREEN_FONT_SIZE, 45);
+    }
+
+    public static void setChromaFontSize(int fontSize) {
+        getPrefs().putInt(CHROMA_SCREEN_FONT_SIZE, fontSize);
+    }
+
+    public static int getChromaPaddingBottom() {
+        return getPrefs().getInt(CHROMA_SCREEN_FONT_SIZE, 150);
+    }
+
+    public static void setChromaPaddingBottom(int paddingBottom) {
+        getPrefs().putInt(CHROMA_SCREEN_PADDING_BOTTOM, paddingBottom);
+    }
+
+    public static int getChromaMinPaddingBottom() {
+        return getPrefs().getInt(CHROMA_SCREEN_MIN_PADDING_BOTTOM, 64);
+    }
+
+    public static void setChromaMinPaddingBottom(int minPaddingBottom) {
+        getPrefs().putInt(CHROMA_SCREEN_MIN_PADDING_BOTTOM, minPaddingBottom);
+    }
 }

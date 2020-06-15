@@ -57,4 +57,10 @@ public interface ProjectionManager {
     void setMusicForBackground(Integer musicId, File preferred);
 
     boolean getCropBackground();
+
+    void setChromaPaddingBottom(int paddingBottom);
+
+    void setChromaMinPaddingBottom(int paddingBottom);
+
+    void setChromaFontSize(int fontSize);
 }

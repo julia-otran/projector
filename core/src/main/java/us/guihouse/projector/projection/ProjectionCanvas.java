@@ -213,4 +213,19 @@ public class ProjectionCanvas implements ProjectionManager {
     public boolean getCropBackground() {
         return background.getCropBackground();
     }
+
+    @Override
+    public void setChromaPaddingBottom(int paddingBottom) {
+        label.setChromaPaddingBottom(paddingBottom);
+    }
+
+    @Override
+    public void setChromaMinPaddingBottom(int paddingBottom) {
+        label.setChromaMinPaddingBottom(paddingBottom);
+    }
+
+    @Override
+    public void setChromaFontSize(int fontSize) {
+        label.setChromaFontSize(fontSize);
+    }
 }

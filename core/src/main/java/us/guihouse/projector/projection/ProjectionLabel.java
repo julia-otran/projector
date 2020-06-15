@@ -39,10 +39,6 @@ public class ProjectionLabel implements Projectable {
 
     private static final int DEFAULT_PADDING_X = 120;
     private static final int DEFAULT_PADDING_Y = 40;
-    private static final int CHROMA_PADDING_BOTTOM = 160;
-    private static final int CHROMA_PADDING_BOTTOM_MIN = 64;
-
-    private static final float CHROMA_OUTPUT_SCALE = 0.4f;
 
     private static final int DEFAULT_FONT_SIZE = 112;
 
@@ -68,10 +64,22 @@ public class ProjectionLabel implements Projectable {
 
     private final HashMap<String, AffineTransform> chromaScreenTransforms = new HashMap<>();
 
+    @Getter
+    private int chromaFontSize;
+
+    @Getter
+    private int chromaPaddingBottom;
+
+    @Getter
+    private int chromaMinPaddingBottom;
+
     public ProjectionLabel(CanvasDelegate canvasDelegate) {
         this.canvasDelegate = canvasDelegate;
         factoryChangeListeners = new ArrayList<>();
         darkenBackground = ProjectorPreferences.getDarkenBackground();
+        chromaFontSize = ProjectorPreferences.getChromaFontSize();
+        chromaPaddingBottom = ProjectorPreferences.getChromaPaddingBottom();
+        chromaMinPaddingBottom = ProjectorPreferences.getChromaMinPaddingBottom();
     }
 
     @Override
@@ -99,6 +107,24 @@ public class ProjectionLabel implements Projectable {
         this.darkenBackground = darken;
         ProjectorPreferences.setDarkenBackground(darken);
         renderText();
+    }
+
+    public void setChromaFontSize(int fontSize) {
+        this.chromaFontSize = fontSize;
+        ProjectorPreferences.setChromaFontSize(fontSize);
+        generateLines();
+    }
+
+    public void setChromaPaddingBottom(int paddingBottom) {
+        this.chromaPaddingBottom = paddingBottom;
+        ProjectorPreferences.setChromaPaddingBottom(paddingBottom);
+        generateLines();
+    }
+
+    public void setChromaMinPaddingBottom(int minPaddingBottom) {
+        this.chromaMinPaddingBottom = minPaddingBottom;
+        ProjectorPreferences.setChromaMinPaddingBottom(minPaddingBottom);
+        generateLines();
     }
 
     public void setText(WrappedText text) {
@@ -243,19 +269,21 @@ public class ProjectionLabel implements Projectable {
 
         drawLines = pendingLines;
 
+        float chromaFontScale = chromaFontSize / (float) getFont().getSize();
+
         canvasDelegate.getVirtualScreens().forEach(vs -> {
             AffineTransform chromaScreenTransform = new AffineTransform();
 
             if (vs.isChromaScreen()) {
-                int chromaTranslateX = (vs.getWidth() - Math.round(canvasDelegate.getMainWidth() * CHROMA_OUTPUT_SCALE)) / 2;
+                int chromaTranslateX = (vs.getWidth() - Math.round(canvasDelegate.getMainWidth() * chromaFontScale)) / 2;
 
-                int bottomBlankSpace = Math.round(emptyHeight * CHROMA_OUTPUT_SCALE / 2) + Math.round(CHROMA_PADDING_BOTTOM / 900f * vs.getHeight());
+                int bottomBlankSpace = Math.round(emptyHeight * chromaFontScale / 2) + chromaPaddingBottom;
                 int chromaTranslateY = vs.getHeight() - bottomBlankSpace;
 
                 int cropCheck = chromaTranslateY +
-                        Math.round(totalHeight * CHROMA_OUTPUT_SCALE) +
-                        Math.round(emptyHeight * CHROMA_OUTPUT_SCALE / 2) +
-                        Math.round(CHROMA_PADDING_BOTTOM_MIN / 900f * vs.getHeight());
+                        Math.round(totalHeight * chromaFontScale) +
+                        Math.round(emptyHeight * chromaFontScale / 2) +
+                        chromaMinPaddingBottom;
 
                 if (cropCheck > vs.getHeight()) {
                     int delta = cropCheck - vs.getHeight();
@@ -263,7 +291,7 @@ public class ProjectionLabel implements Projectable {
                 }
 
                 chromaScreenTransform.translate(chromaTranslateX, chromaTranslateY);
-                chromaScreenTransform.scale(CHROMA_OUTPUT_SCALE, CHROMA_OUTPUT_SCALE);
+                chromaScreenTransform.scale(chromaFontScale, chromaFontScale);
             }
 
             chromaScreenTransforms.put(vs.getVirtualScreenId(), chromaScreenTransform);
