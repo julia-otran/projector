@@ -53,17 +53,17 @@ public class ProjectionWindow  {
             return;
         }
 
-        //do {
-            //do {
+        do {
+            do {
                 Graphics graphics = strategy.getDrawGraphics();
 
                 graphics.drawImage(src, 0, 0, null);
 
                 graphics.dispose();
-            //} while (strategy.contentsRestored());
+            } while (strategy.contentsRestored());
 
             strategy.show();
-        //} while (strategy.contentsLost());
+        } while (strategy.contentsLost());
     }
 
     void makeVisible() {

@@ -11,7 +11,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <fx.version>13.0.2</fx.version>
-        <revision>2.6</revision>
+        <revision>2.7</revision>
     </properties>
 
     <name>Projector</name>
