@@ -70,13 +70,7 @@ public class WindowManagerPresenter implements Runnable {
 
             outputs.forEach((id, img) -> windows.get(id).updateOutput(img));
 
-            //Thread.yield();
-
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            Thread.yield();
         }
     }
 }
