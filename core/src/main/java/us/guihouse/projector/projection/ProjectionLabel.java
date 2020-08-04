@@ -40,8 +40,6 @@ public class ProjectionLabel implements Projectable {
     private static final int DEFAULT_PADDING_X = 120;
     private static final int DEFAULT_PADDING_Y = 40;
 
-    private static final int DEFAULT_FONT_SIZE = 112;
-
     // Label used to get fontMetrics
     private Font font;
     private FontMetrics fontMetrics;
@@ -80,11 +78,12 @@ public class ProjectionLabel implements Projectable {
         chromaFontSize = ProjectorPreferences.getChromaFontSize();
         chromaPaddingBottom = ProjectorPreferences.getChromaPaddingBottom();
         chromaMinPaddingBottom = ProjectorPreferences.getChromaMinPaddingBottom();
+
     }
 
     @Override
     public void init() {
-        setFont(new java.awt.Font(Font.SANS_SERIF, Font.PLAIN, DEFAULT_FONT_SIZE));
+        setFont(new java.awt.Font(Font.SANS_SERIF, Font.PLAIN, ProjectorPreferences.getProjectionLabelFontSize()));
         rebuildLayout();
     }
 
@@ -101,6 +100,7 @@ public class ProjectionLabel implements Projectable {
         this.font = font;
         this.fontMetrics = Toolkit.getDefaultToolkit().getFontMetrics(font);
         onFactoryChange();
+        ProjectorPreferences.setProjectionLabelFontSize(font.getSize());
     }
 
     public void setDarkenBackground(boolean darken) {

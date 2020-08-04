@@ -28,6 +28,7 @@ public class ProjectorPreferences {
     private static final String CHROMA_SCREEN_FONT_SIZE = "CHROMA_SCREEN_FONT_SIZE";
     private static final String CHROMA_SCREEN_PADDING_BOTTOM = "CHROMA_SCREEN_PADDING_BOTTOM";
     private static final String CHROMA_SCREEN_MIN_PADDING_BOTTOM = "CHROMA_SCREEN_MIN_PADDING_BOTTOM";
+    private static final String PROJECTION_LABEL_FONT_SIZE = "PROJECTION_LABEL_FONT_SIZE";
 
     public static Preferences getPrefs() {
         if (prefs == null) {
@@ -155,5 +156,13 @@ public class ProjectorPreferences {
 
     public static void setChromaMinPaddingBottom(int minPaddingBottom) {
         getPrefs().putInt(CHROMA_SCREEN_MIN_PADDING_BOTTOM, minPaddingBottom);
+    }
+
+    public static int getProjectionLabelFontSize() {
+        return getPrefs().getInt(PROJECTION_LABEL_FONT_SIZE, 112);
+    }
+
+    public static void setProjectionLabelFontSize(int size) {
+        getPrefs().putInt(PROJECTION_LABEL_FONT_SIZE, size);
     }
 }
