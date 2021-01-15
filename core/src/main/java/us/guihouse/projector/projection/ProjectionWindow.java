@@ -6,93 +6,124 @@
 package us.guihouse.projector.projection;
 
 import java.awt.*;
-import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
+import java.awt.image.DataBufferInt;
+import java.nio.IntBuffer;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import lombok.Getter;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.PointerBuffer;
+import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GL12;
+import org.lwjgl.system.MemoryStack;
 import us.guihouse.projector.other.GraphicsFinder;
+import us.guihouse.projector.projection.glfw.GLFWHelper;
+
+import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
+import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.system.MemoryStack.stackPush;
+import static org.lwjgl.system.MemoryUtil.NULL;
 
 /**
  *
  * @author guilherme
  */
 public class ProjectionWindow  {
-    private static final BufferedImage BLANK_CURSOR_IMG = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-    private static final Cursor BLANK_CURSOR = Toolkit.getDefaultToolkit().createCustomCursor(BLANK_CURSOR_IMG, new Point(0, 0), "blank cursor");
-
-    @Getter
-    private JFrame frame;
-
     @Getter
     private final GraphicsFinder.Device currentDevice;
-    private BufferStrategy strategy;
+
+    private long window;
+
+    private IntBuffer buffer;
+
+    private Rectangle bounds;
+
+    private boolean drawing = false;
 
     ProjectionWindow(GraphicsFinder.Device device) {
         this.currentDevice = device;
     }
 
     void init() {
-        frame = new JFrame(currentDevice.getDevice().getDefaultConfiguration());
+        PointerBuffer monitors = glfwGetMonitors();
 
-        frame.setExtendedState(Frame.MAXIMIZED_BOTH);
-        frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        frame.setUndecorated(true);
-        frame.setLayout(null);
-        frame.setCursor(BLANK_CURSOR);
+        if (monitors == null) {
+            throw new IllegalStateException("Unable to list monitors");
+        }
 
-        Rectangle displayRect = currentDevice.getDevice().getDefaultConfiguration().getBounds();
-        frame.setBounds(displayRect);
-        frame.setBackground(Color.BLACK);
-        frame.setIgnoreRepaint(true);
+        long monitor = -1;
+
+        bounds = getCurrentDevice().getDevice().getDefaultConfiguration().getBounds();
+
+        buffer = BufferUtils.createIntBuffer(bounds.width * bounds.height);
+
+        try ( MemoryStack stack = stackPush() ) {
+            IntBuffer x = stack.mallocInt(1);
+            IntBuffer y = stack.mallocInt(1);
+
+            for (int i = 0; i < monitors.limit(); i++) {
+                glfwGetMonitorPos(monitors.get(i), x, y);
+
+                if (x.get(0) == bounds.x && y.get(0) == bounds.y) {
+                    monitor = monitors.get(i);
+                }
+            }
+        }
+
+        if (monitor == -1) {
+            throw new IllegalStateException("Unable to find monitor");
+        }
+
+        window = glfwCreateWindow(bounds.width, bounds.height, "Projetor", monitor, NULL);
+
+        if ( window == NULL )
+            throw new RuntimeException("Failed to create the GLFW window");
+
+        glfwSetWindowPos(window, bounds.x, bounds.y);
+
+        // Make the OpenGL context current
+        glfwMakeContextCurrent(window);
+
+        // Enable v-sync
+        glfwSwapInterval(1);
+
+        GL.createCapabilities();
     }
 
     void updateOutput(BufferedImage src) {
-        if (strategy == null) {
-            return;
+        buffer.clear();
+
+        int[] pixelsSrc = ((DataBufferInt)src.getRaster().getDataBuffer()).getData();
+
+        for (int y = bounds.height - 1; y >= 0; y--) {
+            for (int x = 0; x < bounds.width; x++) {
+                int i = y * bounds.width + x;
+                buffer.put(pixelsSrc[i] << 8);
+            }
         }
 
-        // do {
-        //    do {
-                Graphics graphics = strategy.getDrawGraphics();
-
-                graphics.drawImage(src, 0, 0, null);
-
-                graphics.dispose();
-        //    } while (strategy.contentsRestored());
-
-            strategy.show();
-        // } while (strategy.contentsLost());
+        glfwMakeContextCurrent(window);
+        GL12.glDrawPixels(bounds.width, bounds.height, GL12.GL_RGBA, GL12.GL_UNSIGNED_INT_8_8_8_8, buffer);
+        glfwSwapBuffers(window);
+        glfwPollEvents();
     }
 
     void makeVisible() {
-        frame.setVisible(true);
-        frame.createBufferStrategy(1);
-        strategy = frame.getBufferStrategy();
+        if (window != 0) {
+            glfwShowWindow(window);
+        }
     }
 
     void shutdown() {
-        if (frame != null) {
-            final Frame f = frame;
-            currentDevice.getDevice().setFullScreenWindow(null);
-
-            SwingUtilities.invokeLater(() -> {
-                strategy.dispose();
-                strategy = null;
-                f.setVisible(false);
-                f.dispose();
-            });
-
-            frame = null;
+        // Free the window callbacks and destroy the window
+        if (window != 0) {
+            glfwFreeCallbacks(window);
+            glfwDestroyWindow(window);
         }
     }
 
     public void setFullScreen(boolean fullScreen) {
-        if (fullScreen && this.currentDevice.getDevice().isFullScreenSupported()) {
-            this.currentDevice.getDevice().setFullScreenWindow(frame);
-        } else {
-            this.currentDevice.getDevice().setFullScreenWindow(null);
-        }
     }
 }

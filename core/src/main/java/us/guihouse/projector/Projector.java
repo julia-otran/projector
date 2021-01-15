@@ -24,6 +24,7 @@ import us.guihouse.projector.forms.controllers.GraphicsDeviceHelper;
 import us.guihouse.projector.forms.controllers.SceneManager;
 import us.guihouse.projector.forms.controllers.WorkspaceController;
 import us.guihouse.projector.other.SQLiteJDBCDriverConnection;
+import us.guihouse.projector.projection.glfw.GLFWHelper;
 import us.guihouse.projector.utils.ThemeFinder;
 import us.guihouse.projector.utils.VlcPlayerFactory;
 
@@ -49,6 +50,8 @@ public class Projector extends Application implements Runnable {
         ThemeFinder.loadThemes();
 
         VlcPlayerFactory.init();
+
+        GLFWHelper.initGLFW();
 
         final GraphicsDeviceHelper graphicsHelper = new GraphicsDeviceHelper();
 
@@ -120,7 +123,9 @@ public class Projector extends Application implements Runnable {
                 Logger.getLogger(Projector.class.getName()).log(Level.SEVERE, null, ex);
             }
 
-            SwingUtilities.invokeLater(() -> Platform.runLater(() -> System.exit(0)));
+            GLFWHelper.finish();
+
+            Platform.runLater(() -> System.exit(0));
         });
 
         new Thread(this).start();

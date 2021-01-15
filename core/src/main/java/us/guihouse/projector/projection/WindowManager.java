@@ -13,10 +13,13 @@ import lombok.Getter;
 import lombok.Setter;
 import us.guihouse.projector.models.WindowConfig;
 import us.guihouse.projector.other.GraphicsFinder;
+import us.guihouse.projector.projection.glfw.GLFWHelper;
 import us.guihouse.projector.projection.models.VirtualScreen;
 import us.guihouse.projector.services.SettingsService;
 import us.guihouse.projector.utils.BlendGenerator;
 import us.guihouse.projector.utils.WindowConfigsLoader;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoader.WindowConfigsObserver {
 
@@ -124,15 +127,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
             }
         });
 
-        SwingUtilities.invokeLater(() -> windowConfigs.forEach(wc -> {
-            ProjectionWindow w = windows.get(wc.getDisplayId());
-
-            if (w != null) {
-                w.init();
-                w.setFullScreen(fullScreen);
-            }
-        }));
-
         SwingUtilities.invokeLater(() -> {
             windowConfigs.forEach(wc -> {
                 ProjectionWindow w = windows.get(wc.getDisplayId());
@@ -177,12 +171,27 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
             initializationCallback.run();
         }
 
+        GLFWHelper.initGLFW();
+
+        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+        glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_FALSE);
+
+        windowConfigs.forEach(wc -> {
+            ProjectionWindow w = windows.get(wc.getDisplayId());
+
+            if (w != null) {
+                w.init();
+                w.makeVisible();
+            }
+        });
+
         while (running) {
             frames++;
 
             long newTimestamp = System.nanoTime();
             if (newTimestamp - timestamp > 1000000000) {
-                //System.out.println(frames);
+                System.out.println(frames);
                 frames = 0;
                 timestamp = newTimestamp;
             }
@@ -240,7 +249,11 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
             Thread.yield();
         }
 
-        windows.values().forEach(ProjectionWindow::shutdown);
+
+            windows.values().forEach(ProjectionWindow::shutdown);
+            GLFWHelper.finish();
+
+
         screenGraphics.forEach((id, g) -> g.dispose());
 
         drawThread = null;

@@ -5,7 +5,10 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
 
-public class WindowManagerPresenter implements Runnable {
+import static java.awt.image.BufferedImage.TYPE_INT_BGR;
+import static java.awt.image.BufferedImage.TYPE_INT_RGB;
+
+public class WindowManagerPresenter{
     private int frames = 0;
     private long timestamp = 0;
 
@@ -20,57 +23,18 @@ public class WindowManagerPresenter implements Runnable {
 
         outputs.clear();
         windows.forEach((id, w) -> {
-            if (w.getFrame() != null) {
                 GraphicsDevice dev = w.getCurrentDevice().getDevice();
+                Rectangle bounds = dev.getDefaultConfiguration().getBounds();
 
-                BufferedImage img = dev.getDefaultConfiguration().createCompatibleImage(dev.getDefaultConfiguration().getBounds().width, dev.getDefaultConfiguration().getBounds().height);
+                BufferedImage img = new BufferedImage(bounds.width, bounds.height, TYPE_INT_BGR);
                 outputs.put(id, img);
-            }
         });
-
-        running = true;
-        thread = new Thread(this);
-        thread.start();
     }
 
     public void stop() {
-        running = false;
-
-        if (thread != null) {
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            thread = null;
-        }
     }
 
     public void update(String id, BufferedImage src) {
-        BufferedImage dst = outputs.get(id);
-
-        if (dst != null) {
-            src.copyData(dst.getRaster());
-        }
-    }
-
-    @SuppressWarnings("BusyWait")
-    @Override
-    public void run() {
-        while (running) {
-            frames++;
-
-            long newTimestamp = System.nanoTime();
-            if (newTimestamp - timestamp > 1000000000) {
-                // System.out.println(windows.entrySet().stream().findFirst().map(Map.Entry::getKey).orElse("") + " - " + frames);
-                frames = 0;
-                timestamp = newTimestamp;
-            }
-
-            outputs.forEach((id, img) -> windows.get(id).updateOutput(img));
-
-            Thread.yield();
-        }
+        windows.get(id).updateOutput(src);
     }
 }

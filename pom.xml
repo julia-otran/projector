@@ -12,6 +12,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <fx.version>13.0.2</fx.version>
         <revision>2.10</revision>
+        <lwjgl.version>3.2.3</lwjgl.version>
     </properties>
 
     <name>Projector</name>
