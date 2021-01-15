@@ -167,22 +167,20 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
         int frames = 0;
         long timestamp = System.nanoTime();
 
-        if (initializationCallback != null) {
-            initializationCallback.run();
-        }
-
         GLFWHelper.initGLFW();
 
-        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-        glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_FALSE);
+        GLFWHelper.invokeLater(() -> {
+            windowConfigs.forEach(wc -> {
+                ProjectionWindow w = windows.get(wc.getDisplayId());
 
-        windowConfigs.forEach(wc -> {
-            ProjectionWindow w = windows.get(wc.getDisplayId());
+                if (w != null) {
+                    w.init();
+                    w.makeVisible();
+                }
+            });
 
-            if (w != null) {
-                w.init();
-                w.makeVisible();
+            if (initializationCallback != null) {
+                initializationCallback.run();
             }
         });
 
@@ -249,10 +247,11 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
             Thread.yield();
         }
 
-
+        GLFWHelper.invokeLater(() -> {
             windows.values().forEach(ProjectionWindow::shutdown);
-            GLFWHelper.finish();
+        });
 
+        GLFWHelper.finish();
 
         screenGraphics.forEach((id, g) -> g.dispose());
 

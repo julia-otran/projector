@@ -51,8 +51,6 @@ public class Projector extends Application implements Runnable {
 
         VlcPlayerFactory.init();
 
-        GLFWHelper.initGLFW();
-
         final GraphicsDeviceHelper graphicsHelper = new GraphicsDeviceHelper();
 
         graphicsHelper.setInitCallback(() -> Platform.runLater(() -> {
@@ -122,8 +120,6 @@ public class Projector extends Application implements Runnable {
             } catch (IOException ex) {
                 Logger.getLogger(Projector.class.getName()).log(Level.SEVERE, null, ex);
             }
-
-            GLFWHelper.finish();
 
             Platform.runLater(() -> System.exit(0));
         });

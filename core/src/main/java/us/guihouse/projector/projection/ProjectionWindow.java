@@ -42,8 +42,14 @@ public class ProjectionWindow  {
 
     private boolean drawing = false;
 
+    private BufferedImage temp;
+
     ProjectionWindow(GraphicsFinder.Device device) {
         this.currentDevice = device;
+
+        bounds = getCurrentDevice().getDevice().getDefaultConfiguration().getBounds();
+        buffer = BufferUtils.createIntBuffer(bounds.width * bounds.height);
+        temp = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_INT_RGB);
     }
 
     void init() {
@@ -54,10 +60,6 @@ public class ProjectionWindow  {
         }
 
         long monitor = -1;
-
-        bounds = getCurrentDevice().getDevice().getDefaultConfiguration().getBounds();
-
-        buffer = BufferUtils.createIntBuffer(bounds.width * bounds.height);
 
         try ( MemoryStack stack = stackPush() ) {
             IntBuffer x = stack.mallocInt(1);
@@ -93,21 +95,36 @@ public class ProjectionWindow  {
     }
 
     void updateOutput(BufferedImage src) {
-        buffer.clear();
-
-        int[] pixelsSrc = ((DataBufferInt)src.getRaster().getDataBuffer()).getData();
-
-        for (int y = bounds.height - 1; y >= 0; y--) {
-            for (int x = 0; x < bounds.width; x++) {
-                int i = y * bounds.width + x;
-                buffer.put(pixelsSrc[i] << 8);
-            }
+        if (drawing) {
+            return;
         }
 
-        glfwMakeContextCurrent(window);
-        GL12.glDrawPixels(bounds.width, bounds.height, GL12.GL_RGBA, GL12.GL_UNSIGNED_INT_8_8_8_8, buffer);
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+        drawing = true;
+
+        src.copyData(temp.getRaster());
+
+        GLFWHelper.invokeLater(() -> {
+            buffer.clear();
+
+            int[] pixelsSrc = ((DataBufferInt)temp.getRaster().getDataBuffer()).getData();
+
+            for (int y = bounds.height - 1; y >= 0; y--) {
+                for (int x = 0; x < bounds.width; x++) {
+                    int i = y * bounds.width + x;
+                    buffer.put(pixelsSrc[i] << 8);
+                }
+            }
+
+            buffer.flip();
+
+            glfwMakeContextCurrent(window);
+            GL12.glDrawPixels(bounds.width, bounds.height, GL12.GL_RGBA, GL12.GL_UNSIGNED_INT_8_8_8_8, buffer);
+
+            drawing = false;
+
+            glfwSwapBuffers(window);
+            glfwPollEvents();
+        });
     }
 
     void makeVisible() {
