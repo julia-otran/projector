@@ -37,7 +37,7 @@ public class SingleLineTextWrapper extends MultilineTextWrapper {
         super.splitIntoLines(str)
             .forEach(line -> {
                 int countCommas = countCommas(line);
-                if (countCommas > 0) {
+                if (countCommas > 0 && countCommas <= 2) {
                     StringBuilder builder = new StringBuilder();
 
                     int halfCommas = countCommas / 2;
