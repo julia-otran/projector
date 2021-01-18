@@ -3,6 +3,7 @@ package us.guihouse.projector.projection;
 import lombok.Getter;
 import lombok.Setter;
 import us.guihouse.projector.projection.models.VirtualScreen;
+import us.guihouse.projector.projection.video.ProjectionBackgroundVideo;
 
 import java.awt.*;
 

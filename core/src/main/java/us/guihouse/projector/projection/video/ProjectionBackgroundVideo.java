@@ -1,10 +1,13 @@
 package us.guihouse.projector.projection.video;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
+import javafx.beans.property.SimpleBooleanProperty;
 import uk.co.caprica.vlcj.media.MediaEventListener;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import us.guihouse.projector.projection.CanvasDelegate;
+import us.guihouse.projector.projection.PaintableCrossFader;
 import us.guihouse.projector.projection.Projectable;
 import us.guihouse.projector.projection.models.VirtualScreen;
 import us.guihouse.projector.utils.ThemeFinder;
@@ -21,14 +24,17 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
     private final Random random = new Random();
     private final ProjectionVideo videoProjector;
     private boolean playing;
+    private final CanvasDelegate delegate;
+    private final BooleanProperty render = new SimpleBooleanProperty(false);
 
     public ProjectionBackgroundVideo(CanvasDelegate delegate) {
+        this.delegate = delegate;
         videoProjector = new ProjectionVideo(delegate);
         videoProjector.setCropVideo(true);
     }
 
     public ReadOnlyBooleanProperty isRender() {
-        return videoProjector.getRender();
+        return render;
     }
 
     @Override
@@ -45,7 +51,6 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
     public void init() {
         videoProjector.init();
         videoProjector.getPlayer().audio().setMute(true);
-        videoProjector.getRender().setValue(false);
         videoProjector.getPlayer().events().addMediaPlayerEventListener(new ProjectionBackgroundVideoCallbacks(this));
         loadMedia();
     }
@@ -87,7 +92,9 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
     }
 
     private void playMedia(File toPlay) {
-        stopBackground();
+        if (playing) {
+            stopBackground();
+        }
         currentMedia = toPlay;
         videoProjector.getPlayer().media().play(toPlay.getAbsolutePath());
         videoProjector.getPlayer().controls().setRepeat(true);
@@ -96,12 +103,16 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
 
     public void stopBackground() {
         playing = false;
-        videoProjector.getRender().setValue(false);
-        videoProjector.getPlayer().controls().stop();
+        if (render.get()) {
+            render.setValue(false);
+        }
+        videoProjector.getPlayer().controls().pause();
     }
 
     @Override
     public void mediaPlayerReady(MediaPlayer mediaPlayer) {
-        videoProjector.getRender().setValue(true);
+        if (!render.get()) {
+            render.setValue(true);
+        }
     }
 }
