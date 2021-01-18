@@ -11,6 +11,7 @@ import javax.swing.*;
 import javafx.scene.image.ImageView;
 import lombok.Getter;
 import lombok.Setter;
+import org.lwjgl.opengl.GL;
 import us.guihouse.projector.models.WindowConfig;
 import us.guihouse.projector.other.GraphicsFinder;
 import us.guihouse.projector.projection.glfw.GLFWHelper;

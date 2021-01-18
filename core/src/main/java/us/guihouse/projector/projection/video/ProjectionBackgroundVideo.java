@@ -114,9 +114,9 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
         currentMedia = toPlay;
         playing = true;
         currentPlayer = 0;
-        videoProjectors[0].getRender().setValue(true);
         videoProjectors[0].getPlayer().media().play(toPlay.getAbsolutePath());
         videoProjectors[1].getPlayer().media().prepare(toPlay.getAbsolutePath());
+        videoProjectors[0].getRender().setValue(true);
     }
 
     public void stopBackground() {
@@ -124,6 +124,7 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
         videoProjectors[1].getRender().setValue(false);
         videoProjectors[0].getPlayer().controls().stop();
         videoProjectors[1].getPlayer().controls().stop();
+
         playing = false;
     }
 

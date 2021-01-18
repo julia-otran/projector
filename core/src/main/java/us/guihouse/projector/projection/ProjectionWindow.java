@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
+import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.system.MemoryStack;
@@ -78,12 +79,12 @@ public class ProjectionWindow  {
             throw new IllegalStateException("Unable to find monitor");
         }
 
+        GLFWVidMode vidMode = glfwGetVideoMode(monitor);
+        int refreshRate = vidMode == null ? 30 : vidMode.refreshRate();
         window = glfwCreateWindow(bounds.width, bounds.height, "Projetor", monitor, NULL);
 
         if ( window == NULL )
             throw new RuntimeException("Failed to create the GLFW window");
-
-        glfwSetWindowPos(window, bounds.x, bounds.y);
 
         // Make the OpenGL context current
         glfwMakeContextCurrent(window);
@@ -92,6 +93,8 @@ public class ProjectionWindow  {
         glfwSwapInterval(1);
 
         GL.createCapabilities();
+
+        glfwSetWindowMonitor(window, monitor, bounds.x, bounds.y, bounds.width, bounds.height, refreshRate);
     }
 
     void updateOutput(BufferedImage src) {
