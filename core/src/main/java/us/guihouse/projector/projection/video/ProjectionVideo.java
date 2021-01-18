@@ -26,6 +26,8 @@ public class ProjectionVideo implements Projectable {
     protected MediaPlayer player;
 
     protected BufferedImage image;
+    protected BufferedImage freeze = null;
+    protected boolean firstFrame = false;
 
     protected int videoW = 0;
     protected int videoH = 0;
@@ -112,7 +114,11 @@ public class ProjectionVideo implements Projectable {
         if (render.get() && rWidth > 0 && rHeight > 0) {
             g.setColor(Color.BLACK);
             g.fillRect(0, 0, vs.getWidth(), vs.getHeight());
-            g.drawImage(image, rProjectionX, rProjectionY, rWidth, rHeight, null);
+            if (freeze == null) {
+                g.drawImage(image, rProjectionX, rProjectionY, rWidth, rHeight, null);
+            } else {
+                g.drawImage(freeze, rProjectionX, rProjectionY, rWidth, rHeight, null);
+            }
         }
     }
 
@@ -120,13 +126,25 @@ public class ProjectionVideo implements Projectable {
         return image;
     }
 
+    public void freeze() {
+        if (freeze == null && image != null) {
+            firstFrame = true;
+            freeze = delegate.getDefaultDevice().getDefaultConfiguration().createCompatibleImage(videoW, videoH);
+            image.copyData(freeze.getRaster());
+        }
+    }
+
+    public void unfreeze() {
+        freeze = null;
+        rebuildLayout();
+    }
+
     protected void generateBuffer(int w, int h) {
+        freeze();
         videoW = w;
         videoH = h;
 
         image = delegate.getDefaultDevice().getDefaultConfiguration().createCompatibleImage(w, h);
-
-        rebuildLayout();
     }
 
     @Override
@@ -144,7 +162,12 @@ public class ProjectionVideo implements Projectable {
 
         @Override
         public void display(MediaPlayer mediaPlayer, ByteBuffer[] nativeBuffers, BufferFormat bufferFormat) {
-            nativeBuffers[0].asIntBuffer().get(((DataBufferInt) image.getRaster().getDataBuffer()).getData());
+            if (firstFrame) {
+                firstFrame = false;
+            } else {
+                nativeBuffers[0].asIntBuffer().get(((DataBufferInt) image.getRaster().getDataBuffer()).getData());
+                unfreeze();
+            }
         }
     }
 
