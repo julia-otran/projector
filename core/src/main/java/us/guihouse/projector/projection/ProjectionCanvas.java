@@ -32,6 +32,7 @@ public class ProjectionCanvas implements ProjectionManager {
     private final ProjectionBackground background;
     private final ProjectionLabel label;
     private final ProjectionBackgroundVideo bgVideo;
+    private final ProjectionLabelBackground labelBackground;
 
     private final HashMap<String, PaintableCrossFader> faders = new HashMap<>();
 
@@ -52,6 +53,9 @@ public class ProjectionCanvas implements ProjectionManager {
 
         bgVideo = new ProjectionBackgroundVideo(delegate);
         initializeList.add(bgVideo);
+
+        labelBackground = new ProjectionLabelBackground(delegate);
+        initializeList.add(labelBackground);
 
         setupFader();
     }
@@ -101,12 +105,14 @@ public class ProjectionCanvas implements ProjectionManager {
             fader.paintComponent(g);
         }
 
+        labelBackground.paintComponent(g, vs);
         label.paintComponent(g, vs);
     }
 
     @Override
     public void setText(WrappedText text) {
         label.setText(text);
+        labelBackground.setShow(label.getHasText());
     }
 
     @Override
@@ -186,12 +192,12 @@ public class ProjectionCanvas implements ProjectionManager {
 
     @Override
     public boolean getDarkenBackground() {
-        return label.isDarkenBackground();
+        return labelBackground.isDarkenBackground();
     }
 
     @Override
     public void setDarkenBackground(boolean darkenBg) {
-        label.setDarkenBackground(darkenBg);
+        labelBackground.setDarkenBackground(darkenBg);
     }
 
     @Override

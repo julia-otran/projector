@@ -49,18 +49,18 @@ public class ProjectionLabel implements Projectable {
     private WrappedText text;
     private final int paddingY = DEFAULT_PADDING_Y;
 
-    @Getter
-    private boolean darkenBackground;
-
     // Internal control
     private List<StringWithPosition> drawLines = Collections.emptyList();
 
     private final BasicStroke outlineStroke = new BasicStroke(8.0f);
-    private static final Color OVERLAY = new Color(0, 0, 0, 230);
 
     private final HashMap<String, PaintableCrossFader> faders = new HashMap<>();
 
     private final HashMap<String, AffineTransform> chromaScreenTransforms = new HashMap<>();
+
+    public boolean getHasText() {
+        return !drawLines.isEmpty();
+    }
 
     @Getter
     private int chromaFontSize;
@@ -74,7 +74,6 @@ public class ProjectionLabel implements Projectable {
     public ProjectionLabel(CanvasDelegate canvasDelegate) {
         this.canvasDelegate = canvasDelegate;
         factoryChangeListeners = new ArrayList<>();
-        darkenBackground = ProjectorPreferences.getDarkenBackground();
         chromaFontSize = ProjectorPreferences.getChromaFontSize();
         chromaPaddingBottom = ProjectorPreferences.getChromaPaddingBottom();
         chromaMinPaddingBottom = ProjectorPreferences.getChromaMinPaddingBottom();
@@ -101,12 +100,6 @@ public class ProjectionLabel implements Projectable {
         this.fontMetrics = Toolkit.getDefaultToolkit().getFontMetrics(font);
         onFactoryChange();
         ProjectorPreferences.setProjectionLabelFontSize(font.getSize());
-    }
-
-    public void setDarkenBackground(boolean darken) {
-        this.darkenBackground = darken;
-        ProjectorPreferences.setDarkenBackground(darken);
-        renderText();
     }
 
     public void setChromaFontSize(int fontSize) {
@@ -138,11 +131,6 @@ public class ProjectionLabel implements Projectable {
             Graphics2D g = newImage.createGraphics();
 
             if (!drawLines.isEmpty()) {
-                if (darkenBackground && !vs.isChromaScreen()) {
-                    g.setColor(OVERLAY);
-                    g.fillRect(0, 0, canvasDelegate.getMainWidth(), canvasDelegate.getMainHeight());
-                }
-
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
                 g.setStroke(outlineStroke);
