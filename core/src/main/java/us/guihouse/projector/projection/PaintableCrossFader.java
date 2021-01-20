@@ -29,14 +29,14 @@ public class PaintableCrossFader {
 
     public void fadeIn(Paintable next) {
         previous = current;
-        currentFadeAlpha = 0;
+        currentFadeAlpha = 0f;
         current = next;
         direction = FadeDirection.IN;
     }
 
     public void crossFadeIn(Paintable next) {
         previous = current;
-        currentFadeAlpha = 0;
+        currentFadeAlpha = 0f;
         current = next;
         direction = FadeDirection.IN_OUT;
     }
@@ -45,7 +45,7 @@ public class PaintableCrossFader {
         if (direction == FadeDirection.IN || direction == FadeDirection.IN_OUT) {
             currentFadeAlpha += stepPerFrame;
 
-            if (Float.compare(currentFadeAlpha, 1.0f) > 0) {
+            if (currentFadeAlpha > 1.0f) {
                 direction = null;
                 currentFadeAlpha = 1.0f;
                 previous = null;
@@ -53,7 +53,7 @@ public class PaintableCrossFader {
         } else if (direction == FadeDirection.OUT){
             currentFadeAlpha -= stepPerFrame;
 
-            if (Float.compare(currentFadeAlpha, 0f) < 0) {
+            if (currentFadeAlpha < 0f) {
                 direction = null;
                 currentFadeAlpha = 0f;
                 current = null;
