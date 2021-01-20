@@ -8,6 +8,8 @@ package us.guihouse.projector.projection;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -17,6 +19,7 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.system.MemoryStack;
 import us.guihouse.projector.other.GraphicsFinder;
@@ -37,7 +40,7 @@ public class ProjectionWindow  {
 
     private long window;
 
-    private IntBuffer buffer;
+    private ByteBuffer buffer;
 
     private Rectangle bounds;
 
@@ -49,7 +52,7 @@ public class ProjectionWindow  {
         this.currentDevice = device;
 
         bounds = getCurrentDevice().getDevice().getDefaultConfiguration().getBounds();
-        buffer = BufferUtils.createIntBuffer(bounds.width * bounds.height);
+        buffer = BufferUtils.createByteBuffer(bounds.width * bounds.height * 4);
         temp = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_INT_RGB);
     }
 
@@ -97,6 +100,37 @@ public class ProjectionWindow  {
         glfwSetWindowMonitor(window, monitor, bounds.x, bounds.y, bounds.width, bounds.height, refreshRate);
     }
 
+    private static byte toByte(int num) {
+        if (num >= 255) {
+            num = num & 0xFF;
+        }
+
+        if (num <= Byte.MAX_VALUE && num >= 0) {
+            return (byte) num;
+        }
+
+        num = num - 256;
+
+        if (num >= Byte.MIN_VALUE && num <= Byte.MAX_VALUE) {
+            return (byte) num;
+        }
+
+        return 0;
+    }
+
+    private static void copyPixel(int argb, ByteBuffer buffer) {
+        byte num = toByte((argb >> 16) & 0xFF);
+        buffer.put(num);
+        num = toByte((argb >> 8) & 0xFF);
+        buffer.put(num);
+        num = toByte(argb & 0xFF);
+        buffer.put(num);
+        num = toByte((argb >> 24) & 0xFF);
+        buffer.put(num);
+    }
+
+    private long time = 0;
+    private long frames = 0;
     void updateOutput(BufferedImage src) {
         if (drawing) {
             return;
@@ -107,6 +141,15 @@ public class ProjectionWindow  {
         src.copyData(temp.getRaster());
 
         GLFWHelper.invokeLater(() -> {
+            long current = System.nanoTime();
+            frames++;
+
+            if (current - time > 1000000000) {
+                System.out.println("GL Frames " + frames);
+                time = current;
+                frames = 0;
+            }
+
             buffer.clear();
 
             int[] pixelsSrc = ((DataBufferInt)temp.getRaster().getDataBuffer()).getData();
@@ -114,15 +157,15 @@ public class ProjectionWindow  {
             for (int y = bounds.height - 1; y >= 0; y--) {
                 for (int x = 0; x < bounds.width; x++) {
                     int i = y * bounds.width + x;
-                    buffer.put(pixelsSrc[i] << 8);
+                    int argb = pixelsSrc[i];
+                    copyPixel(argb, buffer);
                 }
             }
 
             buffer.flip();
 
             glfwMakeContextCurrent(window);
-            GL12.glDrawPixels(bounds.width, bounds.height, GL12.GL_RGBA, GL12.GL_UNSIGNED_INT_8_8_8_8, buffer);
-
+            GL11.glDrawPixels(bounds.width, bounds.height, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
             drawing = false;
 
             glfwSwapBuffers(window);
