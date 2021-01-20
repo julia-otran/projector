@@ -14,6 +14,7 @@ import lombok.Setter;
 import org.lwjgl.opengl.GL;
 import us.guihouse.projector.models.WindowConfig;
 import us.guihouse.projector.other.GraphicsFinder;
+import us.guihouse.projector.other.RuntimeProperties;
 import us.guihouse.projector.projection.glfw.GLFWHelper;
 import us.guihouse.projector.projection.models.VirtualScreen;
 import us.guihouse.projector.services.SettingsService;
@@ -188,11 +189,13 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
         while (running) {
             frames++;
 
-            long newTimestamp = System.nanoTime();
-            if (newTimestamp - timestamp > 1000000000) {
-                System.out.println(frames);
-                frames = 0;
-                timestamp = newTimestamp;
+            if (RuntimeProperties.isLogFPS()) {
+                long newTimestamp = System.nanoTime();
+                if (newTimestamp - timestamp > 1000000000) {
+                    System.out.println("Virtual Screen FPS=" + frames);
+                    frames = 0;
+                    timestamp = newTimestamp;
+                }
             }
 
             virtualScreens

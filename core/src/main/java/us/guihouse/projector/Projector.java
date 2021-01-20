@@ -23,6 +23,7 @@ import javafx.stage.Stage;
 import us.guihouse.projector.forms.controllers.GraphicsDeviceHelper;
 import us.guihouse.projector.forms.controllers.SceneManager;
 import us.guihouse.projector.forms.controllers.WorkspaceController;
+import us.guihouse.projector.other.RuntimeProperties;
 import us.guihouse.projector.other.SQLiteJDBCDriverConnection;
 import us.guihouse.projector.projection.glfw.GLFWHelper;
 import us.guihouse.projector.utils.ThemeFinder;
@@ -42,6 +43,7 @@ public class Projector extends Application implements Runnable {
      */
     public static void main(String[] args) {
         System.setProperty("sun.java2d.opengl", "True");
+        RuntimeProperties.init(args);
         launch(args);
     }
 

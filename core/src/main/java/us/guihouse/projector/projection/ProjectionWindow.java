@@ -23,6 +23,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.system.MemoryStack;
 import us.guihouse.projector.other.GraphicsFinder;
+import us.guihouse.projector.other.RuntimeProperties;
 import us.guihouse.projector.projection.glfw.GLFWHelper;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
@@ -141,13 +142,15 @@ public class ProjectionWindow  {
         src.copyData(temp.getRaster());
 
         GLFWHelper.invokeLater(() -> {
-            long current = System.nanoTime();
-            frames++;
+            if (RuntimeProperties.isLogFPS()) {
+                long current = System.nanoTime();
+                frames++;
 
-            if (current - time > 1000000000) {
-                System.out.println("GL Frames " + frames);
-                time = current;
-                frames = 0;
+                if (current - time > 1000000000) {
+                    System.out.println("GL Frames " + frames);
+                    time = current;
+                    frames = 0;
+                }
             }
 
             buffer.clear();
