@@ -11,17 +11,15 @@ import javax.swing.*;
 import javafx.scene.image.ImageView;
 import lombok.Getter;
 import lombok.Setter;
-import org.lwjgl.opengl.GL;
 import us.guihouse.projector.models.WindowConfig;
 import us.guihouse.projector.other.GraphicsFinder;
 import us.guihouse.projector.other.RuntimeProperties;
 import us.guihouse.projector.projection.glfw.GLFWHelper;
+import us.guihouse.projector.projection.glfw.GLFWWindowBuilder;
 import us.guihouse.projector.projection.models.VirtualScreen;
 import us.guihouse.projector.services.SettingsService;
 import us.guihouse.projector.utils.BlendGenerator;
 import us.guihouse.projector.utils.WindowConfigsLoader;
-
-import static org.lwjgl.glfw.GLFW.*;
 
 public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoader.WindowConfigsObserver {
 
@@ -32,8 +30,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     private final PreviewImageView preview;
 
     private final ProjectionCanvas projectionCanvas;
-
-    private final HashMap<String, WindowManagerPresenter> managerPresenters = new HashMap<>();
 
     private GraphicsDevice defaultDevice;
 
@@ -80,8 +76,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     }
 
     private void stopEngine() {
-        managerPresenters.forEach((key, mp) -> mp.stop());
-
         running = false;
 
         configLoader.stop();
@@ -139,23 +133,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
             projectionCanvas.init();
             preview.setProjectionCanvas(projectionCanvas);
-
-            managerPresenters.clear();
-
-            virtualScreens.forEach(vs -> {
-                WindowManagerPresenter presenter = new WindowManagerPresenter();
-                managerPresenters.put(vs.getVirtualScreenId(), presenter);
-
-                HashMap<String, ProjectionWindow> targetWindows = new HashMap<>();
-
-                windows.forEach((id, window) -> {
-                    if (vs.getWindows().stream().anyMatch(w -> w.getDisplayId().equals(id))) {
-                        targetWindows.put(id, window);
-                    }
-                });
-
-                presenter.start(targetWindows);
-            });
 
             running = true;
             drawThread = new Thread(WindowManager.this);
@@ -245,15 +222,16 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
             windowConfigs.forEach(windowConfig -> {
                 BufferedImage screen = screenImages.get(windowConfig.getDisplayId());
-                managerPresenters.get(windowConfig.getVirtualScreenId()).update(windowConfig.getDisplayId(), screen);
+                ProjectionWindow pw = windows.get(windowConfig.getDisplayId());
+                if (pw != null) {
+                    pw.updateOutput(screen);
+                }
             });
 
             Thread.yield();
         }
 
-        GLFWHelper.invokeLater(() -> {
-            windows.values().forEach(ProjectionWindow::shutdown);
-        });
+        GLFWHelper.invokeLater(() -> windows.values().forEach(ProjectionWindow::shutdown));
 
         GLFWHelper.finish();
 
@@ -327,7 +305,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
         stopEngine();
         this.windows.clear();
 
-        devices.forEach(device -> this.windows.put(device.getDevice().getIDstring(), new ProjectionWindow(device)));
+        devices.forEach(device -> this.windows.put(device.getDevice().getIDstring(), GLFWWindowBuilder.createWindow(device)));
 
         startEngine();
     }
