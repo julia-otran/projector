@@ -69,7 +69,6 @@ public class Projector extends Application implements Runnable {
         SQLiteJDBCDriverConnection.migrate();
 
         Platform.runLater(() -> Thread.currentThread().setPriority(Thread.MIN_PRIORITY));
-        SwingUtilities.invokeLater(() -> Thread.currentThread().setPriority(Thread.MIN_PRIORITY));
 
         primaryStage.setTitle("Projector");
         primaryStage.setMaxWidth(Double.MAX_VALUE);

@@ -91,7 +91,7 @@ public class ProjectionCanvas implements ProjectionManager {
 
         delegate.getVirtualScreens().forEach(vs -> faders.put(vs.getVirtualScreenId(), new PaintableCrossFader(vs)));
 
-        faders.forEach((screen, fader) -> fader.fadeIn(background));
+        updateFaders();
     }
 
     public void finish() {

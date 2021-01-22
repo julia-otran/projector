@@ -32,7 +32,6 @@ public class ProjectionWebView implements Projectable {
     private Pane container;
     private WebView webView;
     private JFXPanel panel;
-    private Dimension maxSize;
     private final HashMap<String, AffineTransform> transforms = new HashMap<>();
 
     public ProjectionWebView(CanvasDelegate delegate) {

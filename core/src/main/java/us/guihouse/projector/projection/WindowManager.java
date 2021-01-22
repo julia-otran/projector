@@ -123,22 +123,13 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
             }
         });
 
-        SwingUtilities.invokeLater(() -> {
-            windowConfigs.forEach(wc -> {
-                ProjectionWindow w = windows.get(wc.getDisplayId());
-                if (w != null) {
-                    w.makeVisible();
-                }
-            });
+        projectionCanvas.init();
+        preview.setProjectionCanvas(projectionCanvas);
 
-            projectionCanvas.init();
-            preview.setProjectionCanvas(projectionCanvas);
-
-            running = true;
-            drawThread = new Thread(WindowManager.this);
-            drawThread.start();
-            starting = false;
-        });
+        running = true;
+        drawThread = new Thread(WindowManager.this);
+        drawThread.start();
+        starting = false;
     }
 
     @Override
@@ -269,18 +260,14 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
             return;
         }
 
-        SwingUtilities.invokeLater(() -> {
-            stopEngine();
-            this.fullScreen = fullScreen;
-            startEngine();
-        });
+        stopEngine();
+        this.fullScreen = fullScreen;
+        startEngine();
     }
 
     public void stop() {
-        SwingUtilities.invokeLater(() -> {
-            stopEngine();
-            projectionCanvas.finish();
-        });
+        stopEngine();
+        projectionCanvas.finish();
     }
 
     @Override
