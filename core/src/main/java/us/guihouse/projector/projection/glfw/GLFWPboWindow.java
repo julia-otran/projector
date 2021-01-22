@@ -23,37 +23,12 @@ public class GLFWPboWindow implements GLFWInternalWindow {
 
     private int textureId;
 
-    GLFWPboWindow(Rectangle bounds, long window) {
-        this.bounds = bounds;
-        this.window = window;
-    }
+    class TexUpdate implements Runnable {
+        private long time = 0;
+        private long frames = 0;
 
-    public void init() {
-        LOGGER.debug("Initializing PBO Based Window");
-        texStream = new GLFWAsyncTexStream(bounds, window);
-        texStream.init();
-
-        glfwMakeContextCurrent(window);
-        textureId = GL11.glGenTextures();
-
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureId);
-        GL11.glTexParameterf(GL11.GL_TEXTURE_2D,GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
-        GL11.glTexParameterf(GL11.GL_TEXTURE_2D,GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-
-        final ByteBuffer buffer = BufferUtils.createByteBuffer(bounds.width * bounds.height * 3);
-        GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGB, bounds.width, bounds.height, 0, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, buffer);
-    }
-
-    private long time = 0;
-    private long frames = 0;
-    public void updateOutput(BufferedImage src) {
-        if (texStream == null) {
-            return;
-        }
-
-        texStream.upload(src);
-
-        GLFWHelper.invokeLater(() -> {
+        @Override
+        public void run() {
             GLFWAsyncTexStream.Buffer buffer = texStream.pollBuffer();
 
             if (buffer == null) {
@@ -90,7 +65,38 @@ public class GLFWPboWindow implements GLFWInternalWindow {
 
             glfwSwapBuffers(window);
             glfwPollEvents();
-        });
+        }
+    }
+
+    GLFWPboWindow(Rectangle bounds, long window) {
+        this.bounds = bounds;
+        this.window = window;
+    }
+
+    public void init() {
+        LOGGER.debug("Initializing PBO Based Window");
+        texStream = new GLFWAsyncTexStream(bounds, window);
+        texStream.init();
+
+        glfwMakeContextCurrent(window);
+        textureId = GL11.glGenTextures();
+
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureId);
+        GL11.glTexParameterf(GL11.GL_TEXTURE_2D,GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+        GL11.glTexParameterf(GL11.GL_TEXTURE_2D,GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+
+        final ByteBuffer buffer = BufferUtils.createByteBuffer(bounds.width * bounds.height * 3);
+        GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGB, bounds.width, bounds.height, 0, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, buffer);
+
+        GLFWHelper.invokeContinuous(new TexUpdate());
+    }
+
+    public void updateOutput(BufferedImage src) {
+        if (texStream == null) {
+            return;
+        }
+
+        texStream.upload(src);
     }
 
     public void shutdown() {
