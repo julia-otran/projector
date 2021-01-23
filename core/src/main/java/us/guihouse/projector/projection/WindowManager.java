@@ -6,8 +6,6 @@ import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.swing.*;
-
 import javafx.scene.image.ImageView;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,8 +34,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     private final List<VirtualScreen> virtualScreens = new ArrayList<>();
     private final HashMap<String, BufferedImage> virtualScreensRender = new HashMap<>();
     private final HashMap<String, Graphics2D> virtualScreensGraphics = new HashMap<>();
-
-    private final HashMap<String, BufferedImage> bLevelFixAssets = new HashMap<>();
 
     private final HashMap<String, ProjectionWindow> windows = new HashMap<>();
     private final HashMap<Integer, BufferedImage> blendAssets = new HashMap<>();
@@ -144,7 +140,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                 ProjectionWindow w = windows.get(wc.getDisplayId());
 
                 if (w != null) {
-                    w.init();
+                    w.init(wc);
                     w.makeVisible();
                 }
             });
@@ -195,9 +191,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                 g.setTransform(transform);
                 g.translate(windowConfig.getX(), windowConfig.getY());
 
-                BufferedImage bLevelFix = bLevelFixAssets.get(windowConfig.getDisplayId());
-                g.drawImage(bLevelFix, windowConfig.getBgFillX(), windowConfig.getBgFillY(), null);
-
                 windowConfig.getBlends().forEach(blend -> {
                     BufferedImage img = blendAssets.get(blend.getId());
                     if (img != null) {
@@ -205,10 +198,14 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                     }
                 });
 
-                windowConfig.getHelpLines().forEach(helpLine -> {
-                    g.setColor(Color.WHITE);
-                    g.drawLine(helpLine.getX1(), helpLine.getY1(), helpLine.getX2(), helpLine.getY2());
-                });
+                Stroke previousStroke = g.getStroke();
+                g.setStroke(new BasicStroke(2.0f));
+                g.setColor(Color.WHITE);
+
+                windowConfig.getHelpLines()
+                        .forEach(helpLine -> g.drawLine(helpLine.getX1(), helpLine.getY1(), helpLine.getX2(), helpLine.getY2()));
+
+                g.setStroke(previousStroke);
             });
 
             windowConfigs.forEach(windowConfig -> {
@@ -349,8 +346,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                     wc.setBgFillWidth(device.getDevice().getDefaultConfiguration().getBounds().width);
                     wc.setBgFillHeight(device.getDevice().getDefaultConfiguration().getBounds().height);
 
-                    wc.setBLevelOffset(0);
-
+                    wc.setBlackLevelAdjust(null);
                     wc.setBlends(Collections.emptyList());
                     wc.setHelpLines(Collections.emptyList());
 
@@ -398,7 +394,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
         blendAssets.clear();
         transformAssets.clear();
-        bLevelFixAssets.clear();
 
         windowConfigs.forEach(wc -> {
             wc.getBlends().forEach(blend -> blendAssets.put(blend.getId(), BlendGenerator.makeBlender(blend)));
@@ -411,17 +406,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
             t.rotate(wc.getRotate());
 
             transformAssets.put(wc.getDisplayId(), t);
-
-            BufferedImage img = new BufferedImage(wc.getBgFillWidth(), wc.getBgFillHeight(), BufferedImage.TYPE_INT_ARGB);
-            int bLevelPad = ((Math.round(wc.getBLevelOffset()) & 0xFF) << 24) | 0x00FFFFFF;
-
-            for (int x = 0; x < img.getWidth(); x++) {
-                for (int y = 0; y < img.getHeight(); y++) {
-                    img.setRGB(x, y, bLevelPad);
-                }
-            }
-
-            bLevelFixAssets.put(wc.getDisplayId(), img);
         });
 
     }

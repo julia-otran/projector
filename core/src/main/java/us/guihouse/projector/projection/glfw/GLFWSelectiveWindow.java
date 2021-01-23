@@ -1,15 +1,22 @@
 package us.guihouse.projector.projection.glfw;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GL30;
 import org.lwjgl.system.MemoryStack;
+import us.guihouse.projector.models.WindowConfig;
 import us.guihouse.projector.other.GraphicsFinder;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -23,16 +30,18 @@ public class GLFWSelectiveWindow implements GLFWWindow {
     private final Rectangle bounds;
 
     private GLFWInternalWindow delegate;
+    private final GLFWBlackLevelAdjust blackLevelAdjust;
 
     private long window = 0;
 
     public GLFWSelectiveWindow(GraphicsFinder.Device device) {
         this.device = device;
         bounds = getCurrentDevice().getDevice().getDefaultConfiguration().getBounds();
+        blackLevelAdjust = new GLFWBlackLevelAdjust();
     }
 
     @Override
-    public void init() {
+    public void init(WindowConfig windowConfig) {
         PointerBuffer monitors = glfwGetMonitors();
 
         if (monitors == null) {
@@ -85,10 +94,16 @@ public class GLFWSelectiveWindow implements GLFWWindow {
 
         GL11.glViewport(0, 0, bounds.width, bounds.height);
 
+        blackLevelAdjust.init(bounds, windowConfig.getBlackLevelAdjust());
+
+        List<GLFWDrawer> drawers = new ArrayList<>();
+
+        drawers.add(blackLevelAdjust);
+
         if (GLFWExtensions.isPboSupported()) {
-            delegate = new GLFWPboWindow(bounds, window);
+            delegate = new GLFWPboWindow(bounds, window, drawers);
         } else {
-            delegate = new GLFWTexWindow(bounds, window);
+            delegate = new GLFWTexWindow(bounds, window, drawers);
         }
 
         delegate.init();
@@ -98,6 +113,10 @@ public class GLFWSelectiveWindow implements GLFWWindow {
     public void shutdown() {
         if (delegate != null) {
             delegate.shutdown();
+        }
+
+        if (blackLevelAdjust != null) {
+            blackLevelAdjust.finish();
         }
 
         if (window != 0) {

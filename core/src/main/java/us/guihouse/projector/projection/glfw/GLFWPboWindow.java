@@ -7,9 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import us.guihouse.projector.other.RuntimeProperties;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -17,6 +18,7 @@ public class GLFWPboWindow implements GLFWInternalWindow {
     private static final Logger LOGGER = LoggerFactory.getLogger(GLFWWindow.class);
 
     private final long window;
+    private final List<GLFWDrawer> drawers;
     private GLFWAsyncTexStream texStream;
 
     private final Rectangle bounds;
@@ -60,17 +62,21 @@ public class GLFWPboWindow implements GLFWInternalWindow {
 
             GL11.glEnd();
 
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
             GL30.glBindBuffer(GL30.GL_PIXEL_UNPACK_BUFFER, 0);
             texStream.freeBuffer(buffer);
+
+            drawers.forEach(GLFWDrawer::draw);
 
             glfwSwapBuffers(window);
             glfwPollEvents();
         }
     }
 
-    GLFWPboWindow(Rectangle bounds, long window) {
+    GLFWPboWindow(Rectangle bounds, long window, List<GLFWDrawer> drawers) {
         this.bounds = bounds;
         this.window = window;
+        this.drawers = drawers;
     }
 
     public void init() {

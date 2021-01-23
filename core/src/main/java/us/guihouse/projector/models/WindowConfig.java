@@ -12,8 +12,6 @@ public class WindowConfig {
     private Rectangle displayBounds;
     private boolean project;
 
-    private float bLevelOffset;
-
     private int x;
     private int y;
     private int width;
@@ -27,6 +25,8 @@ public class WindowConfig {
     private List<WindowConfigHelpLine> helpLines;
 
     private List<WindowConfigBlend> blends;
+
+    private WindowConfigBlackLevelAdjust blackLevelAdjust;
 
     private double scaleX;
     private double scaleY;

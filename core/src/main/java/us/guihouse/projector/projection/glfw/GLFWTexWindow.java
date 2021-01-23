@@ -9,6 +9,7 @@ import us.guihouse.projector.other.RuntimeProperties;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static us.guihouse.projector.projection.glfw.RGBImageCopy.copyImageToBuffer;
@@ -21,6 +22,7 @@ public class GLFWTexWindow implements GLFWInternalWindow {
     private final ByteBuffer buffer;
 
     private final Rectangle bounds;
+    private final List<GLFWDrawer> drawers;
 
     private boolean drawing = false;
 
@@ -28,9 +30,10 @@ public class GLFWTexWindow implements GLFWInternalWindow {
 
     private int textureId;
 
-    GLFWTexWindow(Rectangle bounds, long window) {
+    GLFWTexWindow(Rectangle bounds, long window, List<GLFWDrawer> drawers) {
         this.window = window;
         this.bounds = bounds;
+        this.drawers = drawers;
 
         buffer = BufferUtils.createByteBuffer(bounds.width * bounds.height * 3);
         temp = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_INT_RGB);
@@ -88,6 +91,10 @@ public class GLFWTexWindow implements GLFWInternalWindow {
             GL11.glTexCoord2f(1, 0); GL11.glVertex2f(1f, -1f);
 
             GL11.glEnd();
+
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+
+            drawers.forEach(GLFWDrawer::draw);
 
             drawing = false;
 
