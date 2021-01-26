@@ -94,11 +94,11 @@ public class GLFWSelectiveWindow implements GLFWWindow {
 
         GL11.glViewport(0, 0, bounds.width, bounds.height);
 
-        blackLevelAdjust.init(bounds, windowConfig.getBlackLevelAdjust());
+//        blackLevelAdjust.init(bounds, windowConfig.getBlackLevelAdjust());
 
         List<GLFWDrawer> drawers = new ArrayList<>();
 
-        drawers.add(blackLevelAdjust);
+//        drawers.add(blackLevelAdjust);
 
         if (GLFWExtensions.isPboSupported()) {
             delegate = new GLFWPboWindow(bounds, window, drawers);

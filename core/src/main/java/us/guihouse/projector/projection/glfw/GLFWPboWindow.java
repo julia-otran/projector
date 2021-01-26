@@ -2,6 +2,7 @@ package us.guihouse.projector.projection.glfw;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,8 @@ public class GLFWPboWindow implements GLFWInternalWindow {
     private final Rectangle bounds;
 
     private int textureId;
+
+    private GLFWColorCorrection colorCorrection;
 
     class TexUpdate implements Runnable {
         private long time = 0;
@@ -49,21 +52,62 @@ public class GLFWPboWindow implements GLFWInternalWindow {
             }
 
             glfwMakeContextCurrent(window);
+
+            GL30.glClearColor(0f, 0f, 0.3f, 1.0f);
+            GL30.glClear(GL30.GL_COLOR_BUFFER_BIT);
+
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureId);
             GL30.glBindBuffer(GL30.GL_PIXEL_UNPACK_BUFFER, buffer.getGlBuffer());
-
             GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, bounds.width, bounds.height, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, 0);
-            GL11.glBegin(GL11.GL_QUADS);
-
-            GL11.glTexCoord2f(0, 0); GL11.glVertex2f(-1f, -1f);
-            GL11.glTexCoord2f(0, 1); GL11.glVertex2f(-1f, 1f);
-            GL11.glTexCoord2f(1, 1); GL11.glVertex2f(1f,1f);
-            GL11.glTexCoord2f(1, 0); GL11.glVertex2f(1f, -1f);
-
-            GL11.glEnd();
-
+            GL30.glGenerateMipmap(GL30.GL_TEXTURE_2D);
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
-            GL30.glBindBuffer(GL30.GL_PIXEL_UNPACK_BUFFER, 0);
+
+            colorCorrection.loopCycle();
+
+//            GL11.glBegin(GL11.GL_QUADS);
+//
+//            GL11.glVertex2f(-1f, -1f);
+//            GL11.glVertex2f(-1f, 1f);
+//            GL11.glVertex2f(1f,1f);
+//            GL11.glVertex2f(1f, -1f);
+//
+//            GL11.glEnd();
+
+//            GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureId);
+//            GL30.glBindBuffer(GL30.GL_PIXEL_UNPACK_BUFFER, buffer.getGlBuffer());
+//
+//            GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, bounds.width, bounds.height, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, 0);
+//            GL30.glGenerateMipmap(GL30.GL_TEXTURE_2D);
+//            GL20.glActiveTexture(textureId);
+//            GL11.glTexCoord2f(0, 0);
+//            GL11.glTexCoord2f(0, 1);
+//            GL11.glTexCoord2f(1, 1);
+//            GL11.glTexCoord2f(1, 0);
+//            GL30.glUniform1i(colorCorrection.getShaderProgramTexIn(), 0);
+//            GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+
+//            GL11.glBegin(GL11.GL_QUADS);
+//
+//            GL11.glTexCoord2f(0, 0); GL11.glVertex2f(-1f, -1f);
+//            GL11.glTexCoord2f(0, 1); GL11.glVertex2f(-1f, 1f);
+//            GL11.glTexCoord2f(1, 1); GL11.glVertex2f(1f,1f);
+//            GL11.glTexCoord2f(1, 0); GL11.glVertex2f(1f, -1f);
+//
+//            GL11.glEnd();
+
+//            GL11.glBegin(GL11.GL_QUADS);
+//
+//            GL11.glVertex2f(-1f, -1f);
+//            GL11.glVertex2f(-1f, 1f);
+//            GL11.glVertex2f(1f,1f);
+//            GL11.glVertex2f(1f, -1f);
+//
+//            GL11.glEnd();
+
+//            GL30.glBindBuffer(GL30.GL_ARRAY_BUFFER, colorCorrection.getVertexBuffer());
+//            GL30.glBindVertexArray(colorCorrection.getVertexArray());
+//            GL30.glVertexAttribPointer(0, 2, GL30.GL_FLOAT, false, 0, 0);
+
             texStream.freeBuffer(buffer);
 
             drawers.forEach(GLFWDrawer::draw);
@@ -85,14 +129,22 @@ public class GLFWPboWindow implements GLFWInternalWindow {
         texStream.init();
 
         glfwMakeContextCurrent(window);
+
         textureId = GL11.glGenTextures();
 
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureId);
         GL11.glTexParameterf(GL11.GL_TEXTURE_2D,GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
         GL11.glTexParameterf(GL11.GL_TEXTURE_2D,GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+        GL20.glTexParameteri(GL11.GL_TEXTURE_2D, GL20.GL_GENERATE_MIPMAP, GL11.GL_TRUE);
+
 
         final ByteBuffer buffer = BufferUtils.createByteBuffer(bounds.width * bounds.height * 3);
+        buffer.flip();
         GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGB, bounds.width, bounds.height, 0, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, buffer);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+
+        colorCorrection = new GLFWColorCorrection(textureId);
+        colorCorrection.init();
 
         GLFWHelper.invokeContinuous(new TexUpdate());
     }
@@ -108,6 +160,9 @@ public class GLFWPboWindow implements GLFWInternalWindow {
     public void shutdown() {
         if (texStream != null) {
             texStream.stop();
+        }
+        if (colorCorrection != null) {
+            colorCorrection.shutdown();
         }
     }
 }
