@@ -46,27 +46,29 @@ class GLFWColorCorrection constructor(private val texId: Int){
                 
                 float delta = maxVal - minVal; 
                 
-                if (delta > 0.0) {
-                    if (lum > 0.5) {
-                        sat = delta / (2.0 - delta);
-                    } else {
-                        sat = delta / (maxVal + minVal);
-                    }
-                    
-                    if (rgbColor.r == maxVal) {
-                        hue = (rgbColor.g - rgbColor.b) / delta; 
-                    }
-                    
-                    if (rgbColor.g == maxVal) {
-                        hue = 2.0 + ((rgbColor.b - rgbColor.r) / delta);
-                    }
-                    
-                    if (rgbColor.b == maxVal) {
-                        hue = 4.0 + ((rgbColor.r - rgbColor.g) / delta);
-                    }                 
+                if (lum > 0.5) {
+                    sat = delta / (2.0 - delta);
+                } else {
+                    sat = delta / (maxVal + minVal);
                 }
                 
-                hue = hue * 0.166666667;
+                if (delta == 0.0) {
+                    delta = 1.0;
+                }
+                    
+                if (rgbColor.r == maxVal) {
+                    hue = (rgbColor.g - rgbColor.b) / delta; 
+                }
+                
+                if (rgbColor.g == maxVal) {
+                    hue = 2.0 + ((rgbColor.b - rgbColor.r) / delta);
+                }
+                
+                if (rgbColor.b == maxVal) {
+                    hue = 4.0 + ((rgbColor.r - rgbColor.g) / delta);
+                }          
+                
+                hue = hue / 6.0;
                 
                 if (hue < 0.0) {
                     hue = 1.0 + hue;
@@ -75,18 +77,24 @@ class GLFWColorCorrection constructor(private val texId: Int){
                 return(vec4(hue, sat, lum, rgbColor.a));
             }
             
-            float convertColorPart(float part, float a, float b) {
-                if (6.0 * part < 1.0) {
-                    return(b + ((a - b) * 6 * part));
+            float convertColorPart(float n1, float n2, float hue) {
+                if (hue > 6.0) {
+                    hue = hue - 6.0;
                 }
-                if (2.0 * part < 1.0) {
-                    return(a);
+                if (hue < 0.0) {
+                    hue = hue + 6.0;
                 }
-                if (3.0 * part < 2.0) {
-                    return(b + ((a - b) * (0.66666 - part) * 6));
+                if (hue < 1.0) {
+                    return(n1 + (n2 - n1) * hue);
+                }
+                if (hue < 3.0) {
+                    return(n2);
+                }
+                if (hue < 4.0) {
+                    return(n1 + (n2 - n1) * (4.0 - hue));
                 }
                 
-                return(b);
+                return(n1);
             }
             
             vec4 hslToRgb(vec4 hsl) {
@@ -98,45 +106,17 @@ class GLFWColorCorrection constructor(private val texId: Int){
                 float y = 0.0;
                 
                 if (hsl.g > 0.0) {
-                    if (hsl.b < 0.5) {
-                        x = hsl.b * (1.0 + hsl.g);
+                    if (hsl.b <= 0.5) {
+                        y = hsl.b * (1.0 + hsl.g);
                     } else {
-                        x = hsl.g + hsl.b - (hsl.g * hsl.b);
+                        y = hsl.g + hsl.b - (hsl.g * hsl.b);
                     }
                     
-                    y = (2.0 * hsl.b) - x;
-                     
-                    r = hsl.r + 0.33333;
-                    g = hsl.r;
-                    b = hsl.r - 0.33333;
-                    
-                    if (r > 1.0) {
-                        r = r - 1.0;
-                    }
-                    
-                    if (r < 0.0) {
-                        r = r + 1.0;
-                    }
-                    
-                    if (g > 1.0) {
-                        g = g - 1.0;
-                    }
-                    
-                    if (g < 0.0) {
-                        g = g + 1.0;
-                    }
-                    
-                    if (b > 1.0) {
-                        b = b - 1.0;
-                    }
-                    
-                    if (b < 0.0) {
-                        b = b + 1.0;
-                    }
-                    
-                    r = convertColorPart(r, x, y);
-                    g = convertColorPart(g, x, y);
-                    b = convertColorPart(b, x, y);
+                    x = (2.0 * hsl.b) - y;
+
+                    r = convertColorPart(x, y, hsl.r * 6.0 + 2.0);
+                    g = convertColorPart(x, y, hsl.r * 6.0);
+                    b = convertColorPart(x, y, hsl.r * 6.0 - 2.0);
                 } else {
                     r = hsl.b;
                     g = hsl.b;
@@ -170,9 +150,8 @@ class GLFWColorCorrection constructor(private val texId: Int){
                 vec4 mids = midtonesMultiply * midAdjust;
                 vec4 highs = highlightsMultiply * highAdjust;
                 
-                vec4 alphaAdd = vec4(0.0, 0.0, 0.0, 1.0);
-                
                 vec4 colorCorrected = texel + shadows + mids + highs;
+                colorCorrected = clamp(colorCorrected, 0.0, 1.0);
                 vec4 colorCorrectedHsl;
                 
                 if (preserveLuminosity > 0.0) {
@@ -181,7 +160,9 @@ class GLFWColorCorrection constructor(private val texId: Int){
                     colorCorrected = hslToRgb(colorCorrectedHsl);
                 }
                 
-                gl_FragColor = colorCorrected * exposureAdjust + brightAdjust + alphaAdd;
+                vec4 result = colorCorrected * exposureAdjust + brightAdjust;
+                
+                gl_FragColor = vec4(result.rgb, 1.0);
             }
         """
     }
@@ -297,7 +278,7 @@ class GLFWColorCorrection constructor(private val texId: Int){
         GL20.glUniform4f(exposureAdjustUniform, 1.0f, 1.0f, 1.0f, 1.0f)
 
         GL20.glUniform4f(lowAdjustUniform, 0f, 0f, 0f, 0f)
-        GL20.glUniform4f(midAdjustUniform, -1f, 0f, 0f, 0f)
+        GL20.glUniform4f(midAdjustUniform, -0.99f, 0f, 0f, 0f)
         GL20.glUniform4f(highAdjustUniform, 0f, 0f, 0f, 0f)
         GL20.glUniform1f(preserveLumUniform, 1f)
 
