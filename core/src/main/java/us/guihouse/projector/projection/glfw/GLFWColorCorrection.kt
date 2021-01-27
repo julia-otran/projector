@@ -217,10 +217,10 @@ class GLFWColorCorrection constructor(private val texId: Int){
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0)
 
         val uv = floatArrayOf(
-            0f, 1f,
             0f, 0f,
-            1f, 0f,
-            1f, 1f
+            0f, 1f,
+            1f, 1f,
+            1f, 0f
         )
 
         val uvBuffer = BufferUtils.createFloatBuffer(uv.size)
@@ -278,7 +278,7 @@ class GLFWColorCorrection constructor(private val texId: Int){
         GL20.glUniform4f(exposureAdjustUniform, 1.0f, 1.0f, 1.0f, 1.0f)
 
         GL20.glUniform4f(lowAdjustUniform, 0f, 0f, 0f, 0f)
-        GL20.glUniform4f(midAdjustUniform, -0.99f, 0f, 0f, 0f)
+        GL20.glUniform4f(midAdjustUniform, 0f, 0f, 0f, 0f)
         GL20.glUniform4f(highAdjustUniform, 0f, 0f, 0f, 0f)
         GL20.glUniform1f(preserveLumUniform, 1f)
 

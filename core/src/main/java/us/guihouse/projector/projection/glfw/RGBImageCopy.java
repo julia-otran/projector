@@ -37,12 +37,8 @@ public class RGBImageCopy {
 
         int[] pixelsSrc = ((DataBufferInt)img.getRaster().getDataBuffer()).getData();
 
-        for (int y = img.getHeight() - 1; y >= 0; y--) {
-            for (int x = 0; x < img.getWidth(); x++) {
-                int i = y * img.getWidth() + x;
-                int argb = pixelsSrc[i];
-                copyPixel(argb, buffer);
-            }
+        for (int argb : pixelsSrc) {
+            copyPixel(argb, buffer);
         }
 
         buffer.flip();
