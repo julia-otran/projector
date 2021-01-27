@@ -31,12 +31,159 @@ class GLFWColorCorrection constructor(private val texId: Int){
             uniform vec4 brightAdjust;
             uniform vec4 exposureAdjust;
  
+            uniform vec4 lowAdjust;
             uniform vec4 midAdjust;
+            uniform vec4 highAdjust;
+            uniform float preserveLuminosity;
             
             void main(void) {
-                vec4 texel = texture2D(image, frag_Uv);
+                vec4 texel = texture2D(image, frag_Uv);                
+                vec4 hsl = rgbToHsl(texel);
                 
-                gl_FragColor = texel * exposureAdjust + brightAdjust;
+                float lum = hsl.b;
+                
+                float a = 0.25;
+                float scale = 0.7;
+                float b = 1 - scale;
+                
+                float shadowsLum = lum - b;
+                float highlightsLum = lum + b -1;
+                
+                float shadowsMultiply = clamp((shadowsLum / (-1.0 * a)) + 0.5, 0.0, 1.0) * scale;
+                float highlightsMultiply = clamp((highlightsLum / a) + 0.5, 0.0, 1.0) * scale;
+                
+                float midtonesMultiply0 = clamp((shadowsLum / a) + 0.5, 0.0, 1.0);
+                float midtonesMultiply1 = clamp((highlightsLum / (-1.0 * a)) + 0.5, 0.0, 1.0);
+                float midtonesMultiply = midtonesMultiply0 * midtonesMultiply1 * scale;
+                
+                vec4 shadows = shadowsMultiply * lowAdjust;
+                vec4 mids = midtonesMultiply * midAdjust;
+                vec4 highs = highlightsMultiply * highAdjust;
+                
+                vec4 alphaAdd = vec4(0.0, 0.0, 0.0, 1.0);
+                
+                vec4 colorCorrected = texel + shadows + mids + highs;
+                vec4 colorCorrectedHsl;
+                
+                if (preserveLuminosity > 0.0) {
+                    colorCorrectedHsl = rgbToHsl(colorCorrected);
+                    colorCorrectedHsl.b = lum;
+                    colorCorrected = hslToRgb(colorCorrectedHsl);
+                }
+                
+                gl_FragColor = texel * exposureAdjust + brightAdjust + alphaAdd;
+            }
+            
+            vec4 rgbToHsl(vec4 rgbColor) {
+                float minVal = min(rgbColor.r, min(rgbColor.g, rgbColor.b));
+                float maxVal = max(rgbColor.r, max(rgbColor.g, rgbColor.b));
+                
+                float lum = (minVal + maxVal) / 2.0;
+                float sat = 0.0;
+                float hue = 0.0;
+                
+                float delta = maxVal - minVal; 
+                
+                if (delta > 0.0) {
+                    if (lum > 0.5) {
+                        sat = delta / (2.0 - delta);
+                    } else {
+                        sat = delta / (maxVal + minVal);
+                    }
+                    
+                    if (rgbColor.r == maxVal) {
+                        hue = (color.g - color.b) / delta; 
+                    }
+                    
+                    if (rgbColor.g == maxVal) {
+                        hue = 2.0 + ((rgbColor.b - rgbColor.r) / delta);
+                    }
+                    
+                    if (rgbColor.b == maxVal) {
+                        hue = 4.0 + ((rgbColor.r - rgbColor.g) / delta);
+                    }                 
+                }
+                
+                hue = hue * 0.166666667;
+                
+                if (hue < 0.0) {
+                    hue = 1.0 + hue;
+                }
+                
+                return(vec4(hue, sat, lum, rgbColor.a));
+            }
+            
+            vec4 hlsToRgb(vec4 hsl) {
+                float r = 0.0;
+                float g = 0.0;
+                float b = 0.0;
+                
+                float x = 0.0;
+                float y = 0.0;
+                
+                if (hsl.g > 0.0) {
+                    if (hsl.b < 0.5) {
+                        x = hsl.b * (1.0 + hsl.b);
+                    } else {
+                        x = hsl.g + hsl.b - (hsl.g * hsl.b);
+                    }
+                    
+                    y = (2.0 * hsl.b) - x;
+                     
+                    r = hsl.r + 0.333;
+                    g = hsl.r;
+                    b = hsl.r - 0.333;
+                    
+                    if (r > 1.0) {
+                        r = 1.0 - r;
+                    }
+                    
+                    if (r < 0.0) {
+                        r = r + 1.0;
+                    }
+                    
+                    if (g > 1.0) {
+                        g = 1.0 - g;
+                    }
+                    
+                    if (g < 0.0) {
+                        g = g + 1.0;
+                    }
+                    
+                    if (b > 1.0) {
+                        b = 1.0 - b;
+                    }
+                    
+                    if (b < 0.0) {
+                        b = b + 1.0;
+                    }
+                    
+                    r = convert(r, x, y);
+                    g = convert(g, x, y);
+                    b = convert(b, x, y);
+                } else {
+                    r = hsl.b;
+                    g = hsl.b;
+                    b = hsl.b;
+                }
+                
+                return(vec4(r, g, b, hsl.a));
+            }
+            
+            float convert(float part, float a, float b) {
+                if (6.0 * part < 1.0) {
+                    return(b + ((a - b) * 6 * part));
+                } else {
+                    if (2.0 * part  < 1.0) {
+                        return(a);
+                    } else {
+                        if (3.0 * part < 2.0) {
+                            return(b + ((a - b) * (0.666 - part) * 6));
+                        } else {
+                            return(b);
+                        }
+                    }
+                }
             }
         """
     }
@@ -55,7 +202,10 @@ class GLFWColorCorrection constructor(private val texId: Int){
     // Uniforms
     private var brightAdjustUniform = 0
     private var exposureAdjustUniform = 0
+    private var lowAdjustUniform = 0
     private var midAdjustUniform = 0
+    private var highAdjustUniform = 0
+    private var preserveLumUniform = 0
 
     fun init() {
         setupQuad()
@@ -134,7 +284,11 @@ class GLFWColorCorrection constructor(private val texId: Int){
         textureUniform = GL20.glGetUniformLocation(pId, "image")
         brightAdjustUniform = GL20.glGetUniformLocation(pId, "brightAdjust")
         exposureAdjustUniform = GL20.glGetUniformLocation(pId, "exposureAdjust")
+
+        lowAdjustUniform = GL20.glGetUniformLocation(pId, "lowAdjust")
         midAdjustUniform = GL20.glGetUniformLocation(pId, "midAdjust")
+        highAdjustUniform = GL20.glGetUniformLocation(pId, "highAdjust")
+        preserveLumUniform = GL20.glGetUniformLocation(pId, "preserveLuminosity")
 
         GL20.glUseProgram(0)
     }
@@ -143,7 +297,12 @@ class GLFWColorCorrection constructor(private val texId: Int){
         GL20.glUseProgram(pId)
         GL20.glUniform4f(brightAdjustUniform, 0.0f, 0.0f, 0.0f, 0.0f)
         GL20.glUniform4f(exposureAdjustUniform, 1.3f, 1.0f, 1.0f, 1.0f)
-        GL20.glUniform4f(midAdjustUniform, 0.5f, 1.0f, 1.0f, 1.0f)
+
+        GL20.glUniform4f(lowAdjustUniform, 0f, 0f, 0f, 0f)
+        GL20.glUniform4f(midAdjustUniform, -1.0f, 0f, 0f, 0f)
+        GL20.glUniform4f(highAdjustUniform, 0f, 0f, 0f, 0f)
+        GL20.glUniform1f(preserveLumUniform, 0f)
+
         GL20.glUseProgram(0)
     }
 
