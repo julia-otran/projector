@@ -1,15 +1,11 @@
 package us.guihouse.projector.projection.glfw;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.ARBMultisample;
 import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL30;
 import us.guihouse.projector.models.WindowConfigBlackLevelAdjust;
 
 import java.awt.*;
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
-import java.util.List;
 
 public class GLFWBlackLevelAdjust implements GLFWDrawer {
 
