@@ -135,6 +135,9 @@ public class GLFWSelectiveWindow implements GLFWWindow {
 
     @Override
     public void updateWindowConfig(WindowConfig wc) {
+        if (window > 0) {
+            glfwMakeContextCurrent(window);
+        }
         if (delegate != null) {
             delegate.updateWindowConfig(wc);
         }
