@@ -86,10 +86,10 @@ public class GLFWTexWindow implements GLFWInternalWindow {
             GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, bounds.width, bounds.height, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, buffer);
             GL11.glBegin(GL11.GL_QUADS);
 
-            GL11.glTexCoord2f(0, 0); GL11.glVertex2f(-1f, -1f);
-            GL11.glTexCoord2f(0, 1); GL11.glVertex2f(-1f, 1f);
-            GL11.glTexCoord2f(1, 1); GL11.glVertex2f(1f,1f);
-            GL11.glTexCoord2f(1, 0); GL11.glVertex2f(1f, -1f);
+            GL11.glTexCoord2f(0, 1); GL11.glVertex2f(-1f, -1f);
+            GL11.glTexCoord2f(0, 0); GL11.glVertex2f(-1f, 1f);
+            GL11.glTexCoord2f(1, 0); GL11.glVertex2f(1f,1f);
+            GL11.glTexCoord2f(1, 1); GL11.glVertex2f(1f, -1f);
 
             GL11.glEnd();
 
