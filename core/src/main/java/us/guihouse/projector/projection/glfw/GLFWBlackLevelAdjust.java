@@ -11,9 +11,14 @@ public class GLFWBlackLevelAdjust implements GLFWDrawer {
 
     private float offset;
     private int vertexCount;
-    private int vertexBuffer;
+    private int vertexBuffer = -1;
+    private Rectangle bounds;
 
-    public void init(Rectangle bounds, WindowConfigBlackLevelAdjust settings) {
+    public void init(Rectangle bounds) {
+        this.bounds = bounds;
+    }
+
+    public void updateConfigs(WindowConfigBlackLevelAdjust settings) {
         if (settings != null &&
                 settings.getPoints() != null &&
                 settings.getPoints().size() > 2) {
@@ -31,6 +36,8 @@ public class GLFWBlackLevelAdjust implements GLFWDrawer {
 
             coordBuffer.flip();
 
+            finish();
+
             vertexBuffer = GL20.glGenBuffers();
             GL20.glBindBuffer(GL20.GL_ARRAY_BUFFER, vertexBuffer);
             GL20.glBufferData(GL20.GL_ARRAY_BUFFER, coordBuffer, GL20.GL_STATIC_DRAW);
@@ -42,7 +49,7 @@ public class GLFWBlackLevelAdjust implements GLFWDrawer {
 
     @Override
     public void draw() {
-        if (vertexCount > 0) {
+        if (vertexCount > 0 && vertexBuffer >= 0) {
             GL20.glBindBuffer(GL20.GL_ARRAY_BUFFER, vertexBuffer);
 
             GL20.glEnable(GL20.GL_BLEND);
@@ -62,7 +69,7 @@ public class GLFWBlackLevelAdjust implements GLFWDrawer {
     }
 
     void finish() {
-        if (vertexBuffer > 0) {
+        if (vertexBuffer >= 0) {
             GL20.glDeleteBuffers(vertexBuffer);
         }
     }

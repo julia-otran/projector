@@ -1,11 +1,13 @@
 package us.guihouse.projector.projection.glfw;
 
+import lombok.Getter;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import us.guihouse.projector.models.WindowConfig;
 import us.guihouse.projector.other.RuntimeProperties;
 
 import java.awt.Rectangle;
@@ -111,6 +113,12 @@ public class GLFWPboWindow implements GLFWInternalWindow {
         }
 
         texStream.upload(src);
+    }
+
+    @Override
+    public void updateWindowConfig(WindowConfig windowConfig) {
+        glfwMakeContextCurrent(window);
+        colorCorrection.setWindowConfig(windowConfig);
     }
 
     public void shutdown() {

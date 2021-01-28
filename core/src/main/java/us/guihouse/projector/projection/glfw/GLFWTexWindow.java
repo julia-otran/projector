@@ -4,6 +4,7 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import us.guihouse.projector.models.WindowConfig;
 import us.guihouse.projector.other.RuntimeProperties;
 
 import java.awt.*;
@@ -101,6 +102,11 @@ public class GLFWTexWindow implements GLFWInternalWindow {
             glfwSwapBuffers(window);
             glfwPollEvents();
         });
+    }
+
+    @Override
+    public void updateWindowConfig(WindowConfig windowConfig) {
+
     }
 
     public void shutdown() {

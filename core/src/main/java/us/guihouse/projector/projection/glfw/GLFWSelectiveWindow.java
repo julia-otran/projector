@@ -5,15 +5,12 @@ import org.lwjgl.PointerBuffer;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL30;
 import org.lwjgl.system.MemoryStack;
 import us.guihouse.projector.models.WindowConfig;
 import us.guihouse.projector.other.GraphicsFinder;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -95,7 +92,7 @@ public class GLFWSelectiveWindow implements GLFWWindow {
 
         GL11.glViewport(0, 0, bounds.width, bounds.height);
 
-        blackLevelAdjust.init(bounds, windowConfig.getBlackLevelAdjust());
+        blackLevelAdjust.init(bounds);
 
         List<GLFWDrawer> drawers = new ArrayList<>();
 
@@ -108,6 +105,9 @@ public class GLFWSelectiveWindow implements GLFWWindow {
         }
 
         delegate.init();
+
+        blackLevelAdjust.updateConfigs(windowConfig.getBlackLevelAdjust());
+        delegate.updateWindowConfig(windowConfig);
     }
 
     @Override
@@ -130,6 +130,16 @@ public class GLFWSelectiveWindow implements GLFWWindow {
     public void updateOutput(BufferedImage src) {
         if (delegate != null) {
             delegate.updateOutput(src);
+        }
+    }
+
+    @Override
+    public void updateWindowConfig(WindowConfig wc) {
+        if (delegate != null) {
+            delegate.updateWindowConfig(wc);
+        }
+        if (blackLevelAdjust != null) {
+            blackLevelAdjust.updateConfigs(wc.getBlackLevelAdjust());
         }
     }
 

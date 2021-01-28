@@ -48,7 +48,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     private Runnable initializationCallback;
 
     private boolean running = false;
-    private boolean fullScreen = false;
     private boolean starting = false;
 
     private final SettingsService settingsService;
@@ -181,14 +180,19 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
                 AffineTransform transform = transformAssets.get(windowConfig.getDisplayId());
 
-                g.setTransform(transform);
+                if (transform != null) {
+                    g.setTransform(transform);
+                }
 
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
                 g.drawImage(virtualScreensRender.get(windowConfig.getVirtualScreenId()), 0, 0, null);
 
-                g.setTransform(transform);
+                if (transform != null) {
+                    g.setTransform(transform);
+                }
+
                 g.translate(windowConfig.getX(), windowConfig.getY());
 
                 windowConfig.getBlends().forEach(blend -> {
@@ -253,13 +257,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
     @Override
     public void setFullScreen(boolean fullScreen) {
-        if (this.fullScreen == fullScreen) {
-            return;
-        }
 
-        stopEngine();
-        this.fullScreen = fullScreen;
-        startEngine();
     }
 
     public void stop() {
@@ -296,18 +294,46 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
     @Override
     public void updateConfigs(List<WindowConfig> windowConfigs) {
+        List<WindowConfig> newWindowConfigs = filterWindowConfigs(windowConfigs);
+
         if (running) {
-            stopEngine();
-            loadWindowConfigs(windowConfigs);
-            startEngine();
+
+            boolean quickReload = this.windowConfigs != null && this.windowConfigs.size() == newWindowConfigs.size();
+
+            if (quickReload) {
+                for (int i=0; i<newWindowConfigs.size() && quickReload; i++) {
+                    WindowConfig current = this.windowConfigs.get(i);
+                    WindowConfig newConfig = windowConfigs.get(i);
+                    quickReload = current.allowQuickReload(newConfig);
+                }
+            }
+
+            if (quickReload) {
+                loadWindowConfigs(newWindowConfigs);
+                generateMutableAssets();
+
+                GLFWHelper.invokeLater(() -> {
+                    this.windowConfigs.forEach(windowConfig -> {
+                        ProjectionWindow pw = windows.get(windowConfig.getDisplayId());
+                        pw.updateWindowConfig(windowConfig);
+                    });
+                });
+            } else {
+                stopEngine();
+                loadWindowConfigs(newWindowConfigs);
+                startEngine();
+            }
         } else {
-            loadWindowConfigs(windowConfigs);
+            loadWindowConfigs(newWindowConfigs);
         }
+    }
+
+    private List<WindowConfig> filterWindowConfigs(List<WindowConfig> windowConfigs) {
+        return windowConfigs.stream().filter(WindowConfig::isProject).collect(Collectors.toList());
     }
 
     private void loadWindowConfigs(List<WindowConfig> windowConfigs) {
         this.windowConfigs = windowConfigs.stream()
-                .filter(WindowConfig::isProject)
                 .peek(wc -> {
                     if (wc.getVirtualScreenId() == null || wc.getVirtualScreenId().isBlank()) {
                         wc.setVirtualScreenId(VirtualScreen.MAIN_SCREEN_ID);
@@ -347,6 +373,9 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                     wc.setBgFillHeight(device.getDevice().getDefaultConfiguration().getBounds().height);
 
                     wc.setBlackLevelAdjust(null);
+                    wc.setWhiteBalance(null);
+                    wc.setColorBalance(null);
+
                     wc.setBlends(Collections.emptyList());
                     wc.setHelpLines(Collections.emptyList());
 
@@ -360,7 +389,27 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                 }).collect(Collectors.toList());
     }
 
+    private void generateMutableAssets() {
+        blendAssets.clear();
+        transformAssets.clear();
+
+        windowConfigs.forEach(wc -> {
+            wc.getBlends().forEach(blend -> blendAssets.put(blend.getId(), BlendGenerator.makeBlender(blend)));
+
+            AffineTransform t = new AffineTransform();
+
+            t.translate(-1 * wc.getX(), -1 * wc.getY());
+            t.scale(wc.getScaleX(), wc.getScaleY());
+            t.shear(wc.getShearX(), wc.getShearY());
+            t.rotate(wc.getRotate());
+
+            transformAssets.put(wc.getDisplayId(), t);
+        });
+    }
+
     private void generateAssets() {
+        generateMutableAssets();
+
         virtualScreens.clear();
         virtualScreensRender.clear();
         virtualScreensGraphics.forEach((id, graphics) -> graphics.dispose());
@@ -391,22 +440,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                     virtualScreensRender.put(virtualScreenId, render);
                     virtualScreensGraphics.put(virtualScreenId, render.createGraphics());
                 });
-
-        blendAssets.clear();
-        transformAssets.clear();
-
-        windowConfigs.forEach(wc -> {
-            wc.getBlends().forEach(blend -> blendAssets.put(blend.getId(), BlendGenerator.makeBlender(blend)));
-
-            AffineTransform t = new AffineTransform();
-
-            t.translate(-1 * wc.getX(), -1 * wc.getY());
-            t.scale(wc.getScaleX(), wc.getScaleY());
-            t.shear(wc.getShearX(), wc.getShearY());
-            t.rotate(wc.getRotate());
-
-            transformAssets.put(wc.getDisplayId(), t);
-        });
 
     }
 }

@@ -5,6 +5,7 @@ import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL15
 import org.lwjgl.opengl.GL20
 import org.lwjgl.opengl.GL30
+import us.guihouse.projector.models.WindowConfig
 import kotlin.system.exitProcess
 
 class GLFWColorCorrection constructor(private val texId: Int){
@@ -189,7 +190,7 @@ class GLFWColorCorrection constructor(private val texId: Int){
     fun init() {
         setupQuad()
         setupShaders()
-        setupUniforms()
+        initUniforms()
     }
 
     private fun setupQuad() {
@@ -272,7 +273,7 @@ class GLFWColorCorrection constructor(private val texId: Int){
         GL20.glUseProgram(0)
     }
 
-    private fun setupUniforms() {
+    private fun initUniforms() {
         GL20.glUseProgram(pId)
         GL20.glUniform4f(brightAdjustUniform, 0.0f, 0.0f, 0.0f, 0.0f)
         GL20.glUniform4f(exposureAdjustUniform, 1.0f, 1.0f, 1.0f, 1.0f)
@@ -281,6 +282,44 @@ class GLFWColorCorrection constructor(private val texId: Int){
         GL20.glUniform4f(midAdjustUniform, 0f, 0f, 0f, 0f)
         GL20.glUniform4f(highAdjustUniform, 0f, 0f, 0f, 0f)
         GL20.glUniform1f(preserveLumUniform, 1f)
+
+        GL20.glUseProgram(0)
+    }
+
+    fun setWindowConfig(windowConfig: WindowConfig) {
+        initUniforms()
+
+        GL20.glUseProgram(pId)
+
+        windowConfig.whiteBalance?.let { whiteBalance ->
+            whiteBalance.bright?.let {
+                GL20.glUniform4f(brightAdjustUniform, it.r, it.g, it.b, 0.0f)
+            }
+
+            whiteBalance.exposure?.let {
+                GL20.glUniform4f(exposureAdjustUniform, it.r, it.g, it.b, 1.0f)
+            }
+        }
+
+        windowConfig.colorBalance?.let { colorBalance ->
+            colorBalance.shadows?.let {
+                GL20.glUniform4f(lowAdjustUniform, it.r, it.g, it.b, 0f)
+            }
+
+            colorBalance.midtones?.let {
+                GL20.glUniform4f(midAdjustUniform, it.r, it.g, it.b, 0f)
+            }
+
+            colorBalance.highlights?.let {
+                GL20.glUniform4f(highAdjustUniform, it.r, it.g, it.b, 0f)
+            }
+
+            if (colorBalance.isPreserveLuminosity) {
+                GL20.glUniform1f(preserveLumUniform, 1.0f)
+            } else {
+                GL20.glUniform1f(preserveLumUniform, 0f)
+            }
+        }
 
         GL20.glUseProgram(0)
     }

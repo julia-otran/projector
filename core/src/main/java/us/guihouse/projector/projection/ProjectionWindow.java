@@ -18,6 +18,7 @@ public interface ProjectionWindow {
     void init(WindowConfig wc);
     void shutdown();
     void updateOutput(BufferedImage src);
+    void updateWindowConfig(WindowConfig wc);
     void makeVisible();
     GraphicsFinder.Device getCurrentDevice();
 }

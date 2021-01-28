@@ -2,6 +2,8 @@ package us.guihouse.projector.models;
 
 import java.awt.*;
 import java.util.List;
+import java.util.Objects;
+
 import lombok.Data;
 
 @Data
@@ -17,6 +19,8 @@ public class WindowConfig {
     private int width;
     private int height;
 
+    // Reloadable Fields
+
     private int bgFillX;
     private int bgFillY;
     private int bgFillWidth;
@@ -27,6 +31,8 @@ public class WindowConfig {
     private List<WindowConfigBlend> blends;
 
     private WindowConfigBlackLevelAdjust blackLevelAdjust;
+    private WindowConfigWhiteBalance whiteBalance;
+    private WindowConfigColorBalance colorBalance;
 
     private double scaleX;
     private double scaleY;
@@ -35,4 +41,29 @@ public class WindowConfig {
     private double shearY;
 
     private double rotate;
+
+    public WindowConfigBlackLevelAdjust getBlackLevelAdjust() {
+        return blackLevelAdjust;
+    }
+
+    public WindowConfigWhiteBalance getWhiteBalance() {
+        return whiteBalance;
+    }
+
+    public WindowConfigColorBalance getColorBalance() {
+        return colorBalance;
+    }
+
+    public boolean allowQuickReload(WindowConfig other) {
+        return
+                Objects.equals(displayId, other.displayId) &&
+                        Objects.equals(virtualScreenId, other.virtualScreenId) &&
+                        Objects.equals(displayBounds, other.displayBounds) &&
+                        project == other.project &&
+                        x == other.x &&
+                        y == other.y &&
+                        width == other.width &&
+                        height == other.height;
+
+    }
 }
