@@ -23,6 +23,7 @@ public class GLFWAsyncTexStream extends EventQueue {
     static public class Buffer {
         @Getter
         final int glBuffer;
+
         final BufferedImage image;
 
         Buffer(Integer glBuffer, BufferedImage image) {
@@ -57,6 +58,7 @@ public class GLFWAsyncTexStream extends EventQueue {
 
         for(int i = 0; i < NUM_BUFFERS; i++) {
             int glBuffer = GL20.glGenBuffers();
+
             BufferedImage image = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_INT_RGB);
             Buffer buffer = new Buffer(glBuffer, image);
 
@@ -97,7 +99,6 @@ public class GLFWAsyncTexStream extends EventQueue {
                     copyImageToBuffer(buffer.image, destination);
                 }
                 GL30.glUnmapBuffer(GL30.GL_PIXEL_UNPACK_BUFFER);
-                GL30.glBindBuffer(GL30.GL_PIXEL_UNPACK_BUFFER, 0);
                 filledBuffers.add(buffer);
             });
         }

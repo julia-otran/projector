@@ -54,6 +54,7 @@ public class GLFWBlackLevelAdjust implements GLFWDrawer {
 
             GL20.glEnable(GL20.GL_BLEND);
             GL20.glEnable(GL20.GL_COLOR_MATERIAL);
+            GL20.glEnable(GL20.GL_MULTISAMPLE);
             GL20.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
             GL20.glColor4f(1.0f, 1.0f, 1.0f, offset);
 
@@ -64,6 +65,7 @@ public class GLFWBlackLevelAdjust implements GLFWDrawer {
 
             GL20.glDisable(GL20.GL_BLEND);
             GL20.glDisable(GL20.GL_COLOR_MATERIAL);
+            GL20.glDisable(GL20.GL_MULTISAMPLE);
             GL20.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
         }
     }

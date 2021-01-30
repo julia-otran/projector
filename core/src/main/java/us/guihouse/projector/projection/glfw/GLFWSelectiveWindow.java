@@ -1,6 +1,5 @@
 package us.guihouse.projector.projection.glfw;
 
-import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
@@ -112,6 +111,10 @@ public class GLFWSelectiveWindow implements GLFWWindow {
 
     @Override
     public void shutdown() {
+        if (window != 0) {
+            glfwMakeContextCurrent(window);
+        }
+
         if (delegate != null) {
             delegate.shutdown();
         }

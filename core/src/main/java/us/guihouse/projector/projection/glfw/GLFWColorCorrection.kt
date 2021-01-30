@@ -8,7 +8,7 @@ import org.lwjgl.opengl.GL30
 import us.guihouse.projector.models.WindowConfig
 import kotlin.system.exitProcess
 
-class GLFWColorCorrection constructor(private val texId: Int){
+class GLFWColorCorrection {
     companion object {
         const val VERTEX_SHADER_SRC = """
             #version 150 core
@@ -331,7 +331,7 @@ class GLFWColorCorrection constructor(private val texId: Int){
         return shaderID
     }
 
-    fun loopCycle() {
+    fun loopCycle(texId: Int) {
         GL20.glUseProgram(pId)
 
         GL20.glUniform1i(textureUniform, 0)

@@ -1,6 +1,5 @@
 package us.guihouse.projector.projection.glfw;
 
-import lombok.Getter;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
@@ -55,22 +54,27 @@ public class GLFWPboWindow implements GLFWInternalWindow {
 
             glfwMakeContextCurrent(window);
 
-            GL30.glClearColor(0f, 0f, 0.3f, 1.0f);
+            GL11.glDisable(GL11.GL_BLEND);
+            GL11.glDisable(GL11.GL_COLOR_MATERIAL);
+            GL20.glDisable(GL20.GL_MULTISAMPLE);
+
+            GL30.glClearColor(0f, 0f, 0.0f, 1.0f);
             GL30.glClear(GL30.GL_COLOR_BUFFER_BIT);
 
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureId);
             GL30.glBindBuffer(GL30.GL_PIXEL_UNPACK_BUFFER, buffer.getGlBuffer());
             GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, bounds.width, bounds.height, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, 0);
-            GL30.glGenerateMipmap(GL30.GL_TEXTURE_2D);
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
-
-            colorCorrection.loopCycle();
+            GL20.glBindBuffer(GL30.GL_PIXEL_UNPACK_BUFFER, 0);
 
             texStream.freeBuffer(buffer);
+
+            colorCorrection.loopCycle(textureId);
 
             drawers.forEach(GLFWDrawer::draw);
 
             glfwSwapBuffers(window);
+
             glfwPollEvents();
         }
     }
@@ -93,15 +97,14 @@ public class GLFWPboWindow implements GLFWInternalWindow {
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureId);
         GL11.glTexParameterf(GL11.GL_TEXTURE_2D,GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
         GL11.glTexParameterf(GL11.GL_TEXTURE_2D,GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-        GL20.glTexParameteri(GL11.GL_TEXTURE_2D, GL20.GL_GENERATE_MIPMAP, GL11.GL_TRUE);
-
 
         final ByteBuffer buffer = BufferUtils.createByteBuffer(bounds.width * bounds.height * 3);
         buffer.flip();
+
         GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGB, bounds.width, bounds.height, 0, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, buffer);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 
-        colorCorrection = new GLFWColorCorrection(textureId);
+        colorCorrection = new GLFWColorCorrection();
         colorCorrection.init();
 
         GLFWHelper.invokeContinuous(new TexUpdate());
