@@ -11,11 +11,10 @@ import kotlin.system.exitProcess
 class GLFWColorCorrection {
     companion object {
         const val VERTEX_SHADER_SRC = """
-            #version 150 core
-            in vec4 in_Position;
-            in vec2 in_Uv;
+            attribute vec4 in_Position;
+            attribute vec2 in_Uv;
             
-            out vec2 frag_Uv;
+            varying vec2 frag_Uv;
             
             void main(void) {
                 gl_Position = in_Position;
@@ -24,9 +23,7 @@ class GLFWColorCorrection {
         """
 
         const val FRAGMENT_SHADER_SRC = """
-            #version 150 core
-            
-            in vec2 frag_Uv;
+            varying vec2 frag_Uv;
             uniform sampler2D image;
             
             uniform vec4 brightAdjust;
@@ -35,6 +32,7 @@ class GLFWColorCorrection {
             uniform vec4 lowAdjust;
             uniform vec4 midAdjust;
             uniform vec4 highAdjust;
+            
             uniform float preserveLuminosity;
             
             vec4 rgbToHsl(vec4 rgbColor) {
@@ -78,7 +76,7 @@ class GLFWColorCorrection {
                 return(vec4(hue, sat, lum, rgbColor.a));
             }
             
-            float convertColorPart(float n1, float n2, float hue) {
+                        float convertColorPart(float n1, float n2, float hue) {
                 if (hue > 6.0) {
                     hue = hue - 6.0;
                 }
@@ -135,10 +133,10 @@ class GLFWColorCorrection {
                 
                 float a = 0.25;
                 float scale = 0.7;
-                float b = 1 - scale;
+                float b = 1.0 - scale;
                 
                 float shadowsLum = lum - b;
-                float highlightsLum = lum + b -1;
+                float highlightsLum = lum + b -1.0;
                 
                 float shadowsMultiply = clamp((shadowsLum / (-1.0 * a)) + 0.5, 0.0, 1.0) * scale;
                 float highlightsMultiply = clamp((highlightsLum / a) + 0.5, 0.0, 1.0) * scale;
@@ -240,9 +238,9 @@ class GLFWColorCorrection {
 
     private fun setupShaders() {
         // Load the vertex shader
-        vsId = loadShader(VERTEX_SHADER_SRC, GL20.GL_VERTEX_SHADER)
+        vsId = loadShader(VERTEX_SHADER_SRC, GL20.GL_VERTEX_SHADER, "Color Correction Vertex Shader")
         // Load the fragment shader
-        fsId = loadShader(FRAGMENT_SHADER_SRC, GL20.GL_FRAGMENT_SHADER)
+        fsId = loadShader(FRAGMENT_SHADER_SRC, GL20.GL_FRAGMENT_SHADER, "Color Correction Fragment Shader")
 
         // Create a new shader program that links both shaders
         pId = GL20.glCreateProgram()
@@ -324,10 +322,15 @@ class GLFWColorCorrection {
         GL20.glUseProgram(0)
     }
 
-    private fun loadShader(shaderSource: String, type: Int): Int {
+    private fun loadShader(shaderSource: String, type: Int, name: String): Int {
         val shaderID = GL20.glCreateShader(type)
         GL20.glShaderSource(shaderID, shaderSource)
         GL20.glCompileShader(shaderID)
+        val compileStatus = GL20.glGetShaderi(shaderID, GL20.GL_COMPILE_STATUS)
+        if (compileStatus == 0) {
+            print("Failed compiling shader $name")
+            println(GL20.glGetShaderInfoLog(shaderID))
+        }
         return shaderID
     }
 
