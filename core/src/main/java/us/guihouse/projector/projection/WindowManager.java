@@ -193,15 +193,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                 }
 
                 g.translate(windowConfig.getX(), windowConfig.getY());
-
-                Stroke previousStroke = g.getStroke();
-                g.setStroke(new BasicStroke(2.0f));
-                g.setColor(Color.WHITE);
-
-                windowConfig.getHelpLines()
-                        .forEach(helpLine -> g.drawLine(helpLine.getX1(), helpLine.getY1(), helpLine.getX2(), helpLine.getY2()));
-
-                g.setStroke(previousStroke);
             });
 
             windowConfigs.forEach(windowConfig -> {

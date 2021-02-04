@@ -31,7 +31,8 @@ public class GLFWWindow implements ProjectionWindow {
 
     private final GLFWBlackLevelAdjust blackLevelAdjust;
     private final GLFWBlend blends;
-    private GLFWColorCorrection colorCorrection;
+    private final GLFWColorCorrection colorCorrection;
+    private final GLFWHelperLines helperLines;
 
     private long window = 0;
 
@@ -46,6 +47,8 @@ public class GLFWWindow implements ProjectionWindow {
         bounds = getCurrentDevice().getDevice().getDefaultConfiguration().getBounds();
         blackLevelAdjust = new GLFWBlackLevelAdjust();
         blends = new GLFWBlend(bounds);
+        colorCorrection = new GLFWColorCorrection();
+        helperLines = new GLFWHelperLines(bounds);
     }
 
     @Override
@@ -126,12 +129,12 @@ public class GLFWWindow implements ProjectionWindow {
         GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGB, bounds.width, bounds.height, 0, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, buffer);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 
-        colorCorrection = new GLFWColorCorrection();
         colorCorrection.init();
 
         blackLevelAdjust.updateConfigs(windowConfig.getBlackLevelAdjust());
         colorCorrection.setWindowConfig(windowConfig);
         blends.updateWindowConfigs(windowConfig);
+        helperLines.updateWindowConfig(windowConfig);
 
         GLFWHelper.invokeContinuous(loopCycle);
     }
@@ -167,6 +170,7 @@ public class GLFWWindow implements ProjectionWindow {
             colorCorrection.loopCycle(textureId);
             blends.render();
             blackLevelAdjust.draw();
+            helperLines.render();
 
             glfwSwapBuffers(window);
             glfwPollEvents();
@@ -219,6 +223,9 @@ public class GLFWWindow implements ProjectionWindow {
         }
         if (blends != null) {
             blends.updateWindowConfigs(wc);
+        }
+        if (helperLines != null) {
+            helperLines.updateWindowConfig(wc);
         }
     }
 

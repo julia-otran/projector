@@ -58,6 +58,10 @@ public class WindowConfig {
         return colorBalance;
     }
 
+    public List<WindowConfigHelpLine> getHelpLines() {
+        return helpLines;
+    }
+
     public boolean allowQuickReload(WindowConfig other) {
         return
                 Objects.equals(displayId, other.displayId) &&
