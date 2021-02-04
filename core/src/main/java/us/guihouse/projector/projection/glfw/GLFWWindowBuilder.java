@@ -4,6 +4,6 @@ import us.guihouse.projector.other.GraphicsFinder;
 
 public class GLFWWindowBuilder {
     public static GLFWWindow createWindow(GraphicsFinder.Device device) {
-        return new GLFWSelectiveWindow(device);
+        return new GLFWWindow(device);
     }
 }

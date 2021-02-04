@@ -42,6 +42,10 @@ public class WindowConfig {
 
     private double rotate;
 
+    public List<WindowConfigBlend> getBlends() {
+        return blends;
+    }
+
     public WindowConfigBlackLevelAdjust getBlackLevelAdjust() {
         return blackLevelAdjust;
     }

@@ -1,8 +1,10 @@
 package us.guihouse.projector.utils;
 
+import org.lwjgl.BufferUtils;
 import us.guihouse.projector.models.WindowConfigBlend;
 
 import java.awt.image.BufferedImage;
+import java.nio.ByteBuffer;
 
 public class BlendGenerator {
     private static int curve(float x, WindowConfigBlend blend) {
@@ -14,7 +16,6 @@ public class BlendGenerator {
     }
 
     public static BufferedImage makeBlender(WindowConfigBlend blend) {
-
         BufferedImage img = new BufferedImage(blend.getWidth(), blend.getHeight(), BufferedImage.TYPE_INT_ARGB);
 
         switch (blend.getDirection()) {

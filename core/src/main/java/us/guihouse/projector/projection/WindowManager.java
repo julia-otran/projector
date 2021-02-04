@@ -36,7 +36,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     private final HashMap<String, Graphics2D> virtualScreensGraphics = new HashMap<>();
 
     private final HashMap<String, ProjectionWindow> windows = new HashMap<>();
-    private final HashMap<Integer, BufferedImage> blendAssets = new HashMap<>();
     private final HashMap<String, AffineTransform> transformAssets = new HashMap<>();
     private final HashMap<String, BufferedImage> screenImages = new HashMap<>();
     private final HashMap<String, Graphics2D> screenGraphics = new HashMap<>();
@@ -194,13 +193,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                 }
 
                 g.translate(windowConfig.getX(), windowConfig.getY());
-
-                windowConfig.getBlends().forEach(blend -> {
-                    BufferedImage img = blendAssets.get(blend.getId());
-                    if (img != null) {
-                        g.drawImage(img, blend.getX(), blend.getY(), null);
-                    }
-                });
 
                 Stroke previousStroke = g.getStroke();
                 g.setStroke(new BasicStroke(2.0f));
@@ -390,12 +382,9 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
     }
 
     private void generateMutableAssets() {
-        blendAssets.clear();
         transformAssets.clear();
 
         windowConfigs.forEach(wc -> {
-            wc.getBlends().forEach(blend -> blendAssets.put(blend.getId(), BlendGenerator.makeBlender(blend)));
-
             AffineTransform t = new AffineTransform();
 
             t.translate(-1 * wc.getX(), -1 * wc.getY());

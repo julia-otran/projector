@@ -350,7 +350,6 @@ class GLFWColorCorrection {
         GL11.glDrawArrays(GL11.GL_QUADS, 0, 4)
 
         GL20.glBindTexture(GL20.GL_TEXTURE_2D, 0)
-        GL20.glActiveTexture(0)
         GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0)
         GL20.glDisableVertexAttribArray(0)
         GL20.glDisableVertexAttribArray(1)

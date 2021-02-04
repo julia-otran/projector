@@ -87,5 +87,9 @@ public class EventQueue implements Runnable {
     protected void enqueueContinuous(Runnable r) {
         continuousRun.add(r);
     }
+
+    protected void removeContinuous(Runnable r) {
+        continuousRun.remove(r);
+    }
 }
 

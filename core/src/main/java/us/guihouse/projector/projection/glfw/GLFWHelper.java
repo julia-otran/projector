@@ -22,6 +22,8 @@ public class GLFWHelper extends EventQueue {
 
     public static void invokeContinuous(Runnable r) { instance.enqueueContinuous(r); }
 
+    public static void clearContinuous(Runnable r) { instance.removeContinuous(r); }
+
     @Override
     public void onStart() {
         GLFWErrorCallback.createPrint(System.err).set();

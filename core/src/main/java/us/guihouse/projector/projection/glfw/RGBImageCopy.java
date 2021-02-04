@@ -23,24 +23,33 @@ public class RGBImageCopy {
         return 0;
     }
 
-    private static void copyPixel(int argb, ByteBuffer buffer) {
+    private static void copyPixel(int argb, ByteBuffer buffer, boolean alphaChannel) {
         byte num = toByte((argb >> 16) & 0xFF);
         buffer.put(num);
         num = toByte((argb >> 8) & 0xFF);
         buffer.put(num);
         num = toByte(argb & 0xFF);
         buffer.put(num);
+
+        if (alphaChannel) {
+            num = toByte((argb >> 24) & 0xFF);
+            buffer.put(num);
+        }
     }
 
-    public static void copyImageToBuffer(BufferedImage img, ByteBuffer buffer) {
+    public static void copyImageToBuffer(BufferedImage img, ByteBuffer buffer, boolean alphaChannel) {
         buffer.clear();
 
         int[] pixelsSrc = ((DataBufferInt)img.getRaster().getDataBuffer()).getData();
 
         for (int argb : pixelsSrc) {
-            copyPixel(argb, buffer);
+            copyPixel(argb, buffer, alphaChannel);
         }
 
         buffer.flip();
+    }
+
+    public static void copyImageToBuffer(BufferedImage img, ByteBuffer buffer) {
+        copyImageToBuffer(img, buffer, false);
     }
 }
