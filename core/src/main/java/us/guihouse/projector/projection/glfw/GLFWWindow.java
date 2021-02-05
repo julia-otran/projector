@@ -9,6 +9,7 @@ import org.lwjgl.opengl.GL30;
 import org.lwjgl.system.MemoryStack;
 import us.guihouse.projector.models.WindowConfig;
 import us.guihouse.projector.other.GraphicsFinder;
+import us.guihouse.projector.projection.models.VirtualScreen;
 
 import java.awt.Rectangle;
 import java.nio.IntBuffer;
@@ -23,24 +24,23 @@ public class GLFWWindow {
     private final GraphicsFinder.Device device;
 
     private final Rectangle bounds;
-    private double translateX = 0;
-    private double translateY = 0;
 
     private final GLFWBlackLevelAdjust blackLevelAdjust;
     private final GLFWBlend blends;
     private final GLFWColorCorrection colorCorrection;
     private final GLFWHelperLines helperLines;
 
+    private double translateX = 0;
+    private double translateY = 0;
+
     private long window = 0;
-    private long monitor;
-    private int refreshRate;
 
     public GLFWWindow(GraphicsFinder.Device device) {
         this.device = device;
         bounds = getCurrentDevice().getDevice().getDefaultConfiguration().getBounds();
         blackLevelAdjust = new GLFWBlackLevelAdjust();
         blends = new GLFWBlend(bounds);
-        colorCorrection = new GLFWColorCorrection();
+        colorCorrection = new GLFWColorCorrection(bounds);
         helperLines = new GLFWHelperLines(bounds);
     }
 
@@ -51,7 +51,7 @@ public class GLFWWindow {
             throw new IllegalStateException("Unable to list monitors");
         }
 
-        monitor = -1;
+        long monitor = -1;
 
         try ( MemoryStack stack = stackPush() ) {
             IntBuffer x = stack.mallocInt(1);
@@ -71,7 +71,7 @@ public class GLFWWindow {
         }
 
         GLFWVidMode vidMode = glfwGetVideoMode(monitor);
-        refreshRate = vidMode == null ? 30 : vidMode.refreshRate();
+        int refreshRate = vidMode == null ? 30 : vidMode.refreshRate();
 
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
@@ -83,9 +83,11 @@ public class GLFWWindow {
 
         if ( window == NULL )
             throw new RuntimeException("Failed to create the GLFW window");
+
+        glfwSetWindowMonitor(window, monitor, bounds.x, bounds.y, bounds.width, bounds.height, refreshRate);
     }
 
-    public void init(WindowConfig windowConfig) {
+    public void init(WindowConfig windowConfig, VirtualScreen virtualScreen) {
         // Make the OpenGL context current
         glfwMakeContextCurrent(window);
 
@@ -94,21 +96,20 @@ public class GLFWWindow {
 
         GL.createCapabilities();
 
-        glfwSetWindowMonitor(window, monitor, bounds.x, bounds.y, bounds.width, bounds.height, refreshRate);
-
         GL11.glEnable(GL11.GL_TEXTURE_2D);
 
         GL11.glViewport(0, 0, bounds.width, bounds.height);
 
         blackLevelAdjust.init(bounds);
-        colorCorrection.init();
+        colorCorrection.init(windowConfig, virtualScreen);
+
         blackLevelAdjust.updateConfigs(windowConfig.getBlackLevelAdjust());
         colorCorrection.setWindowConfig(windowConfig);
         blends.updateWindowConfigs(windowConfig);
         helperLines.updateWindowConfig(windowConfig);
 
-        translateX = -1d * windowConfig.getX() / bounds.width;
-        translateY = -1d * windowConfig.getY() / bounds.height;
+        this.translateX = -2d * windowConfig.getX() / (double) bounds.width;
+        this.translateY = -2d * windowConfig.getY() / (double) bounds.height;
     }
 
     public void loopCycle(int texId) {
@@ -121,13 +122,7 @@ public class GLFWWindow {
         GL30.glClearColor(0f, 0f, 0.3f, 1.0f);
         GL30.glClear(GL30.GL_COLOR_BUFFER_BIT);
 
-        GL11.glMatrixMode(GL11.GL_MODELVIEW);
-        GL11.glPushMatrix();
-        GL11.glTranslated(translateX, translateY, 0d);
-
         colorCorrection.loopCycle(texId);
-
-        GL11.glPopMatrix();
 
         blends.render();
         blackLevelAdjust.draw();

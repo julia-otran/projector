@@ -14,7 +14,7 @@ import java.awt.image.BufferedImage
 import java.lang.RuntimeException
 
 class GLFWVirtualScreen(private val virtualScreen: VirtualScreen, private val windows: Map<String, GLFWWindow>, private val windowConfigs: Map<String, WindowConfig>) {
-    private val eventQueue = EventQueue()
+    private val eventQueue = EventQueue(10)
 
     private var glWindow = 0L
     private var glTexUploadWindow = 0L
@@ -58,7 +58,7 @@ class GLFWVirtualScreen(private val virtualScreen: VirtualScreen, private val wi
     internal inner class Starter : Runnable {
         override fun run() {
             windows.forEach { (id, window) ->
-                window.init(windowConfigs[id])
+                window.init(windowConfigs[id], virtualScreen)
             }
 
             GLFW.glfwMakeContextCurrent(glWindow)

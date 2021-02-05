@@ -6,6 +6,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class EventQueue implements Runnable {
+    private final long sleepInterval;
     private Thread thread;
     private boolean running;
     private final Queue<Runnable> eventQueue = new ConcurrentLinkedQueue<>();
@@ -21,6 +22,14 @@ public class EventQueue implements Runnable {
 
     public void setStopRunnable(Runnable r) {
         this.stopRunnable = r;
+    }
+
+    public EventQueue(long sleepInterval) {
+        this.sleepInterval = sleepInterval;
+    }
+
+    public EventQueue() {
+        this(5);
     }
 
     public void init() {
@@ -79,7 +88,7 @@ public class EventQueue implements Runnable {
                         waiter.wait(500);
                     }
                 } else {
-                    Thread.sleep(5);
+                    Thread.sleep(sleepInterval);
                 }
 
                 do {

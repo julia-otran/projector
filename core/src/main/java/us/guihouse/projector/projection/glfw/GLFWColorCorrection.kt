@@ -6,9 +6,11 @@ import org.lwjgl.opengl.GL15
 import org.lwjgl.opengl.GL20
 import org.lwjgl.opengl.GL30
 import us.guihouse.projector.models.WindowConfig
+import us.guihouse.projector.projection.models.VirtualScreen
+import java.awt.Rectangle
 import kotlin.system.exitProcess
 
-class GLFWColorCorrection {
+class GLFWColorCorrection(private val bounds: Rectangle) {
     companion object {
         const val VERTEX_SHADER_SRC = """
             attribute vec4 in_Position;
@@ -76,7 +78,7 @@ class GLFWColorCorrection {
                 return(vec4(hue, sat, lum, rgbColor.a));
             }
             
-                        float convertColorPart(float n1, float n2, float hue) {
+            float convertColorPart(float n1, float n2, float hue) {
                 if (hue > 6.0) {
                     hue = hue - 6.0;
                 }
@@ -185,13 +187,13 @@ class GLFWColorCorrection {
     private var highAdjustUniform = 0
     private var preserveLumUniform = 0
 
-    fun init() {
-        setupQuad()
+    fun init(windowConfig: WindowConfig, virtualScreen: VirtualScreen) {
+        setupQuad(windowConfig, virtualScreen)
         setupShaders()
         initUniforms()
     }
 
-    private fun setupQuad() {
+    private fun setupQuad(windowConfig: WindowConfig, virtualScreen: VirtualScreen) {
         // Vertices, the order is not important. XYZW instead of XYZ
         val vertices = floatArrayOf(
             -1f, 1f, 0f, 1f,
@@ -215,11 +217,17 @@ class GLFWColorCorrection {
         GL20.glVertexAttribPointer(0, 4, GL11.GL_FLOAT, false, 0, 0)
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0)
 
+        val texWidth = windowConfig.width / virtualScreen.width.toFloat()
+        val texHeight = windowConfig.height / virtualScreen.height.toFloat()
+
+        val translateX = windowConfig.x / virtualScreen.width.toFloat()
+        val translateY = windowConfig.y / virtualScreen.height.toFloat()
+
         val uv = floatArrayOf(
-            0f, 0f,
-            0f, 1f,
-            1f, 1f,
-            1f, 0f
+            translateX, translateY,
+            translateX, translateY + texHeight,
+            translateX + texWidth, translateY + texHeight,
+            translateX + texWidth, translateY
         )
 
         val uvBuffer = BufferUtils.createFloatBuffer(uv.size)
