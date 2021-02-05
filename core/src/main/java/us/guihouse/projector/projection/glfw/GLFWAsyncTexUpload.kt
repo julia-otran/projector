@@ -18,13 +18,12 @@ import java.util.ArrayList
 import java.util.Queue
 import java.util.function.Consumer
 
-class GLFWAsyncTexUpload(private val bounds: Rectangle, private val parentWindow: Long) : EventQueue(), GLFWTexUpload {
+class GLFWAsyncTexUpload(private val bounds: Rectangle, private val window: Long) : EventQueue(), GLFWTexUpload {
     data class Buffer internal constructor(val glBuffer: Int, val image: BufferedImage)
 
     private val allocatedBuffers: MutableList<Buffer> = ArrayList()
     private val freeBuffers: Queue<Buffer> = ConcurrentLinkedQueue()
     private val filledBuffers: Queue<Buffer> = ConcurrentLinkedQueue()
-    private var window: Long = 0
 
     override fun onStart() {
         super.onStart()
@@ -99,10 +98,6 @@ class GLFWAsyncTexUpload(private val bounds: Rectangle, private val parentWindow
     }
 
     override fun start() {
-        GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE)
-        window = GLFW.glfwCreateWindow(640, 480, "Projector Background Window", MemoryUtil.NULL, parentWindow)
-        if (window == MemoryUtil.NULL) throw RuntimeException("Failed to create the background GLFW window")
-
         super.init()
     }
 }

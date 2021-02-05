@@ -17,6 +17,14 @@ public class VirtualScreen {
 
     private List<WindowConfig> windows;
 
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
     public boolean isMainScreen() {
         return MAIN_SCREEN_ID.equalsIgnoreCase(virtualScreenId) || MAIN_CHROMA_SCREEN_ID.equalsIgnoreCase(virtualScreenId);
     }

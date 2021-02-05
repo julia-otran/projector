@@ -1,12 +1,14 @@
 package us.guihouse.projector.other;
 
-import lombok.Getter;
 import lombok.Setter;
 
 public class RuntimeProperties {
-    @Getter
     @Setter
     private static boolean logFPS;
+
+    public static boolean isLogFPS() {
+        return logFPS;
+    }
 
     private static final String LOG_FPS_ARG = "--log-fps";
 

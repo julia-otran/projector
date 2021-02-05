@@ -12,6 +12,16 @@ public class EventQueue implements Runnable {
     private final List<Runnable> continuousRun = new ArrayList<>();
 
     private final Object waiter = new Object();
+    private Runnable startRunnable;
+    private Runnable stopRunnable;
+
+    public void setStartRunnable(Runnable r) {
+        this.startRunnable = r;
+    }
+
+    public void setStopRunnable(Runnable r) {
+        this.stopRunnable = r;
+    }
 
     public void init() {
         running = true;
@@ -45,8 +55,16 @@ public class EventQueue implements Runnable {
         }
     }
 
-    public void onStart() {}
-    public void onStop() {}
+    public void onStart() {
+        if (startRunnable != null) {
+            startRunnable.run();
+        }
+    }
+    public void onStop() {
+        if (stopRunnable != null) {
+            stopRunnable.run();
+        }
+    }
 
     @Override
     public void run() {
@@ -84,11 +102,11 @@ public class EventQueue implements Runnable {
         onStop();
     }
 
-    protected void enqueueContinuous(Runnable r) {
+    public void enqueueContinuous(Runnable r) {
         continuousRun.add(r);
     }
 
-    protected void removeContinuous(Runnable r) {
+    public void removeContinuous(Runnable r) {
         continuousRun.remove(r);
     }
 }

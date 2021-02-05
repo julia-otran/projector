@@ -1,6 +1,5 @@
 package us.guihouse.projector.projection.glfw;
 
-import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
@@ -10,12 +9,8 @@ import org.lwjgl.opengl.GL30;
 import org.lwjgl.system.MemoryStack;
 import us.guihouse.projector.models.WindowConfig;
 import us.guihouse.projector.other.GraphicsFinder;
-import us.guihouse.projector.other.RuntimeProperties;
-import us.guihouse.projector.projection.ProjectionWindow;
 
 import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
-import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
@@ -24,10 +19,12 @@ import static org.lwjgl.glfw.GLFW.glfwSwapInterval;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-public class GLFWWindow implements ProjectionWindow {
+public class GLFWWindow {
     private final GraphicsFinder.Device device;
 
     private final Rectangle bounds;
+    private double translateX = 0;
+    private double translateY = 0;
 
     private final GLFWBlackLevelAdjust blackLevelAdjust;
     private final GLFWBlend blends;
@@ -35,12 +32,8 @@ public class GLFWWindow implements ProjectionWindow {
     private final GLFWHelperLines helperLines;
 
     private long window = 0;
-
-    private GLFWTexUpload texStream;
-
-    private int textureId;
-
-    private final Runnable loopCycle = new TexUpdate();
+    private long monitor;
+    private int refreshRate;
 
     public GLFWWindow(GraphicsFinder.Device device) {
         this.device = device;
@@ -51,15 +44,14 @@ public class GLFWWindow implements ProjectionWindow {
         helperLines = new GLFWHelperLines(bounds);
     }
 
-    @Override
-    public void init(WindowConfig windowConfig) {
+    public void createWindow(long glShare) {
         PointerBuffer monitors = glfwGetMonitors();
 
         if (monitors == null) {
             throw new IllegalStateException("Unable to list monitors");
         }
 
-        long monitor = -1;
+        monitor = -1;
 
         try ( MemoryStack stack = stackPush() ) {
             IntBuffer x = stack.mallocInt(1);
@@ -79,7 +71,7 @@ public class GLFWWindow implements ProjectionWindow {
         }
 
         GLFWVidMode vidMode = glfwGetVideoMode(monitor);
-        int refreshRate = vidMode == null ? 30 : vidMode.refreshRate();
+        refreshRate = vidMode == null ? 30 : vidMode.refreshRate();
 
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
@@ -87,11 +79,13 @@ public class GLFWWindow implements ProjectionWindow {
         glfwWindowHint(GLFW_FOCUS_ON_SHOW, GLFW_FALSE);
         glfwWindowHint(GLFW_SAMPLES, 4);
 
-        window = glfwCreateWindow(bounds.width, bounds.height, "Projetor", monitor, NULL);
+        window = glfwCreateWindow(bounds.width, bounds.height, "Projetor", monitor, glShare);
 
         if ( window == NULL )
             throw new RuntimeException("Failed to create the GLFW window");
+    }
 
+    public void init(WindowConfig windowConfig) {
         // Make the OpenGL context current
         glfwMakeContextCurrent(window);
 
@@ -107,84 +101,43 @@ public class GLFWWindow implements ProjectionWindow {
         GL11.glViewport(0, 0, bounds.width, bounds.height);
 
         blackLevelAdjust.init(bounds);
-
-        if (GLFWExtensions.isPboSupported()) {
-            texStream = new GLFWAsyncTexUpload(bounds, window);
-        } else {
-            texStream = new GLFWSyncTexUpload(bounds);
-        }
-
-        texStream.start();
-
-        glfwMakeContextCurrent(window);
-
-        textureId = GL11.glGenTextures();
-
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureId);
-        GL11.glTexParameterf(GL11.GL_TEXTURE_2D,GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
-        GL11.glTexParameterf(GL11.GL_TEXTURE_2D,GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-
-        final ByteBuffer buffer = BufferUtils.createByteBuffer(bounds.width * bounds.height * 3);
-        buffer.flip();
-        GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGB, bounds.width, bounds.height, 0, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, buffer);
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
-
         colorCorrection.init();
-
         blackLevelAdjust.updateConfigs(windowConfig.getBlackLevelAdjust());
         colorCorrection.setWindowConfig(windowConfig);
         blends.updateWindowConfigs(windowConfig);
         helperLines.updateWindowConfig(windowConfig);
 
-        GLFWHelper.invokeContinuous(loopCycle);
+        translateX = -1d * windowConfig.getX() / bounds.width;
+        translateY = -1d * windowConfig.getY() / bounds.height;
     }
 
-    class TexUpdate implements Runnable {
-        private long time = 0;
-        private long frames = 0;
+    public void loopCycle(int texId) {
+        GL11.glDisable(GL11.GL_BLEND);
+        GL11.glDisable(GL11.GL_COLOR_MATERIAL);
+        GL20.glDisable(GL20.GL_MULTISAMPLE);
 
-        @Override
-        public void run() {
-            if (RuntimeProperties.isLogFPS()) {
-                long current = System.nanoTime();
-                frames++;
+        glfwMakeContextCurrent(window);
 
-                if (current - time > 1000000000) {
-                    System.out.println("GL Frames " + frames);
-                    time = current;
-                    frames = 0;
-                }
-            }
+        GL30.glClearColor(0f, 0f, 0.3f, 1.0f);
+        GL30.glClear(GL30.GL_COLOR_BUFFER_BIT);
 
-            GL11.glDisable(GL11.GL_BLEND);
-            GL11.glDisable(GL11.GL_COLOR_MATERIAL);
-            GL20.glDisable(GL20.GL_MULTISAMPLE);
+        GL11.glMatrixMode(GL11.GL_MODELVIEW);
+        GL11.glPushMatrix();
+        GL11.glTranslated(translateX, translateY, 0d);
 
-            glfwMakeContextCurrent(window);
+        colorCorrection.loopCycle(texId);
 
-            texStream.updateTex(textureId);
+        GL11.glPopMatrix();
 
-            GL30.glClearColor(0f, 0f, 0.3f, 1.0f);
-            GL30.glClear(GL30.GL_COLOR_BUFFER_BIT);
+        blends.render();
+        blackLevelAdjust.draw();
+        helperLines.render();
 
-            colorCorrection.loopCycle(textureId);
-            blends.render();
-            blackLevelAdjust.draw();
-            helperLines.render();
-
-            glfwSwapBuffers(window);
-            glfwPollEvents();
-        }
+        glfwSwapBuffers(window);
+        glfwPollEvents();
     }
 
-    @Override
     public void shutdown() {
-        GLFWHelper.clearContinuous(loopCycle);
-
-        if (texStream != null) {
-            texStream.stop();
-        }
-
         if (blends != null) {
             blends.shutdown();
         }
@@ -203,14 +156,6 @@ public class GLFWWindow implements ProjectionWindow {
         }
     }
 
-    @Override
-    public void updateOutput(BufferedImage src) {
-        if (texStream != null) {
-            texStream.enqueue(src);
-        }
-    }
-
-    @Override
     public void updateWindowConfig(WindowConfig wc) {
         if (window > 0) {
             glfwMakeContextCurrent(window);
@@ -229,14 +174,12 @@ public class GLFWWindow implements ProjectionWindow {
         }
     }
 
-    @Override
     public void makeVisible() {
         if (window != 0) {
             glfwShowWindow(window);
         }
     }
 
-    @Override
     public GraphicsFinder.Device getCurrentDevice() {
         return device;
     }
