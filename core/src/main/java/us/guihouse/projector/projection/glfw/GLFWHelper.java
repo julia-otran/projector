@@ -1,5 +1,6 @@
 package us.guihouse.projector.projection.glfw;
 
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import us.guihouse.projector.other.EventQueue;
 
@@ -24,6 +25,8 @@ public class GLFWHelper extends EventQueue {
 
     public static void clearContinuous(Runnable r) { instance.removeContinuous(r); }
 
+    private Runnable pollEvents = org.lwjgl.glfw.GLFW::glfwPollEvents;
+
     @Override
     public void onStart() {
         GLFWErrorCallback.createPrint(System.err).set();
@@ -31,10 +34,14 @@ public class GLFWHelper extends EventQueue {
         // Initialize GLFW. Most GLFW functions will not work before doing this.
         if ( !glfwInit() )
             throw new IllegalStateException("Unable to initialize GLFW");
+
+        enqueueContinuous(pollEvents);
     }
 
     @Override
     public void onStop() {
+        clearContinuous(pollEvents);
+
         glfwTerminate();
 
         GLFWErrorCallback cb = glfwSetErrorCallback(null);

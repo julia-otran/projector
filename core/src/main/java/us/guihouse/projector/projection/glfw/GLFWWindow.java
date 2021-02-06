@@ -113,11 +113,11 @@ public class GLFWWindow {
     }
 
     public void loopCycle(int texId) {
+        glfwMakeContextCurrent(window);
+
         GL11.glDisable(GL11.GL_BLEND);
         GL11.glDisable(GL11.GL_COLOR_MATERIAL);
         GL20.glDisable(GL20.GL_MULTISAMPLE);
-
-        glfwMakeContextCurrent(window);
 
         GL30.glClearColor(0f, 0f, 0.3f, 1.0f);
         GL30.glClear(GL30.GL_COLOR_BUFFER_BIT);

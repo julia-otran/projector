@@ -43,7 +43,10 @@ class GLFWVirtualScreen(private val virtualScreen: VirtualScreen, private val wi
             throw RuntimeException("Cannot create GLFW window")
         }
 
-        windows.values.forEach { it.createWindow(glWindow) }
+        windows.values.forEach {
+            it.createWindow(glWindow)
+            it.makeVisible()
+        }
 
         eventQueue.setStartRunnable(Starter())
         eventQueue.setStopRunnable(Stopper())
@@ -95,10 +98,6 @@ class GLFWVirtualScreen(private val virtualScreen: VirtualScreen, private val wi
 
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0)
 
-            windows.forEach { (_, window) ->
-                window.makeVisible()
-            }
-
             eventQueue.enqueueContinuous(looper)
         }
 
@@ -123,6 +122,7 @@ class GLFWVirtualScreen(private val virtualScreen: VirtualScreen, private val wi
             texGLFWTexUpload!!.updateTex(texture)
 
             windows.values.forEach { it.loopCycle(texture) }
+            GLFW.glfwPollEvents()
         }
     }
 
