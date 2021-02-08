@@ -4,9 +4,15 @@ import java.awt.*;
 import java.util.List;
 import java.util.Objects;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder(toBuilder = true)
 public class WindowConfig {
 
     private String displayId;
@@ -20,12 +26,6 @@ public class WindowConfig {
     private int height;
 
     // Reloadable Fields
-
-    private int bgFillX;
-    private int bgFillY;
-    private int bgFillWidth;
-    private int bgFillHeight;
-
     private List<WindowConfigHelpLine> helpLines;
 
     private List<WindowConfigBlend> blends;
@@ -34,13 +34,9 @@ public class WindowConfig {
     private WindowConfigWhiteBalance whiteBalance;
     private WindowConfigColorBalance colorBalance;
 
-    private double scaleX;
-    private double scaleY;
-
-    private double shearX;
-    private double shearY;
-
-    private double rotate;
+    public String getDisplayId() {
+        return displayId;
+    }
 
     public int getX() {
         return x;

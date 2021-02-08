@@ -238,56 +238,46 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
     @Override
     public void updateConfigs(List<WindowConfig> windowConfigs) {
-        List<WindowConfig> newWindowConfigs = filterWindowConfigs(windowConfigs);
+        List<WindowConfig> newWindowConfigs = prepareWindowConfigs(windowConfigs);
 
         if (running) {
-
-            boolean quickReload = this.windowConfigs != null && this.windowConfigs.size() == newWindowConfigs.size();
-
-            if (quickReload) {
-                for (int i=0; i<newWindowConfigs.size() && quickReload; i++) {
-                    WindowConfig current = this.windowConfigs.get(i);
-                    WindowConfig newConfig = windowConfigs.get(i);
-                    quickReload = current.allowQuickReload(newConfig);
-                }
-            }
+            boolean quickReload = this.windowConfigs != null &&
+                    this.windowConfigs.size() == newWindowConfigs.size() &&
+                    this.windowConfigs.stream().allMatch(wc -> newWindowConfigs.stream().anyMatch(wc::allowQuickReload));
 
             if (quickReload) {
-                loadWindowConfigs(newWindowConfigs);
-
-                GLFWHelper.invokeLater(() -> this.windowConfigs.forEach(windowConfig -> {
-                    GLFWWindow pw = windows.get(windowConfig.getDisplayId());
-                    pw.updateWindowConfig(windowConfig);
-                }));
+                this.windowConfigs = newWindowConfigs;
+                glfwVirtualScreens.values().forEach(vs -> vs.updateWindowConfigs(newWindowConfigs));
             } else {
                 stopEngine();
-                loadWindowConfigs(newWindowConfigs);
+                this.windowConfigs = newWindowConfigs;
                 startEngine();
             }
         } else {
-            loadWindowConfigs(newWindowConfigs);
+            this.windowConfigs = newWindowConfigs;
         }
     }
 
-    private List<WindowConfig> filterWindowConfigs(List<WindowConfig> windowConfigs) {
-        return windowConfigs.stream().filter(WindowConfig::isProject).collect(Collectors.toList());
-    }
+    private List<WindowConfig> prepareWindowConfigs(List<WindowConfig> windowConfigs) {
+        return windowConfigs.stream()
+                .filter(WindowConfig::isProject)
+                .map(wc -> {
+                    WindowConfig.WindowConfigBuilder builder = wc.toBuilder();
 
-    private void loadWindowConfigs(List<WindowConfig> windowConfigs) {
-        this.windowConfigs = windowConfigs.stream()
-                .peek(wc -> {
                     if (wc.getVirtualScreenId() == null || wc.getVirtualScreenId().isBlank()) {
-                        wc.setVirtualScreenId(VirtualScreen.MAIN_SCREEN_ID);
+                        builder = builder.virtualScreenId(VirtualScreen.MAIN_SCREEN_ID);
                     }
 
                     if (wc.getDisplayBounds() != null) {
-                        this.windows.forEach((id, w) -> {
-                            Rectangle deviceBounds = w.getCurrentDevice().getDevice().getDefaultConfiguration().getBounds();
+                        for (Map.Entry<String, GLFWWindow> entry  : this.windows.entrySet()) {
+                            Rectangle deviceBounds = entry.getValue().getCurrentDevice().getDevice().getDefaultConfiguration().getBounds();
                             if (deviceBounds.equals(wc.getDisplayBounds())) {
-                                wc.setDisplayId(id);
+                                builder = builder.displayId(entry.getKey());
                             }
-                        });
+                        }
                     }
+
+                    return builder.build();
                 })
                 .collect(Collectors.toList());
     }
@@ -308,23 +298,12 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
                     wc.setX(0);
                     wc.setY(0);
 
-                    wc.setBgFillX(0);
-                    wc.setBgFillY(0);
-                    wc.setBgFillWidth(device.getDevice().getDefaultConfiguration().getBounds().width);
-                    wc.setBgFillHeight(device.getDevice().getDefaultConfiguration().getBounds().height);
-
                     wc.setBlackLevelAdjust(null);
                     wc.setWhiteBalance(null);
                     wc.setColorBalance(null);
 
                     wc.setBlends(Collections.emptyList());
                     wc.setHelpLines(Collections.emptyList());
-
-                    wc.setScaleX(1.0);
-                    wc.setScaleY(1.0);
-                    wc.setShearX(0.0);
-                    wc.setShearY(0.0);
-                    wc.setRotate(0.0);
 
                     return wc;
                 }).collect(Collectors.toList());

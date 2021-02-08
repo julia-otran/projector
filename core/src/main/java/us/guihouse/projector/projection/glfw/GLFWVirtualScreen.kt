@@ -138,5 +138,13 @@ class GLFWVirtualScreen(private val virtualScreen: VirtualScreen, private val wi
         eventQueue.stop()
     }
 
+    fun updateWindowConfigs(newWindowConfigs: MutableList<WindowConfig>) {
+        eventQueue.enqueueForRun {
+            newWindowConfigs.forEach {
+                windows[it.displayId]?.updateWindowConfig(it)
+            }
+        }
+    }
+
 
 }

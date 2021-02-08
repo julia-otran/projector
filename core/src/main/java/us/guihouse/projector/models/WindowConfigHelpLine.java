@@ -8,6 +8,11 @@ public class WindowConfigHelpLine {
     private Integer X2;
     private Integer Y1;
     private Integer Y2;
+    private float lineWidth = 1.0f;
+
+    public float getLineWidth() {
+        return lineWidth;
+    }
 
     public Integer getX1() {
         return X1;

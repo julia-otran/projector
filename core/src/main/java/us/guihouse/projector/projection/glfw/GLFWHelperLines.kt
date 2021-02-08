@@ -21,6 +21,8 @@ class GLFWHelperLines(private val bounds: Rectangle) {
         GL11.glOrtho(0.0, bounds.width.toDouble(), bounds.height.toDouble(), 0.0, 1.0, 0.0)
 
         helpLines.forEach {
+            GL11.glLineWidth(it.lineWidth)
+
             GL11.glBegin(GL11.GL_LINES)
             GL11.glVertex2d(it.x1.toDouble(), it.y1.toDouble())
             GL11.glVertex2d(it.x2.toDouble(), it.y2.toDouble())
