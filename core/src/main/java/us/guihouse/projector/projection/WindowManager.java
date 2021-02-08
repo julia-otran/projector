@@ -76,9 +76,7 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
 
         preview.setProjectionCanvas(null);
 
-        GLFWHelper.invokeLater(() -> glfwVirtualScreens.values().forEach(GLFWVirtualScreen::shutdown));
-
-        GLFWHelper.finish();
+        glfwVirtualScreens.values().forEach(GLFWVirtualScreen::shutdown);
 
         if (drawThread != null) {
             try {
@@ -121,8 +119,6 @@ public class WindowManager implements Runnable, CanvasDelegate, WindowConfigsLoa
             GLFWVirtualScreen glfwVirtualScreen = new GLFWVirtualScreen(virtualScreen, vsWindows, vsWindowConfigs);
             glfwVirtualScreens.put(id, glfwVirtualScreen);
         });
-
-        GLFWHelper.initGLFW();
 
         GLFWHelper.invokeLater(() -> {
             glfwVirtualScreens.values().forEach(GLFWVirtualScreen::init);

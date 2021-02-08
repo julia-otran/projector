@@ -49,6 +49,8 @@ public class Projector extends Application implements Runnable {
 
     @Override
     public void run() {
+        GLFWHelper.initGLFW();
+
         ThemeFinder.loadThemes();
 
         VlcPlayerFactory.init();
@@ -113,6 +115,8 @@ public class Projector extends Application implements Runnable {
         
         primaryStage.setOnCloseRequest(event -> {
             controller.stop();
+
+            GLFWHelper.finish();
 
             VlcPlayerFactory.finish();
 
