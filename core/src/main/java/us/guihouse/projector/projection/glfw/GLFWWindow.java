@@ -86,12 +86,11 @@ public class GLFWWindow {
 
         window = glfwCreateWindow(vidMode.width(), vidMode.height(), "Projetor", monitor, glShare);
 
-        if ( window == NULL )
+        if (window == NULL)
             throw new RuntimeException("Failed to create the GLFW window");
 
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-        //glfwSetWindowPos(window, bounds.x, bounds.y);
-        glfwSetWindowMonitor(window, monitor, bounds.x, bounds.y, vidMode.width(), vidMode.height(), vidMode.refreshRate());
+        glfwSetWindowPos(window, bounds.x, bounds.y);
     }
 
     public void init(WindowConfig windowConfig, VirtualScreen virtualScreen) {
