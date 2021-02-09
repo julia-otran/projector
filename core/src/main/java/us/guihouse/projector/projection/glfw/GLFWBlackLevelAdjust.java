@@ -1,6 +1,7 @@
 package us.guihouse.projector.projection.glfw;
 
 import org.lwjgl.BufferUtils;
+import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL20;
 import us.guihouse.projector.models.WindowConfigBlackLevelAdjust;
 
@@ -12,9 +13,9 @@ public class GLFWBlackLevelAdjust implements GLFWDrawer {
     private float offset;
     private int vertexCount;
     private int vertexBuffer = -1;
-    private Rectangle bounds;
+    private GLFWVidMode bounds;
 
-    public void init(Rectangle bounds) {
+    public void init(GLFWVidMode bounds) {
         this.bounds = bounds;
     }
 
@@ -28,8 +29,8 @@ public class GLFWBlackLevelAdjust implements GLFWDrawer {
             FloatBuffer coordBuffer = BufferUtils.createFloatBuffer(vertexCount * 2);
 
             for (Point p : settings.getPoints()) {
-                float x = ((p.x * 2) / (float) bounds.width) - 1.0f;
-                float y = ((p.y * 2) / (float) bounds.height) - 1.0f;
+                float x = ((p.x * 2) / (float) bounds.width()) - 1.0f;
+                float y = ((p.y * 2) / (float) bounds.height()) - 1.0f;
                 coordBuffer.put(x);
                 coordBuffer.put(y);
             }

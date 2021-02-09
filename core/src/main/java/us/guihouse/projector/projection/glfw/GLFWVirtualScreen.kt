@@ -45,7 +45,6 @@ class GLFWVirtualScreen(private val virtualScreen: VirtualScreen, private val wi
 
         windows.values.forEach {
             it.createWindow(glWindow)
-            it.makeVisible()
         }
 
         eventQueue.setStartRunnable(Starter())
@@ -129,6 +128,7 @@ class GLFWVirtualScreen(private val virtualScreen: VirtualScreen, private val wi
     internal inner class Stopper : Runnable {
         override fun run() {
             eventQueue.removeContinuous(looper)
+            GL11.glDeleteTextures(texture)
             windows.values.forEach { it.shutdown() }
             GLFW.glfwDestroyWindow(glWindow)
         }
@@ -145,6 +145,4 @@ class GLFWVirtualScreen(private val virtualScreen: VirtualScreen, private val wi
             }
         }
     }
-
-
 }

@@ -1,6 +1,5 @@
 package us.guihouse.projector.projection.glfw;
 
-import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import us.guihouse.projector.other.EventQueue;
 
@@ -21,11 +20,7 @@ public class GLFWHelper extends EventQueue {
         instance.enqueueForRun(r);
     }
 
-    public static void invokeContinuous(Runnable r) { instance.enqueueContinuous(r); }
-
-    public static void clearContinuous(Runnable r) { instance.removeContinuous(r); }
-
-    private Runnable pollEvents = org.lwjgl.glfw.GLFW::glfwPollEvents;
+    private final Runnable pollEvents = org.lwjgl.glfw.GLFW::glfwPollEvents;
 
     @Override
     public void onStart() {
@@ -40,7 +35,7 @@ public class GLFWHelper extends EventQueue {
 
     @Override
     public void onStop() {
-        clearContinuous(pollEvents);
+        removeContinuous(pollEvents);
 
         glfwTerminate();
 

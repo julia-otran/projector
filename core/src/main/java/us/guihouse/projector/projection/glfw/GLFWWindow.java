@@ -24,14 +24,12 @@ public class GLFWWindow {
     private final GraphicsFinder.Device device;
 
     private final Rectangle bounds;
+    private GLFWVidMode vidMode;
 
     private final GLFWBlackLevelAdjust blackLevelAdjust;
     private final GLFWBlend blends;
     private final GLFWColorCorrection colorCorrection;
     private final GLFWHelperLines helperLines;
-
-    private double translateX = 0;
-    private double translateY = 0;
 
     private long window = 0;
 
@@ -70,21 +68,30 @@ public class GLFWWindow {
             throw new IllegalStateException("Unable to find monitor");
         }
 
-        GLFWVidMode vidMode = glfwGetVideoMode(monitor);
-        int refreshRate = vidMode == null ? 30 : vidMode.refreshRate();
+        vidMode = glfwGetVideoMode(monitor);
+        if (vidMode == null) {
+            throw new IllegalStateException("Unable to find vidMode");
+        }
 
-        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+        glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
         glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_FALSE);
-        glfwWindowHint(GLFW_FOCUS_ON_SHOW, GLFW_FALSE);
         glfwWindowHint(GLFW_SAMPLES, 4);
+        glfwWindowHint(GLFW_CENTER_CURSOR, GLFW_FALSE);
 
-        window = glfwCreateWindow(bounds.width, bounds.height, "Projetor", monitor, glShare);
+        glfwWindowHint(GLFW_RED_BITS, vidMode.redBits());
+        glfwWindowHint(GLFW_GREEN_BITS, vidMode.greenBits());
+        glfwWindowHint(GLFW_BLUE_BITS, vidMode.blueBits());
+        glfwWindowHint(GLFW_REFRESH_RATE, vidMode.refreshRate());
+
+        window = glfwCreateWindow(vidMode.width(), vidMode.height(), "Projetor", monitor, glShare);
 
         if ( window == NULL )
             throw new RuntimeException("Failed to create the GLFW window");
 
-        glfwSetWindowMonitor(window, monitor, bounds.x, bounds.y, bounds.width, bounds.height, refreshRate);
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+        //glfwSetWindowPos(window, bounds.x, bounds.y);
+        glfwSetWindowMonitor(window, monitor, bounds.x, bounds.y, vidMode.width(), vidMode.height(), vidMode.refreshRate());
     }
 
     public void init(WindowConfig windowConfig, VirtualScreen virtualScreen) {
@@ -98,18 +105,15 @@ public class GLFWWindow {
 
         GL11.glEnable(GL11.GL_TEXTURE_2D);
 
-        GL11.glViewport(0, 0, bounds.width, bounds.height);
+        GL11.glViewport(0, 0, vidMode.width(), vidMode.height());
 
-        blackLevelAdjust.init(bounds);
+        blackLevelAdjust.init(vidMode);
         colorCorrection.init(windowConfig, virtualScreen);
 
         blackLevelAdjust.updateConfigs(windowConfig.getBlackLevelAdjust());
         colorCorrection.setWindowConfig(windowConfig);
         blends.updateWindowConfigs(windowConfig);
         helperLines.updateWindowConfig(windowConfig);
-
-        this.translateX = -2d * windowConfig.getX() / (double) bounds.width;
-        this.translateY = -2d * windowConfig.getY() / (double) bounds.height;
     }
 
     public void loopCycle(int texId) {
@@ -166,12 +170,6 @@ public class GLFWWindow {
         }
         if (helperLines != null) {
             helperLines.updateWindowConfig(wc);
-        }
-    }
-
-    public void makeVisible() {
-        if (window != 0) {
-            glfwShowWindow(window);
         }
     }
 
