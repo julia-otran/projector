@@ -38,6 +38,7 @@ class GLFWVirtualScreen(private val projectionCanvas: ProjectionCanvas,
         bounds = Rectangle(virtualScreen.width, virtualScreen.height)
 
         GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE)
+
         glWindow = GLFW.glfwCreateWindow(640, 480, "Projector VS", MemoryUtil.NULL, 0)
 
         if (glWindow == 0L) {
@@ -153,8 +154,6 @@ class GLFWVirtualScreen(private val projectionCanvas: ProjectionCanvas,
             GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0)
 
             windows.values.forEach { it.loopCycle(glTexture) }
-
-            GLFW.glfwPollEvents()
         }
     }
 

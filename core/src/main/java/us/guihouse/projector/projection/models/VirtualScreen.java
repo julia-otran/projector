@@ -17,6 +17,10 @@ public class VirtualScreen {
 
     private List<WindowConfig> windows;
 
+    public String getVirtualScreenId() {
+        return virtualScreenId;
+    }
+
     public int getWidth() {
         return width;
     }

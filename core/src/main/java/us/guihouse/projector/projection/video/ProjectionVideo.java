@@ -3,6 +3,7 @@ package us.guihouse.projector.projection.video;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import lombok.Getter;
+import lombok.Setter;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
@@ -14,6 +15,7 @@ import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormatCall
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.RenderCallback;
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.format.RV32BufferFormat;
 import us.guihouse.projector.projection.CanvasDelegate;
+import us.guihouse.projector.projection.PaintableCrossFader;
 import us.guihouse.projector.projection.Projectable;
 import us.guihouse.projector.projection.glfw.GLFWGraphicsAdapter;
 import us.guihouse.projector.projection.glfw.RGBImageCopy;
@@ -38,17 +40,13 @@ public class ProjectionVideo implements Projectable {
     protected int videoW = 0;
     protected int videoH = 0;
 
-    private final ConcurrentHashMap<String, Integer> texes = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, Rectangle> positions = new ConcurrentHashMap<>();
-
     protected boolean firstFrame = false;
+    private final ConcurrentHashMap<String, Boolean> freezes = new ConcurrentHashMap<>();
     private boolean freeze = false;
 
     private int[] freezeImageData;
-    private int freezeVideoW;
-    private int freezeVideoH;
 
-    private final ConcurrentHashMap<String, Rectangle> freezePositions = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, PaintableCrossFader> faders = new ConcurrentHashMap<>();
 
     @Getter
     private boolean cropVideo = false;
@@ -60,59 +58,74 @@ public class ProjectionVideo implements Projectable {
     protected ProjectionVideo.MyBufferFormatCallback bufferFormatCallback;
     protected CallbackVideoSurface videoSurface;
 
-    private Queue<int[]> frameBuffer = new ConcurrentLinkedQueue<>();
+    private final Queue<int[]> frameBuffer = new ConcurrentLinkedQueue<>();
+
+    private ProjectionVideoPaintable videoPaintable;
+
+    @Getter
+    @Setter
+    private boolean fadeInVideo = false;
+
+    private boolean fadePending = true;
 
     private boolean finished;
 
     public ProjectionVideo(CanvasDelegate delegate) {
         this.delegate = delegate;
+
+        render.addListener((prop, oldValue, newValue) -> {
+            if (!oldValue && newValue) {
+                fadePending = true;
+            }
+        });
     }
 
     @Override
     public void rebuildLayout() {
+        rebuildLayout(true);
+    }
+
+    public void rebuildLayout(boolean createFaders) {
+        delegate.getVirtualScreens().forEach(vs -> {
+            if (createFaders) {
+                faders.put(vs.getVirtualScreenId(), new PaintableCrossFader(vs));
+            }
+        });
+
+        if (createFaders) {
+            fadePending = true;
+        }
+
         if (videoW == 0 || videoH == 0) {
             return;
         }
 
+        Rectangle videoSize = new Rectangle(videoW, videoH);
+
         delegate.getVirtualScreens().forEach(vs -> {
+            freezes.put(vs.getVirtualScreenId(), true);
+
+            float scaleW = vs.getWidth() / (float) videoW;
+            float scaleH = vs.getHeight() / (float) videoH;
+
+            float scale;
+
+            if (cropVideo) {
+                scale = Math.max(scaleW, scaleH);
+            } else {
+                scale = Math.min(scaleW, scaleH);
+            }
+
+            int scaledWidth = Math.round(scale * videoW);
+            int scaledHeight = Math.round(scale * videoH);
+            int x = (vs.getWidth() - scaledWidth) / 2;
+            int y = (vs.getHeight() - scaledHeight) / 2;
+
+            Rectangle position = new Rectangle(x, y, scaledWidth, scaledHeight);
+
             delegate.runOnProvider(vs, provider -> {
-                freeze = false;
-                float scaleW = vs.getWidth() / (float) videoW;
-                float scaleH = vs.getHeight() / (float) videoH;
-
-                float scale;
-
-                if (cropVideo) {
-                    scale = Math.max(scaleW, scaleH);
-                } else {
-                    scale = Math.min(scaleW, scaleH);
-                }
-
-                int scaledWidth = Math.round(scale * videoW);
-                int scaledHeight = Math.round(scale * videoH);
-                int x = (vs.getWidth() - scaledWidth) / 2;
-                int y = (vs.getHeight() - scaledHeight) / 2;
-
-                Rectangle position = new Rectangle(x, y, scaledWidth, scaledHeight);
-                positions.put(vs.getVirtualScreenId(), position);
-
-                Integer oldTex = texes.get(vs.getVirtualScreenId());
-
-                if (oldTex != null) {
-                    provider.freeTex(oldTex);
-                }
-
-                int tex = provider.dequeueTex();
-                texes.put(vs.getVirtualScreenId(), tex);
-
-                GL11.glBindTexture(GL11.GL_TEXTURE_2D, tex);
-
-                GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-                GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-
-                GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, videoW, videoH, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, 0L);
-
-                GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+                videoPaintable.generateTex(provider, vs, position, videoSize);
+                freezes.put(vs.getVirtualScreenId(), false);
             });
         });
     }
@@ -120,6 +133,7 @@ public class ProjectionVideo implements Projectable {
     @Override
     public void init() {
         finished = false;
+        videoPaintable = new ProjectionVideoPaintable();
         renderCallback = new ProjectionVideo.MyRenderCallback();
         bufferFormatCallback = new ProjectionVideo.MyBufferFormatCallback();
 
@@ -136,102 +150,52 @@ public class ProjectionVideo implements Projectable {
         rebuildLayout();
     }
 
+    private void updateImages() {
+        delegate.getVirtualScreens().forEach(vs -> {
+            if (freezes.getOrDefault(vs.getVirtualScreenId(), false)) {
+                videoPaintable.setProjectionData(freezeImageData, vs);
+            } else {
+                videoPaintable.setProjectionData(imageData, vs);
+            }
+        });
+    }
+
+    private void fadeInVideo() {
+        if (fadePending && fadeInVideo) {
+            delegate.getVirtualScreens().forEach(vs -> {
+                PaintableCrossFader fader = faders.get(vs.getVirtualScreenId());
+
+                if (fader != null) {
+                    fader.fadeIn(videoPaintable);
+                }
+            });
+
+            fadePending = false;
+        }
+    }
+
     @Override
     public void paintComponent(GLFWGraphicsAdapter g, VirtualScreen vs) {
         if (finished) {
             return;
         }
 
-        int[] data;
-
-        Rectangle position;
-
-        int videoW;
-        int videoH;
-
-        if (freeze) {
-            data = freezeImageData;
-
-            position = freezePositions.get(vs.getVirtualScreenId());
-
-            videoW = this.freezeVideoW;
-            videoH = this.freezeVideoH;
-        } else {
-            data = imageData;
-
-            position = positions.get(vs.getVirtualScreenId());
-
-            videoW = this.videoW;
-            videoH = this.videoH;
+        if (!render.get()) {
+            return;
         }
 
-        Integer videoTex = texes.get(vs.getVirtualScreenId());
+        g.setColor(Color.BLACK);
+        g.fillRect(0, 0, vs.getWidth(), vs.getHeight());
 
-        if (render.get() && position != null && data != null && videoTex != null) {
-            if (videoW * videoH != data.length) {
-                return;
-            }
+        if (!fadeInVideo) {
+            videoPaintable.paintComponent(g, vs);
+            return;
+        }
 
-            int buffer = g.getProvider().dequeueGlBuffer();
-            GL30.glBindBuffer(GL30.GL_PIXEL_UNPACK_BUFFER, buffer);
+        PaintableCrossFader fader = faders.get(vs.getVirtualScreenId());
 
-            GL30.glBufferData(
-                    GL30.GL_PIXEL_UNPACK_BUFFER,
-                    (long) data.length * 4,
-                    GL30.GL_STREAM_DRAW
-            );
-
-            ByteBuffer destination = GL30.glMapBuffer(GL30.GL_PIXEL_UNPACK_BUFFER, GL30.GL_WRITE_ONLY);
-
-            if (destination != null) {
-                RGBImageCopy.copyImageToBuffer(data, destination, true);
-            }
-
-            GL30.glUnmapBuffer(GL30.GL_PIXEL_UNPACK_BUFFER);
-            GL30.glBindBuffer(GL30.GL_PIXEL_UNPACK_BUFFER, 0);
-
-            g.setColor(Color.BLACK);
-            g.fillRect(0, 0, vs.getWidth(), vs.getHeight());
-
-            Composite composite = g.getComposite();
-
-            g.getProvider().enqueueForDraw(() -> {
-                GL11.glEnable(GL11.GL_BLEND);
-                GL20.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-                GL11.glEnable(GL11.GL_TEXTURE_2D);
-
-                GL11.glPushMatrix();
-                g.adjustOrtho();
-                g.updateAlpha(composite);
-
-                GL11.glBindTexture(GL11.GL_TEXTURE_2D, videoTex);
-
-                GL30.glBindBuffer(GL30.GL_PIXEL_UNPACK_BUFFER, buffer);
-
-                GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, videoW, videoH, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, 0L);
-
-                GL11.glBegin(GL11.GL_QUADS);
-
-                GL11.glTexCoord2d(0, 0);
-                GL11.glVertex2d(position.getX(), position.getY());
-
-                GL11.glTexCoord2d(0, 1);
-                GL11.glVertex2d(position.getX(), position.getMaxY());
-
-                GL11.glTexCoord2d(1, 1);
-                GL11.glVertex2d(position.getMaxX(), position.getMaxY());
-
-                GL11.glTexCoord2d(1, 0);
-                GL11.glVertex2d(position.getMaxX(), position.getY());
-
-                GL11.glEnd();
-
-                GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
-                GL30.glBindBuffer(GL30.GL_PIXEL_UNPACK_BUFFER, 0);
-                GL11.glPopMatrix();
-                GL11.glDisable(GL11.GL_BLEND);
-                GL11.glDisable(GL11.GL_TEXTURE_2D);
-            });
+        if (fader != null) {
+            fader.paintComponent(g);
         }
     }
 
@@ -245,14 +209,18 @@ public class ProjectionVideo implements Projectable {
         }
 
         freezeImageData = frameBuffer.peek();
-        freezeVideoW = videoW;
-        freezeVideoH = videoH;
-        freezePositions.putAll(positions);
+
         freeze = true;
+        freezes.keySet().forEach(vsId -> freezes.put(vsId, true));
+
+        updateImages();
     }
 
     public void unfreeze() {
-        rebuildLayout();
+        if (freeze) {
+            rebuildLayout(false);
+            freeze = false;
+        }
     }
 
     protected void generateBuffer(int w, int h) {
@@ -275,10 +243,7 @@ public class ProjectionVideo implements Projectable {
         this.player.release();
 
         delegate.getVirtualScreens().forEach(vs -> {
-            Integer tex = texes.remove(vs.getVirtualScreenId());
-            if (tex != null) {
-                delegate.runOnProvider(vs, provider -> provider.freeTex(tex));
-            }
+            delegate.runOnProvider(vs, provider -> videoPaintable.freeTex(vs, provider));
         });
     }
 
@@ -302,7 +267,10 @@ public class ProjectionVideo implements Projectable {
                 firstFrame = false;
             } else {
                 unfreeze();
+                fadeInVideo();
             }
+
+            updateImages();
         }
     }
 

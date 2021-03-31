@@ -132,7 +132,6 @@ public class GLFWWindow {
         helperLines.render();
 
         glfwSwapBuffers(window);
-        glfwPollEvents();
     }
 
     public void shutdown() {

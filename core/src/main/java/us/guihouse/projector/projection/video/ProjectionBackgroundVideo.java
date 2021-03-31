@@ -18,7 +18,7 @@ import java.io.File;
 import java.util.*;
 import java.util.List;
 
-public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgroundVideoCallbacks.Callbacks {
+public class ProjectionBackgroundVideo implements Projectable {
     private final List<File> media = new ArrayList<>();
     private File currentMedia = null;
     private final Map<Integer, File> musicMap = new HashMap<>();
@@ -32,6 +32,7 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
         this.delegate = delegate;
         videoProjector = new ProjectionVideo(delegate);
         videoProjector.setCropVideo(true);
+        videoProjector.setFadeInVideo(true);
     }
 
     public ReadOnlyBooleanProperty isRender() {
@@ -52,7 +53,6 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
     public void init() {
         videoProjector.init();
         videoProjector.getPlayer().audio().setMute(true);
-        videoProjector.getPlayer().events().addMediaPlayerEventListener(new ProjectionBackgroundVideoCallbacks(this));
         loadMedia();
     }
 
@@ -100,6 +100,7 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
         videoProjector.getPlayer().media().play(toPlay.getAbsolutePath());
         videoProjector.getPlayer().controls().setRepeat(true);
         playing = true;
+        render.setValue(true);
     }
 
     public void stopBackground() {
@@ -108,12 +109,5 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
             render.setValue(false);
         }
         videoProjector.getPlayer().controls().pause();
-    }
-
-    @Override
-    public void mediaPlayerReady(MediaPlayer mediaPlayer) {
-        if (!render.get()) {
-            render.setValue(true);
-        }
     }
 }
