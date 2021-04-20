@@ -34,7 +34,7 @@ class ProjectionVideoPaintable : Paintable {
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR)
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR)
 
-        GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, videoSize.getWidth().toInt(), videoSize.getHeight().toInt(), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, 0L)
+        GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGB, videoSize.getWidth().toInt(), videoSize.getHeight().toInt(), 0, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, 0L)
 
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0)
     }
@@ -67,14 +67,14 @@ class ProjectionVideoPaintable : Paintable {
             GL30.glBindBuffer(GL30.GL_PIXEL_UNPACK_BUFFER, buffer)
             GL30.glBufferData(
                     GL30.GL_PIXEL_UNPACK_BUFFER,
-                    data.size.toLong() * 4,
+                    data.size.toLong() * 3,
                     GL30.GL_STREAM_DRAW
             )
 
             val destination = GL30.glMapBuffer(GL30.GL_PIXEL_UNPACK_BUFFER, GL30.GL_WRITE_ONLY)
 
             if (destination != null) {
-                RGBImageCopy.copyImageToBuffer(data, destination, true)
+                RGBImageCopy.copyImageToBuffer(data, destination, false)
             }
 
             GL30.glUnmapBuffer(GL30.GL_PIXEL_UNPACK_BUFFER)
@@ -95,7 +95,7 @@ class ProjectionVideoPaintable : Paintable {
                 GL11.glBindTexture(GL11.GL_TEXTURE_2D, videoTex)
 
                 GL30.glBindBuffer(GL30.GL_PIXEL_UNPACK_BUFFER, buffer)
-                GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, videoW.toInt(), videoH.toInt(), GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, 0L)
+                GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, videoW, videoH, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, 0L)
 
                 GL11.glBegin(GL11.GL_QUADS)
 
