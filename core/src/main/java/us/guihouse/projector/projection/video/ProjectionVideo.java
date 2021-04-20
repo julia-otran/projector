@@ -88,7 +88,9 @@ public class ProjectionVideo implements Projectable {
     public void rebuildLayout(boolean createFaders) {
         delegate.getVirtualScreens().forEach(vs -> {
             if (createFaders) {
-                faders.put(vs.getVirtualScreenId(), new PaintableCrossFader(vs));
+                PaintableCrossFader fader = new PaintableCrossFader(vs);
+                fader.setCascadeFade(true);
+                faders.put(vs.getVirtualScreenId(), fader);
             }
         });
 

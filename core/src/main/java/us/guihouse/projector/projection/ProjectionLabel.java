@@ -12,6 +12,7 @@ import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javafx.application.Platform;
@@ -167,7 +168,7 @@ public class ProjectionLabel implements Projectable {
         });
     }
 
-    private final HashMap<VirtualScreen, BufferedImage> virtualScreenImages = new HashMap<>();
+    private final ConcurrentHashMap<VirtualScreen, BufferedImage> virtualScreenImages = new ConcurrentHashMap<>();
 
     @Override
     public void paintComponent(GLFWGraphicsAdapter g, VirtualScreen vs) {
@@ -177,16 +178,33 @@ public class ProjectionLabel implements Projectable {
         if (img != null && fader != null) {
             int tex = g.getProvider().dequeueTex();
 
+            int buffer = GL30.glGenBuffers();
+            GL30.glBindBuffer(GL30.GL_PIXEL_UNPACK_BUFFER, buffer);
+            GL30.glBufferData(
+                    GL30.GL_PIXEL_UNPACK_BUFFER,
+                    img.getWidth() * img.getHeight() * 4L,
+                    GL30.GL_STREAM_DRAW
+            );
+
+            ByteBuffer destination = GL30.glMapBuffer(GL30.GL_PIXEL_UNPACK_BUFFER, GL30.GL_WRITE_ONLY);
+
+            if (destination != null) {
+                RGBImageCopy.copyImageToBuffer(img, destination, true);
+            }
+
+            GL30.glUnmapBuffer(GL30.GL_PIXEL_UNPACK_BUFFER);
+
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, tex);
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
 
-            ByteBuffer buffer = BufferUtils.createByteBuffer(img.getWidth() * img.getHeight() * 4);
-            RGBImageCopy.copyImageToBuffer(img, buffer, true);
+            //ByteBuffer buffer = BufferUtils.createByteBuffer(img.getWidth() * img.getHeight() * 4);
+            // RGBImageCopy.copyImageToBuffer(img, buffer, true);
 
-            GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, img.getWidth(), img.getHeight(), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
+            GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, img.getWidth(), img.getHeight(), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, 0L);
 
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+            GL30.glBindBuffer(GL30.GL_PIXEL_UNPACK_BUFFER, 0);
 
             fader.crossFadeIn(new TexPaintable(tex), () ->
                     g.getProvider().enqueueForDraw(() ->
@@ -334,13 +352,13 @@ public class ProjectionLabel implements Projectable {
     static class TexPaintable implements Paintable {
         private final int tex;
 
-        TexPaintable(int tex) {
+         private TexPaintable(int tex) {
             this.tex = tex;
         }
 
         @Override
         public void paintComponent(GLFWGraphicsAdapter g, VirtualScreen vs) {
-            Composite composite = g.getComposite();
+            float alpha = g.getAlpha();
 
             g.getProvider().enqueueForDraw(() -> {
                 GL11.glEnable(GL11.GL_TEXTURE_2D);
@@ -349,7 +367,7 @@ public class ProjectionLabel implements Projectable {
 
                 GL11.glPushMatrix();
                 g.adjustOrtho();
-                g.updateAlpha(composite);
+                g.updateAlpha(alpha);
 
                 GL11.glBindTexture(GL11.GL_TEXTURE_2D, tex);
 

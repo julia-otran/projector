@@ -30,6 +30,10 @@ public class PaintableCrossFader {
     @Setter
     private float stepPerFrame = 0.05f;
 
+    @Getter
+    @Setter
+    private boolean cascadeFade = false;
+
     public void fadeIn(Paintable next) {
         previous = current;
         currentFadeAlpha = 0f;
@@ -81,40 +85,37 @@ public class PaintableCrossFader {
 
         if (previous != null) {
             if (direction == FadeDirection.IN_OUT) {
-                Composite old = g.getComposite();
+                float oldAlpha = g.getAlpha();
 
                 float cascadeComposite = 1.0f;
 
-                if (old instanceof AlphaComposite) {
-                    cascadeComposite = ((AlphaComposite) old).getAlpha();
+                if (cascadeFade) {
+                    cascadeComposite = oldAlpha;
                 }
 
                 cascadeComposite *= 1.0f - currentFadeAlpha;
 
-                AlphaComposite fade = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, cascadeComposite);
-                g.setComposite(fade);
+                g.setAlpha(cascadeComposite);
                 previous.paintComponent(g, screen);
-                g.setComposite(old);
+                g.setAlpha(oldAlpha);
             } else {
                 previous.paintComponent(g, screen);
             }
         }
 
         if (current != null) {
-            Composite old = g.getComposite();
-
             float cascadeComposite = 1.0f;
+            float oldAlpha = g.getAlpha();
 
-            if (old instanceof AlphaComposite) {
-                cascadeComposite = ((AlphaComposite) old).getAlpha();
+            if (cascadeFade) {
+                cascadeComposite = oldAlpha;
             }
 
             cascadeComposite *= currentFadeAlpha;
 
-            AlphaComposite fade = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, cascadeComposite);
-            g.setComposite(fade);
+            g.setAlpha(cascadeComposite);
             current.paintComponent(g, screen);
-            g.setComposite(old);
+            g.setAlpha(oldAlpha);
         }
     }
 

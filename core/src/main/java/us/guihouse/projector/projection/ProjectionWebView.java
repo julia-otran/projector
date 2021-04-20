@@ -107,7 +107,7 @@ public class ProjectionWebView implements Projectable {
             return;
         }
 
-        Composite composite = g.getComposite();
+        float alpha = g.getAlpha();
 
         g.getProvider().enqueueForDraw(() -> {
             GL11.glEnable(GL11.GL_BLEND);
@@ -130,7 +130,7 @@ public class ProjectionWebView implements Projectable {
 
             GL11.glPushMatrix();
             g.adjustOrtho();
-            g.updateAlpha(composite);
+            g.updateAlpha(alpha);
 
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, tex);
 

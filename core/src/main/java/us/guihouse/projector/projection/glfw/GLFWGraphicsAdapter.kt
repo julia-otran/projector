@@ -26,6 +26,7 @@ import java.awt.image.ImageObserver
 import java.awt.image.RenderedImage
 import java.awt.image.renderable.RenderableImage
 import java.text.AttributedCharacterIterator
+import javax.swing.text.AttributeSet
 import kotlin.math.max
 import kotlin.math.min
 
@@ -38,6 +39,8 @@ class GLFWGraphicsAdapter(private val bounds: Rectangle, val provider: GLFWGraph
 
     private val imagesAndBuffers = HashMap<BufferedImage, Int>()
     private val filledStaticBuffers = ArrayList<Int>()
+
+    var alpha: Float = 1.0f
 
     override fun create(): Graphics {
         return GLFWGraphicsAdapter(bounds, provider)
@@ -72,23 +75,13 @@ class GLFWGraphicsAdapter(private val bounds: Rectangle, val provider: GLFWGraph
         this.color = c ?: Color(0, 0, 0)
     }
 
-    private fun updateColor(color: Color, composite: Composite) {
-        var alpha = color.alpha / 255.0f
+    private fun updateColor(color: Color, alpha: Float) {
+        var colorAlpha = color.alpha / 255.0f
 
-        if (composite is AlphaComposite) {
-            alpha *= composite.alpha
-        }
-
-        GL11.glColor4f(color.red / 255.0f, color.green / 255.0f, color.blue / 255.0f, alpha)
+        GL11.glColor4f(color.red / 255.0f, color.green / 255.0f, color.blue / 255.0f, alpha * colorAlpha)
     }
 
-    fun updateAlpha(composite: Composite) {
-        var alpha = 1.0f
-
-        if (composite is AlphaComposite) {
-            alpha *= composite.alpha
-        }
-
+    fun updateAlpha(alpha: Float) {
         GL11.glColor4f(1f, 1f, 1f, alpha)
     }
 
@@ -151,7 +144,7 @@ class GLFWGraphicsAdapter(private val bounds: Rectangle, val provider: GLFWGraph
 
     override fun fillRect(x: Int, y: Int, width: Int, height: Int) {
         val currentColor = getColor()
-        val currentComposite = getComposite()
+        val currentAlpha = alpha
         val currentTransform = getTransform()
 
         provider.enqueueForDraw {
@@ -160,7 +153,7 @@ class GLFWGraphicsAdapter(private val bounds: Rectangle, val provider: GLFWGraph
             updateTransform(currentTransform)
             GL11.glEnable(GL11.GL_COLOR_MATERIAL)
             GL11.glEnable(GL11.GL_BLEND)
-            updateColor(currentColor, currentComposite)
+            updateColor(currentColor, currentAlpha)
 
             GL11.glBegin(GL11.GL_QUADS)
             GL11.glVertex2i(x, y)
@@ -364,7 +357,7 @@ class GLFWGraphicsAdapter(private val bounds: Rectangle, val provider: GLFWGraph
             GL30.glBindBuffer(GL30.GL_PIXEL_UNPACK_BUFFER, 0)
         }
 
-        val currentComposite = composite
+        val currentAlpha = alpha
         val currentTransform = transform
 
         bgcolor?.let {
@@ -389,7 +382,7 @@ class GLFWGraphicsAdapter(private val bounds: Rectangle, val provider: GLFWGraph
             GL11.glPushMatrix()
             adjustOrtho()
             updateTransform(currentTransform)
-            updateAlpha(currentComposite)
+            updateAlpha(currentAlpha)
 
             val texId = GL11.glGenTextures()
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, texId)

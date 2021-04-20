@@ -38,7 +38,7 @@ public class ProjectionImage implements Projectable {
     private boolean cropBackground;
     private BackgroundProvide model;
 
-    private HashMap<String, Integer> texes = new HashMap<>();
+    private final HashMap<String, Integer> texes = new HashMap<>();
 
     ProjectionImage(CanvasDelegate canvasDelegate) {
         this(canvasDelegate, new Color(0, 0, 0));
@@ -74,7 +74,7 @@ public class ProjectionImage implements Projectable {
         g.setColor(bgColor);
         g.fillRect(0, 0, vs.getWidth(), vs.getHeight());
 
-        Composite composite = g.getComposite();
+        float alpha = g.getAlpha();
 
         g.getProvider().enqueueForDraw(() -> {
             GL11.glEnable(GL11.GL_BLEND);
@@ -83,7 +83,7 @@ public class ProjectionImage implements Projectable {
 
             GL11.glPushMatrix();
             g.adjustOrtho();
-            g.updateAlpha(composite);
+            g.updateAlpha(alpha);
 
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, tex);
 

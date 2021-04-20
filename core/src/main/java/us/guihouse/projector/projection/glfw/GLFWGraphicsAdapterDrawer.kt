@@ -51,6 +51,7 @@ class GLFWGraphicsAdapterDrawer() : EventQueue(), GLFWGraphicsAdapterProvider {
             currentFrame?.let {
                 it.draws.clear()
                 projectionCanvas.paintComponent(graphicsAdapter, virtualScreen)
+                GLFW.glfwSwapBuffers(glWindow)
                 freeTexes()
                 filledFrameBuffer.add(it)
             }

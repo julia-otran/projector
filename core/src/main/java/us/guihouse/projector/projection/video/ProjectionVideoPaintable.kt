@@ -80,7 +80,7 @@ class ProjectionVideoPaintable : Paintable {
             GL30.glUnmapBuffer(GL30.GL_PIXEL_UNPACK_BUFFER)
             GL30.glBindBuffer(GL30.GL_PIXEL_UNPACK_BUFFER, 0)
 
-            val composite = g.composite
+            val alpha = g.alpha;
 
             g.provider.enqueueForDraw {
                 GL11.glEnable(GL11.GL_BLEND)
@@ -90,7 +90,7 @@ class ProjectionVideoPaintable : Paintable {
                 GL11.glPushMatrix()
 
                 g.adjustOrtho()
-                g.updateAlpha(composite)
+                g.updateAlpha(alpha)
 
                 GL11.glBindTexture(GL11.GL_TEXTURE_2D, videoTex)
 
