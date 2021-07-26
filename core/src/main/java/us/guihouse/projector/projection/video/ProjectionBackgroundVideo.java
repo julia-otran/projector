@@ -52,6 +52,7 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
         videoProjector.init();
         videoProjector.getPlayer().audio().setMute(true);
         videoProjector.getPlayer().events().addMediaPlayerEventListener(new ProjectionBackgroundVideoCallbacks(this));
+        videoProjector.setUseFade(true);
         loadMedia();
     }
 
@@ -95,7 +96,11 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
         if (playing) {
             stopBackground();
         }
+        if (!render.get()) {
+            render.setValue(true);
+        }
         currentMedia = toPlay;
+        videoProjector.setShouldFadeIn(true);
         videoProjector.getPlayer().media().play(toPlay.getAbsolutePath());
         videoProjector.getPlayer().controls().setRepeat(true);
         playing = true;
@@ -111,8 +116,6 @@ public class ProjectionBackgroundVideo implements Projectable, ProjectionBackgro
 
     @Override
     public void mediaPlayerReady(MediaPlayer mediaPlayer) {
-        if (!render.get()) {
-            render.setValue(true);
-        }
+
     }
 }

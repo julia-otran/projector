@@ -8,8 +8,15 @@ import us.guihouse.projector.projection.video.ProjectionBackgroundVideo;
 import java.awt.*;
 
 public class PaintableCrossFader {
+    private final boolean cumulative;
+
     public PaintableCrossFader(VirtualScreen vs) {
+        this(vs, false);
+    }
+
+    public PaintableCrossFader(VirtualScreen vs, boolean cumulative) {
         this.screen = vs;
+        this.cumulative = cumulative;
     }
 
     enum FadeDirection {
@@ -63,7 +70,15 @@ public class PaintableCrossFader {
         if (previous != null) {
             if (direction == FadeDirection.IN_OUT) {
                 Composite old = g.getComposite();
-                AlphaComposite fade = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f - currentFadeAlpha);
+
+                float alpha = 1.0f - currentFadeAlpha;
+
+                if (cumulative && old instanceof AlphaComposite) {
+                    AlphaComposite prev = (AlphaComposite) old;
+                    alpha *= prev.getAlpha();
+                }
+
+                AlphaComposite fade = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
                 g.setComposite(fade);
                 previous.paintComponent(g, screen);
                 g.setComposite(old);
@@ -74,7 +89,15 @@ public class PaintableCrossFader {
 
         if (current != null) {
             Composite old = g.getComposite();
-            AlphaComposite fade = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, currentFadeAlpha);
+
+            float alpha = currentFadeAlpha;
+
+            if (cumulative && old instanceof AlphaComposite) {
+                AlphaComposite prev = (AlphaComposite) old;
+                alpha *= prev.getAlpha();
+            }
+
+            AlphaComposite fade = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
             g.setComposite(fade);
             current.paintComponent(g, screen);
             g.setComposite(old);

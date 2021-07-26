@@ -3,6 +3,8 @@ package us.guihouse.projector.projection.video;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import lombok.Getter;
+import lombok.Setter;
+import org.lwjgl.system.CallbackI;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import uk.co.caprica.vlcj.player.embedded.videosurface.CallbackVideoSurface;
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormat;
@@ -10,6 +12,8 @@ import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormatCall
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.RenderCallback;
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.format.RV32BufferFormat;
 import us.guihouse.projector.projection.CanvasDelegate;
+import us.guihouse.projector.projection.Paintable;
+import us.guihouse.projector.projection.PaintableCrossFader;
 import us.guihouse.projector.projection.Projectable;
 import us.guihouse.projector.projection.models.VirtualScreen;
 import us.guihouse.projector.utils.VlcPlayerFactory;
@@ -18,6 +22,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ProjectionVideo implements Projectable {
@@ -27,7 +32,21 @@ public class ProjectionVideo implements Projectable {
 
     protected BufferedImage image;
     protected BufferedImage freeze = null;
+    protected final HashMap<String, BufferedImage> imageCache = new HashMap<>();
+    protected final HashMap<String, BufferedImage> freezeCache = new HashMap<>();
+
     protected boolean firstFrame = false;
+    protected boolean isFreeze = false;
+
+    @Getter
+    @Setter
+    protected boolean shouldFadeIn = false;
+    @Getter
+    @Setter
+    protected boolean useFade = false;
+
+    protected final HashMap<String, PaintableCrossFader> faders = new HashMap<>();
+    protected final Paintable fadePaintable = new VideoPaintable();
 
     protected int videoW = 0;
     protected int videoH = 0;
@@ -58,12 +77,11 @@ public class ProjectionVideo implements Projectable {
             return;
         }
 
-        width.clear();
-        height.clear();
-        projectionX.clear();
-        projectionY.clear();
-
         delegate.getVirtualScreens().forEach(vs -> {
+            if (!faders.containsKey(vs.getVirtualScreenId())) {
+                faders.put(vs.getVirtualScreenId(), new PaintableCrossFader(vs, true));
+            }
+
             float scaleW = vs.getWidth() / (float) videoW;
             float scaleH = vs.getHeight() / (float) videoH;
 
@@ -106,18 +124,36 @@ public class ProjectionVideo implements Projectable {
 
     @Override
     public void paintComponent(Graphics2D g, VirtualScreen vs) {
-        int rWidth = width.getOrDefault(vs.getVirtualScreenId(), 0);
-        int rHeight = height.getOrDefault(vs.getVirtualScreenId(), 0);
-        int rProjectionX = projectionX.getOrDefault(vs.getVirtualScreenId(), 0);
-        int rProjectionY = projectionY.getOrDefault(vs.getVirtualScreenId(), 0);
-
-        if (render.get() && rWidth > 0 && rHeight > 0) {
+        if (render.get()) {
             g.setColor(Color.BLACK);
             g.fillRect(0, 0, vs.getWidth(), vs.getHeight());
-            if (freeze == null) {
-                g.drawImage(image, rProjectionX, rProjectionY, rWidth, rHeight, null);
+
+            if (useFade) {
+                PaintableCrossFader fader = faders.get(vs.getVirtualScreenId());
+
+                if (fader != null) {
+                    fader.paintComponent(g);
+                }
             } else {
-                g.drawImage(freeze, rProjectionX, rProjectionY, rWidth, rHeight, null);
+                fadePaintable.paintComponent(g, vs);
+            }
+        }
+    }
+
+    private class VideoPaintable implements Paintable {
+        @Override
+        public void paintComponent(Graphics2D g, VirtualScreen vs) {
+            int rWidth = width.getOrDefault(vs.getVirtualScreenId(), 0);
+            int rHeight = height.getOrDefault(vs.getVirtualScreenId(), 0);
+            int rProjectionX = projectionX.getOrDefault(vs.getVirtualScreenId(), 0);
+            int rProjectionY = projectionY.getOrDefault(vs.getVirtualScreenId(), 0);
+
+            if (rWidth > 0 && rHeight > 0) {
+                if (isFreeze) {
+                    g.drawImage(freeze, rProjectionX, rProjectionY, rWidth, rHeight, null);
+                } else {
+                    g.drawImage(image, rProjectionX, rProjectionY, rWidth, rHeight, null);
+                }
             }
         }
     }
@@ -127,24 +163,43 @@ public class ProjectionVideo implements Projectable {
     }
 
     public void freeze() {
-        if (freeze == null && image != null) {
+        if (!isFreeze) {
             firstFrame = true;
-            freeze = delegate.getDefaultDevice().getDefaultConfiguration().createCompatibleImage(videoW, videoH);
-            image.copyData(freeze.getRaster());
+
+            String freezeSizeIdentifier = videoW + "x" + videoH;
+            freeze = freezeCache.get(freezeSizeIdentifier);
+
+            if (image != null && freeze != null) {
+                image.copyData(freeze.getRaster());
+            }
         }
+        isFreeze = true;
     }
 
     public void unfreeze() {
-        freeze = null;
-        rebuildLayout();
+        if (isFreeze) {
+            rebuildLayout();
+        }
+        isFreeze = false;
     }
 
     protected void generateBuffer(int w, int h) {
         freeze();
+
         videoW = w;
         videoH = h;
 
-        image = delegate.getDefaultDevice().getDefaultConfiguration().createCompatibleImage(w, h);
+        String sizeIdentifier = w + "x" + h;
+        image = imageCache.get(sizeIdentifier);
+
+        if (image == null) {
+            image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+            imageCache.put(sizeIdentifier, image);
+        }
+
+        if (!freezeCache.containsKey(sizeIdentifier)) {
+            freezeCache.put(sizeIdentifier, new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB));
+        }
     }
 
     @Override
@@ -167,19 +222,34 @@ public class ProjectionVideo implements Projectable {
             } else {
                 nativeBuffers[0].asIntBuffer().get(((DataBufferInt) image.getRaster().getDataBuffer()).getData());
                 unfreeze();
+
+                if (shouldFadeIn) {
+                    faders.values().forEach(f -> f.fadeIn(fadePaintable));
+                    shouldFadeIn = false;
+                }
             }
         }
     }
 
     private final class MyBufferFormatCallback implements BufferFormatCallback {
+        private final HashMap<String, RV32BufferFormat> buffers = new HashMap<>();
 
         MyBufferFormatCallback() {
         }
 
         @Override
         public BufferFormat getBufferFormat(int sourceWidth, int sourceHeight) {
+            String bufferIdentifier = sourceWidth + "x" + sourceHeight;
+            RV32BufferFormat buffer = buffers.get(bufferIdentifier);
+
+            if (buffer == null) {
+                buffer = new RV32BufferFormat(sourceWidth, sourceHeight);
+                buffers.put(bufferIdentifier, buffer);
+            }
+
             generateBuffer(sourceWidth, sourceHeight);
-            return new RV32BufferFormat(sourceWidth, sourceHeight);
+
+            return buffer;
         }
 
         @Override
