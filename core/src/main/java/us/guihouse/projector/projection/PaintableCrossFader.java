@@ -88,19 +88,23 @@ public class PaintableCrossFader {
         }
 
         if (current != null) {
-            Composite old = g.getComposite();
-
             float alpha = currentFadeAlpha;
 
-            if (cumulative && old instanceof AlphaComposite) {
-                AlphaComposite prev = (AlphaComposite) old;
-                alpha *= prev.getAlpha();
-            }
+            if (alpha == 1.0f) {
+                current.paintComponent(g, screen);
+            } else {
+                Composite old = g.getComposite();
 
-            AlphaComposite fade = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
-            g.setComposite(fade);
-            current.paintComponent(g, screen);
-            g.setComposite(old);
+                if (cumulative && old instanceof AlphaComposite) {
+                    AlphaComposite prev = (AlphaComposite) old;
+                    alpha *= prev.getAlpha();
+                }
+
+                AlphaComposite fade = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
+                g.setComposite(fade);
+                current.paintComponent(g, screen);
+                g.setComposite(old);
+            }
         }
     }
 

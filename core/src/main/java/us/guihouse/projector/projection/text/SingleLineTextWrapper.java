@@ -24,7 +24,20 @@ public class SingleLineTextWrapper extends MultilineTextWrapper {
         List<WrappedText> groups = new ArrayList<>();
         
         for (String phrase : phrases) {
-            groups.add(wrap(phrase));
+            WrappedText wrapped = wrap(phrase);
+
+            List<String> building = new ArrayList<>();
+
+            for (String wrappedPhrase : wrapped.getLines()) {
+                building.add(wrappedPhrase);
+
+                if (building.size() >= lineLimit) {
+                    groups.add(new WrappedText(building));
+                    building = new ArrayList<>();
+                }
+            }
+
+            groups.add(new WrappedText(building));
         }
         
         return groups;

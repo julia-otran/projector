@@ -193,12 +193,12 @@ public class ProjectionVideo implements Projectable {
         image = imageCache.get(sizeIdentifier);
 
         if (image == null) {
-            image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+            image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
             imageCache.put(sizeIdentifier, image);
         }
 
         if (!freezeCache.containsKey(sizeIdentifier)) {
-            freezeCache.put(sizeIdentifier, new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB));
+            freezeCache.put(sizeIdentifier, new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB));
         }
     }
 

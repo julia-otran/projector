@@ -39,6 +39,7 @@ public class ProjectionLabel implements Projectable {
 
     private static final int DEFAULT_PADDING_X = 120;
     private static final int DEFAULT_PADDING_Y = 40;
+    private static final float STROKE_RATIO = 0.05f;
 
     // Label used to get fontMetrics
     private Font font;
@@ -52,7 +53,8 @@ public class ProjectionLabel implements Projectable {
     // Internal control
     private List<StringWithPosition> drawLines = Collections.emptyList();
 
-    private final BasicStroke outlineStroke = new BasicStroke(8.0f);
+    private BasicStroke outlineStroke;
+    private BasicStroke chromaStroke;
 
     private final HashMap<String, PaintableCrossFader> faders = new HashMap<>();
 
@@ -98,12 +100,15 @@ public class ProjectionLabel implements Projectable {
     public void setFont(Font font) {
         this.font = font;
         this.fontMetrics = Toolkit.getDefaultToolkit().getFontMetrics(font);
+        this.outlineStroke = new BasicStroke(font.getSize() * STROKE_RATIO);
+
         onFactoryChange();
         ProjectorPreferences.setProjectionLabelFontSize(font.getSize());
     }
 
     public void setChromaFontSize(int fontSize) {
         this.chromaFontSize = fontSize;
+        this.chromaStroke = new BasicStroke(fontSize * STROKE_RATIO);
         ProjectorPreferences.setChromaFontSize(fontSize);
         generateLines();
     }
@@ -133,7 +138,12 @@ public class ProjectionLabel implements Projectable {
             if (!drawLines.isEmpty()) {
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-                g.setStroke(outlineStroke);
+
+                if (vs.isChromaScreen()) {
+                    g.setStroke(chromaStroke);
+                } else {
+                    g.setStroke(outlineStroke);
+                }
 
                 AffineTransform placement = chromaScreenTransforms.get(vs.getVirtualScreenId());
 

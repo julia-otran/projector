@@ -20,7 +20,7 @@ public class MultilineTextWrapper implements TextWrapper {
 
     private final FontMetrics fontMetrics;
     private final int maxWidth;
-    private final int lineLimit;
+    protected final int lineLimit;
 
     MultilineTextWrapper(FontMetrics fontMetrics, int maxWidth, int maxHeight) {
         this.fontMetrics = fontMetrics;
