@@ -28,3 +28,6 @@ buildNumber.properties
 out/*
 *.iml
 *.iws
+
+*.db
+*.db-journal

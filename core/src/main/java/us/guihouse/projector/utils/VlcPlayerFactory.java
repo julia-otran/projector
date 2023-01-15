@@ -26,8 +26,6 @@ public class VlcPlayerFactory {
             NativeLibrary.addSearchPath("libvlc", "C:\\VLC");
         }
 
-        NativeLibrary.addSearchPath("vlc", "/home/julia/Downloads/vlc-3.0.10/dist/lib");
-
         factory = new MediaPlayerFactory(vlcArgs);
     }
 
