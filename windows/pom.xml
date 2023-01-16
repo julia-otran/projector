@@ -393,7 +393,7 @@
         </dependency>
 
         <dependency>
-            <groupId>us.guihouse.projector</groupId>
+            <groupId>dev.juhouse.projector</groupId>
             <artifactId>projector-core</artifactId>
             <version>${revision}</version>
             <exclusions>
