@@ -25,6 +25,7 @@ import dev.juhouse.projector.projection.models.StringWithPosition;
 import dev.juhouse.projector.projection.models.VirtualScreen;
 import dev.juhouse.projector.projection.text.WrappedText;
 import dev.juhouse.projector.projection.text.WrapperFactory;
+import dev.juhouse.projector.utils.FontCreatorUtil;
 import javafx.application.Platform;
 import lombok.Getter;
 import dev.juhouse.projector.other.ProjectorPreferences;
@@ -84,7 +85,14 @@ public class ProjectionLabel implements Projectable {
 
     @Override
     public void init() {
-        setFont(new java.awt.Font(Font.SANS_SERIF, Font.PLAIN, ProjectorPreferences.getProjectionLabelFontSize()));
+        setFont(
+                FontCreatorUtil.createFont(
+                        ProjectorPreferences.getProjectionLabelFontName(),
+                        ProjectorPreferences.getProjectionLabelFontStyle(),
+                        ProjectorPreferences.getProjectionLabelFontSize()
+                )
+        );
+
         rebuildLayout();
     }
 
@@ -103,6 +111,9 @@ public class ProjectionLabel implements Projectable {
         this.outlineStroke = new BasicStroke(font.getSize() * STROKE_RATIO);
 
         onFactoryChange();
+
+        ProjectorPreferences.setProjectionLabelFontName(font.getFamily());
+        ProjectorPreferences.setProjectionLabelFontStyle(font.getStyle());
         ProjectorPreferences.setProjectionLabelFontSize(font.getSize());
     }
 

@@ -317,8 +317,6 @@ public class MusicProjectionController extends ProjectionController {
         SelectionText st;
         WrappedText wt;
 
-        System.out.println("Old Selected Phrase nunmber " + oldPhraseNumber);
-
         for (int i = 0; i < lst.size(); i++) {
             wt = lst.get(i);
 

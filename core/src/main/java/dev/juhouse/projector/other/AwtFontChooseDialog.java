@@ -8,6 +8,8 @@ package dev.juhouse.projector.other;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
+
+import dev.juhouse.projector.utils.FontCreatorUtil;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingNode;
@@ -84,8 +86,10 @@ public class AwtFontChooseDialog extends Dialog<Object> implements ChangeListene
         SwingNode previewNode = new SwingNode();
         previewNode.setContent(previewLabel);
         vbox.getChildren().add(previewNode);
-        
+
+        fontNames.getItems().add(FontCreatorUtil.getMontserratFont().getFamily());
         fontNames.getItems().addAll(getFontNames());
+
         fontNames.getSelectionModel().select(current.getFamily());
         fontNames.getSelectionModel().selectedIndexProperty().addListener(this);
         
@@ -141,7 +145,7 @@ public class AwtFontChooseDialog extends Dialog<Object> implements ChangeListene
     }
 
     private void updatePreviewFont(Font font) {
-        previewLabel.setFont(new Font(font.getFontName(), font.getStyle(), 32));
+        previewLabel.setFont(font.deriveFont(32.0f));
     }
 
     private void updateFont() {
@@ -163,7 +167,7 @@ public class AwtFontChooseDialog extends Dialog<Object> implements ChangeListene
             default: style = Font.PLAIN;
         }
 
-        this.font = new Font(familyName, style, size);
+        this.font = FontCreatorUtil.createFont(familyName, style, size);
         updatePreviewFont(font);
     }
 }

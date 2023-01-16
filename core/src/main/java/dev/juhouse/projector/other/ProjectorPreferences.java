@@ -5,6 +5,9 @@
  */
 package dev.juhouse.projector.other;
 
+import dev.juhouse.projector.utils.FontCreatorUtil;
+
+import java.awt.*;
 import java.util.prefs.Preferences;
 
 /**
@@ -29,6 +32,8 @@ public class ProjectorPreferences {
     private static final String CHROMA_SCREEN_PADDING_BOTTOM = "CHROMA_SCREEN_PADDING_BOTTOM";
     private static final String CHROMA_SCREEN_MIN_PADDING_BOTTOM = "CHROMA_SCREEN_MIN_PADDING_BOTTOM";
     private static final String PROJECTION_LABEL_FONT_SIZE = "PROJECTION_LABEL_FONT_SIZE";
+    private static final String PROJECTION_LABEL_FONT_NAME = "PROJECTION_LABEL_FONT_NAME";
+    private static final String PROJECTION_LABEL_FONT_STYLE = "PROJECTION_LABEL_FONT_STYLE";
 
     public static Preferences getPrefs() {
         if (prefs == null) {
@@ -164,5 +169,21 @@ public class ProjectorPreferences {
 
     public static void setProjectionLabelFontSize(int size) {
         getPrefs().putInt(PROJECTION_LABEL_FONT_SIZE, size);
+    }
+
+    public static String getProjectionLabelFontName() {
+        return getPrefs().get(PROJECTION_LABEL_FONT_NAME, FontCreatorUtil.getMontserratFont().getFamily());
+    }
+
+    public static void setProjectionLabelFontName(String name) {
+        getPrefs().put(PROJECTION_LABEL_FONT_NAME, name);
+    }
+
+    public static int getProjectionLabelFontStyle() {
+        return getPrefs().getInt(PROJECTION_LABEL_FONT_STYLE, Font.PLAIN);
+    }
+
+    public static void setProjectionLabelFontStyle(int style) {
+        getPrefs().putInt(PROJECTION_LABEL_FONT_STYLE, style);
     }
 }
