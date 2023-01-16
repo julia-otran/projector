@@ -71,7 +71,7 @@ public class AwtFontChooseDialog extends Dialog<Object> implements ChangeListene
         sizes = new ListView<>();
         
         previewLabel = new JLabel();
-        previewLabel.setFont(font);
+        updatePreviewFont(font);
         previewLabel.setText("AaBbÇç");
         previewLabel.setMaximumSize(new Dimension(350, 200));
         
@@ -139,7 +139,11 @@ public class AwtFontChooseDialog extends Dialog<Object> implements ChangeListene
     public void changed(ObservableValue observable, Number oldValue, Number newValue) {
         updateFont();
     }
-    
+
+    private void updatePreviewFont(Font font) {
+        previewLabel.setFont(new Font(font.getFontName(), font.getStyle(), 32));
+    }
+
     private void updateFont() {
         String familyName = fontNames.getSelectionModel().getSelectedItem();
         int size;
@@ -160,6 +164,6 @@ public class AwtFontChooseDialog extends Dialog<Object> implements ChangeListene
         }
 
         this.font = new Font(familyName, style, size);
-        previewLabel.setFont(font);
+        updatePreviewFont(font);
     }
 }

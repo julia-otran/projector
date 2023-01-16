@@ -43,10 +43,12 @@ public class MultilineTextWrapper implements TextWrapper {
         List<WrappedText> groups = new ArrayList<>();
         List<String> buildingGroup = new ArrayList<>();
 
-        for (String phrase : phrases) {
+        for (int i = 0; i < phrases.size(); i++) {
+            String phrase = phrases.get(i);
+
             if (phrase.trim().isEmpty()) {
                 if (!buildingGroup.isEmpty()) {
-                    groups.add(new WrappedText(buildingGroup));
+                    groups.add(new WrappedText(buildingGroup, i));
                     buildingGroup = new ArrayList<>();
                 }
 
@@ -60,14 +62,14 @@ public class MultilineTextWrapper implements TextWrapper {
                 buildingGroup.add(breaked);
 
                 if (buildingGroup.size() >= lineLimit) {
-                    groups.add(new WrappedText(buildingGroup));
+                    groups.add(new WrappedText(buildingGroup, i));
                     buildingGroup = new ArrayList<>();
                 }
             }
         }
 
         if (!buildingGroup.isEmpty()) {
-            groups.add(new WrappedText(buildingGroup));
+            groups.add(new WrappedText(buildingGroup, phrases.size() - 1));
         }
 
         return groups;
@@ -88,7 +90,7 @@ public class MultilineTextWrapper implements TextWrapper {
         List<String> lines = splitIntoLines(str);
 
         if (lines.isEmpty()) {
-            return new WrappedText(Collections.emptyList());
+            return new WrappedText(Collections.emptyList(), 0);
         }
 
         ArrayList<String> strings = new ArrayList<>();
@@ -97,7 +99,7 @@ public class MultilineTextWrapper implements TextWrapper {
             wrapLineInto(line, strings);
         }
 
-        return new WrappedText(strings);
+        return new WrappedText(strings, 0);
     }
 
     protected boolean isSeparator(char c) {

@@ -2,35 +2,43 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.input.KeyCodeCombination?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox id="RootBox" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1"
-      xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="us.guihouse.projector.forms.controllers.projection.MusicProjectionController">
+<VBox id="RootBox" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.guihouse.projector.forms.controllers.projection.MusicProjectionController">
     <ToolBar prefHeight="40.0" prefWidth="200.0">
         <ImageView fitHeight="19.0" fitWidth="17.0" preserveRatio="true">
-            <Image url="@../icons/icon-ios7-search-strong-128.png"/>
+            <Image url="@../icons/icon-ios7-search-strong-128.png" />
         </ImageView>
-        <TextField fx:id="searchTextField" prefHeight="28.0" prefWidth="231.0" promptText="Ir para"/>
-        <Button fx:id="clearScreenButton" disable="true" focusTraversable="false" maxHeight="1.7976931348623157E308"
-                maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onClearScreen"
-                prefHeight="28.0" prefWidth="204.0" text="Clique em uma frase para projetar"/>
-        <Button fx:id="removeBackgroundButton" disable="true" mnemonicParsing="false" onAction="#removeBackground"
-                prefHeight="28.0" prefWidth="121.0" text="Remover Fundo"/>
+        <TextField fx:id="searchTextField" prefHeight="28.0" prefWidth="231.0" promptText="Ir para" />
+        <Button fx:id="clearScreenButton" disable="true" focusTraversable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onClearScreen" prefHeight="30.0" prefWidth="219.0" text="Clique em uma frase para projetar" />
+      <MenuButton mnemonicParsing="false" prefHeight="28.0" prefWidth="100.0" text="Opções">
+        <items>
+          <MenuItem fx:id="editLyricsMenuItem" mnemonicParsing="false" onAction="#onEditLyrics" text="Editar Letra">
+               <accelerator>
+                  <KeyCodeCombination alt="UP" code="E" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+               </accelerator></MenuItem>
+          <MenuItem fx:id="removeBackgroundMenuItem" mnemonicParsing="false" onAction="#removeBackground" text="Remover Fundo">
+               <accelerator>
+                  <KeyCodeCombination alt="UP" code="ESCAPE" control="UP" meta="UP" shift="DOWN" shortcut="UP" />
+               </accelerator></MenuItem>
+        </items>
+      </MenuButton>
     </ToolBar>
     <HBox prefHeight="353.0" prefWidth="600.0" VBox.vgrow="ALWAYS">
-        <ListView fx:id="miniPhrasesListView" focusTraversable="false" prefHeight="360.0" prefWidth="276.0"
-                  HBox.hgrow="NEVER"/>
+        <ListView fx:id="miniPhrasesListView" focusTraversable="false" prefHeight="360.0" prefWidth="276.0" HBox.hgrow="NEVER" />
         <TableView fx:id="phrasesTable" prefHeight="342.0" prefWidth="600.0" HBox.hgrow="ALWAYS">
             <columns>
-                <TableColumn minWidth="200.0" prefWidth="450.0" sortable="false" text="Letra"/>
+                <TableColumn minWidth="200.0" prefWidth="450.0" sortable="false" text="Letra" />
             </columns>
         </TableView>
     </HBox>

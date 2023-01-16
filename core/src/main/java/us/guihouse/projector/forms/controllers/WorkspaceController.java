@@ -54,7 +54,7 @@ import static us.guihouse.projector.utils.Patterns.INTEGER_NUMBER_PATTERN;
  *
  * @author guilherme
  */
-public class WorkspaceController implements Initializable, SceneObserver, AddMusicCallback, ProjectableItemListCell.CellCallback<ProjectionListItem> {
+public class WorkspaceController implements Initializable, SceneObserver, AddMusicCallback, EditMusicCallback, ProjectableItemListCell.CellCallback<ProjectionListItem> {
 
     private SceneManager sceneManager;
     private GraphicsDeviceHelper graphicsHelper;
@@ -71,6 +71,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
 
     @FXML
     private Pane loadingPane;
+    private Scene listScene;
 
     /**
      * Initializes the controller class.
@@ -142,9 +143,6 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
 
     @FXML
     private CheckMenuItem fullScreenCheckMenuItem;
-
-    @FXML
-    private CheckMenuItem animateBackgroundCheckItem;
 
     @FXML
     private CheckMenuItem darkenBackgroundMenuItem;
@@ -559,6 +557,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
                     MusicProjectionScene scene = (MusicProjectionScene) created;
                     scene.getTextWrapperProperty().bind(textWrapperProperty);
                     scene.setManageMusicService(manageMusicService);
+                    scene.setEditMusicCallback(this);
                 }
 
                 created.initWithProjectionManager(graphicsHelper.getProjectionManager());
@@ -591,6 +590,39 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
 
     @FXML
     public void onAddMusic() {
+        listMusicStage.setScene(listScene);
+        listMusicStage.setX(sceneManager.getStage().getX());
+        listMusicStage.setY(sceneManager.getStage().getY());
+        listMusicStage.show();
+        listMusicStage.requestFocus();
+        listMusicStage.setX(sceneManager.getStage().getX());
+        listMusicStage.setY(sceneManager.getStage().getY());
+    }
+    public void onEditMusic(Integer musicId) {
+        try {
+            Parent list = MusicFormScene.editMusicFormScene(manageMusicService, new BackCallback() {
+                @Override
+                public void goBack() {
+                    listMusicStage.hide();
+                }
+
+                @Override
+                public void goBackWithId(Integer id) {
+                    listMusicStage.hide();
+                }
+
+                @Override
+                public void goBackAndReload() {
+                    listMusicStage.hide();
+                }
+            }, musicId);
+
+            Scene editScene = new Scene(list, 800, 480);
+            listMusicStage.setScene(editScene);
+        } catch (IOException | ManageMusicService.PersistenceException ex) {
+            Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
         listMusicStage.setX(sceneManager.getStage().getX());
         listMusicStage.setY(sceneManager.getStage().getY());
         listMusicStage.show();
@@ -729,7 +761,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
         try {
             listMusicStage = new Stage();
             Parent list = MusicListScene.createMusicListScene(this, manageMusicService, listMusicStage);
-            Scene listScene = new Scene(list, 800, 480);
+            listScene = new Scene(list, 800, 480);
             listMusicStage.setScene(listScene);
         } catch (IOException ex) {
             Logger.getLogger(WorkspaceController.class.getName()).log(Level.SEVERE, null, ex);

@@ -120,8 +120,7 @@ public class Music {
     }
 
     public void setPhrases(List<String> p) {
-        phrasesList.clear();
-        phrasesList.addAll(p);
+        phrasesList.setAll(p);
     }
 
     public void setPhrases(String text) {

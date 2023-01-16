@@ -10,6 +10,8 @@ import java.net.URL;
 import javafx.beans.property.Property;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import us.guihouse.projector.forms.controllers.EditMusicCallback;
+import us.guihouse.projector.forms.controllers.WorkspaceController;
 import us.guihouse.projector.forms.controllers.projection.MusicProjectionController;
 import us.guihouse.projector.projection.text.TextWrapper;
 import us.guihouse.projector.services.ManageMusicService;
@@ -49,5 +51,9 @@ public class MusicProjectionScene extends ProjectionItemSubScene {
 
     public int getMusicId() {
         return getController().getMusicId();
+    }
+
+    public void setEditMusicCallback(EditMusicCallback editMusicCallback) {
+        getController().setEditMusicCallback(editMusicCallback);
     }
 }

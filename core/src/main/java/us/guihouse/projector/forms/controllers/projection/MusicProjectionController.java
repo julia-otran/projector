@@ -34,6 +34,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.util.Callback;
 import lombok.Getter;
+import us.guihouse.projector.forms.controllers.EditMusicCallback;
 import us.guihouse.projector.models.Music;
 import us.guihouse.projector.models.MusicTheme;
 import us.guihouse.projector.other.ProjectorStringUtils;
@@ -55,7 +56,7 @@ public class MusicProjectionController extends ProjectionController {
     private Button clearScreenButton;
 
     @FXML
-    private Button removeBackgroundButton;
+    private MenuItem removeBackgroundMenuItem;
 
     @FXML
     private TableView<SelectionText> phrasesTable;
@@ -77,6 +78,8 @@ public class MusicProjectionController extends ProjectionController {
     private boolean projecting = false;
 
     private Integer markedPosition = null;
+    private EditMusicCallback editMusicCallback;
+    private Integer currentPhraseNumber = null;
 
     /**
      * Initializes the controller class.
@@ -156,6 +159,11 @@ public class MusicProjectionController extends ProjectionController {
         clearText = clearScreenButton.getText();
     }
 
+    @FXML
+    public void onEditLyrics() {
+        editMusicCallback.onEditMusic(getMusicId());
+    }
+
     @Override
     public void initWithProjectionManager(final ProjectionManager projectionManager) {
         super.initWithProjectionManager(projectionManager);
@@ -233,6 +241,8 @@ public class MusicProjectionController extends ProjectionController {
                 } else {
                     markedPosition = null;
                 }
+
+                currentPhraseNumber = text.getSourcePhraseNumber();
                 projecting = true;
                 projectionManager.setText(text);
                 playTheme();
@@ -297,14 +307,24 @@ public class MusicProjectionController extends ProjectionController {
     }
 
     private void reprocessPhrases() {
+        Integer oldPhraseNumber = currentPhraseNumber;
+        Integer wrappedTextFirstIndex = null;
+
         data.clear();
         List<WrappedText> lst = textWrapperProperty.getValue().fitGroups(music.getPhrasesList());
 
         SelectionText st;
         WrappedText wt;
 
+        System.out.println("Old Selected Phrase nunmber " + oldPhraseNumber);
+
         for (int i = 0; i < lst.size(); i++) {
             wt = lst.get(i);
+
+            if (oldPhraseNumber != null && oldPhraseNumber.equals(wt.getSourcePhraseNumber()) && wrappedTextFirstIndex == null) {
+                wrappedTextFirstIndex = i;
+            }
+
             st = new SelectionText(wt);
             int j = i - 1;
 
@@ -319,6 +339,14 @@ public class MusicProjectionController extends ProjectionController {
 
         miniPhrasesListView.getItems().clear();
         miniPhrasesListView.getItems().addAll(data);
+
+        if (wrappedTextFirstIndex != null) {
+            final int index = wrappedTextFirstIndex;
+
+            Platform.runLater(() -> {
+                phrasesTable.getSelectionModel().select(index);
+            });
+        }
     }
 
     private void markIfPosible(final Number position) {
@@ -339,6 +367,7 @@ public class MusicProjectionController extends ProjectionController {
     }
 
     private void performClear() {
+        currentPhraseNumber = null;
         projecting = false;
         clearScreenButton.setText(clearText);
         clearScreenButton.disableProperty().set(true);
@@ -349,7 +378,7 @@ public class MusicProjectionController extends ProjectionController {
     private void enableClear() {
         clearScreenButton.setText("Limpar Tela (ESC)");
         clearScreenButton.disableProperty().set(false);
-        removeBackgroundButton.disableProperty().set(false);
+        removeBackgroundMenuItem.disableProperty().set(false);
     }
 
     @FXML
@@ -360,8 +389,12 @@ public class MusicProjectionController extends ProjectionController {
 
     @FXML
     public void removeBackground() {
+        if (!clearScreenButton.isDisabled()) {
+            onClearScreen();
+        }
+
         projectionManager.setMusicForBackground(null, null);
-        removeBackgroundButton.disableProperty().set(true);
+        removeBackgroundMenuItem.disableProperty().set(true);
     }
 
     private void clearMarker() {
@@ -430,6 +463,10 @@ public class MusicProjectionController extends ProjectionController {
         }
         
         return selected;
+    }
+
+    public void setEditMusicCallback(EditMusicCallback editMusicCallback) {
+        this.editMusicCallback = editMusicCallback;
     }
 
     public static class SelectionText {
@@ -511,20 +548,20 @@ public class MusicProjectionController extends ProjectionController {
             return label;
         }
     }
-    
-    
+
     @Override
     public void onEscapeKeyPressed() {
         if (!clearScreenButton.isDisabled()) {
             clearScreenButton.fire();
+        } else if (!removeBackgroundMenuItem.isDisable()) {
+            removeBackgroundMenuItem.fire();
         }
     }
 
     @Override
     public void stop() {
-        onEscapeKeyPressed();
-        if (!removeBackgroundButton.isDisabled()) {
-            removeBackgroundButton.fire();
+        if (!removeBackgroundMenuItem.isDisable()) {
+            removeBackgroundMenuItem.fire();
         }
     }
 }

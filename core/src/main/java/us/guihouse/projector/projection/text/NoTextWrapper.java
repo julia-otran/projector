@@ -18,7 +18,7 @@ public class NoTextWrapper implements TextWrapper {
     @Override
     public List<WrappedText> fitGroups(List<String> phrases) {
         return phrases.stream()
-                .map(p -> new WrappedText(Collections.singletonList(p)))
+                .map(p -> new WrappedText(Collections.singletonList(p), 0))
                 .collect(Collectors.toList());
     }
 

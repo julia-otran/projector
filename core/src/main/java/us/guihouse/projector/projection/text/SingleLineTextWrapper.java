@@ -23,7 +23,8 @@ public class SingleLineTextWrapper extends MultilineTextWrapper {
     public List<WrappedText> fitGroups(List<String> phrases) {
         List<WrappedText> groups = new ArrayList<>();
         
-        for (String phrase : phrases) {
+        for (int i = 0; i < phrases.size(); i++) {
+            String phrase = phrases.get(i);
             WrappedText wrapped = wrap(phrase);
 
             List<String> building = new ArrayList<>();
@@ -32,12 +33,12 @@ public class SingleLineTextWrapper extends MultilineTextWrapper {
                 building.add(wrappedPhrase);
 
                 if (building.size() >= lineLimit) {
-                    groups.add(new WrappedText(building));
+                    groups.add(new WrappedText(building, i));
                     building = new ArrayList<>();
                 }
             }
 
-            groups.add(new WrappedText(building));
+            groups.add(new WrappedText(building, i));
         }
         
         return groups;

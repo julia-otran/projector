@@ -5,6 +5,8 @@
  */
 package us.guihouse.projector.projection.text;
 
+import lombok.Getter;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -13,15 +15,17 @@ import java.util.List;
  * @author guilherme
  */
 public class WrappedText {
-
+    @Getter
+    private final int sourcePhraseNumber;
     private final List<String> lines;
 
-    WrappedText(List<String> lines) {
+    WrappedText(List<String> lines, int sourcePhraseNumber) {
+        this.sourcePhraseNumber = sourcePhraseNumber;
         this.lines = Collections.unmodifiableList(lines);
     }
 
     public static WrappedText blankText() {
-        return new WrappedText(Collections.singletonList(" "));
+        return new WrappedText(Collections.singletonList(" "), 0);
     }
 
     public List<String> getLines() {
