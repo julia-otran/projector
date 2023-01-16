@@ -7,7 +7,7 @@
     <parent>
         <version>${revision}</version>
         <artifactId>projector</artifactId>
-        <groupId>us.guihouse.projector</groupId>
+        <groupId>dev.juhouse.projector</groupId>
         <relativePath>../pom.xml</relativePath>
     </parent>
 

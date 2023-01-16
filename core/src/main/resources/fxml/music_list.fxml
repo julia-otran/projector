@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <VBox id="RootBox" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.131"
-      xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.guihouse.projector.forms.controllers.MusicListController">
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="dev.juhouse.projector.forms.controllers.MusicListController">
     <ToolBar prefHeight="40.0" prefWidth="200.0">
         <HBox alignment="TOP_RIGHT" prefHeight="27.0" prefWidth="581.0">
             <ImageView fitHeight="19.0" fitWidth="17.0" preserveRatio="true" HBox.hgrow="NEVER">

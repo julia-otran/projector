@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <VBox id="RootBox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
       xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8"
-      fx:controller="us.guihouse.projector.forms.controllers.projection.BrowserController">
+      fx:controller="dev.juhouse.projector.forms.controllers.projection.BrowserController">
    <padding>
       <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
    </padding>
