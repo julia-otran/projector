@@ -1,6 +1,7 @@
 #include <stdlib.h>
 
-#include "virtual_screen.h"
+#include "ogl-loader.h"
+#include "virtual-screen.h"
 
 void initialize_virtual_screen(config_virtual_screen *config, void **data) {
     virtual_screen *vs = (virtual_screen*) calloc(1, sizeof(virtual_screen));

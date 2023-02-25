@@ -1,4 +1,4 @@
-#include <GLFW/glfw3.h>
+#include "ogl-loader.h"
 #include "monitor.h"
 #include "render.h"
 

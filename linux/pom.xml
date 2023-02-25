@@ -433,14 +433,14 @@
                             <fileNames>
                                 <fileName>lib-render.c</fileName>
                                 <fileName>monitor.c</fileName>
+                                <fileName>config-parse.c</fileName>
+                                <fileName>config-serialize.c</fileName>
+                                <fileName>config-debug.c</fileName>
                                 <fileName>config.c</fileName>
                                 <fileName>render.c</fileName>
                                 <fileName>loop.c</fileName>
-                                <fileName>virtual_screen.c</fileName>
-                                <fileName>vs_color_corrector.c</fileName>
-                                <fileName>glad/gl.c</fileName>
-                                <fileName>glad/gles1.c</fileName>
-                                <fileName>glad/gles2.c</fileName>
+                                <fileName>virtual-screen.c</fileName>
+                                <fileName>vs-color-corrector.c</fileName>
                             </fileNames>
                         </source>
                     </sources>
@@ -466,6 +466,10 @@
                         <linkerStartOption>-shared</linkerStartOption>
                     </linkerStartOptions>
                     <linkerEndOptions>
+                        <linkerEndOption>-L/usr/lib64</linkerEndOption>
+                        <linkerEndOption>-lGLEW</linkerEndOption>
+                        <linkerEndOption>-lGL</linkerEndOption>
+                        <linkerEndOption>-lX11</linkerEndOption>
                         <linkerEndOption>
                             -L/usr/lib
                         </linkerEndOption>

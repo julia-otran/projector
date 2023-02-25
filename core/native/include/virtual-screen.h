@@ -1,8 +1,6 @@
-#include <GLFW/glfw3.h>
-
 #include "monitor.h"
-#include "config.h"
-#include "vs_color_corrector.h"
+#include "config-structs.h"
+#include "vs-color-corrector.h"
 
 #ifndef _VIRTUAL_SCREEN_H
 #define _VIRTUAL_SCREEN_H

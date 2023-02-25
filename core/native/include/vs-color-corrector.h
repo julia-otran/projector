@@ -1,7 +1,6 @@
-#include <GLFW/glfw3.h>
-
+#include "ogl-loader.h"
 #include "monitor.h"
-#include "config.h"
+#include "config-structs.h"
 
 #ifndef _VS_COLOR_CORRECTOR_H_
 #define _VS_COLOR_CORRECTOR_H_

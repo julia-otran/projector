@@ -1,5 +1,5 @@
-#include <GLFW/glfw3.h>
-#include "config.h"
+#include "ogl-loader.h"
+#include "config-structs.h"
 #include "render.h"
 
 #ifndef _MONITOR_H_
@@ -24,8 +24,8 @@ void activate_monitors(projection_config *config);
 void swap_monitor_buffers();
 void shutdown_monitors();
 
-void get_default_projection_monitor_bounds(config_bounds *in);
-GLFWmonitor* get_gl_share_context();
+void get_default_projection_monitor_bounds(config_bounds *in, int *no_secondary_mon);
+GLFWwindow* get_gl_share_context();
 int window_should_close();
 
 void prepare_monitors();

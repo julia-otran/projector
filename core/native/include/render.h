@@ -1,6 +1,6 @@
 #include <pthread.h>
-#include <GLFW/glfw3.h>
-#include "config.h"
+#include "ogl-loader.h"
+#include "config-structs.h"
 
 #ifndef _RENDER_H_
 #define _RENDER_H_

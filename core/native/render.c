@@ -2,6 +2,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "debug.h"
+#include "ogl-loader.h"
 #include "render.h"
 
 static int count_renders;
@@ -52,8 +54,12 @@ void* renderer_loop(void *arg) {
     render_layer *render = (render_layer*) arg;
     config_color_factor *background_clear_color = &render->config.background_clear_color;
 
+    if (!render->window) {
+        log("Renderer loop window is null\n");
+    }
+
     glfwMakeContextCurrent(render->window);
-    gladLoadGL(glfwGetProcAddress);
+    glewInit();
 
     int width, height;
 
@@ -109,6 +115,10 @@ void create_render(GLFWwindow *shared_context, config_render *render_conf, rende
 
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
     render->window = glfwCreateWindow(render_conf->w, render_conf->h, "Projector Render Layer", NULL, shared_context);
+
+    if (!render->window) {
+        log("Failed to create render window\n");
+    }
 
     pthread_mutex_init(&render->thread_mutex, NULL);
     pthread_cond_init(&render->thread_cond, NULL);
