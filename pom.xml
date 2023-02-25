@@ -13,6 +13,9 @@
         <fx.version>13.0.2</fx.version>
         <revision>2.21</revision>
         <lwjgl.version>3.2.3</lwjgl.version>
+        <lib_name>render</lib_name>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
     <name>Projector</name>

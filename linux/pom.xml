@@ -415,17 +415,82 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.4</version>
                 <configuration>
-                    <mainClass>us.guihouse.projector.linux.Main</mainClass>
+                    <mainClass>dev.juhouse.projector.Main</mainClass>
                 </configuration>
             </plugin>
 
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.0.2</version>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+                <version>1.0-alpha-11</version>
+                <extensions>true</extensions>
                 <configuration>
-                    <skipIfEmpty>true</skipIfEmpty>
+                    <javahOS>linux</javahOS>
+                    <sources>
+                        <source>
+                            <!-- path to the C/C++ sources -->
+                            <directory>../core/native</directory>
+                            <fileNames>
+                                <fileName>lib-render.c</fileName>
+                                <fileName>monitor.c</fileName>
+                                <fileName>config.c</fileName>
+                                <fileName>render.c</fileName>
+                                <fileName>loop.c</fileName>
+                                <fileName>virtual_screen.c</fileName>
+                                <fileName>vs_color_corrector.c</fileName>
+                                <fileName>glad/gl.c</fileName>
+                                <fileName>glad/gles1.c</fileName>
+                                <fileName>glad/gles2.c</fileName>
+                            </fileNames>
+                        </source>
+                    </sources>
+                    <compilerProvider>generic-classic</compilerProvider>
+                    <compilerExecutable>gcc</compilerExecutable>
+                    <!-- compiler options -->
+                    <compilerStartOptions>
+                        <compilerStartOption>-m64</compilerStartOption>
+                        <compilerStartOption>-Wall</compilerStartOption>
+                        <compilerStartOption>-Wextra</compilerStartOption>
+                        <compilerStartOption>-O3</compilerStartOption>
+                        <compilerStartOption>-I${env.JAVA_HOME}/include</compilerStartOption>
+                        <compilerStartOption>-I${env.JAVA_HOME}/include/linux</compilerStartOption>
+                        <compilerStartOption>-I${project.basedir}/../core/native/include</compilerStartOption>
+                        <compilerStartOption>-I/usr/include</compilerStartOption>
+                        <compilerStartOption>-fPIC</compilerStartOption>
+                    </compilerStartOptions>
+                    <linkerOutputDirectory>target</linkerOutputDirectory>
+                    <linkerExecutable>gcc</linkerExecutable>
+                    <!-- linker options -->
+                    <linkerStartOptions>
+                        <linkerStartOption>-m64</linkerStartOption>
+                        <linkerStartOption>-shared</linkerStartOption>
+                    </linkerStartOptions>
+                    <linkerEndOptions>
+                        <linkerEndOption>
+                            -L/usr/lib
+                        </linkerEndOption>
+                        <linkerEndOption>
+                            -lglfw
+                        </linkerEndOption>
+                        <linkerEndOption>
+                            -lcjson
+                        </linkerEndOption>
+                        <linkerEndOption>
+                            -o ${project.build.sourceDirectory}/../resources/lib${lib_name}.so
+                        </linkerEndOption>
+                    </linkerEndOptions>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>javah</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>initialize</goal>
+                            <goal>compile</goal>
+                            <goal>link</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <!-- Maven Assembly Plugin -->
@@ -440,10 +505,9 @@
                     <!-- MainClass in mainfest make a executable jar -->
                     <archive>
                         <manifest>
-                            <mainClass>us.guihouse.projector.linux.Main</mainClass>
+                            <mainClass>dev.juhouse.projector.linux.Main</mainClass>
                         </manifest>
                     </archive>
-
                 </configuration>
                 <executions>
                     <execution>
@@ -456,7 +520,6 @@
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
 </project>
