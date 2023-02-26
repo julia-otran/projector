@@ -144,3 +144,10 @@ void render_text_render_cycle(render_layer *layer) {
 
     glBindTexture(GL_TEXTURE_2D, 0);
 }
+
+void render_text_deallocate_assets() {
+}
+
+void render_text_shutdown() {
+
+}

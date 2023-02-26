@@ -4,6 +4,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import lombok.Getter;
 import lombok.Setter;
+import sun.misc.Unsafe;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import uk.co.caprica.vlcj.player.embedded.videosurface.CallbackVideoSurface;
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormat;
@@ -16,6 +17,8 @@ import dev.juhouse.projector.utils.VlcPlayerFactory;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.lang.reflect.Field;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 
@@ -46,6 +49,8 @@ public class ProjectionVideo implements Projectable {
     protected ProjectionVideo.MyBufferFormatCallback bufferFormatCallback;
     protected CallbackVideoSurface videoSurface;
 
+    private ByteBuffer[] buffers;
+
     public ProjectionVideo(CanvasDelegate delegate) {
         this.delegate = delegate;
     }
@@ -63,11 +68,17 @@ public class ProjectionVideo implements Projectable {
 
     public void setRender(boolean render) {
         this.render.setValue(render);
+
+        if (render) {
+            updateBufferAddress();
+        }
+
         delegate.getBridge().setRenderVideoBuffer(render);
     }
 
     public void setCropVideo(boolean cropVideo) {
         this.cropVideo = cropVideo;
+        updateBufferAddress();
     }
 
     public BufferedImage getImage() {
@@ -94,12 +105,41 @@ public class ProjectionVideo implements Projectable {
         return player;
     }
 
+    private static class UnsafeAccess {
+        private static final Unsafe UNSAFE;
+
+        private UnsafeAccess() {
+        }
+
+        static {
+            try {
+                Field field = Unsafe.class.getDeclaredField("theUnsafe");
+                field.setAccessible(true);
+                UNSAFE = (Unsafe) field.get((Object) null);
+            } catch (Exception var1) {
+                throw new RuntimeException(var1);
+            }
+        }
+        private static long getAddressOffset() {
+            try {
+                return UNSAFE.objectFieldOffset(Buffer.class.getDeclaredField("address"));
+            } catch (Exception var1) {
+                throw new RuntimeException(var1);
+            }
+        }
+
+        static long getAddress(ByteBuffer buffer) {
+            return UNSAFE.getLong(buffer, getAddressOffset());
+        }
+    }
+
     private final class MyRenderCallback implements RenderCallback {
         private int previewUpdateCount;
 
         MyRenderCallback() {
             previewUpdateCount = 0;
         }
+
 
         @Override
         public void display(MediaPlayer mediaPlayer, ByteBuffer[] nativeBuffers, BufferFormat bufferFormat) {
@@ -109,8 +149,14 @@ public class ProjectionVideo implements Projectable {
             }
 
             if (render.get()) {
-                delegate.getBridge().setVideoBuffer(nativeBuffers[0], videoW, videoH, cropVideo);
+                delegate.getBridge().updateVideoBuffer();
             }
+        }
+    }
+
+    private void updateBufferAddress() {
+        if (buffers != null && buffers[0] != null) {
+            delegate.getBridge().setVideoBuffer(UnsafeAccess.getAddress(buffers[0]), videoW, videoH, cropVideo);
         }
     }
 
@@ -138,6 +184,8 @@ public class ProjectionVideo implements Projectable {
         @Override
         public void allocatedBuffers(ByteBuffer[] buffers) {
             assert buffers[0].capacity() == videoW * videoH * 4;
+            ProjectionVideo.this.buffers = buffers;
+            updateBufferAddress();
         }
     }
 }

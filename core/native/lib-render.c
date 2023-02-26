@@ -8,6 +8,7 @@
 #include "lib-render.h"
 #include "loop.h"
 #include "config-debug.h"
+#include "render-video.h"
 
 static int initialized = 0;
 static projection_config *config;
@@ -96,13 +97,24 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setTextImag
   (JNIEnv *, jobject, jintArray, jint) {
   }
 
-
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setVideoBuffer
-  (JNIEnv *, jobject, jobject, jint, jint, jboolean) {
-  }
+    (JNIEnv *, jobject, jlong buf_address, jint width, jint height, jboolean crop) {
+
+    render_video_set_crop_video(crop);
+    render_video_set_buffer(buf_address, width, height);
+}
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setRenderVideoBuffer
-  (JNIEnv *, jobject, jboolean) {
+  (JNIEnv *, jobject, jboolean render) {
+
+    render_video_set_render(render);
+}
+
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_updateVideoBuffer
+  (JNIEnv *, jobject) {
+
+  render_video_update_buffer();
+
   }
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setImageAsset

@@ -6,6 +6,7 @@
 #include "ogl-loader.h"
 #include "render.h"
 #include "render-text.h"
+#include "render-video.h"
 
 static int count_renders;
 static render_layer *renders;
@@ -67,6 +68,9 @@ void shutdown_renders() {
     lock_renders();
     unlock_renders();
 
+    render_video_shutdown();
+    render_text_shutdown();
+
     for (int i=0; i<count_renders; i++) {
         pthread_join(renders[i].thread_id, NULL);
         glfwDestroyWindow(renders[i].window);
@@ -125,10 +129,19 @@ void* renderer_loop(void *arg) {
         }
     }
 
+    if (render->config.text_render_mode & CONFIG_RENDER_MODE_MAIN) {
+        lock_renders_for_asset_upload();
+
+        render_video_generate_assets();
+
+        unlock_renders_for_asset_upload();
+    }
+
     while (run) {
         if (render->config.text_render_mode & CONFIG_RENDER_MODE_MAIN) {
             lock_renders_for_asset_upload();
 
+            render_video_upload_texes();
             render_text_upload_texes();
 
             unlock_renders_for_asset_upload();
@@ -149,6 +162,7 @@ void* renderer_loop(void *arg) {
         glClear(GL_COLOR_BUFFER_BIT);
 
         render_text_render_cycle(render);
+        render_video_render(render);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glPopMatrix();
@@ -157,6 +171,15 @@ void* renderer_loop(void *arg) {
 
         pthread_mutex_unlock(&render->asset_thread_mutex);
         pthread_mutex_unlock(&render->thread_mutex);
+    }
+
+    if (render->config.text_render_mode & CONFIG_RENDER_MODE_MAIN) {
+        lock_renders_for_asset_upload();
+
+        render_text_deallocate_assets();
+        render_video_deallocate_assets();
+
+        unlock_renders_for_asset_upload();
     }
 
     for (int i=0; i < count_renders; i++) {
