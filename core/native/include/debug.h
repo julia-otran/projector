@@ -9,4 +9,7 @@
     fflush(stdout);\
 }
 
+void register_render_frame(int render_id);
+void register_monitor_frame();
+
 #endif

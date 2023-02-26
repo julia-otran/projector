@@ -431,6 +431,7 @@
                             <!-- path to the C/C++ sources -->
                             <directory>../core/native</directory>
                             <fileNames>
+                                <fileName>debug.c</fileName>
                                 <fileName>lib-render.c</fileName>
                                 <fileName>monitor.c</fileName>
                                 <fileName>config-parse.c</fileName>

@@ -228,4 +228,5 @@ void render_monitors(render_output *data, int render_output_count) {
     }
 
     swap_monitor_buffers();
+    register_monitor_frame();
 }
