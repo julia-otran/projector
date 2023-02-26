@@ -5,7 +5,7 @@
  */
 package dev.juhouse.projector.forms.controllers.projection;
 
-import dev.juhouse.projector.projection.ProjectionManager;
+import dev.juhouse.projector.projection2.ProjectionManager;
 import javafx.fxml.Initializable;
 import dev.juhouse.projector.forms.controllers.ControllerObserver;
 import dev.juhouse.projector.forms.controllers.SceneManager;

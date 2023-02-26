@@ -35,4 +35,7 @@ void unlock_renders();
 
 void get_render_output(render_output **out, int *render_output_count);
 
+void get_main_output_size(render_output_size *output_size);
+void get_main_text_area(config_bounds *text_area);
+
 #endif

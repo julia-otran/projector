@@ -17,7 +17,6 @@ import dev.juhouse.projector.forms.controllers.SceneManager;
 import dev.juhouse.projector.forms.controllers.WorkspaceController;
 import dev.juhouse.projector.other.RuntimeProperties;
 import dev.juhouse.projector.other.SQLiteJDBCDriverConnection;
-import dev.juhouse.projector.projection.glfw.GLFWHelper;
 import dev.juhouse.projector.utils.ThemeFinder;
 import dev.juhouse.projector.utils.VlcPlayerFactory;
 import javafx.application.Application;
@@ -33,34 +32,15 @@ import javafx.stage.Stage;
  *
  * @author 15096134
  */
-public class Projector extends Application implements Runnable {
+public class Projector extends Application {
     private WorkspaceController controller;
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        System.setProperty("sun.java2d.opengl", "True");
         RuntimeProperties.init(args);
         launch(args);
-    }
-
-    @Override
-    public void run() {
-        GLFWHelper.initGLFW();
-
-        ThemeFinder.loadThemes();
-
-        VlcPlayerFactory.init();
-
-        final GraphicsDeviceHelper graphicsHelper = new GraphicsDeviceHelper();
-
-        graphicsHelper.setInitCallback(() -> Platform.runLater(() -> {
-            graphicsHelper.setInitCallback(null);
-            controller.init(graphicsHelper);
-        }));
-
-        graphicsHelper.init();
     }
 
     @Override
@@ -113,9 +93,6 @@ public class Projector extends Application implements Runnable {
         
         primaryStage.setOnCloseRequest(event -> {
             controller.stop();
-
-            GLFWHelper.finish();
-
             VlcPlayerFactory.finish();
 
             try {
@@ -127,6 +104,12 @@ public class Projector extends Application implements Runnable {
             Platform.runLater(() -> System.exit(0));
         });
 
-        new Thread(this).start();
+        ThemeFinder.loadThemes();
+
+        VlcPlayerFactory.init();
+
+        final GraphicsDeviceHelper graphicsHelper = new GraphicsDeviceHelper();
+
+        graphicsHelper.init();
     }
 }

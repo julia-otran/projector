@@ -5,11 +5,10 @@
  */
 package dev.juhouse.projector.forms.controllers;
 
-import dev.juhouse.projector.other.GraphicsFinder;
-import dev.juhouse.projector.projection.ProjectionManager;
-import dev.juhouse.projector.projection.WindowManager;
+import dev.juhouse.projector.projection2.ProjectionManager;
+import dev.juhouse.projector.projection2.WindowManager;
 import dev.juhouse.projector.services.SettingsService;
-import dev.juhouse.projector.utils.WindowConfigsLoader;
+import dev.juhouse.projector.utils.WindowConfigsLoaderProperty;
 import javafx.scene.image.ImageView;
 
 /**
@@ -28,29 +27,24 @@ public class GraphicsDeviceHelper {
         return windowManager.getManager();
     }
 
-    public void setInitCallback(Runnable runnable) {
-        windowManager.setInitializationCallback(runnable);
-    }
-
     public void init() {
         reloadDevices();
     }
 
     void stop() {
-        windowManager.stop();
+        windowManager.stopEngine();
     }
 
     public void reloadDevices() {
-        GraphicsFinder.Device defaulDevice = GraphicsFinder.getDefaultDevice();
-        windowManager.setDefaultDevice(defaulDevice.getDevice());
-        windowManager.setDevices(GraphicsFinder.getAvailableDevices());
+        windowManager.stopEngine();
+        windowManager.startEngine();
     }
 
     ImageView getPreviewPanel() {
-        return windowManager.getPreviewPanel();
+        return windowManager.getPreview();
     }
 
-    WindowConfigsLoader getWindowConfigsLoader() {
-        return windowManager.getWindowConfigsLoader();
+    WindowConfigsLoaderProperty getWindowConfigsLoaderProperty() {
+        return windowManager.getConfigsObserver();
     }
 }

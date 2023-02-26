@@ -8,7 +8,7 @@ package dev.juhouse.projector.scenes;
 import java.io.IOException;
 import java.net.URL;
 
-import dev.juhouse.projector.projection.ProjectionManager;
+import dev.juhouse.projector.projection2.ProjectionManager;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import dev.juhouse.projector.forms.controllers.projection.BgImageController;

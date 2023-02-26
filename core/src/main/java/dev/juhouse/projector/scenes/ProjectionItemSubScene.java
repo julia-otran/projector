@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-import dev.juhouse.projector.projection.ProjectionManager;
+import dev.juhouse.projector.projection2.ProjectionManager;
 import dev.juhouse.projector.repositories.ProjectionListRepository;
 import javafx.scene.Parent;
 import javafx.scene.SubScene;

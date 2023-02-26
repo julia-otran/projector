@@ -33,7 +33,7 @@ import java.util.List;
 
 import static java.nio.file.StandardWatchEventKinds.*;
 
-public class WindowConfigsLoader implements Runnable {
+public class WindowConfigsLoader implements Runnable, WindowConfigsLoaderProperty {
 
     private Thread thread;
     private final WindowConfigsObserver observer;

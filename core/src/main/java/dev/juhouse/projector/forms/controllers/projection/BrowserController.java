@@ -8,8 +8,8 @@ package dev.juhouse.projector.forms.controllers.projection;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import dev.juhouse.projector.projection.ProjectionManager;
-import dev.juhouse.projector.projection.ProjectionWebView;
+import dev.juhouse.projector.projection2.ProjectionManager;
+import dev.juhouse.projector.projection2.ProjectionWebView;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.Node;

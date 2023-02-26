@@ -64,6 +64,18 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_load_1confi
     start_main_loop();
 }
 
+JNIEXPORT jint JNICALL Java_dev_juhouse_projector_projection2_Bridge_getTextRenderAreaWidth(JNIEnv *, jobject) {
+    config_bounds text_area;
+    get_main_text_area(&text_area);
+    return (jint) text_area.w;
+}
+
+JNIEXPORT jint JNICALL Java_dev_juhouse_projector_projection2_Bridge_getTextRenderAreaHeight(JNIEnv *, jobject) {
+    config_bounds text_area;
+    get_main_text_area(&text_area);
+    return (jint) text_area.h;
+}
+
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_shutdown(JNIEnv *, jobject) {
     CHECK_INITIALIZE
 

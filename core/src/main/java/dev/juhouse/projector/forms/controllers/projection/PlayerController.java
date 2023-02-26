@@ -9,8 +9,8 @@ import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import dev.juhouse.projector.projection.ProjectionManager;
-import dev.juhouse.projector.projection.video.ProjectionPlayer;
+import dev.juhouse.projector.projection2.ProjectionManager;
+import dev.juhouse.projector.projection2.video.ProjectionPlayer;
 import dev.juhouse.projector.services.FileDragDropService;
 import javafx.application.Platform;
 import javafx.fxml.FXML;

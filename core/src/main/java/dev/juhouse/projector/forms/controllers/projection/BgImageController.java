@@ -9,8 +9,8 @@ import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import dev.juhouse.projector.projection.ProjectionManager;
-import dev.juhouse.projector.projection.models.BackgroundModel;
+import dev.juhouse.projector.projection2.ProjectionManager;
+import dev.juhouse.projector.projection2.models.BackgroundModel;
 import dev.juhouse.projector.services.ImageDragDropService;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;

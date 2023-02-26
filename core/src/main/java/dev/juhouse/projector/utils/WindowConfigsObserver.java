@@ -1,12 +1,5 @@
 package dev.juhouse.projector.utils;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
-import dev.juhouse.projector.models.WindowConfig;
-import dev.juhouse.projector.models.WindowConfigBlend;
 import dev.juhouse.projector.other.ProjectorPreferences;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -16,13 +9,11 @@ import javafx.collections.ObservableList;
 import lombok.Getter;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
-import java.util.List;
 
 import static java.nio.file.StandardWatchEventKinds.*;
 
-public class WindowConfigsObserver implements Runnable {
+public class WindowConfigsObserver implements Runnable, WindowConfigsLoaderProperty {
 
     private Thread thread;
     private final WindowConfigsObserverCallback callback;
@@ -119,7 +110,7 @@ public class WindowConfigsObserver implements Runnable {
                     continue;
                 }
 
-                // Platform.runLater(this::loadConfigFiles);
+                Platform.runLater(this::loadConfigFiles);
 
                 // The filename is the
                 // context of the event.
@@ -170,7 +161,7 @@ public class WindowConfigsObserver implements Runnable {
     public void loadDefaultConfigs() {
         ProjectorPreferences.setWindowConfigFile(null);
         callback.updateConfigs(null);
-        // Platform.runLater(() -> loadedConfigFile.set(null));
+        Platform.runLater(() -> loadedConfigFile.set(null));
     }
 
     private boolean loadConfigs(File configFile) {

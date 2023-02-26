@@ -22,8 +22,8 @@ import dev.juhouse.projector.models.SimpleProjectionList;
 import dev.juhouse.projector.other.AwtFontChooseDialog;
 import dev.juhouse.projector.other.ProjectableItemListCell;
 import dev.juhouse.projector.other.YouTubeVideoResolve;
-import dev.juhouse.projector.projection.text.TextWrapper;
-import dev.juhouse.projector.projection.text.WrapperFactory;
+import dev.juhouse.projector.projection2.text.TextWrapper;
+import dev.juhouse.projector.projection2.text.WrapperFactory;
 import dev.juhouse.projector.repositories.ProjectionListRepository;
 import dev.juhouse.projector.scenes.*;
 import dev.juhouse.projector.services.ManageMusicService;
@@ -94,9 +94,9 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
         initProjectionList();
         updateProjectionList();
 
-        graphicsHelper.getWindowConfigsLoader().getConfigFiles().addListener((ListChangeListener<String>) c -> buildPresetsMenu());
+        graphicsHelper.getWindowConfigsLoaderProperty().getConfigFiles().addListener((ListChangeListener<String>) c -> buildPresetsMenu());
 
-        graphicsHelper.getWindowConfigsLoader().loadedConfigFileProperty().addListener((prop, oldValue, newValue) -> updateSelectedPreset(newValue));
+        graphicsHelper.getWindowConfigsLoaderProperty().loadedConfigFileProperty().addListener((prop, oldValue, newValue) -> updateSelectedPreset(newValue));
 
         graphicsHelper.getProjectionManager().addTextWrapperChangeListener(factory -> {
             wrapperFactory = factory;
@@ -197,7 +197,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
 
     @FXML
     public void onChangeFullScreen() {
-        graphicsHelper.getProjectionManager().setFullScreen(fullScreenCheckMenuItem.isSelected());
+        // TODO: remove
     }
 
     @FXML
@@ -234,19 +234,20 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
 
         newValue.ifPresent(value -> {
             if (FilePaths.ALLOWED_WINDOW_CONFIG_FILE_NAME_PATTERN.matcher(value).matches()) {
-                if (graphicsHelper.getWindowConfigsLoader().createConfigFileFromDefaults(value + ".json")) {
+                // TODO: fix default config creation
+                /* if (graphicsHelper.getWindowConfigsLoaderProperty().createConfigFileFromDefaults(value + ".json")) {
                     Alert a = new Alert(Alert.AlertType.INFORMATION);
                     a.setTitle("OK");
                     a.setHeaderText("Preset criado");
                     a.setContentText("O novo arquivo de preset foi criado");
                     a.show();
-                } else {
+                } else { */
                     Alert a = new Alert(Alert.AlertType.ERROR);
                     a.setTitle("Erro");
                     a.setHeaderText("Falha ao criar novo preset");
                     a.setContentText("Verifique se já não existe um com mesmo nome.");
                     a.show();
-                }
+                // }
             } else {
                 Alert a = new Alert(Alert.AlertType.ERROR);
                 a.setTitle("Erro");
@@ -267,15 +268,15 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     private void buildPresetsMenu() {
         windowConfigsPresetsMenu.getItems().clear();
 
-        graphicsHelper.getWindowConfigsLoader().getConfigFiles().forEach(cf -> {
+        graphicsHelper.getWindowConfigsLoaderProperty().getConfigFiles().forEach(cf -> {
             CheckMenuItem checkItem = new CheckMenuItem();
             checkItem.setText(cf);
-            checkItem.setSelected(cf.equals(graphicsHelper.getWindowConfigsLoader().loadedConfigFileProperty().getValue()));
+            checkItem.setSelected(cf.equals(graphicsHelper.getWindowConfigsLoaderProperty().loadedConfigFileProperty().getValue()));
             checkItem.setOnAction(x -> {
-                if (cf.equals(graphicsHelper.getWindowConfigsLoader().loadedConfigFileProperty().getValue())) {
-                    graphicsHelper.getWindowConfigsLoader().loadDefaultConfigs();
+                if (cf.equals(graphicsHelper.getWindowConfigsLoaderProperty().loadedConfigFileProperty().getValue())) {
+                    graphicsHelper.getWindowConfigsLoaderProperty().loadDefaultConfigs();
                 } else {
-                    graphicsHelper.getWindowConfigsLoader().loadConfigs(cf);
+                    graphicsHelper.getWindowConfigsLoaderProperty().loadConfigs(cf);
                 }
             });
             windowConfigsPresetsMenu.getItems().add(checkItem);
@@ -284,71 +285,17 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
 
     @FXML
     public void onMenuChromaPaddingBottomClick() {
-        TextInputDialog inputDialog = new TextInputDialog();
-        inputDialog.setTitle("Definir espaçamento inferior da tela chroma");
-        inputDialog.setHeaderText("Digite o valor em pixels do espaçamento inferior (Somente números)");
-        inputDialog.setContentText("Espaçamento Inferior:");
-
-        Optional<String> newValue = inputDialog.showAndWait();
-
-        newValue.ifPresent(value -> {
-            if (Patterns.INTEGER_NUMBER_PATTERN.matcher(value).matches()) {
-                int paddingBottom = Integer.parseInt(value);
-                graphicsHelper.getProjectionManager().setChromaPaddingBottom(paddingBottom);
-            } else {
-                Alert a = new Alert(Alert.AlertType.ERROR);
-                a.setTitle("Erro");
-                a.setHeaderText("Falha ao definir espaçamento");
-                a.setContentText("O número é inválido.");
-                a.show();
-            }
-        });
+        // TODO: remove
     }
 
     @FXML
     public void onMenuChromaMinPaddingBottomClick() {
-        TextInputDialog inputDialog = new TextInputDialog();
-        inputDialog.setTitle("Definir espaçamento inferior mínimo da tela chroma");
-        inputDialog.setHeaderText("Digite o valor em pixels do espaçamento inferior mínimo (Somente números)");
-        inputDialog.setContentText("Espaçamento Inferior Mínimo:");
-
-        Optional<String> newValue = inputDialog.showAndWait();
-
-        newValue.ifPresent(value -> {
-            if (Patterns.INTEGER_NUMBER_PATTERN.matcher(value).matches()) {
-                int paddingBottom = Integer.parseInt(value);
-                graphicsHelper.getProjectionManager().setChromaMinPaddingBottom(paddingBottom);
-            } else {
-                Alert a = new Alert(Alert.AlertType.ERROR);
-                a.setTitle("Erro");
-                a.setHeaderText("Falha ao definir espaçamento");
-                a.setContentText("O número é inválido.");
-                a.show();
-            }
-        });
+        // TODO: remove
     }
 
     @FXML
     public void onMenuChromaFontSizeClick() {
-        TextInputDialog inputDialog = new TextInputDialog();
-        inputDialog.setTitle("Definir tamanho da fonte da tela chroma");
-        inputDialog.setHeaderText("Digite o valor em pixels do tamanho da fonte (Somente números)");
-        inputDialog.setContentText("Tamanho da fonte:");
-
-        Optional<String> newValue = inputDialog.showAndWait();
-
-        newValue.ifPresent(value -> {
-            if (Patterns.INTEGER_NUMBER_PATTERN.matcher(value).matches()) {
-                int fontSize = Integer.parseInt(value);
-                graphicsHelper.getProjectionManager().setChromaFontSize(fontSize);
-            } else {
-                Alert a = new Alert(Alert.AlertType.ERROR);
-                a.setTitle("Erro");
-                a.setHeaderText("Falha ao definir espaçamento");
-                a.setContentText("O número é inválido.");
-                a.show();
-            }
-        });
+        // TODO: remove
     }
 
     // ------------------------------

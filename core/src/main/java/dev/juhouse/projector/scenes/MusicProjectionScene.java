@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.net.URL;
 
 import dev.juhouse.projector.forms.controllers.EditMusicCallback;
-import dev.juhouse.projector.projection.text.TextWrapper;
+import dev.juhouse.projector.projection2.text.TextWrapper;
 import javafx.beans.property.Property;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;

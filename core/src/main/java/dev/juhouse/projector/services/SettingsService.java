@@ -7,7 +7,7 @@ package dev.juhouse.projector.services;
 
 import java.io.File;
 
-import dev.juhouse.projector.projection.models.BackgroundModel;
+import dev.juhouse.projector.projection2.models.BackgroundModel;
 import dev.juhouse.projector.other.ProjectorPreferences;
 
 /**

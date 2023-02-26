@@ -13,8 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import dev.juhouse.projector.projection.ProjectionImage;
-import dev.juhouse.projector.projection.ProjectionManager;
+import dev.juhouse.projector.projection2.ProjectionImage;
+import dev.juhouse.projector.projection2.ProjectionManager;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
