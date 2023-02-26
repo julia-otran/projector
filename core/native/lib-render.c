@@ -10,6 +10,7 @@
 #include "config-debug.h"
 
 static int initialized = 0;
+static projection_config *config;
 
 #define CHECK_INITIALIZE {\
     if (!initialized) {\
@@ -39,17 +40,20 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_initialize(
     initialized = 1;
 }
 
-JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_load_1config(JNIEnv *env, jobject, jstring j_file_path) {
-    char *file_path;
-    projection_config *config;
-
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_loadConfig(JNIEnv *env, jobject, jstring j_file_path) {
     CHECK_INITIALIZE
 
+    if (config) {
+        log_debug("Config was loaded! restarting engine.\n");
+        terminate_main_loop();
+        shutdown_renders();
+        shutdown_monitors();
+        free_projection_config(config);
+    }
+
     if (j_file_path != NULL) {
-        file_path = (char*) (*env)->GetStringUTFChars(env, j_file_path, 0);
-        log_debug("String:\n%s\n", file_path);
-        config = load_config(NULL);
-        //config = load_config(file_path);
+        char *file_path = (char*) (*env)->GetStringUTFChars(env, j_file_path, 0);
+        config = load_config(file_path);
         (*env)->ReleaseStringUTFChars(env, j_file_path, file_path);
     } else {
         config = load_config(NULL);
@@ -75,6 +79,40 @@ JNIEXPORT jint JNICALL Java_dev_juhouse_projector_projection2_Bridge_getTextRend
     get_main_text_area(&text_area);
     return (jint) text_area.h;
 }
+
+JNIEXPORT jint JNICALL Java_dev_juhouse_projector_projection2_Bridge_getRenderAreaWidth(JNIEnv *, jobject) {
+    render_output_size out_size;
+    get_main_output_size(&out_size);
+    return out_size.render_width;
+}
+
+JNIEXPORT jint JNICALL Java_dev_juhouse_projector_projection2_Bridge_getRenderAreaHeight(JNIEnv *, jobject) {
+    render_output_size out_size;
+    get_main_output_size(&out_size);
+    return out_size.render_height;
+}
+
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setTextImage
+  (JNIEnv *, jobject, jintArray, jint) {
+  }
+
+
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setVideoBuffer
+  (JNIEnv *, jobject, jobject, jint, jint, jboolean) {
+  }
+
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setRenderVideoBuffer
+  (JNIEnv *, jobject, jboolean) {
+  }
+
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setImageAsset
+  (JNIEnv *, jobject, jintArray, jint, jint, jboolean) {
+  }
+
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setImageBackgroundAsset
+  (JNIEnv *, jobject, jintArray, jint, jint, jboolean) {
+  }
+
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_shutdown(JNIEnv *, jobject) {
     CHECK_INITIALIZE

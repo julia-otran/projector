@@ -111,5 +111,7 @@ public class Projector extends Application {
         final GraphicsDeviceHelper graphicsHelper = new GraphicsDeviceHelper();
 
         graphicsHelper.init();
+
+        controller.init(graphicsHelper);
     }
 }

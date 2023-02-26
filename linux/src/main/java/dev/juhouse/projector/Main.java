@@ -35,7 +35,7 @@ public class Main {
     public static void main(String[] args) {
         loadNativeLib();
 
-        // Projector.main(args);
-        MainTest.main(args);
+//        MainTest.main(args);
+         Projector.main(args);
     }
 }

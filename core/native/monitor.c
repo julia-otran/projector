@@ -64,7 +64,7 @@ void create_window(monitor *m) {
     glfwSetWindowMonitor(m->window, monitor, m->xpos, m->ypos, mode->width, mode->height, mode->refreshRate);
 
 	glfwSetInputMode(m->window, GLFW_STICKY_KEYS, GL_TRUE);
-    glfwSetInputMode(m->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(m->window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
     if (gl_share_context == NULL) {
         gl_share_context = m->window;
