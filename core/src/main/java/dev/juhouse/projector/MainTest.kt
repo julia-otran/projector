@@ -13,7 +13,7 @@ class MainTest {
             bridge.initialize()
 
             var configObserver = WindowConfigsObserver(WindowConfigsObserver.WindowConfigsObserverCallback {
-                bridge.load_config(it);
+                bridge.load_config("á");
             })
 
             configObserver.start()

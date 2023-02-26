@@ -10,6 +10,9 @@ static int monitors_count;
 static monitor *monitors;
 static GLFWwindow *gl_share_context = NULL;
 
+static render_output *render_output_config;
+static int render_output_config_count;
+
 void reload_monitors() {
     int found_monitors_count;
 
@@ -141,7 +144,7 @@ void get_default_projection_monitor_bounds(config_bounds *in, int *no_secondary_
         }
     }
 
-    log("No secondary monitor found! Will use simulation mode\n");
+    log_debug("No secondary monitor found! Will use simulation mode\n");
 
     in->w = 1280;
     in->h = 720;
@@ -162,8 +165,11 @@ int window_should_close() {
     return 0;
 }
 
-void prepare_monitors() {
+void prepare_monitors(render_output *data, int render_output_count) {
     int width, height;
+
+    render_output_config = data;
+    render_output_config_count = render_output_count;
 
     for (int i=0; i<monitors_count; i++) {
         monitor *m = &monitors[i];
@@ -188,17 +194,17 @@ void prepare_monitors() {
     }
 }
 
-GLuint find_texture_id(render_output *data, int render_output_count, config_virtual_screen *vs_config) {
-    for (int i=0; i<render_output_count; i++) {
-        if (data[i].render_id == vs_config->source_render_id) {
-            return data[i].rendered_texture;
+GLuint find_texture_id(config_virtual_screen *vs_config) {
+    for (int i=0; i<render_output_config_count; i++) {
+        if (render_output_config[i].render_id == vs_config->source_render_id) {
+            return render_output_config[i].rendered_texture;
         }
     }
 
     return 0;
 }
 
-void render_monitors(render_output *data, int render_output_count) {
+void render_monitors() {
     GLuint texture_id;
     int width, height;
 
@@ -216,7 +222,7 @@ void render_monitors(render_output *data, int render_output_count) {
 
             for (int j=0; j < m->config->count_virtual_screen; j++) {
                 void *vs_data = &m->virtual_screen_data[i];
-                texture_id = find_texture_id(data, render_output_count, &m->config->virtual_screens[i]);
+                texture_id = find_texture_id(&m->config->virtual_screens[i]);
 
                 if (texture_id) {
                     render_virtual_screen(texture_id, vs_data);

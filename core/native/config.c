@@ -76,10 +76,16 @@ void prepare_default_config(config_bounds *default_monitor_bounds, int no_displa
     default_config.renders[0].render_id = 1;
     default_config.renders[0].w = default_monitor_bounds->w;
     default_config.renders[0].h = default_monitor_bounds->h;
+
+    default_config.renders[0].text_area.x = 30.0;
+    default_config.renders[0].text_area.y = 30.0;
+    default_config.renders[0].text_area.w = default_monitor_bounds->w - 60.0;
+    default_config.renders[0].text_area.h = default_monitor_bounds->h - 60.0;
+
     default_config.renders[0].enable_render_background_assets = 1;
     default_config.renders[0].enable_render_image = 1;
     default_config.renders[0].enable_render_video = 1;
-    default_config.renders[0].text_render_mode = TEXT_RENDER_MODE_MAIN;
+    default_config.renders[0].text_render_mode = CONFIG_RENDER_MODE_MAIN;
 
     if (no_display) {
         default_config.count_display = 0;

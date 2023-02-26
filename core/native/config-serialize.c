@@ -129,11 +129,13 @@ cJSON* serialize_config_render(config_render *in) {
     cJSON_AddItemToObject(config_render_json, "render_id", cJSON_CreateNumber(in->render_id));
     cJSON_AddItemToObject(config_render_json, "w", cJSON_CreateNumber(in->w));
     cJSON_AddItemToObject(config_render_json, "h", cJSON_CreateNumber(in->h));
+
+    cJSON_AddItemToObject(config_render_json, "text_area", serialize_config_bounds(&in->text_area));
+
     cJSON_AddItemToObject(config_render_json, "enable_render_background_assets", cJSON_CreateNumber(in->enable_render_background_assets));
     cJSON_AddItemToObject(config_render_json, "enable_render_image", cJSON_CreateNumber(in->enable_render_image));
     cJSON_AddItemToObject(config_render_json, "enable_render_video", cJSON_CreateNumber(in->enable_render_video));
     cJSON_AddItemToObject(config_render_json, "text_render_mode", cJSON_CreateNumber(in->text_render_mode));
-    cJSON_AddItemToObject(config_render_json, "text_scale", cJSON_CreateNumber(in->text_scale));
 
     cJSON_AddItemToObject(config_render_json, "background_clear_color", serialize_config_color_factor(&in->background_clear_color));
 

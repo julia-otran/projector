@@ -13,6 +13,8 @@ typedef struct {
     pthread_mutex_t thread_mutex;
     pthread_cond_t thread_cond;
 
+    pthread_mutex_t asset_thread_mutex;
+
     GLuint rendered_texture;
 } render_layer;
 
@@ -21,8 +23,16 @@ typedef struct {
     GLuint rendered_texture;
 } render_output;
 
+typedef struct {
+    int render_width, render_height;
+} render_output_size;
+
 void activate_renders(GLFWwindow *shared_context, projection_config *config);
 void shutdown_renders();
-void render_cycle(render_output **out, int *render_output_count);
+
+void lock_renders();
+void unlock_renders();
+
+void get_render_output(render_output **out, int *render_output_count);
 
 #endif

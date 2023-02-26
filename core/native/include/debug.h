@@ -4,7 +4,7 @@
 #ifndef _DEBUG_H_
 #define _DEBUG_H_
 
-#define log(args...) {\
+#define log_debug(args...) {\
     printf(args);\
     fflush(stdout);\
 }

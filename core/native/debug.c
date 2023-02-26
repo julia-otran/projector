@@ -7,7 +7,7 @@
 
 #include "debug.h"
 
-void register_render_frame(int render_id) {
+void register_render_frame(int) {
 }
 
 static int monitor_frame_count = 0;
@@ -28,7 +28,7 @@ void register_monitor_frame() {
 
         double fps = monitor_frame_count / (ms_delta / 1000.0);
 
-        log("Monitors FPS: %lf\n", fps);
+        log_debug("Monitors FPS: %lf\n", fps);
 
         last_time_ms = new_ms;
         last_time_sec = spec.tv_sec;

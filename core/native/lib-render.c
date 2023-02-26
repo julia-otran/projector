@@ -18,7 +18,7 @@ static int initialized = 0;
 }
 
 void glfwIntErrorCallback(GLint, const GLchar *error_string) {
-    log("Catch GLFW error: %s\n", error_string);
+    log_debug("Catch GLFW error: %s\n", error_string);
 }
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_initialize(JNIEnv *, jobject) {
@@ -47,13 +47,15 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_load_1confi
 
     if (j_file_path != NULL) {
         file_path = (char*) (*env)->GetStringUTFChars(env, j_file_path, 0);
-        config = load_config(file_path);
+        log_debug("String:\n%s\n", file_path);
+        config = load_config(NULL);
+        //config = load_config(file_path);
         (*env)->ReleaseStringUTFChars(env, j_file_path, file_path);
     } else {
         config = load_config(NULL);
     }
 
-    log("Will load config:\n");
+    log_debug("Will load config:\n");
     print_projection_config(config);
 
     activate_monitors(config);

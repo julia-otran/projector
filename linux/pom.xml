@@ -431,15 +431,17 @@
                             <!-- path to the C/C++ sources -->
                             <directory>../core/native</directory>
                             <fileNames>
-                                <fileName>debug.c</fileName>
-                                <fileName>lib-render.c</fileName>
-                                <fileName>monitor.c</fileName>
+                                <fileName>config.c</fileName>
+                                <fileName>config-debug.c</fileName>
                                 <fileName>config-parse.c</fileName>
                                 <fileName>config-serialize.c</fileName>
-                                <fileName>config-debug.c</fileName>
-                                <fileName>config.c</fileName>
-                                <fileName>render.c</fileName>
+                                <fileName>debug.c</fileName>
+                                <fileName>lib-render.c</fileName>
                                 <fileName>loop.c</fileName>
+                                <fileName>monitor.c</fileName>
+                                <fileName>render.c</fileName>
+                                <fileName>render-fader.c</fileName>
+                                <fileName>render-text.c</fileName>
                                 <fileName>virtual-screen.c</fileName>
                                 <fileName>vs-color-corrector.c</fileName>
                             </fileNames>

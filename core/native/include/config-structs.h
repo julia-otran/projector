@@ -68,18 +68,17 @@ typedef struct {
 // The texts will be adjusted to fill this render
 // Impossible to scale the text, as its adjusted to this render.
 // Required to have one (and only one) render as main mode.
-#define TEXT_RENDER_MODE_MAIN 1
+#define CONFIG_RENDER_MODE_MAIN 1
 
-// This is a secondary rendering, do not adjust the text according to this layer.
-// Enables scaling
-#define TEXT_RENDER_MODE_SECONDARY 2
-
-// Text will be positioned like captions, at the bottom of the render
-#define TEXT_RENDER_MODE_CAPTION_POSITIONED 4
+// This is a secondary rendering,
+// do not set the text according to this layer.
+// Instead, text will be scaled to fill text_area
+#define CONFIG_RENDER_MODE_SECONDARY 2
 
 typedef struct {
     int render_id, w, h;
 
+    config_bounds text_area;
     config_color_factor background_clear_color;
 
     int enable_render_background_assets;
@@ -87,7 +86,6 @@ typedef struct {
     int enable_render_video;
 
     int text_render_mode;
-    float text_scale;
 } config_render;
 
 typedef struct {

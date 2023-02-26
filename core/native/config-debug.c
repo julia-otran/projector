@@ -5,9 +5,9 @@
 
 void print_json(cJSON *json) {
     char *json_str = cJSON_Print(json);
-    log("Printing Config...\n");
-    log("%s\n", json_str);
-    log("Print config done!\n");
+    log_debug("Printing Config...\n");
+    log_debug("%s\n", json_str);
+    log_debug("Print config done!\n");
     cJSON_Delete(json);
     free(json_str);
 }

@@ -28,7 +28,7 @@ void get_default_projection_monitor_bounds(config_bounds *in, int *no_secondary_
 GLFWwindow* get_gl_share_context();
 int window_should_close();
 
-void prepare_monitors();
-void render_monitors(render_output *data, int render_output_count);
+void prepare_monitors(render_output *data, int render_output_count);
+void render_monitors();
 
 #endif

@@ -1,5 +1,7 @@
 #include <pthread.h>
 #include <stdlib.h>
+
+#include "debug.h"
 #include "loop.h"
 #include "ogl-loader.h"
 
@@ -11,19 +13,19 @@ void* loop(void*) {
     render_output *output;
     int render_output_count;
 
-    prepare_monitors();
+    get_render_output(&output, &render_output_count);
+    prepare_monitors(output, render_output_count);
 
     while (run) {
-        render_cycle(&output, &render_output_count);
-        render_monitors(output, render_output_count);
+        lock_renders();
+        render_monitors();
+        unlock_renders();
 
         glfwPollEvents();
 
         if (window_should_close()) {
             run = 0;
         }
-
-        free(output);
     }
 
     return NULL;
