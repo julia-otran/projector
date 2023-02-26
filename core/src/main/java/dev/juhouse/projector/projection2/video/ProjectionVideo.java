@@ -26,6 +26,7 @@ public class ProjectionVideo implements Projectable {
     public interface BufferSizeChangeCallback {
         void onBufferSizeChange(int width, int height);
     }
+
     @Getter
     @Setter
     private BufferSizeChangeCallback bufferSizeChangeCallback;
@@ -43,7 +44,7 @@ public class ProjectionVideo implements Projectable {
     private boolean cropVideo = false;
 
     @Getter
-    private final BooleanProperty render = new SimpleBooleanProperty(true);
+    private final BooleanProperty render = new SimpleBooleanProperty(false);
 
     protected ProjectionVideo.MyRenderCallback renderCallback;
     protected ProjectionVideo.MyBufferFormatCallback bufferFormatCallback;
@@ -68,12 +69,7 @@ public class ProjectionVideo implements Projectable {
 
     public void setRender(boolean render) {
         this.render.setValue(render);
-
-        if (render) {
-            updateBufferAddress();
-        }
-
-        delegate.getBridge().setRenderVideoBuffer(render);
+        updateBufferAddress();
     }
 
     public void setCropVideo(boolean cropVideo) {
@@ -155,7 +151,7 @@ public class ProjectionVideo implements Projectable {
     }
 
     private void updateBufferAddress() {
-        if (buffers != null && buffers[0] != null) {
+        if (buffers != null && buffers[0] != null && render.get()) {
             delegate.getBridge().setVideoBuffer(UnsafeAccess.getAddress(buffers[0]), videoW, videoH, cropVideo);
         }
     }
