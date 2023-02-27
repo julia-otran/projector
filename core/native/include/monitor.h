@@ -30,5 +30,6 @@ int window_should_close();
 
 void prepare_monitors(render_output *data, int render_output_count);
 void render_monitors();
+void deallocate_monitors();
 
 #endif

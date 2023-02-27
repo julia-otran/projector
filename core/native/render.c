@@ -61,6 +61,11 @@ void get_render_output(render_output **out, int *render_output_count) {
    (*render_output_count) = count_renders;
 }
 
+void initialize_renders() {
+    render_video_initialize();
+    render_text_initialize();
+}
+
 void shutdown_renders() {
     run = 0;
 
@@ -68,14 +73,18 @@ void shutdown_renders() {
     lock_renders();
     unlock_renders();
 
+    for (int i=0; i<count_renders; i++) {
+        pthread_join(renders[i].thread_id, NULL);
+    }
+
     render_video_shutdown();
     render_text_shutdown();
 
     for (int i=0; i<count_renders; i++) {
-        pthread_join(renders[i].thread_id, NULL);
         glfwDestroyWindow(renders[i].window);
     }
 
+    free(output);
     free(renders);
 }
 
@@ -90,13 +99,10 @@ void* renderer_loop(void *arg) {
     glfwMakeContextCurrent(render->window);
     glewInit();
 
-    int width, height;
+    int width = render->config.w;
+    int height = render->config.h;
 
-    glfwGetFramebufferSize(render->window, &width, &height);
-
-    GLuint FramebufferName = 0;
-    glGenFramebuffers(1, &FramebufferName);
-    glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
+    glViewport(0, 0, width, height);
 
     GLuint renderedTexture;
     glGenTextures(1, &renderedTexture);
@@ -107,18 +113,33 @@ void* renderer_loop(void *arg) {
     glBindTexture(GL_TEXTURE_2D, renderedTexture);
 
     // Give an empty image to OpenGL ( the last "0" )
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0,GL_RGB, GL_UNSIGNED_BYTE, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,GL_RGBA, GL_UNSIGNED_BYTE, 0);
 
     // Poor filtering. Needed !
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-    // Set "renderedTexture" as our colour attachement #0
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderedTexture, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
-    // Set the list of draw buffers.
-    GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
-    glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
+    GLuint glDepthRenderBuffer;
+    glGenRenderbuffers(1, &glDepthRenderBuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, glDepthRenderBuffer);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+    GLuint FramebufferName = 0;
+    glGenFramebuffers(1, &FramebufferName);
+    glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
+
+    // Set "renderedTexture" as our colour attachement #0
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderedTexture, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, glDepthRenderBuffer);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+//    // Set the list of draw buffers.
+//    GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
+//    glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -139,6 +160,8 @@ void* renderer_loop(void *arg) {
 
     while (run) {
         if (render->config.text_render_mode & CONFIG_RENDER_MODE_MAIN) {
+            register_render_frame();
+
             lock_renders_for_asset_upload();
 
             render_video_upload_texes();
@@ -152,34 +175,31 @@ void* renderer_loop(void *arg) {
 
         pthread_mutex_lock(&render->asset_thread_mutex);
 
-        glPushMatrix();
-        glOrtho(0.f, render->config.w, render->config.h, 0.f, 0.f, 1.f );
-
         glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
         glViewport(0, 0, width, height);
 
+        glPushMatrix();
+        glOrtho(0.f, render->config.w, render->config.h, 0.f, 0.f, 1.f );
+
         glClearColor(background_clear_color->r, background_clear_color->g, background_clear_color->b, 1.0);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         render_text_render_cycle(render);
         render_video_render(render);
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glPopMatrix();
 
-        glfwSwapBuffers(render->window);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         pthread_mutex_unlock(&render->asset_thread_mutex);
         pthread_mutex_unlock(&render->thread_mutex);
     }
 
     if (render->config.text_render_mode & CONFIG_RENDER_MODE_MAIN) {
-        lock_renders_for_asset_upload();
 
         render_text_deallocate_assets();
         render_video_deallocate_assets();
 
-        unlock_renders_for_asset_upload();
     }
 
     for (int i=0; i < count_renders; i++) {
@@ -204,7 +224,7 @@ void create_render(GLFWwindow *shared_context, config_render *render_conf, rende
     }
 
     if (render->config.text_render_mode & CONFIG_RENDER_MODE_MAIN) {
-        render_text_initialize(render->config.text_area.w, render->config.text_area.h);
+        render_text_set_size(render->config.text_area.w, render->config.text_area.h);
     }
 
     pthread_mutex_init(&render->asset_thread_mutex, NULL);

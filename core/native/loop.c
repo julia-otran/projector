@@ -28,6 +28,8 @@ void* loop(void*) {
         }
     }
 
+    deallocate_monitors();
+
     return NULL;
 }
 

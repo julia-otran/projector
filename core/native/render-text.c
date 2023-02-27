@@ -26,23 +26,21 @@ static int clear_text;
 static GLuint render_tex_id;
 static render_fader_instance *fader_instance;
 
-void render_text_initialize(int width_in, int height_in) {
-    if (initialized) {
-        return;
-    }
+void render_text_initialize() {
+    pthread_mutex_init(&thread_mutex, 0);
 
+    render_fader_init(&fader_instance);
+
+    initialized = 1;
+}
+
+void render_text_set_size(int width_in, int height_in) {
     width = width_in;
     height = height_in;
     share_pixel_data = malloc(width_in * height_in * 4);
     pixel_data_changed = 0;
     clear_text = 0;
     render_tex_id = 0;
-
-    pthread_mutex_init(&thread_mutex, 0);
-
-    render_fader_init(&fader_instance);
-
-    initialized = 1;
 }
 
 void render_text_set_image(void *pixel_data) {
@@ -149,5 +147,9 @@ void render_text_deallocate_assets() {
 }
 
 void render_text_shutdown() {
+    if (share_pixel_data) {
+        free(share_pixel_data);
+    }
 
+    render_fader_terminate(fader_instance);
 }

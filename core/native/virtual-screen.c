@@ -14,3 +14,7 @@ void render_virtual_screen(GLuint texture_id, void *data) {
     virtual_screen *vs = (virtual_screen*) data;
     vs_color_corrector_render_texture(texture_id, &vs->color_corrector);
 }
+
+void shutdown_virtual_screen(void *data) {
+    free(data);
+}

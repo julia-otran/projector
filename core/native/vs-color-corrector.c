@@ -25,16 +25,16 @@ static const GLchar* FRAGMENT_SHADER_SRC[1] = {
 "varying vec2 frag_Uv;\n"
 "uniform sampler2D image;\n"
 "\n"
-"uniform vec4 brightAdjust;\n"
-"uniform vec4 exposureAdjust;\n"
+"uniform vec3 brightAdjust;\n"
+"uniform vec3 exposureAdjust;\n"
 "\n"
-"uniform vec4 lowAdjust;\n"
-"uniform vec4 midAdjust;\n"
-"uniform vec4 highAdjust;\n"
+"uniform vec3 lowAdjust;\n"
+"uniform vec3 midAdjust;\n"
+"uniform vec3 highAdjust;\n"
 "\n"
 "uniform float preserveLuminosity;\n"
 "\n"
-"vec4 rgbToHsl(vec4 rgbColor) {\n"
+"vec3 rgbToHsl(vec3 rgbColor) {\n"
 "    float minVal = min(rgbColor.r, min(rgbColor.g, rgbColor.b));\n"
 "    float maxVal = max(rgbColor.r, max(rgbColor.g, rgbColor.b));\n"
 "\n"
@@ -72,7 +72,7 @@ static const GLchar* FRAGMENT_SHADER_SRC[1] = {
 "        hue = 1.0 + hue;\n"
 "    }\n"
 "\n"
-"    return(vec4(hue, sat, lum, rgbColor.a));\n"
+"    return(vec3(hue, sat, lum));\n"
 "}\n"
 "\n"
 "float convertColorPart(float n1, float n2, float hue) {\n"
@@ -95,7 +95,7 @@ static const GLchar* FRAGMENT_SHADER_SRC[1] = {
 "    return(n1);\n"
 "}\n"
 "\n"
-"vec4 hslToRgb(vec4 hsl) {\n"
+"vec3 hslToRgb(vec3 hsl) {\n"
 "    float r = 0.0;\n"
 "    float g = 0.0;\n"
 "    float b = 0.0;\n"
@@ -121,12 +121,12 @@ static const GLchar* FRAGMENT_SHADER_SRC[1] = {
 "        b = hsl.b;\n"
 "    }\n"
 "\n"
-"    return(vec4(r, g, b, hsl.a));\n"
+"    return(vec3(r, g, b));\n"
 "}\n"
 "\n"
 "void main(void) {\n"
 "    vec4 texel = texture2D(image, frag_Uv);                \n"
-"    vec4 hsl = rgbToHsl(texel);\n"
+"    vec3 hsl = rgbToHsl(texel.rgb);\n"
 "\n"
 "    float lum = hsl.b;\n"
 "\n"
@@ -144,13 +144,13 @@ static const GLchar* FRAGMENT_SHADER_SRC[1] = {
 "    float midtonesMultiply1 = clamp((highlightsLum / (-1.0 * a)) + 0.5, 0.0, 1.0);\n"
 "    float midtonesMultiply = midtonesMultiply0 * midtonesMultiply1 * scale;\n"
 "\n"
-"    vec4 shadows = shadowsMultiply * lowAdjust;\n"
-"    vec4 mids = midtonesMultiply * midAdjust;\n"
-"    vec4 highs = highlightsMultiply * highAdjust;\n"
+"    vec3 shadows = shadowsMultiply * lowAdjust;\n"
+"    vec3 mids = midtonesMultiply * midAdjust;\n"
+"    vec3 highs = highlightsMultiply * highAdjust;\n"
 "\n"
-"    vec4 colorCorrected = texel + shadows + mids + highs;\n"
+"    vec3 colorCorrected = texel.rgb + shadows + mids + highs;\n"
 "    colorCorrected = clamp(colorCorrected, 0.0, 1.0);\n"
-"    vec4 colorCorrectedHsl;\n"
+"    vec3 colorCorrectedHsl;\n"
 "\n"
 "    if (preserveLuminosity > 0.0) {\n"
 "        colorCorrectedHsl = rgbToHsl(colorCorrected);\n"
@@ -158,9 +158,9 @@ static const GLchar* FRAGMENT_SHADER_SRC[1] = {
 "        colorCorrected = hslToRgb(colorCorrectedHsl);\n"
 "    }\n"
 "\n"
-"    vec4 result = colorCorrected * exposureAdjust + brightAdjust;\n"
+"    vec3 result = colorCorrected * exposureAdjust + brightAdjust;\n"
 "\n"
-"    gl_FragColor = vec4(result.rgb, 1.0);\n"
+"    gl_FragColor = vec4(result.rgb, texel.a);\n"
 "}"
 };
 
@@ -198,6 +198,7 @@ void load_coordinates(config_virtual_screen *config, vs_color_corrector *data) {
     GLuint vertexarray;
     glGenVertexArrays(1, &vertexarray);
     glBindVertexArray(vertexarray);
+
     data->vertexarray = vertexarray;
 
     GLfloat *indexed_vertices = calloc(16, sizeof(GLfloat));
@@ -225,8 +226,12 @@ void load_coordinates(config_virtual_screen *config, vs_color_corrector *data) {
     GLuint vertexbuffer;
     glGenBuffers(1, &vertexbuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-    glBufferData(GL_ARRAY_BUFFER, 16, &indexed_vertices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 16 * sizeof(GLfloat), indexed_vertices, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     data->vertexbuffer = vertexbuffer;
     free(indexed_vertices);
@@ -248,8 +253,10 @@ void load_coordinates(config_virtual_screen *config, vs_color_corrector *data) {
     GLuint uvbuffer;
     glGenBuffers(1, &uvbuffer);
     glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-    glBufferData(GL_ARRAY_BUFFER, 8, &indexed_uvs[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(GLfloat), indexed_uvs, GL_STATIC_DRAW);
+
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     data->uvbuffer = uvbuffer;
     free(indexed_uvs);
@@ -287,15 +294,14 @@ void setup_shaders(config_virtual_screen *, vs_color_corrector *data) {
 
 void initUniforms(config_virtual_screen *config, vs_color_corrector *data) {
     glUseProgram(data->program);
-    glUniform4f(data->brightAdjustUniform, config->white_balance.bright.r, config->white_balance.bright.g, config->white_balance.bright.b, 0.0);
-    glUniform4f(data->exposureAdjustUniform, config->white_balance.bright.r, config->white_balance.bright.g, config->white_balance.bright.b, 1.0);
 
-    glUniform4f(data->lowAdjustUniform, config->color_balance.shadows.r, config->color_balance.shadows.g, config->color_balance.shadows.b, 0.0);
-    glUniform4f(data->midAdjustUniform, config->color_balance.midtones.r, config->color_balance.midtones.g, config->color_balance.midtones.b, 0.0);
-    glUniform4f(data->highAdjustUniform, config->color_balance.highlights.r, config->color_balance.highlights.g, config->color_balance.highlights.b, 0.0);
+    glUniform3f(data->brightAdjustUniform, config->white_balance.bright.r, config->white_balance.bright.g, config->white_balance.bright.b);
+    glUniform3f(data->exposureAdjustUniform, config->white_balance.exposure.r, config->white_balance.exposure.g, config->white_balance.exposure.b);
+
+    glUniform3f(data->lowAdjustUniform, config->color_balance.shadows.r, config->color_balance.shadows.g, config->color_balance.shadows.b);
+    glUniform3f(data->midAdjustUniform, config->color_balance.midtones.r, config->color_balance.midtones.g, config->color_balance.midtones.b);
+    glUniform3f(data->highAdjustUniform, config->color_balance.highlights.r, config->color_balance.highlights.g, config->color_balance.highlights.b);
     glUniform1f(data->preserveLumUniform, config->color_balance.preserve_luminosity);
-
-    glUniform1i(data->textureUniform, GL_TEXTURE0);
 
     glUseProgram(0);
 }
@@ -311,8 +317,8 @@ void vs_color_corrector_render_texture(GLuint texture_id, vs_color_corrector *da
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture_id);
+        glUniform1i(data->textureUniform, 0);
 
-        // Bind to the VAO that has all the information about the vertices
         glBindVertexArray(data->vertexarray);
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
@@ -320,7 +326,6 @@ void vs_color_corrector_render_texture(GLuint texture_id, vs_color_corrector *da
         glDrawArrays(GL_QUADS, 0, 4);
 
         glBindTexture(GL_TEXTURE_2D, 0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
         glBindVertexArray(0);

@@ -87,6 +87,10 @@ void prepare_default_config(config_bounds *default_monitor_bounds, int no_displa
     default_config.renders[0].enable_render_video = 1;
     default_config.renders[0].text_render_mode = CONFIG_RENDER_MODE_MAIN;
 
+    default_config.renders[0].background_clear_color.r = 1.0;
+    default_config.renders[0].background_clear_color.g = 0.0;
+    default_config.renders[0].background_clear_color.b = 0.0;
+
     if (no_display) {
         default_config.count_display = 0;
         default_config.display = NULL;
@@ -108,29 +112,29 @@ void prepare_default_config(config_bounds *default_monitor_bounds, int no_displa
 
     default_config.display[0].virtual_screens[0].input_bounds.x = 0;
     default_config.display[0].virtual_screens[0].input_bounds.y = 0;
-    default_config.display[0].virtual_screens[0].input_bounds.w = default_monitor_bounds->w;
-    default_config.display[0].virtual_screens[0].input_bounds.h = default_monitor_bounds->h;
+    default_config.display[0].virtual_screens[0].input_bounds.w = 1;
+    default_config.display[0].virtual_screens[0].input_bounds.h = 1;
 
-    default_config.display[0].virtual_screens[0].output_bounds.x = 0;
-    default_config.display[0].virtual_screens[0].output_bounds.y = 0;
-    default_config.display[0].virtual_screens[0].output_bounds.w = default_monitor_bounds->w;
-    default_config.display[0].virtual_screens[0].output_bounds.h = default_monitor_bounds->h;
+    default_config.display[0].virtual_screens[0].output_bounds.x = -1;
+    default_config.display[0].virtual_screens[0].output_bounds.y = -1;
+    default_config.display[0].virtual_screens[0].output_bounds.w = 2;
+    default_config.display[0].virtual_screens[0].output_bounds.h = 2;
 
     default_config.display[0].virtual_screens[0].count_blends = 0;
     default_config.display[0].virtual_screens[0].count_help_lines = 0;
     default_config.display[0].virtual_screens[0].count_black_level_adjusts = 0;
 
-    default_config.display[0].virtual_screens[0].color_balance.shadows.r = 1.0;
-    default_config.display[0].virtual_screens[0].color_balance.shadows.g = 1.0;
-    default_config.display[0].virtual_screens[0].color_balance.shadows.b = 1.0;
+    default_config.display[0].virtual_screens[0].color_balance.shadows.r = 0.0;
+    default_config.display[0].virtual_screens[0].color_balance.shadows.g = 0.0;
+    default_config.display[0].virtual_screens[0].color_balance.shadows.b = 0.0;
 
-    default_config.display[0].virtual_screens[0].color_balance.midtones.r = 1.0;
-    default_config.display[0].virtual_screens[0].color_balance.midtones.g = 1.0;
-    default_config.display[0].virtual_screens[0].color_balance.midtones.b = 1.0;
+    default_config.display[0].virtual_screens[0].color_balance.midtones.r = 0.0;
+    default_config.display[0].virtual_screens[0].color_balance.midtones.g = 0.0;
+    default_config.display[0].virtual_screens[0].color_balance.midtones.b = 0.0;
 
-    default_config.display[0].virtual_screens[0].color_balance.highlights.r = 1.0;
-    default_config.display[0].virtual_screens[0].color_balance.highlights.g = 1.0;
-    default_config.display[0].virtual_screens[0].color_balance.highlights.b = 1.0;
+    default_config.display[0].virtual_screens[0].color_balance.highlights.r = 0.0;
+    default_config.display[0].virtual_screens[0].color_balance.highlights.g = 0.0;
+    default_config.display[0].virtual_screens[0].color_balance.highlights.b = 0.0;
 
     default_config.display[0].virtual_screens[0].color_balance.preserve_luminosity = 1;
 

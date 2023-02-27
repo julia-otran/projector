@@ -1,4 +1,5 @@
 #include "ogl-loader.h"
+#include "render.h"
 
 #ifndef _RENDER_VIDEO_H_
 #define _RENDER_VIDEO_H_

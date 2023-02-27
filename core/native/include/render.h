@@ -27,6 +27,7 @@ typedef struct {
     int render_width, render_height;
 } render_output_size;
 
+void initialize_renders();
 void activate_renders(GLFWwindow *shared_context, projection_config *config);
 void shutdown_renders();
 

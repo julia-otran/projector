@@ -38,6 +38,8 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_initialize(
     get_default_projection_monitor_bounds(&default_monitor, &no_display);
     prepare_default_config(&default_monitor, no_display);
 
+    initialize_renders();
+
     initialized = 1;
 }
 
@@ -101,7 +103,7 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setVideoBuf
     (JNIEnv *, jobject, jlong buf_address, jint width, jint height, jboolean crop) {
 
     render_video_set_crop_video(crop);
-    render_video_set_buffer(buf_address, width, height);
+    render_video_set_buffer((void*)buf_address, width, height);
 }
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setRenderVideoBuffer

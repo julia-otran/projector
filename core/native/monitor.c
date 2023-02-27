@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "debug.h"
 #include "ogl-loader.h"
@@ -12,6 +13,9 @@ static GLFWwindow *gl_share_context = NULL;
 
 static render_output *render_output_config;
 static int render_output_config_count;
+static GLuint test_tex;
+
+static void* random_data = NULL;
 
 void reload_monitors() {
     int found_monitors_count;
@@ -27,6 +31,7 @@ void reload_monitors() {
         found_monitors[i].is_primary = i == 0;
         found_monitors[i].window = NULL;
         found_monitors[i].config = NULL;
+        found_monitors[i].virtual_screen_data = NULL;
     }
 
     monitors_count = found_monitors_count;
@@ -101,8 +106,15 @@ void shutdown_monitors() {
 
     for (int i=0; i<monitors_count; i++) {
         monitor *m = &monitors[i];
+
         destroy_window(m);
+
+        if (m->virtual_screen_data) {
+            free(m->virtual_screen_data);
+        }
     }
+
+    free(monitors);
 }
 
 void activate_monitors(projection_config *config) {
@@ -123,6 +135,11 @@ void activate_monitors(projection_config *config) {
         }
 
         if (!found) {
+            if (m->virtual_screen_data) {
+                free(m->virtual_screen_data);
+                m->virtual_screen_data = NULL;
+            }
+
             m->config = NULL;
             destroy_window(m);
         }
@@ -179,6 +196,7 @@ void prepare_monitors(render_output *data, int render_output_count) {
             glewInit();
 
             glfwGetFramebufferSize(m->window, &width, &height);
+            glViewport(0, 0, width, height);
 
             glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
@@ -186,10 +204,41 @@ void prepare_monitors(render_output *data, int render_output_count) {
             glOrtho(0.f, width, height, 0.f, 0.f, 1.f );
 
             for (int j=0; j<m->config->count_virtual_screen; j++) {
-                initialize_virtual_screen(&m->config->virtual_screens[i], &m->virtual_screen_data[i]);
+                initialize_virtual_screen(&m->config->virtual_screens[j], &m->virtual_screen_data[j]);
             }
 
             glPopMatrix();
+
+            random_data = malloc(width * height * 4);
+            int *ptr = (int*) random_data;
+
+            for (int j=0; j < (width * height * 4 / sizeof(int)); j++) {
+                ptr[j] = (j << 8) | 0xff;
+            }
+
+            glGenTextures(1, &test_tex);
+            glBindTexture(GL_TEXTURE_2D, test_tex);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,GL_RGBA, GL_UNSIGNED_BYTE, random_data);
+
+            // Poor filtering. Needed !
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glBindTexture(GL_TEXTURE_2D, 0);
+        }
+    }
+}
+
+void deallocate_monitors() {
+    for (int i=0; i<monitors_count; i++) {
+        monitor *m = &monitors[i];
+
+        if (m->virtual_screen_data) {
+            for (int j=0; j<m->config->count_virtual_screen; j++) {
+                if (m->virtual_screen_data[j]) {
+                    shutdown_virtual_screen(m->virtual_screen_data[j]);
+                    m->virtual_screen_data[j] = NULL;
+                }
+            }
         }
     }
 }
@@ -214,18 +263,22 @@ void render_monitors() {
         if (m->window) {
             glfwMakeContextCurrent(m->window);
             glfwGetFramebufferSize(m->window, &width, &height);
+            glViewport(0, 0, width, height);
 
-            glClear(GL_COLOR_BUFFER_BIT);
+            glEnableClientState(GL_VERTEX_ARRAY);
+            glEnable(GL_TEXTURE_2D);
+
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             glPushMatrix();
             glOrtho(0.f, width, height, 0.f, 0.f, 1.f );
 
             for (int j=0; j < m->config->count_virtual_screen; j++) {
-                void *vs_data = &m->virtual_screen_data[i];
-                texture_id = find_texture_id(&m->config->virtual_screens[i]);
+                void *vs_data = m->virtual_screen_data[j];
+                texture_id = find_texture_id(&m->config->virtual_screens[j]);
 
-                if (texture_id) {
-                    render_virtual_screen(texture_id, vs_data);
+                if (test_tex) {
+                    render_virtual_screen(test_tex, vs_data);
                 }
             }
 

@@ -65,12 +65,14 @@ void render_fader_fade_in(render_fader_instance *instance, int fade_id, int dura
 }
 
 void render_fader_fade_out(render_fader_instance *instance, int fade_id, int duration_ms) {
-    fade_node *node = find_or_create_fade_node(instance, fade_id);
+    fade_node *node = find_fade_node(instance, fade_id);
 
-    node->mode = RENDER_FADER_MODE_OUT;
-    node->duration_ms = duration_ms;
-    clock_gettime(CLOCK_REALTIME, &node->start_time_spec);
-    node->dealocate_on_finish = 0;
+    if (node) {
+        node->mode = RENDER_FADER_MODE_OUT;
+        node->duration_ms = duration_ms;
+        clock_gettime(CLOCK_REALTIME, &node->start_time_spec);
+        node->dealocate_on_finish = 0;
+    }
 }
 
 void render_fader_set_alpha(fade_node *node) {
@@ -123,6 +125,7 @@ void render_fader_cleanup(render_fader_instance *instance) {
     fade_node *current = (*previous_ptr);
 
     while (current) {
+        log_debug("Bad cleanup!!\n");
         if (render_fader_is_hidden(current)) {
             (*previous_ptr) = (fade_node *) current->next;
             free(current);

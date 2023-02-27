@@ -11,5 +11,6 @@ typedef struct {
 
 void initialize_virtual_screen(config_virtual_screen *config, void **data);
 void render_virtual_screen(GLuint texture_id, void *data);
+void shutdown_virtual_screen(void *data);
 
 #endif

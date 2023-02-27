@@ -8,10 +8,10 @@
 #include "config-parse.h"
 
 void parse_config_bounds(cJSON *config_bounds_json, config_bounds *out) {
-    out->x = cJSON_GetObjectItemCaseSensitive(config_bounds_json, "x")->valueint;
-    out->y = cJSON_GetObjectItemCaseSensitive(config_bounds_json, "y")->valueint;
-    out->w = cJSON_GetObjectItemCaseSensitive(config_bounds_json, "w")->valueint;
-    out->h = cJSON_GetObjectItemCaseSensitive(config_bounds_json, "h")->valueint;
+    out->x = cJSON_GetObjectItemCaseSensitive(config_bounds_json, "x")->valuedouble;
+    out->y = cJSON_GetObjectItemCaseSensitive(config_bounds_json, "y")->valuedouble;
+    out->w = cJSON_GetObjectItemCaseSensitive(config_bounds_json, "w")->valuedouble;
+    out->h = cJSON_GetObjectItemCaseSensitive(config_bounds_json, "h")->valuedouble;
 }
 
 void parse_config_blend(cJSON *config_blend_json, config_blend *out) {
