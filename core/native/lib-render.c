@@ -101,7 +101,7 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setTextImag
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setVideoBuffer
     (JNIEnv *, jobject, jlong buf_address, jint width, jint height, jboolean crop) {
 
-    log_debug("setVideoBuffer %p %i %i\n", (void*)buf_address, width, height);
+    log_debug("setVideoBuffer %p %i %i %i\n", (void*)buf_address, width, height, crop);
 
     render_video_src_set_crop_video(crop);
     render_video_src_set_buffer((void*)buf_address, width, height);

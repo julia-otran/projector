@@ -28,8 +28,6 @@ static render_pixel_unpack_buffer_instance *buffer_instance;
 
 static GLuint texture_id;
 
-static void* random_data = NULL;
-
 void render_video_initialize() {
     src_crop = 0;
     src_update_buffer = 0;
@@ -117,13 +115,6 @@ void render_video_update_buffers() {
 
 void render_video_create_assets() {
     glGenTextures(1, &texture_id);
-
-    random_data = malloc(1920 * 1080 * 4);
-    int *ptr = (int*) random_data;
-
-    for (int j=0; j < (1920 * 1080 * 4 / sizeof(int)); j++) {
-        ptr[j] = 0x999999FF;
-    }
 }
 
 void render_video_render(render_layer *layer) {
@@ -136,11 +127,9 @@ void render_video_render(render_layer *layer) {
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
         glBindTexture(GL_TEXTURE_2D, texture_id);
 
-        // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, dst_width, dst_height, 0,  GL_BGR_INTEGER, GL_UNSIGNED_INT, 0);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dst_width, dst_height, 0, GL_BGRA, GL_UNSIGNED_BYTE, 0);
-        // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1920, 1080, 0, GL_RGB, GL_UNSIGNED_BYTE, random_data);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
         glBindTexture(GL_TEXTURE_2D, 0);
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
@@ -161,7 +150,7 @@ void render_video_render(render_layer *layer) {
     float h_sz = layer->config.w * h_scale;
 
     if (src_crop) {
-        if (w_sz > h_sz) {
+        if (w_sz > layer->config.w) {
             w = w_sz;
             h = h_scale * w;
         } else {
@@ -169,7 +158,7 @@ void render_video_render(render_layer *layer) {
             w = w_scale * h;
         }
     } else {
-        if (w_sz < h_sz) {
+        if (w_sz < layer->config.w) {
             w = w_sz;
             h = h_scale * w;
         } else {

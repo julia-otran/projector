@@ -154,6 +154,8 @@ public class ProjectionVideo implements Projectable {
 
     private void updateBufferAddress() {
         if (buffers != null && buffers[0] != null && render.get()) {
+            System.out.println("Crop Video");
+            System.out.println(cropVideo);
             delegate.getBridge().setVideoBuffer(UnsafeAccess.getAddress(buffers[0]), videoW, videoH, cropVideo);
         }
     }
