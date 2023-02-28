@@ -137,6 +137,7 @@
                                 <fileName>monitor.c</fileName>
                                 <fileName>render.c</fileName>
                                 <fileName>render-fader.c</fileName>
+                                <fileName>render-pixel-unpack-buffer.c</fileName>
                                 <fileName>render-text.c</fileName>
                                 <fileName>render-video.c</fileName>
                                 <fileName>virtual-screen.c</fileName>

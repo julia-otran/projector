@@ -1,9 +1,14 @@
 #include <pthread.h>
 #include <math.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
 
+#include "debug.h"
 #include "ogl-loader.h"
 #include "render-fader.h"
 #include "render-video.h"
+#include "render-pixel-unpack-buffer.h"
 
 static int src_crop;
 static void *src_buffer;
@@ -12,17 +17,18 @@ static int src_height;
 static int src_render;
 static int src_update_buffer;
 
-static int dst_width;
-static int dst_height;
-static int dst_render;
-static int dst_crop;
+static int dst_width = 0;
+static int dst_height = 0;
 
 static pthread_mutex_t thread_mutex;
 static pthread_cond_t thread_cond;
 
 static render_fader_instance *fader_instance;
+static render_pixel_unpack_buffer_instance *buffer_instance;
 
 static GLuint texture_id;
+
+static void* random_data = NULL;
 
 void render_video_initialize() {
     src_crop = 0;
@@ -35,90 +41,126 @@ void render_video_initialize() {
     render_fader_init(&fader_instance);
 }
 
-void render_video_set_crop_video(int in_crop) {
-    pthread_mutex_lock(&thread_mutex);
+void render_video_src_set_crop_video(int in_crop) {
     src_crop = in_crop;
-    pthread_mutex_unlock(&thread_mutex);
 }
 
-void render_video_set_buffer(void *buffer, int width, int height) {
-    pthread_mutex_lock(&thread_mutex);
-
+void render_video_src_set_buffer(void *buffer, int width, int height) {
     src_buffer = buffer;
     src_width = width;
     src_height = height;
-
-    pthread_mutex_unlock(&thread_mutex);
 }
 
-void render_video_set_render(int render) {
-    pthread_mutex_lock(&thread_mutex);
+void render_video_src_set_render(int render) {
     src_render = render;
+}
+
+void render_video_src_buffer_update() {
+    pthread_mutex_lock(&thread_mutex);
+
+    if (src_update_buffer == 0) {
+        src_update_buffer = 1;
+        pthread_cond_wait(&thread_cond, &thread_mutex);
+    }
+
     pthread_mutex_unlock(&thread_mutex);
 }
 
-void render_video_update_buffer() {
-    pthread_mutex_lock(&thread_mutex);
-
-    src_update_buffer = 1;
-
-    pthread_cond_wait(&thread_cond, &thread_mutex);
-    pthread_mutex_unlock(&thread_mutex);
+void render_video_create_buffers() {
+    render_pixel_unpack_buffer_create(&buffer_instance);
 }
 
-void render_video_generate_assets() {
-    glGenTextures(1, &texture_id);
-    dst_render = 0;
+void render_video_deallocate_buffers() {
+    render_pixel_unpack_buffer_deallocate(buffer_instance);
+    buffer_instance = NULL;
 }
 
-void render_video_upload_texes() {
-    pthread_mutex_lock(&thread_mutex);
+void render_video_update_buffers() {
+    int buffer_updated = 0;
 
-    dst_crop = src_crop;
+    render_pixel_unpack_buffer_node* buffer = render_pixel_unpack_buffer_dequeue_for_write(buffer_instance);
+
+    pthread_mutex_lock(&thread_mutex);
 
     if (src_update_buffer) {
-        dst_width = src_width;
-        dst_height = src_height;
-
-        glBindTexture(GL_TEXTURE_2D, texture_id);
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, src_width, src_height, 0, GL_RGB, GL_UNSIGNED_BYTE, src_buffer);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-        glBindTexture(GL_TEXTURE_2D, 0);
-
         src_update_buffer = 0;
+
+        if (buffer) {
+            glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
+
+            if (buffer->width != src_width || buffer->height != src_height) {
+                glBufferData(GL_PIXEL_UNPACK_BUFFER, src_width * src_height * 4, 0, GL_DYNAMIC_DRAW);
+                buffer->width = src_width;
+                buffer->height = src_height;
+            }
+
+            buffer_updated = 1;
+
+            void *data = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+            memcpy(data, src_buffer, src_width * src_height * 4);
+            glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+
+            glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        }
+
         pthread_cond_signal(&thread_cond);
     }
 
-    if (dst_render != src_render) {
-        if (src_render && src_buffer) {
-            dst_render = src_render;
-            render_fader_fade_in(fader_instance, 1, 1000);
-        } else {
-            dst_render = src_render;
-            render_fader_fade_out(fader_instance, 1, 1000);
-        }
-    }
-
     pthread_mutex_unlock(&thread_mutex);
+
+    if (buffer_updated) {
+        render_pixel_unpack_buffer_enqueue_for_read(buffer_instance, buffer);
+    } else {
+        render_pixel_unpack_buffer_enqueue_for_write(buffer_instance, buffer);
+    }
+}
+
+void render_video_create_assets() {
+    glGenTextures(1, &texture_id);
+
+    random_data = malloc(1920 * 1080 * 4);
+    int *ptr = (int*) random_data;
+
+    for (int j=0; j < (1920 * 1080 * 4 / sizeof(int)); j++) {
+        ptr[j] = 0x999999FF;
+    }
 }
 
 void render_video_render(render_layer *layer) {
+    render_pixel_unpack_buffer_node* buffer = render_pixel_unpack_buffer_dequeue_for_read(buffer_instance);
+
+    if (buffer) {
+        dst_width = buffer->width;
+        dst_height = buffer->height;
+
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
+        glBindTexture(GL_TEXTURE_2D, texture_id);
+
+        // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, dst_width, dst_height, 0,  GL_BGR_INTEGER, GL_UNSIGNED_INT, 0);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dst_width, dst_height, 0, GL_BGRA, GL_UNSIGNED_BYTE, 0);
+        // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1920, 1080, 0, GL_RGB, GL_UNSIGNED_BYTE, random_data);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    }
+
+    render_pixel_unpack_buffer_enqueue_for_write(buffer_instance, buffer);
+
     if (dst_width <= 0 || dst_height <= 0) {
         return;
     }
 
     float x, y, w, h;
 
-    float w_scale = (dst_width / dst_height);
-    float h_scale = (dst_height / dst_width);
+    float w_scale = (dst_width / (float)dst_height);
+    float h_scale = (dst_height / (float)dst_width);
 
     float w_sz = layer->config.h * w_scale;
     float h_sz = layer->config.w * h_scale;
 
-    if (dst_crop) {
+    if (src_crop) {
         if (w_sz > h_sz) {
             w = w_sz;
             h = h_scale * w;
@@ -139,22 +181,24 @@ void render_video_render(render_layer *layer) {
     x = (layer->config.w - w) / 2;
     y = (layer->config.h - h) / 2;
 
-    render_fader_for_each(fader_instance) {
-        glBindTexture(GL_TEXTURE_2D, texture_id);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnable(GL_TEXTURE_2D);
 
-        glBegin(GL_QUADS);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
 
-        render_fader_set_alpha(node);
+    glBegin(GL_QUADS);
 
-        glTexCoord2i(0,0); glVertex2d(x, y);
-        glTexCoord2i(0, 1); glVertex2d(x, y + h);
-        glTexCoord2i(1, 1); glVertex2d(x + w, y + h);
-        glTexCoord2i(1, 0); glVertex2d(x + w, y);
+    // TODO: Fader
+    // render_fader_set_alpha(node);
 
-        glEnd();
+    glTexCoord2f(0.0, 0.0); glVertex2d(x, y);
+    glTexCoord2f(0.0, 1.0); glVertex2d(x, y + h);
+    glTexCoord2f(1.0, 1.0); glVertex2d(x + w, y + h);
+    glTexCoord2f(1.0, 0.0); glVertex2d(x + w, y);
 
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
+    glEnd();
+
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 void render_video_deallocate_assets() {
     glDeleteTextures(1, &texture_id);

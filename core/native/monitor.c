@@ -13,9 +13,6 @@ static GLFWwindow *gl_share_context = NULL;
 
 static render_output *render_output_config;
 static int render_output_config_count;
-static GLuint test_tex;
-
-static void* random_data = NULL;
 
 void reload_monitors() {
     int found_monitors_count;
@@ -182,7 +179,7 @@ int window_should_close() {
     return 0;
 }
 
-void prepare_monitors(render_output *data, int render_output_count) {
+void monitors_init(render_output *data, int render_output_count) {
     int width, height;
 
     render_output_config = data;
@@ -193,12 +190,12 @@ void prepare_monitors(render_output *data, int render_output_count) {
 
         if (m->window) {
             glfwMakeContextCurrent(m->window);
+            glfwSwapInterval(1);
+
             glewInit();
 
             glfwGetFramebufferSize(m->window, &width, &height);
             glViewport(0, 0, width, height);
-
-            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
             glPushMatrix();
             glOrtho(0.f, width, height, 0.f, 0.f, 1.f );
@@ -208,27 +205,11 @@ void prepare_monitors(render_output *data, int render_output_count) {
             }
 
             glPopMatrix();
-
-            random_data = malloc(width * height * 4);
-            int *ptr = (int*) random_data;
-
-            for (int j=0; j < (width * height * 4 / sizeof(int)); j++) {
-                ptr[j] = (j << 8) | 0xff;
-            }
-
-            glGenTextures(1, &test_tex);
-            glBindTexture(GL_TEXTURE_2D, test_tex);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,GL_RGBA, GL_UNSIGNED_BYTE, random_data);
-
-            // Poor filtering. Needed !
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glBindTexture(GL_TEXTURE_2D, 0);
         }
     }
 }
 
-void deallocate_monitors() {
+void monitors_terminate() {
     for (int i=0; i<monitors_count; i++) {
         monitor *m = &monitors[i];
 
@@ -253,7 +234,18 @@ GLuint find_texture_id(config_virtual_screen *vs_config) {
     return 0;
 }
 
-void render_monitors() {
+void monitor_prepare_renders_context() {
+    for (int i=0; i<monitors_count; i++) {
+        monitor *m = &monitors[i];
+
+        if (m->window) {
+            glfwMakeContextCurrent(m->window);
+            break;
+        }
+    }
+}
+
+void monitors_cycle() {
     GLuint texture_id;
     int width, height;
 
@@ -265,20 +257,18 @@ void render_monitors() {
             glfwGetFramebufferSize(m->window, &width, &height);
             glViewport(0, 0, width, height);
 
-            glEnableClientState(GL_VERTEX_ARRAY);
-            glEnable(GL_TEXTURE_2D);
-
+            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             glPushMatrix();
-            glOrtho(0.f, width, height, 0.f, 0.f, 1.f );
+            glOrtho(0.0, width, height, 0.0, 0.0, 1.0);
 
             for (int j=0; j < m->config->count_virtual_screen; j++) {
                 void *vs_data = m->virtual_screen_data[j];
                 texture_id = find_texture_id(&m->config->virtual_screens[j]);
 
-                if (test_tex) {
-                    render_virtual_screen(test_tex, vs_data);
+                if (texture_id) {
+                    render_virtual_screen(texture_id, vs_data);
                 }
             }
 

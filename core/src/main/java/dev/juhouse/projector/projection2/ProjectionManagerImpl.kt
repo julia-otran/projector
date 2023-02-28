@@ -17,6 +17,8 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
     private val backgroundVideo = ProjectionBackgroundVideo(ProjectionVideo(delegate))
     private val background = ProjectionBackground(delegate)
     private val currentProjectable = ReadOnlyObjectWrapper<Projectable?>()
+    private val terminateList = ArrayList<Projectable>()
+
     override fun init() {
         label.init()
         backgroundVideo.init()
@@ -25,6 +27,7 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
     override fun finish() {
         label.finish()
         backgroundVideo.finish()
+        terminateList.forEach { it.finish() }
     }
     override fun setText(text: WrappedText?) {
         label.setText(text)
@@ -47,7 +50,12 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
     }
 
     override fun createImage(): ProjectionImage {
-        return ProjectionImage(delegate)
+        val image = ProjectionImage(delegate)
+
+        terminateList.add(image)
+
+        image.init()
+        return image
     }
 
     override fun setProjectable(projectable: Projectable?) {
@@ -55,8 +63,8 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
 
         currentProjectable.set(projectable)
 
+        backgroundVideo.setRender(projectable == null)
         projectable?.setRender(true)
-        backgroundVideo.setRender(projectable != null)
     }
 
     override fun getWrapperFactory(): WrapperFactory {
@@ -80,7 +88,12 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
     }
 
     override fun createPlayer(): ProjectionPlayer {
-        return ProjectionPlayer(ProjectionVideo(delegate))
+        val player = ProjectionPlayer(ProjectionVideo(delegate))
+
+        terminateList.add(player)
+
+        player.init()
+        return player;
     }
 
     override fun getDarkenBackground(): Boolean {
@@ -93,9 +106,12 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
 
     override fun stop(projectable: Projectable?) {
         projectable?.finish()
+        terminateList.remove(projectable)
     }
 
     override fun setMusicForBackground(musicId: Int?, preferred: File?) {
+        backgroundVideo.setRender(currentProjectable.get() == null)
+
         if (musicId != null) {
             backgroundVideo.startBackground(musicId, preferred)
         } else {

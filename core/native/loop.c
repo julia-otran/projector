@@ -4,6 +4,7 @@
 #include "debug.h"
 #include "loop.h"
 #include "ogl-loader.h"
+#include "render.h"
 
 static int run;
 static pthread_t thread_id;
@@ -14,12 +15,15 @@ void* loop(void*) {
     int render_output_count;
 
     get_render_output(&output, &render_output_count);
-    prepare_monitors(output, render_output_count);
+    monitors_init(output, render_output_count);
+
+    monitor_prepare_renders_context();
+    renders_init();
 
     while (run) {
-        lock_renders();
-        render_monitors();
-        unlock_renders();
+        monitor_prepare_renders_context();
+        renders_cycle();
+        monitors_cycle();
 
         glfwPollEvents();
 
@@ -28,7 +32,8 @@ void* loop(void*) {
         }
     }
 
-    deallocate_monitors();
+    renders_terminate();
+    monitors_terminate();
 
     return NULL;
 }

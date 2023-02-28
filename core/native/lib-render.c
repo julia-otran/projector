@@ -67,7 +67,6 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_loadConfig(
 
     activate_monitors(config);
     activate_renders(get_gl_share_context(), config);
-
     start_main_loop();
 }
 
@@ -102,20 +101,22 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setTextImag
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setVideoBuffer
     (JNIEnv *, jobject, jlong buf_address, jint width, jint height, jboolean crop) {
 
-    render_video_set_crop_video(crop);
-    render_video_set_buffer((void*)buf_address, width, height);
+    log_debug("setVideoBuffer %p %i %i\n", (void*)buf_address, width, height);
+
+    render_video_src_set_crop_video(crop);
+    render_video_src_set_buffer((void*)buf_address, width, height);
 }
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setRenderVideoBuffer
   (JNIEnv *, jobject, jboolean render) {
 
-    render_video_set_render(render);
+    render_video_src_set_render(render);
 }
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_updateVideoBuffer
   (JNIEnv *, jobject) {
 
-  render_video_update_buffer();
+  render_video_src_buffer_update();
 
   }
 

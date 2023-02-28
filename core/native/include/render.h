@@ -7,15 +7,8 @@
 
 typedef struct {
     config_render config;
-    GLFWwindow *window;
-    pthread_t thread_id;
-
-    pthread_mutex_t thread_mutex;
-    pthread_cond_t thread_cond;
-
-    pthread_mutex_t asset_thread_mutex;
-
     GLuint rendered_texture;
+    GLuint framebuffer_name;
 } render_layer;
 
 typedef struct {
@@ -33,6 +26,10 @@ void shutdown_renders();
 
 void lock_renders();
 void unlock_renders();
+
+void renders_init();
+void renders_cycle();
+void renders_terminate();
 
 void get_render_output(render_output **out, int *render_output_count);
 

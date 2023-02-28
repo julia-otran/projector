@@ -142,6 +142,8 @@ public class ProjectionVideo implements Projectable {
             if (previewUpdateCount >= 10) {
                 nativeBuffers[0].asIntBuffer().get(((DataBufferInt) image.getRaster().getDataBuffer()).getData());
                 previewUpdateCount = 0;
+            } else {
+                previewUpdateCount += 1;
             }
 
             if (render.get()) {

@@ -21,15 +21,15 @@ typedef struct {
 
 void reload_monitors();
 void activate_monitors(projection_config *config);
-void swap_monitor_buffers();
 void shutdown_monitors();
 
 void get_default_projection_monitor_bounds(config_bounds *in, int *no_secondary_mon);
 GLFWwindow* get_gl_share_context();
 int window_should_close();
 
-void prepare_monitors(render_output *data, int render_output_count);
-void render_monitors();
-void deallocate_monitors();
+void monitors_init(render_output *data, int render_output_count);
+void monitor_prepare_renders_context();
+void monitors_cycle();
+void monitors_terminate();
 
 #endif
