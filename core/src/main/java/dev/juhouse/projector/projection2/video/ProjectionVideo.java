@@ -22,7 +22,7 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 
-public class ProjectionVideo implements Projectable {
+public class ProjectionVideo {
     public interface BufferSizeChangeCallback {
         void onBufferSizeChange(int width, int height);
     }
@@ -55,8 +55,6 @@ public class ProjectionVideo implements Projectable {
     public ProjectionVideo(CanvasDelegate delegate) {
         this.delegate = delegate;
     }
-
-    @Override
     public void init() {
         renderCallback = new ProjectionVideo.MyRenderCallback();
         bufferFormatCallback = new ProjectionVideo.MyBufferFormatCallback();
@@ -92,7 +90,6 @@ public class ProjectionVideo implements Projectable {
         }
     }
 
-    @Override
     public void finish() {
         this.player.release();
     }
@@ -154,8 +151,6 @@ public class ProjectionVideo implements Projectable {
 
     private void updateBufferAddress() {
         if (buffers != null && buffers[0] != null && render.get()) {
-            System.out.println("Crop Video");
-            System.out.println(cropVideo);
             delegate.getBridge().setVideoBuffer(UnsafeAccess.getAddress(buffers[0]), videoW, videoH, cropVideo);
         }
     }

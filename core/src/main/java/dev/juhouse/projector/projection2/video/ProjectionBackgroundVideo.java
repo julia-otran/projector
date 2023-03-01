@@ -36,6 +36,11 @@ public class ProjectionBackgroundVideo implements Projectable {
     }
 
     @Override
+    public void rebuild() {
+
+    }
+
+    @Override
     public void setRender(boolean render) {
         externalRender = render;
         updateRender();

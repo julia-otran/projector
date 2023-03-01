@@ -78,25 +78,36 @@ void render_text_deallocate_buffers() {
 }
 
 void render_text_update_buffers() {
+    int buffer_updated = 0;
+
     render_pixel_unpack_buffer_node* buffer = render_pixel_unpack_buffer_dequeue_for_write(buffer_instance);
 
     pthread_mutex_lock(&thread_mutex);
 
-    if (pixel_data_changed) {
-        if (buffer) {
-            buffer->updated = 1;
+    if (pixel_data_changed && buffer) {
+        buffer_updated = 1;
 
-            glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
-            glBufferData(GL_PIXEL_UNPACK_BUFFER, width * height * 4, share_pixel_data, GL_STREAM_DRAW);
-            glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
 
-            pixel_data_changed = 0;
+        if (buffer->width != width || buffer->height != height) {
+            glBufferData(GL_PIXEL_UNPACK_BUFFER, width * height * 4, 0, GL_DYNAMIC_DRAW);
+            buffer->width = width;
+            buffer->height = height;
         }
+
+        void *data = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+        memcpy(data, share_pixel_data, width * height * 4);
+        glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+        buffer_updated = 1;
+        pixel_data_changed = 0;
     }
 
     pthread_mutex_unlock(&thread_mutex);
 
-    if (buffer && buffer->updated) {
+    if (buffer_updated) {
         render_pixel_unpack_buffer_enqueue_for_read(buffer_instance, buffer);
     } else {
         render_pixel_unpack_buffer_enqueue_for_write(buffer_instance, buffer);
@@ -113,9 +124,7 @@ void render_text_render(render_layer *layer) {
         // TODO: add a debouce. if text changes too fast we may allocate too many textures
         render_pixel_unpack_buffer_node* buffer = render_pixel_unpack_buffer_dequeue_for_read(buffer_instance);
 
-        if (buffer && buffer->updated) {
-            buffer->updated = 0;
-
+        if (buffer) {
             GLuint texture_id = 0;
             glGenTextures(1, &texture_id);
 
@@ -123,8 +132,8 @@ void render_text_render(render_layer *layer) {
             glBindTexture(GL_TEXTURE_2D, texture_id);
 
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
             glBindTexture(GL_TEXTURE_2D, 0);
             glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
@@ -142,8 +151,8 @@ void render_text_render(render_layer *layer) {
     w = layer->config.text_area.w;
     h = layer->config.text_area.h;
 
-    ws = w * 1.01;
-    hs = h * 1.01;
+    ws = w + w * 0.01;
+    hs += h + h * 0.01;
     xs = x - ((ws - w) / 2);
     ys = y - ((hs - h) / 2);
 
@@ -151,10 +160,9 @@ void render_text_render(render_layer *layer) {
         if (node->fade_id) {
             glBindTexture(GL_TEXTURE_2D, node->fade_id);
 
-            render_fader_set_alpha(node);
+            float alpha = render_fader_get_alpha(node);
+            glColor4f(0.0, 0.0, 0.0, alpha * alpha);
 
-            // TODO: Need shader to invert the tex color to create the border of chars
-            // Also consider replacing color for the subtitles
             glBegin(GL_QUADS);
 
             glTexCoord2i(0,0); glVertex2d(xs, ys);
@@ -163,6 +171,13 @@ void render_text_render(render_layer *layer) {
             glTexCoord2i(1, 0); glVertex2d(xs + ws, ys);
 
             glEnd();
+
+            glColor4f(
+                layer->config.text_color.r * alpha,
+                layer->config.text_color.g * alpha,
+                layer->config.text_color.b * alpha,
+                alpha
+            );
 
             glBegin(GL_QUADS);
 

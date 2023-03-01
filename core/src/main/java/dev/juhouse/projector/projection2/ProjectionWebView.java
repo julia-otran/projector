@@ -25,7 +25,10 @@ import javax.swing.*;
  */
 public class ProjectionWebView implements Projectable {
 
-    // TODO: Need a thread to update bridge
+    // TODO: Update bridge buffer
+    // Maybe is there a way to read directly a JavaFX image buffer, directly in the bridge,
+    // or doing something like is done with Vlc4j
+    // This could be nice because we won't need to have panel -> swingnode -> panel
 
     private final CanvasDelegate delegate;
 
@@ -109,6 +112,11 @@ public class ProjectionWebView implements Projectable {
     @Override
     public void finish() {
 
+    }
+
+    @Override
+    public void rebuild() {
+        // TODO: Adjust all webview sizes
     }
 
     @Override

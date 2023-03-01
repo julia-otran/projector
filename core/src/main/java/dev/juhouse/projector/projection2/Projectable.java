@@ -15,5 +15,7 @@ public interface Projectable {
 
     void finish();
 
+    void rebuild();
+
     void setRender(boolean render);
 }

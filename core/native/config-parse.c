@@ -115,12 +115,15 @@ void parse_config_render(cJSON *config_render_json, config_render *out) {
     out->w = cJSON_GetObjectItemCaseSensitive(config_render_json, "w")->valueint;
     out->h = cJSON_GetObjectItemCaseSensitive(config_render_json, "h")->valueint;
 
+    parse_config_color_factor(cJSON_GetObjectItemCaseSensitive(config_render_json, "background_clear_color"), &out->background_clear_color);
+    parse_config_color_factor(cJSON_GetObjectItemCaseSensitive(config_render_json, "text_color"), &out->text_color);
+
     parse_config_bounds(cJSON_GetObjectItemCaseSensitive(config_render_json, "text_area"), &out->text_area);
 
     out->enable_render_background_assets = cJSON_GetObjectItemCaseSensitive(config_render_json, "enable_render_background_assets")->valueint;
     out->enable_render_image = cJSON_GetObjectItemCaseSensitive(config_render_json, "enable_render_image")->valueint;
     out->enable_render_video = cJSON_GetObjectItemCaseSensitive(config_render_json, "enable_render_video")->valueint;
-    out->text_render_mode = cJSON_GetObjectItemCaseSensitive(config_render_json, "text_render_mode")->valueint;
+    out->render_mode = cJSON_GetObjectItemCaseSensitive(config_render_json, "render_mode")->valueint;
 }
 
 void parse_projection_config(cJSON *projection_config_json, projection_config *out) {

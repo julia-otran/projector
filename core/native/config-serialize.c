@@ -52,6 +52,7 @@ cJSON* serialize_config_color_balance(config_color_balance *in) {
     cJSON_AddItemToObject(config_color_balance_json, "midtones", serialize_config_color_factor(&in->midtones));
     cJSON_AddItemToObject(config_color_balance_json, "highlights", serialize_config_color_factor(&in->highlights));
 
+    // TODO: Fix, it must be serialized as number
     cJSON_AddItemToObject(config_color_balance_json, "preserve_luminosity", cJSON_CreateNumber(in->preserve_luminosity));
 
     return config_color_balance_json;
@@ -135,9 +136,10 @@ cJSON* serialize_config_render(config_render *in) {
     cJSON_AddItemToObject(config_render_json, "enable_render_background_assets", cJSON_CreateNumber(in->enable_render_background_assets));
     cJSON_AddItemToObject(config_render_json, "enable_render_image", cJSON_CreateNumber(in->enable_render_image));
     cJSON_AddItemToObject(config_render_json, "enable_render_video", cJSON_CreateNumber(in->enable_render_video));
-    cJSON_AddItemToObject(config_render_json, "text_render_mode", cJSON_CreateNumber(in->text_render_mode));
+    cJSON_AddItemToObject(config_render_json, "render_mode", cJSON_CreateNumber(in->render_mode));
 
     cJSON_AddItemToObject(config_render_json, "background_clear_color", serialize_config_color_factor(&in->background_clear_color));
+    cJSON_AddItemToObject(config_render_json, "text_color", serialize_config_color_factor(&in->text_color));
 
     return config_render_json;
 }

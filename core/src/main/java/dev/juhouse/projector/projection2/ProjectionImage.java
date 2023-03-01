@@ -38,6 +38,11 @@ public class ProjectionImage implements Projectable {
     }
 
     @Override
+    public void rebuild() {
+
+    }
+
+    @Override
     public void setRender(boolean render) {
         this.render = render;
         update();

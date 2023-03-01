@@ -37,7 +37,7 @@ void render_fader_cleanup(render_fader_instance *instance);
 
 void render_fader_terminate(render_fader_instance *instance);
 
-void render_fader_set_alpha(fade_node *node);
+float render_fader_get_alpha(fade_node *node);
 
 #define render_fader_for_each(INSTANCE) \
     for (fade_node *node = INSTANCE->fade_node_list; node != NULL; node = node->next)

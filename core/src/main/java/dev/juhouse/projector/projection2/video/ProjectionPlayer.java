@@ -59,6 +59,11 @@ public class ProjectionPlayer implements Projectable, ProjectionVideo.BufferSize
         video.setBufferSizeChangeCallback(null);
     }
 
+    @Override
+    public void rebuild() {
+
+    }
+
     public PlayerPreview getPreviewPanel() {
         return preview;
     }

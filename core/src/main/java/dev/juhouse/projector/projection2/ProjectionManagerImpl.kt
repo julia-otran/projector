@@ -17,18 +17,26 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
     private val backgroundVideo = ProjectionBackgroundVideo(ProjectionVideo(delegate))
     private val background = ProjectionBackground(delegate)
     private val currentProjectable = ReadOnlyObjectWrapper<Projectable?>()
-    private val terminateList = ArrayList<Projectable>()
+    private val projectablesList = ArrayList<Projectable>()
+
+    init {
+        projectablesList.add(label)
+        projectablesList.add(backgroundVideo)
+        projectablesList.add(background)
+    }
 
     override fun init() {
-        label.init()
-        backgroundVideo.init()
+        projectablesList.forEach { it.init() }
     }
 
     override fun finish() {
-        label.finish()
-        backgroundVideo.finish()
-        terminateList.forEach { it.finish() }
+        projectablesList.forEach { it.finish() }
     }
+
+    override fun rebuild() {
+        projectablesList.forEach { it.rebuild() }
+    }
+
     override fun setText(text: WrappedText?) {
         label.setText(text)
     }
@@ -52,7 +60,7 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
     override fun createImage(): ProjectionImage {
         val image = ProjectionImage(delegate)
 
-        terminateList.add(image)
+        projectablesList.add(image)
 
         image.init()
         return image
@@ -90,7 +98,7 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
     override fun createPlayer(): ProjectionPlayer {
         val player = ProjectionPlayer(ProjectionVideo(delegate))
 
-        terminateList.add(player)
+        projectablesList.add(player)
 
         player.init()
         return player;
@@ -106,7 +114,7 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
 
     override fun stop(projectable: Projectable?) {
         projectable?.finish()
-        terminateList.remove(projectable)
+        projectablesList.remove(projectable)
     }
 
     override fun setMusicForBackground(musicId: Int?, preferred: File?) {

@@ -23,6 +23,8 @@ public interface ProjectionManager {
 
     void finish();
 
+    void rebuild();
+
     void setText(WrappedText text);
 
     Font getTextFont();

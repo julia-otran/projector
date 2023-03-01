@@ -22,19 +22,25 @@ static pthread_cond_t transfer_window_thread_cond;
 
 void get_main_output_size(render_output_size *output_size) {
     for (int i = 0; i < count_renders; i++) {
-        if (renders[i].config.text_render_mode & CONFIG_RENDER_MODE_MAIN) {
+        if (renders[i].config.render_mode & CONFIG_RENDER_MODE_MAIN) {
             output_size->render_width = renders[i].config.w;
             output_size->render_height = renders[i].config.h;
+            return;
         }
     }
+
+    log_debug("BUG: No main render found! Be sure to have created one!\n");
 }
 
 void get_main_text_area(config_bounds *text_area) {
     for (int i = 0; i < count_renders; i++) {
-        if (renders[i].config.text_render_mode & CONFIG_RENDER_MODE_MAIN) {
+        if (renders[i].config.render_mode & CONFIG_RENDER_MODE_MAIN) {
             memcpy(text_area, &renders[i].config.text_area, sizeof(config_bounds));
+            return;
         }
     }
+
+    log_debug("BUG: No main render found! Be sure to have created one!\n");
 }
 
 void get_render_output(render_output **out, int *render_output_count) {
@@ -103,7 +109,7 @@ void render_init(render_layer *render) {
         }
     }
 
-    if (render->config.text_render_mode & CONFIG_RENDER_MODE_MAIN) {
+    if (render->config.render_mode & CONFIG_RENDER_MODE_MAIN) {
         render_video_create_assets();
         render_text_create_assets();
     }
@@ -145,7 +151,7 @@ void render_cycle(render_layer *render) {
 }
 
 void render_terminate(render_layer *render) {
-    if (render->config.text_render_mode & CONFIG_RENDER_MODE_MAIN) {
+    if (render->config.render_mode & CONFIG_RENDER_MODE_MAIN) {
         render_text_deallocate_assets();
         render_video_deallocate_assets();
     }
@@ -204,7 +210,7 @@ void* transfer_window_loop(void*) {
 void create_render(config_render *render_conf, render_layer *render) {
     memcpy(&render->config, render_conf, sizeof(config_render));
 
-    if (render->config.text_render_mode & CONFIG_RENDER_MODE_MAIN) {
+    if (render->config.render_mode & CONFIG_RENDER_MODE_MAIN) {
         render_text_set_size(render->config.text_area.w, render->config.text_area.h);
     }
 }

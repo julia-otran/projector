@@ -5,13 +5,7 @@
  */
 package dev.juhouse.projector.projection2;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.Shape;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
@@ -46,13 +40,15 @@ public class ProjectionLabel implements Projectable {
     // Internal control
     private List<StringWithPosition> drawLines = Collections.emptyList();
 
-    public boolean getHasText() {
-        return !drawLines.isEmpty();
-    }
+    private BufferedImage image;
+    private Graphics2D g;
+
+    private Color clearColor;
 
     public ProjectionLabel(CanvasDelegate canvasDelegate) {
         this.canvasDelegate = canvasDelegate;
         factoryChangeListeners = new ArrayList<>();
+        clearColor = new Color(255, 255, 255, 0);
     }
 
     @Override
@@ -71,6 +67,12 @@ public class ProjectionLabel implements Projectable {
     @Override
     public void finish() {
 
+    }
+
+    @Override
+    public void rebuild() {
+        image = new BufferedImage(canvasDelegate.getTextWidth(), canvasDelegate.getTextHeight(), BufferedImage.TYPE_INT_ARGB);
+        g = image.createGraphics();
     }
 
     @Override
@@ -104,10 +106,11 @@ public class ProjectionLabel implements Projectable {
             return;
         }
 
-        BufferedImage newImage = new BufferedImage(canvasDelegate.getTextWidth(), canvasDelegate.getTextHeight(), BufferedImage.TYPE_INT_ARGB);
-
-        Graphics2D g = newImage.createGraphics();
-
+        g.setComposite(AlphaComposite.Clear);
+        g.setColor(clearColor);
+        g.fillRect(0, 0, image.getWidth(), image.getHeight());
+        g.setComposite(AlphaComposite.SrcOver);
+        g.setColor(Color.white);
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
@@ -121,15 +124,12 @@ public class ProjectionLabel implements Projectable {
             // get the shape object
             Shape textShape = glyphVector.getOutline();
 
-            g.setColor(Color.white);
             g.fill(textShape);
 
             g.setTransform(oldTransform);
         });
 
-        g.dispose();
-
-        canvasDelegate.getBridge().setTextImage(((DataBufferInt)newImage.getRaster().getDataBuffer()).getData(), textHeight);
+        canvasDelegate.getBridge().setTextImage(((DataBufferInt)image.getRaster().getDataBuffer()).getData(), textHeight);
     }
 
     private void generateLines() {

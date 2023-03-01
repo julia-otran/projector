@@ -5,7 +5,6 @@
 #include <time.h>
 #include <string.h>
 
-#include "ogl-loader.h"
 #include "debug.h"
 #include "render-fader.h"
 
@@ -109,7 +108,7 @@ void render_fader_fade_in_out(render_fader_instance *instance, int fade_id, int 
     }
 }
 
-void render_fader_set_alpha(fade_node *node) {
+float render_fader_get_alpha(fade_node *node) {
     struct timespec spec;
     clock_gettime(CLOCK_REALTIME, &spec);
 
@@ -120,20 +119,21 @@ void render_fader_set_alpha(fade_node *node) {
 
     if (node->mode == RENDER_FADER_MODE_IN) {
         if (elapsed_time >= node->duration_ms) {
-            glColor4f(1.0, 1.0, 1.0, 1.0);
+            return 1.0;
         } else {
-            float alpha = elapsed_time / (float)node->duration_ms;
-            glColor4f(1.0, 1.0, 1.0, alpha);
+            return elapsed_time / (float)node->duration_ms;
         }
     } else if (node->mode == RENDER_FADER_MODE_OUT) {
         if (elapsed_time >= node->duration_ms) {
-            glColor4f(1.0, 1.0, 1.0, 0.0);
+            return 0.0;
         } else {
             long remaiming_time = node->duration_ms - elapsed_time;
-            float alpha = remaiming_time / (float)node->duration_ms;
-            glColor4f(1.0, 1.0, 1.0, alpha);
+            return remaiming_time / (float)node->duration_ms;
         }
     }
+
+    // may never happen?
+    return 1.0;
 }
 
 int render_fader_is_hidden(fade_node *node) {
@@ -159,7 +159,6 @@ void render_fader_cleanup(render_fader_instance *instance) {
     fade_node *current = (*previous_ptr);
 
     while (current) {
-        log_debug("Bad cleanup!!\n");
         if (render_fader_is_hidden(current)) {
             (*previous_ptr) = (fade_node *) current->next;
             free(current);

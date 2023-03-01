@@ -172,6 +172,7 @@ void render_video_render(render_layer *layer) {
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnable(GL_TEXTURE_2D);
+    glColor4f(1.0, 1.0, 1.0, 1.0);
 
     glBindTexture(GL_TEXTURE_2D, texture_id);
 

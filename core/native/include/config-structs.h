@@ -80,12 +80,13 @@ typedef struct {
 
     config_bounds text_area;
     config_color_factor background_clear_color;
+    config_color_factor text_color;
 
     int enable_render_background_assets;
     int enable_render_image;
     int enable_render_video;
 
-    int text_render_mode;
+    int render_mode;
 } config_render;
 
 typedef struct {
