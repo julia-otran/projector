@@ -40,24 +40,24 @@ void render_text_set_image(void *pixel_data) {
     pthread_mutex_lock(&thread_mutex);
 
     if (pixel_data) {
-        // memcpy(share_pixel_data, pixel_data, width * height * 4);
+        memcpy(share_pixel_data, pixel_data, width * height * 4);
         // Adjust ARGB to RGBA
         // Hope this works faster for 64bit systems.
         // Also, I don't think this sw could run on 32bit
-        int pointer_count = width * height * 4 / sizeof(unsigned long long*);
-        unsigned long long *src_ptr = (unsigned long long*) pixel_data;
-        unsigned long long *dst_ptr = (unsigned long long*) share_pixel_data;
-        unsigned long long aux;
-
-        for (int i=0; i<pointer_count; i++) {
-            // ARGB ARGB << 8
-            // RGB0 RGB0
-            // ARGB ARGB >> 24
-            // 000A RGBA
-            aux = (src_ptr[i] << 8) & 0xFFFFFF00FFFFFF00;
-            aux = aux | ((src_ptr[i] >> 24) & 0x000000FF000000FF);
-            dst_ptr[i] = aux;
-        }
+//        int pointer_count = width * height * 4 / sizeof(unsigned long long*);
+//        unsigned long long *src_ptr = (unsigned long long*) pixel_data;
+//        unsigned long long *dst_ptr = (unsigned long long*) share_pixel_data;
+//        unsigned long long aux;
+//
+//        for (int i=0; i<pointer_count; i++) {
+//            // ARGB ARGB << 8
+//            // RGB0 RGB0
+//            // ARGB ARGB >> 24
+//            // 000A RGBA
+//            aux = (src_ptr[i] << 8) & 0xFFFFFF00FFFFFF00;
+//            aux = aux | ((src_ptr[i] >> 24) & 0x000000FF000000FF);
+//            dst_ptr[i] = aux;
+//        }
 
         clear_text = 0;
         pixel_data_changed = 1;
@@ -119,7 +119,7 @@ void render_text_create_assets() {
 
 void render_text_render(render_layer *layer) {
     if (clear_text) {
-        render_fader_fade_in_out(fader_instance, 0, 1000);
+        render_fader_fade_in_out(fader_instance, 0, RENDER_FADER_DEFAULT_TIME_MS);
     } else {
         // TODO: add a debouce. if text changes too fast we may allocate too many textures
         render_pixel_unpack_buffer_node* buffer = render_pixel_unpack_buffer_dequeue_for_read(buffer_instance);
@@ -131,14 +131,14 @@ void render_text_render(render_layer *layer) {
             glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
             glBindTexture(GL_TEXTURE_2D, texture_id);
 
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, 0);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
             glBindTexture(GL_TEXTURE_2D, 0);
             glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-            render_fader_fade_in_out(fader_instance, texture_id, 1000);
+            render_fader_fade_in_out(fader_instance, texture_id, RENDER_FADER_DEFAULT_TIME_MS);
         }
 
         render_pixel_unpack_buffer_enqueue_for_write(buffer_instance, buffer);

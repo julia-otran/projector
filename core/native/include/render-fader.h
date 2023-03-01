@@ -11,6 +11,8 @@
 #define RENDER_FADER_MODE_IN 1
 #define RENDER_FADER_MODE_OUT 2
 
+#define RENDER_FADER_DEFAULT_TIME_MS 300
+
 typedef struct {
     int fade_id;
 
