@@ -43,7 +43,9 @@ public class ProjectionLabel implements Projectable {
     private BufferedImage image;
     private Graphics2D g;
 
-    private Color clearColor;
+    private final Color clearColor;
+
+    private BasicStroke stroke;
 
     public ProjectionLabel(CanvasDelegate canvasDelegate) {
         this.canvasDelegate = canvasDelegate;
@@ -88,6 +90,8 @@ public class ProjectionLabel implements Projectable {
         this.font = font;
         this.fontMetrics = Toolkit.getDefaultToolkit().getFontMetrics(font);
 
+        stroke = new BasicStroke(font.getSize() * 0.05f);
+
         onFactoryChange();
 
         ProjectorPreferences.setProjectionLabelFontName(font.getFamily());
@@ -106,13 +110,15 @@ public class ProjectionLabel implements Projectable {
             return;
         }
 
+        Composite oldComposite = g.getComposite();
         g.setComposite(AlphaComposite.Clear);
         g.setColor(clearColor);
         g.fillRect(0, 0, image.getWidth(), image.getHeight());
-        g.setComposite(AlphaComposite.SrcOver);
-        g.setColor(Color.white);
+        g.setComposite(oldComposite);
+
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g.setStroke(stroke);
 
         AffineTransform oldTransform = g.getTransform();
 
@@ -124,6 +130,10 @@ public class ProjectionLabel implements Projectable {
             // get the shape object
             Shape textShape = glyphVector.getOutline();
 
+            g.setColor(Color.black);
+            g.draw(textShape);
+
+            g.setColor(Color.white);
             g.fill(textShape);
 
             g.setTransform(oldTransform);

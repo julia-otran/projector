@@ -144,33 +144,18 @@ void render_text_render(render_layer *layer) {
         render_pixel_unpack_buffer_enqueue_for_write(buffer_instance, buffer);
     }
 
-    float x, y, w, h, xs, ys, ws, hs;
+    float x, y, w, h;
 
     x = layer->config.text_area.x;
     y = layer->config.text_area.y;
     w = layer->config.text_area.w;
     h = layer->config.text_area.h;
 
-    ws = w + w * 0.01;
-    hs += h + h * 0.01;
-    xs = x - ((ws - w) / 2);
-    ys = y - ((hs - h) / 2);
-
     render_fader_for_each(fader_instance) {
         if (node->fade_id) {
             glBindTexture(GL_TEXTURE_2D, node->fade_id);
 
             float alpha = render_fader_get_alpha(node);
-            glColor4f(0.0, 0.0, 0.0, alpha * alpha);
-
-            glBegin(GL_QUADS);
-
-            glTexCoord2i(0,0); glVertex2d(xs, ys);
-            glTexCoord2i(0, 1); glVertex2d(xs, ys + hs);
-            glTexCoord2i(1, 1); glVertex2d(xs + ws, ys + hs);
-            glTexCoord2i(1, 0); glVertex2d(xs + ws, ys);
-
-            glEnd();
 
             glColor4f(
                 layer->config.text_color.r * alpha,
