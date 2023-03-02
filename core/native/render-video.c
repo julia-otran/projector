@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <string.h>
 
 #include "debug.h"
 #include "ogl-loader.h"
@@ -27,11 +28,15 @@ static render_fader_instance *fader_instance;
 static render_pixel_unpack_buffer_instance *buffer_instance;
 
 static GLuint texture_id;
+static int texture_loaded;
+static int should_clear;
 
 void render_video_initialize() {
     src_crop = 0;
     src_update_buffer = 0;
     src_render = 0;
+    texture_loaded = 0;
+    should_clear = 0;
 
     pthread_mutex_init(&thread_mutex, 0);
     pthread_cond_init(&thread_cond, 0);
@@ -99,6 +104,8 @@ void render_video_update_buffers() {
             glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
             glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+            texture_loaded = 1;
         }
 
         pthread_cond_signal(&thread_cond);
@@ -133,9 +140,23 @@ void render_video_render(render_layer *layer) {
 
         glBindTexture(GL_TEXTURE_2D, 0);
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        texture_loaded = 1;
     }
 
     render_pixel_unpack_buffer_enqueue_for_write(buffer_instance, buffer);
+
+    if (src_render) {
+        if (texture_loaded) {
+            should_clear = 1;
+            render_fader_fade_in(fader_instance, 1, RENDER_FADER_DEFAULT_TIME_MS);
+        }
+    } else {
+        if (should_clear) {
+            should_clear = 0;
+            texture_loaded = 0;
+            render_fader_fade_out(fader_instance, 1, RENDER_FADER_DEFAULT_TIME_MS);
+        }
+    }
 
     if (dst_width <= 0 || dst_height <= 0) {
         return;
@@ -172,23 +193,25 @@ void render_video_render(render_layer *layer) {
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnable(GL_TEXTURE_2D);
-    glColor4f(1.0, 1.0, 1.0, 1.0);
 
-    glBindTexture(GL_TEXTURE_2D, texture_id);
+    render_fader_for_each(fader_instance) {
+        float alpha = render_fader_get_alpha(node);
 
-    glBegin(GL_QUADS);
+        glColor4f(alpha, alpha, alpha, alpha);
 
-    // TODO: Fader
-    // render_fader_set_alpha(node);
+        glBindTexture(GL_TEXTURE_2D, texture_id);
 
-    glTexCoord2f(0.0, 0.0); glVertex2d(x, y);
-    glTexCoord2f(0.0, 1.0); glVertex2d(x, y + h);
-    glTexCoord2f(1.0, 1.0); glVertex2d(x + w, y + h);
-    glTexCoord2f(1.0, 0.0); glVertex2d(x + w, y);
+        glBegin(GL_QUADS);
 
-    glEnd();
+        glTexCoord2f(0.0, 0.0); glVertex2d(x, y);
+        glTexCoord2f(0.0, 1.0); glVertex2d(x, y + h);
+        glTexCoord2f(1.0, 1.0); glVertex2d(x + w, y + h);
+        glTexCoord2f(1.0, 0.0); glVertex2d(x + w, y);
 
-    glBindTexture(GL_TEXTURE_2D, 0);
+        glEnd();
+
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
 }
 void render_video_deallocate_assets() {
     glDeleteTextures(1, &texture_id);

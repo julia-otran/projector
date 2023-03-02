@@ -33,3 +33,5 @@ out/*
 *.db-journal
 /core/native/include/dev_juhouse_projector_projection2_Bridge.h
 /linux/src/main/resources/librender.so
+
+.ccls-cache

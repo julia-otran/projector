@@ -41,27 +41,10 @@ void render_text_set_image(void *pixel_data) {
 
     if (pixel_data) {
         memcpy(share_pixel_data, pixel_data, width * height * 4);
-        // Adjust ARGB to RGBA
-        // Hope this works faster for 64bit systems.
-        // Also, I don't think this sw could run on 32bit
-//        int pointer_count = width * height * 4 / sizeof(unsigned long long*);
-//        unsigned long long *src_ptr = (unsigned long long*) pixel_data;
-//        unsigned long long *dst_ptr = (unsigned long long*) share_pixel_data;
-//        unsigned long long aux;
-//
-//        for (int i=0; i<pointer_count; i++) {
-//            // ARGB ARGB << 8
-//            // RGB0 RGB0
-//            // ARGB ARGB >> 24
-//            // 000A RGBA
-//            aux = (src_ptr[i] << 8) & 0xFFFFFF00FFFFFF00;
-//            aux = aux | ((src_ptr[i] >> 24) & 0x000000FF000000FF);
-//            dst_ptr[i] = aux;
-//        }
-
         clear_text = 0;
         pixel_data_changed = 1;
     } else {
+        log_debug("Clear text received\n");
         clear_text = 1;
     }
 
@@ -85,8 +68,6 @@ void render_text_update_buffers() {
     pthread_mutex_lock(&thread_mutex);
 
     if (pixel_data_changed && buffer) {
-        buffer_updated = 1;
-
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
 
         if (buffer->width != width || buffer->height != height) {
@@ -127,6 +108,7 @@ void render_text_render(render_layer *layer) {
         if (buffer) {
             GLuint texture_id = 0;
             glGenTextures(1, &texture_id);
+            log_debug("Texture id %u\n", texture_id);
 
             glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
             glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -150,6 +132,9 @@ void render_text_render(render_layer *layer) {
     y = layer->config.text_area.y;
     w = layer->config.text_area.w;
     h = layer->config.text_area.h;
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnable(GL_TEXTURE_2D);
 
     render_fader_for_each(fader_instance) {
         if (node->fade_id) {

@@ -67,6 +67,7 @@ public class ProjectionVideo {
 
     public void setRender(boolean render) {
         this.render.setValue(render);
+        this.delegate.getBridge().setRenderVideoBuffer(render);
         updateBufferAddress();
     }
 

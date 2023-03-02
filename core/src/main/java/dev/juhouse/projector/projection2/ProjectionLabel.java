@@ -158,6 +158,7 @@ public class ProjectionLabel implements Projectable {
 
         if (lines == null || text.isEmpty() || lines.isEmpty()) {
             drawLines = Collections.emptyList();
+            renderText( 0);
             return;
         }
 
@@ -193,6 +194,7 @@ public class ProjectionLabel implements Projectable {
 
         if (pendingLines.stream().allMatch(l -> l.getText().isEmpty())) {
             drawLines = Collections.emptyList();
+            renderText( 0);
             return;
         }
 
