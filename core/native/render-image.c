@@ -49,11 +49,9 @@ void render_image_set_image(void *pixel_data, int width_in, int height_in, int c
 
         memcpy(share_pixel_data, pixel_data, width * height * 4);
 
-        log_debug("Setting image\n");
         clear_image = 0;
         pixel_data_changed = 1;
     } else {
-        log_debug("Clear image\n");
         clear_image = 1;
     }
 
