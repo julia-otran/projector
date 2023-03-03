@@ -98,7 +98,7 @@ void render_text_update_buffers() {
 void render_text_create_assets() {
 }
 
-void render_text_render(render_layer *layer) {
+void render_text_update_assets() {
     if (clear_text) {
         render_fader_fade_in_out(fader_instance, 0, RENDER_FADER_DEFAULT_TIME_MS);
     } else {
@@ -126,6 +126,20 @@ void render_text_render(render_layer *layer) {
         render_pixel_unpack_buffer_enqueue_for_write(buffer_instance, buffer);
     }
 
+    render_fader_for_each(fader_instance) {
+        if (render_fader_is_hidden(node)) {
+            GLuint tex_id = (unsigned int) node->fade_id;
+
+            if (tex_id) {
+                glDeleteTextures(1, &tex_id);
+            }
+        }
+    }
+
+    render_fader_cleanup(fader_instance);
+}
+
+void render_text_render(render_layer *layer) {
     float x, y, w, h;
 
     x = layer->config.text_area.x;
@@ -161,18 +175,6 @@ void render_text_render(render_layer *layer) {
     }
 
     glBindTexture(GL_TEXTURE_2D, 0);
-
-    render_fader_for_each(fader_instance) {
-        if (render_fader_is_hidden(node)) {
-            GLuint tex_id = (unsigned int) node->fade_id;
-
-            if (tex_id) {
-                glDeleteTextures(1, &tex_id);
-            }
-        }
-    }
-
-    render_fader_cleanup(fader_instance);
 }
 
 void render_text_deallocate_assets() {

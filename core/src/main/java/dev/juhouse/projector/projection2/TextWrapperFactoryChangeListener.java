@@ -9,7 +9,7 @@ import dev.juhouse.projector.projection2.text.WrapperFactory;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public interface TextWrapperFactoryChangeListener {
 

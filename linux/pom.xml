@@ -140,6 +140,7 @@
                                 <fileName>render-pixel-unpack-buffer.c</fileName>
                                 <fileName>render-text.c</fileName>
                                 <fileName>render-video.c</fileName>
+                                <fileName>render-web-view.c</fileName>
                                 <fileName>virtual-screen.c</fileName>
                                 <fileName>vs-color-corrector.c</fileName>
                             </fileNames>

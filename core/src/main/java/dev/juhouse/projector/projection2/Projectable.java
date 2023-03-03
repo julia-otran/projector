@@ -7,7 +7,7 @@ package dev.juhouse.projector.projection2;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public interface Projectable {
 

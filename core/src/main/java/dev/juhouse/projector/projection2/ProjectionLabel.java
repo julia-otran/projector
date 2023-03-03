@@ -23,7 +23,7 @@ import dev.juhouse.projector.other.ProjectorPreferences;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class ProjectionLabel implements Projectable {
 

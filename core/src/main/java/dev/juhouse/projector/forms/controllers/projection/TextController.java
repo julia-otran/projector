@@ -22,7 +22,7 @@ import javafx.scene.control.TextField;
 /**
  * FXML Controller class
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class TextController extends ProjectionController implements TextWrapperFactoryChangeListener {
 

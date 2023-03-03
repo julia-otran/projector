@@ -25,7 +25,7 @@ import javax.swing.JLabel;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class AwtFontChooseDialog extends Dialog<Object> implements ChangeListener<Number> {
 

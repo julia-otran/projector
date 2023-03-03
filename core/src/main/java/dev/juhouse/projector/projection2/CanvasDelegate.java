@@ -11,7 +11,7 @@ import dev.juhouse.projector.services.SettingsService;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public interface CanvasDelegate {
 

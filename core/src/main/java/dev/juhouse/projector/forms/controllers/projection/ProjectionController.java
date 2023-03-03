@@ -12,7 +12,7 @@ import dev.juhouse.projector.forms.controllers.SceneManager;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public abstract class ProjectionController implements Initializable {
     private ControllerObserver observer;

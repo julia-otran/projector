@@ -7,7 +7,7 @@ package dev.juhouse.projector.utils.promise;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public interface Callback<OUT> {
     void success(OUT out);

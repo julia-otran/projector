@@ -17,7 +17,7 @@ import dev.juhouse.projector.services.ManageMusicService;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class MusicFormScene {
     public static Parent createMusicFormScene(ManageMusicService manageMusicService, BackCallback callback) throws IOException {

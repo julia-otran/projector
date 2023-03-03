@@ -25,7 +25,7 @@ import dev.juhouse.projector.dtos.ImportingMusicDTO;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public abstract class MusicUrlImporter implements Callback<String> {
 

@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class NoTextWrapper implements TextWrapper {
 

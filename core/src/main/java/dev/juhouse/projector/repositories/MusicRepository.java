@@ -19,7 +19,7 @@ import dev.juhouse.projector.other.SQLiteJDBCDriverConnection;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class MusicRepository {
 

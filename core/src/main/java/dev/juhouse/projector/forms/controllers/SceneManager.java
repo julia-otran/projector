@@ -10,7 +10,7 @@ import javafx.stage.Stage;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public interface SceneManager {
     void goToParent(Parent toor);

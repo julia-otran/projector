@@ -17,7 +17,7 @@ import java.awt.image.BufferedImage;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class PreviewImageView extends ImageView implements Runnable {
     private PixelBufferProvider bufferProvider;

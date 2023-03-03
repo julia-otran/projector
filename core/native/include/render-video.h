@@ -16,8 +16,10 @@ void render_video_update_buffers();
 void render_video_deallocate_buffers();
 
 void render_video_create_assets();
-void render_video_render(render_layer *layer);
+void render_video_update_assets();
 void render_video_deallocate_assets();
+
+void render_video_render(render_layer *layer);
 
 void render_video_shutdown();
 

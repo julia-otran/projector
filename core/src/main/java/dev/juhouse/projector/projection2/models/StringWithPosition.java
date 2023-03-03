@@ -7,7 +7,7 @@ package dev.juhouse.projector.projection2.models;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class StringWithPosition {
 

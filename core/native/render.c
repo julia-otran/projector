@@ -8,6 +8,7 @@
 #include "render.h"
 #include "render-text.h"
 #include "render-video.h"
+#include "render-web-view.h"
 
 static int count_renders;
 static render_layer *renders;
@@ -51,6 +52,7 @@ void get_render_output(render_output **out, int *render_output_count) {
 void initialize_renders() {
     render_video_initialize();
     render_text_initialize();
+    render_web_view_initialize();
 }
 
 void shutdown_renders() {
@@ -59,6 +61,7 @@ void shutdown_renders() {
 
     render_video_shutdown();
     render_text_shutdown();
+    render_web_view_shutdown();
 
     free(output);
     free(renders);
@@ -112,12 +115,19 @@ void render_init(render_layer *render) {
     if (render->config.render_mode & CONFIG_RENDER_MODE_MAIN) {
         render_video_create_assets();
         render_text_create_assets();
+        render_web_view_create_assets();
     }
 }
 
 void render_cycle(render_layer *render) {
     if (!transfer_window_initialized) {
         return;
+    }
+
+    if (render->config.render_mode & CONFIG_RENDER_MODE_MAIN) {
+        render_text_update_assets();
+        render_video_update_assets();
+        render_web_view_update_assets();
     }
 
     config_color_factor *background_clear_color = &render->config.background_clear_color;
@@ -144,6 +154,7 @@ void render_cycle(render_layer *render) {
 
     render_video_render(render);
     render_text_render(render);
+    render_web_view_render(render);
 
     glPopMatrix();
 
@@ -154,6 +165,7 @@ void render_terminate(render_layer *render) {
     if (render->config.render_mode & CONFIG_RENDER_MODE_MAIN) {
         render_text_deallocate_assets();
         render_video_deallocate_assets();
+        render_web_view_deallocate_assets();
     }
 
     for (int i=0; i < count_renders; i++) {
@@ -192,17 +204,20 @@ void* transfer_window_loop(void*) {
 
     render_text_create_buffers();
     render_video_create_buffers();
+    render_web_view_create_buffers();
 
     transfer_window_initialized = 1;
 
     while (transfer_window_thread_run) {
         render_video_update_buffers();
         render_text_update_buffers();
+        render_web_view_update_buffers();
         usleep(1000);
     }
 
     render_video_deallocate_buffers();
     render_text_deallocate_buffers();
+    render_web_view_deallocate_buffers();
 
     return NULL;
 }

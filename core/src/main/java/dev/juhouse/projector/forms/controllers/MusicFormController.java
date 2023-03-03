@@ -30,7 +30,7 @@ import javafx.util.StringConverter;
 /**
  * FXML Controller class
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class MusicFormController implements Initializable {
     private ManageMusicService musicService;

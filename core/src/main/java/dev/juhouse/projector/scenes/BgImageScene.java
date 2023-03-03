@@ -17,7 +17,7 @@ import dev.juhouse.projector.forms.controllers.SceneManager;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class BgImageScene {
     public static Parent createScene(ProjectionManager mgr, SceneManager sceneManager) throws IOException {

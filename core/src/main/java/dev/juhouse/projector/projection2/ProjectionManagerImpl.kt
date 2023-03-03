@@ -54,7 +54,10 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
     }
 
     override fun createWebView(): ProjectionWebView {
-        TODO("Not yet implemented")
+        val webView = ProjectionWebView(delegate)
+        webView.init()
+        projectablesList.add(webView)
+        return webView
     }
 
     override fun createImage(): ProjectionImage {

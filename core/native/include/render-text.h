@@ -13,8 +13,10 @@ void render_text_update_buffers();
 void render_text_deallocate_buffers();
 
 void render_text_create_assets();
-void render_text_render(render_layer *layer);
 void render_text_deallocate_assets();
+void render_text_update_assets();
+
+void render_text_render(render_layer *layer);
 
 void render_text_shutdown();
 

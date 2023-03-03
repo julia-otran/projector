@@ -18,7 +18,7 @@ import uk.co.caprica.vlcj.player.base.MediaPlayer;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class ProjectionPlayer implements Projectable, ProjectionVideo.BufferSizeChangeCallback {
     private PlayerPreview preview;

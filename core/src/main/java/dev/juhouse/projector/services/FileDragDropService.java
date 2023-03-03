@@ -13,7 +13,7 @@ import javafx.scene.input.TransferMode;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class FileDragDropService {
     public interface Client {

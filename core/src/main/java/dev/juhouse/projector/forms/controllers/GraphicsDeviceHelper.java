@@ -13,7 +13,7 @@ import javafx.scene.image.ImageView;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class GraphicsDeviceHelper {
     private final WindowManager windowManager;

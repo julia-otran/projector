@@ -18,7 +18,7 @@ import dev.juhouse.projector.services.ManageMusicService;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class MusicProjectionScene extends ProjectionItemSubScene {
 

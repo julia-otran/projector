@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class SingleLineTextWrapper extends MultilineTextWrapper {
     public SingleLineTextWrapper(FontMetrics fontMetrics, int maxWidth, int maxHeight) {

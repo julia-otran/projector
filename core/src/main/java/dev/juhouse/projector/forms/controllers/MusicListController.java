@@ -41,7 +41,7 @@ import javafx.stage.Stage;
 /**
  * FXML Controller class
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class MusicListController implements Initializable, BackCallback, ImportCallback {
 

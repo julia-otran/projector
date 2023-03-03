@@ -27,7 +27,7 @@ import javafx.scene.web.WebEngine;
 /**
  * FXML Controller class
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class BrowserController extends ProjectionController {
 
@@ -90,14 +90,12 @@ public class BrowserController extends ProjectionController {
             url = "https://google.com.br";
         }
 
-        Node displayNode = projectionWebView.getNode();
-
         Pane scalePane = new Pane();
         scalePane.setMaxWidth(Double.MAX_VALUE);
         scalePane.setMaxHeight(Double.MAX_VALUE);
 
         browserPane.setContent(scalePane);
-        scalePane.getChildren().add(displayNode);
+        scalePane.getChildren().add(projectionWebView.getWebView());
 
         ChangeListener<Number> sizeChangeListener = (observable, oldValue, newValue) -> {
             double ww = projectionWebView.getWebView().getWidth();

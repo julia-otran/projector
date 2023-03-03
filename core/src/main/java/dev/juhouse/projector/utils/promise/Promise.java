@@ -10,7 +10,7 @@ import lombok.Setter;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class Promise<X> {
     @Getter

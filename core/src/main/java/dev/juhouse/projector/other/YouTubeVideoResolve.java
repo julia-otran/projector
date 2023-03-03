@@ -33,7 +33,7 @@ import org.jsoup.select.Elements;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class YouTubeVideoResolve implements Callback<String> {
 

@@ -7,7 +7,7 @@ package dev.juhouse.projector.other;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public interface Identifiable {
 }

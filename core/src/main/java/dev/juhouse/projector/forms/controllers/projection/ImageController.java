@@ -35,7 +35,7 @@ import javafx.util.Callback;
 /**
  * FXML Controller class
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class ImageController extends ProjectionController implements Runnable {
     /**

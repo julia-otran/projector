@@ -7,7 +7,7 @@ package dev.juhouse.projector.music_importing;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 class ImportError extends Exception {
 

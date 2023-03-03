@@ -12,7 +12,7 @@ import dev.juhouse.projector.other.ProjectorPreferences;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class SettingsService {
     private static final String NONE_TYPE = "NONE";

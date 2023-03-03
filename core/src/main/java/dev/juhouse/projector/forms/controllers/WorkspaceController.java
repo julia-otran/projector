@@ -51,7 +51,7 @@ import dev.juhouse.projector.enums.ProjectionListItemType;
 /**
  * FXML Controller class
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class WorkspaceController implements Initializable, SceneObserver, AddMusicCallback, EditMusicCallback, ProjectableItemListCell.CellCallback<ProjectionListItem> {
 

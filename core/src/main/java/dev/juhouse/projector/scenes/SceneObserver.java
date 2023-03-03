@@ -9,7 +9,7 @@ import dev.juhouse.projector.models.ProjectionListItem;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public interface SceneObserver {
 

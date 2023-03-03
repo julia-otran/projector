@@ -12,7 +12,7 @@ import java.awt.image.DataBufferInt;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class ProjectionImage implements Projectable {
 

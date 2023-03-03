@@ -16,7 +16,7 @@ import dev.juhouse.projector.dtos.ImportingMusicDTO;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class VagalumeImporter extends MusicUrlImporter {
 

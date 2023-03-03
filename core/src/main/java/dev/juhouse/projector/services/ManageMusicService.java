@@ -32,7 +32,7 @@ import dev.juhouse.projector.utils.promise.Promise;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class ManageMusicService {
 

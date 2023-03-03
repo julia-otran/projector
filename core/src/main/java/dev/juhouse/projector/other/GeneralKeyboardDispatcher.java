@@ -13,7 +13,7 @@ import java.awt.event.KeyEvent;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class GeneralKeyboardDispatcher implements KeyEventDispatcher {
 

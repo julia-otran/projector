@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class ProjectorStringUtils {
     private static final Pattern NON_ACSII = Pattern.compile("[^\\p{ASCII}]");

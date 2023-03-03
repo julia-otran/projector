@@ -11,7 +11,7 @@ import lombok.Data;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 @Data
 public class Artist {

@@ -13,7 +13,7 @@ import dev.juhouse.projector.forms.controllers.projection.BrowserController;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class BrowserSubScene extends ProjectionItemSubScene {
 

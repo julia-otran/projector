@@ -21,7 +21,7 @@ import lombok.Getter;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 @Data
 public class Music {

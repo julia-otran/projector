@@ -48,7 +48,7 @@ import dev.juhouse.projector.other.ProjectorStringUtils;
 /**
  * FXML Controller class
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class MusicProjectionController extends ProjectionController {
     public static final String MUSIC_ID_PROPERTY = "MUSIC_ID";

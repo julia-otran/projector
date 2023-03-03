@@ -13,7 +13,7 @@ import dev.juhouse.projector.forms.controllers.projection.PlayerController;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class PlayerSubScene extends ProjectionItemSubScene {
 

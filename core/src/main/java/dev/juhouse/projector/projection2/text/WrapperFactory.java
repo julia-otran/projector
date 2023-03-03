@@ -9,7 +9,7 @@ import java.awt.FontMetrics;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class WrapperFactory {
 

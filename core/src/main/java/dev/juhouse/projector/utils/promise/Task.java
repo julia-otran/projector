@@ -7,7 +7,7 @@ package dev.juhouse.projector.utils.promise;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public interface Task<IN, OUT> {
     void execute(IN input, Callback<OUT> callback);

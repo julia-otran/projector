@@ -10,6 +10,7 @@
 #include "config-debug.h"
 #include "render-video.h"
 #include "render-text.h"
+#include "render-web-view.h"
 
 static int initialized = 0;
 static projection_config *config;
@@ -107,6 +108,7 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setTextImag
     }
   }
 
+// Video render methods
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setVideoBuffer
     (JNIEnv *, jobject, jlong buf_address, jint width, jint height, jboolean crop) {
 
@@ -127,6 +129,7 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_updateVideo
 
   }
 
+// Image render methods
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setImageAsset
   (JNIEnv *, jobject, jintArray, jint, jint, jboolean) {
   }
@@ -135,6 +138,21 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setImageBac
   (JNIEnv *, jobject, jintArray, jint, jint, jboolean) {
   }
 
+// WebView render methods
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setWebViewBuffer
+  (JNIEnv *env, jobject, jintArray arr, jint width, jint height) {
+
+    // Null buffer isn't expected, set render false instead
+    jint *data = (*env)->GetIntArrayElements(env, arr, 0);
+    render_web_view_src_set_buffer((void*) data, width, height);
+    render_web_view_src_buffer_update();
+    (*env)->ReleaseIntArrayElements(env, arr, data, 0);
+
+}
+
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setRenderWebViewBuffer(JNIEnv *, jobject, jboolean render) {
+    render_web_view_src_set_render(render);
+}
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_shutdown(JNIEnv *, jobject) {
     CHECK_INITIALIZE

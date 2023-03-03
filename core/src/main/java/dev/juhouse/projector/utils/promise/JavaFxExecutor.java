@@ -9,7 +9,7 @@ import javafx.application.Platform;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class JavaFxExecutor<IN> implements Executor<IN> {
     @Override

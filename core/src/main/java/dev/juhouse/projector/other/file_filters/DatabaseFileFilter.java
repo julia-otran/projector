@@ -9,7 +9,7 @@ import javafx.stage.FileChooser.ExtensionFilter;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class DatabaseFileFilter {
     public static ExtensionFilter getFilter() {

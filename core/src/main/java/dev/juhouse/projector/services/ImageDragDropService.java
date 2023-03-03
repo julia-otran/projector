@@ -21,7 +21,7 @@ import dev.juhouse.projector.forms.controllers.projection.ImageController;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class ImageDragDropService {
     public interface Client {

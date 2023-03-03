@@ -35,7 +35,7 @@ import uk.co.caprica.vlcj.player.base.MediaPlayerEventListener;
 /**
  * FXML Controller class
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class PlayerController extends ProjectionController implements FileDragDropService.Client, MediaPlayerEventListener {
 

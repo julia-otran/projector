@@ -23,7 +23,7 @@ import javafx.scene.paint.Color;
 /**
  * FXML Controller class
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class BgImageController extends ProjectionController {
     private BackgroundModel backgroundModel;

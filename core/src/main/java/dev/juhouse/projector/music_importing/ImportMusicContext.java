@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class ImportMusicContext {
 

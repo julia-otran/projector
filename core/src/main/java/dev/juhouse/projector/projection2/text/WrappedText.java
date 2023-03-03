@@ -12,7 +12,7 @@ import java.util.List;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class WrappedText {
     @Getter

@@ -7,13 +7,19 @@ package dev.juhouse.projector.projection2;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.HashMap;
 
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.embed.swing.SwingNode;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.image.PixelReader;
+import javafx.scene.image.WritableImage;
+import javafx.scene.image.WritablePixelFormat;
 import javafx.scene.layout.Pane;
 import javafx.scene.web.WebView;
 
@@ -21,114 +27,122 @@ import javax.swing.*;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
-public class ProjectionWebView implements Projectable {
-
-    // TODO: Update bridge buffer
-    // Maybe is there a way to read directly a JavaFX image buffer, directly in the bridge,
-    // or doing something like is done with Vlc4j
-    // This could be nice because we won't need to have panel -> swingnode -> panel
-
+public class ProjectionWebView implements Projectable, Runnable {
     private final CanvasDelegate delegate;
-
-    private SwingNode node;
-    private Pane container;
     private WebView webView;
-    private JFXPanel panel;
+    
+    private boolean render;
 
+    private boolean snapshotRendered;
+
+    private Thread bufferUpdateThread;
+
+    private final Object renderSync = new Object();
+
+    private WritableImage snapshotImage;
+
+    private IntBuffer snapshotBuffer;
+
+    private int width;
+
+    private int height;
+    
     public ProjectionWebView(CanvasDelegate delegate) {
         this.delegate = delegate;
-    }
-
-    public void rebuildLayout() {
-        int width = delegate.getMainWidth();
-        int height = delegate.getMainHeight();
-
-        Platform.runLater(() -> {
-            webView.setPrefWidth(width);
-            webView.setPrefHeight(height);
-            webView.setMinWidth(width);
-            webView.setMinHeight(height);
-
-            node.resize(width, height);
-
-            SwingUtilities.invokeLater(() -> {
-                panel.setMinimumSize(new Dimension(width, height));
-                panel.setPreferredSize(new Dimension(width, height));
-
-                Component root = panel;
-
-                while (root != null) {
-                    root.setMinimumSize(new Dimension(width, height));
-                    root.setBounds(0, 0, width, height);
-                    root = root.getParent();
-                }
-            });
-        });
     }
 
     @Override
     public void init() {
         if (webView == null) {
             webView = new WebView();
-
-            int width = delegate.getMainWidth();
-            int height = delegate.getMainHeight();
-
-            Scene scene = new Scene(webView, width, height);
-
-            panel = new JFXPanel() {
-                @Override
-                public void setBounds(int x, int y, int width, int height) {
-                    if (width >= delegate.getMainWidth() || height >= delegate.getMainHeight()) {
-                        super.setBounds(x, y, width, height);
-                    }
-                }
-            };
-
-            panel.setScene(scene);
-
-            this.node = new SwingNode() {
-                @Override
-                public boolean isResizable() {
-                    return false;
-                }
-            };
-
-            node.setContent(panel);
-
-            this.container = new Pane();
-
-            container.setMinWidth(width);
-            container.setMinHeight(height);
-
-            container.getChildren().add(node);
         }
 
-        rebuildLayout();
+        rebuild();
     }
 
     @Override
     public void finish() {
-
+        setRender(false);
     }
 
     @Override
     public void rebuild() {
-        // TODO: Adjust all webview sizes
+        boolean oldRender = render;
+
+        int width = delegate.getMainWidth();
+        int height = delegate.getMainHeight();
+
+        Platform.runLater(() -> {
+            setRender(false);
+
+            this.width = width;
+            this.height = height;
+
+            snapshotBuffer = IntBuffer.allocate(width * height);
+            snapshotImage = new WritableImage(width, height);
+
+            webView.setPrefWidth(width);
+            webView.setPrefHeight(height);
+            webView.setMinWidth(width);
+            webView.setMinHeight(height);
+
+            setRender(oldRender);
+        });
     }
 
     @Override
     public void setRender(boolean render) {
+        this.render = render;
+        
+        if (render) {
+            bufferUpdateThread = new Thread(this);
+            bufferUpdateThread.start();
+        } else if (bufferUpdateThread != null) {
+            try {
+                bufferUpdateThread.join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
-    }
+        delegate.getBridge().setRenderWebViewBuffer(render);
+    }   
 
     public WebView getWebView() {
         return webView;
     }
+    
+    @Override
+    public void run() {
+        snapshotRendered = false;
 
-    public Node getNode() {
-        return container;
+        while (render) {
+            Platform.runLater(() -> {
+                synchronized (renderSync) {
+                    webView.snapshot(null, snapshotImage);
+                    snapshotRendered = true;
+                    renderSync.notifyAll();
+                }
+            });
+
+            synchronized (renderSync) {
+                try {
+                    if (!snapshotRendered) {
+                        renderSync.wait(100);
+                    }
+
+                    snapshotRendered = false;
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            if (snapshotImage != null) {
+                snapshotImage.getPixelReader().getPixels(0, 0, width, height, WritablePixelFormat.getIntArgbInstance(), snapshotBuffer.array(), 0, width);
+                delegate.getBridge().setWebViewBuffer(snapshotBuffer.array(), width, height);
+            }
+        }
     }
 }

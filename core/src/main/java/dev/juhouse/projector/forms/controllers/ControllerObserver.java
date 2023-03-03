@@ -7,7 +7,7 @@ package dev.juhouse.projector.forms.controllers;
 
 /**
  *
- * @author guilherme
+ * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public interface ControllerObserver {
     void onTitleChanged(String newTitle);
