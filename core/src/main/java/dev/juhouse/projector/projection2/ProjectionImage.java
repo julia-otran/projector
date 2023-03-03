@@ -76,12 +76,16 @@ public class ProjectionImage implements Projectable {
         if (render) {
             BufferedImage image = getModel().getStaticBackground();
 
-            canvasDelegate.getBridge().setImageAsset(
-                    ((DataBufferInt) image.getRaster().getDataBuffer()).getData(),
-                    image.getWidth(),
-                    image.getHeight(),
-                    cropBackground
-            );
+            if (image == null) {
+                canvasDelegate.getBridge().setImageAsset(null, 0, 0, cropBackground);
+            } else {
+                canvasDelegate.getBridge().setImageAsset(
+                        ((DataBufferInt) image.getRaster().getDataBuffer()).getData(),
+                        image.getWidth(),
+                        image.getHeight(),
+                        cropBackground
+                );
+            }
         } else {
             canvasDelegate.getBridge().setImageAsset(null, 0, 0, cropBackground);
         }

@@ -11,6 +11,7 @@
 #include "render-video.h"
 #include "render-text.h"
 #include "render-web-view.h"
+#include "render-image.h"
 
 static int initialized = 0;
 static projection_config *config;
@@ -131,7 +132,14 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_updateVideo
 
 // Image render methods
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setImageAsset
-  (JNIEnv *, jobject, jintArray, jint, jint, jboolean) {
+  (JNIEnv *env, jobject, jintArray arr, jint width, jint height, jboolean crop) {
+    if (arr) {
+        jint *data = (*env)->GetIntArrayElements(env, arr, 0);
+        render_image_set_image((void*) data, width, height, crop);
+        (*env)->ReleaseIntArrayElements(env, arr, data, 0);
+    } else {
+        render_image_set_image(NULL, 0, 0, 0);
+    }
   }
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setImageBackgroundAsset

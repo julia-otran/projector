@@ -31,6 +31,10 @@ import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * FXML Controller class
@@ -139,31 +143,41 @@ public class ImageController extends ProjectionController implements Runnable {
         });
     }
 
-    private final List<Image> toAdd = new ArrayList<>();
-    private final List<File> toAddFiles = new ArrayList<>();
+    @AllArgsConstructor
+    private static class ToAddImage {
+        @Getter
+        private final Image image;
+
+        @Getter
+        private final File file;
+    }
+
+    private final List<ToAddImage> toAdd = new ArrayList<>();
 
     @FXML
     public void onDragOver(DragEvent event) {
         toAdd.clear();
-        toAddFiles.clear();
         Dragboard board = event.getDragboard();
 
         if (board.hasFiles()) {
             for (File imageFile : board.getFiles()) {
                 try {
-                    Image img = new Image(imageFile.toURI().toString());
-                    toAdd.add(img);
-                    toAddFiles.add(imageFile);
+                    Image img = new Image(imageFile.toURI().toURL().toExternalForm());
+                    toAdd.add(new ToAddImage(img, imageFile));
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
 
             if (toAdd.size() > 0) {
-                imageView.setImage(toAdd.get(0));
+                imageView.setImage(toAdd.get(0).getImage());
                 dragDropLabel.setText(toAdd.size() + " arquivos a serem adicionados");
                 event.acceptTransferModes(TransferMode.LINK);
             }
+        } else if (board.hasImage()) {
+            toAdd.add(new ToAddImage(board.getImage(), null));
+            dragDropLabel.setText("1 imagem a ser adicionada");
+            event.acceptTransferModes(TransferMode.LINK);
         } else {
             setError();
         }
@@ -177,21 +191,25 @@ public class ImageController extends ProjectionController implements Runnable {
 
     @FXML
     public void onDragDropped(DragEvent event) {
-        for (Image adding : toAdd) {
-            if (adding.isError()) {
+        for (ToAddImage adding : toAdd) {
+            if (adding.getImage().isError()) {
+                System.out.println("Image errored");
+                System.out.println(adding.getImage().exceptionProperty().get().toString());
                 continue;
             }
 
-            BufferedImage awt = SwingFXUtils.fromFXImage(adding, null);
+            BufferedImage awt = SwingFXUtils.fromFXImage(adding.getImage(), null);
             awtImages.add(awt);
-            imagesList.getItems().add(adding);
+            imagesList.getItems().add(adding.getImage());
+
+            if (adding.getFile() != null) {
+                openedImages.add(adding.getFile());
+            }
         }
 
         if (imagesList.getItems().size() > 0) {
             beginProjectionButton.setDisable(false);
         }
-
-        openedImages.addAll(toAddFiles);
 
         saveOpenedImages();
 
@@ -297,21 +315,21 @@ public class ImageController extends ProjectionController implements Runnable {
         running = false;
     }
 
-    private long time;
-
     @SuppressWarnings("BusyWait")
     @Override
     public void run() {
+        long time = System.currentTimeMillis();
+
         while (running) {
             long current = System.currentTimeMillis();
             double interval = changeMsecSlider.valueProperty().doubleValue() * 1000;
 
             if (current - time < Math.round(interval)) {
-                continue;
-            }
-
-            if (time == 0) {
-                time = current;
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 continue;
             }
 
@@ -327,12 +345,6 @@ public class ImageController extends ProjectionController implements Runnable {
             }
 
             Platform.runLater(() -> imagesList.getSelectionModel().clearAndSelect(nextIndex));
-
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
     }
 
