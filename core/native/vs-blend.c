@@ -10,17 +10,31 @@ static const GLfloat UV_VS_BLEND_MODE[4][8] = {
     // Left to Right
     {
         0.0F, 0.0F,
+        0.0F, 0.0F,
         1.0F, 0.0F,
-        1.0F, 0.0F,
-        0.0F, 0.0F
+        1.0F, 0.0F
     },
     // Right to Left
     {
         1.0F, 0.0F,
+        1.0F, 0.0F,
+        0.0F, 0.0F,
+        0.0F, 0.0F
+    },
+    // Top to Bottom
+    {
+        0.0F, 1.0F,
+        0.0F, 1.0F,
+        0.0F, 0.0F,
+        0.0F, 0.0F
+    },
+    // Bottom to Top
+    {
         0.0F, 0.0F,
         0.0F, 0.0F,
-        1.0F, 0.0F
-    }
+        0.0F, 1.0F,
+        0.0F, 1.0F
+    },
 };
 
 static const GLchar* VERTEX_SHADER_SRC[1] =  {
@@ -72,6 +86,8 @@ void vs_blend_load_coordinates(config_bounds *display_bounds, config_virtual_scr
     y = (config->position.y * h / virtual_screen->output_bounds.h) + y;
     w = (config->position.w * w / virtual_screen->output_bounds.w);
     h = (config->position.h * h / virtual_screen->output_bounds.h);
+
+    log_debug("Blend vertices x %f y %f w %f h %f\n", x, y, w, h);
 
     indexed_vertices[0] = x;
     indexed_vertices[1] = y;

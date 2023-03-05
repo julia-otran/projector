@@ -119,7 +119,6 @@ void render_text_update_assets() {
         if (buffer) {
             GLuint texture_id = 0;
             glGenTextures(1, &texture_id);
-            log_debug("Texture id %u\n", texture_id);
 
             glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
             glBindTexture(GL_TEXTURE_2D, texture_id);
