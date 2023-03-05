@@ -8,7 +8,6 @@ typedef struct {
 typedef struct {
     config_bounds position;
     int direction;
-    int use_curve;
 } config_blend;
 
 typedef struct {
@@ -35,7 +34,8 @@ typedef struct {
 
 typedef struct {
     int x1, x2, y1, y2;
-    int offset;
+    config_color_factor color;
+    double alpha;
 } config_black_level_adjust;
 
 typedef struct {

@@ -10,4 +10,6 @@ public interface WindowConfigsLoaderProperty {
     void loadDefaultConfigs();
 
     ObservableList<String> getConfigFiles();
+
+    boolean createConfigFileFromDefaults(String name);
 }

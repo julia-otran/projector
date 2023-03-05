@@ -96,6 +96,7 @@ void destroy_window(monitor *m) {
     }
 
     glfwDestroyWindow(m->window);
+    m->window = NULL;
 }
 
 void shutdown_monitors() {
@@ -125,20 +126,13 @@ void activate_monitors(projection_config *config) {
             if (monitor_match_bounds(&dsp->monitor_bounds, m) && dsp->projection_enabled) {
                 found = 1;
                 m->config = dsp;
-                m->virtual_screen_data = (void**) calloc(dsp->count_virtual_screen, sizeof(void*));
-
                 create_window(m);
             }
         }
 
         if (!found) {
-            if (m->virtual_screen_data) {
-                free(m->virtual_screen_data);
-                m->virtual_screen_data = NULL;
-            }
-
-            m->config = NULL;
             destroy_window(m);
+            m->config = NULL;
         }
     }
 }
@@ -179,6 +173,38 @@ int window_should_close() {
     return 0;
 }
 
+void monitors_config_hot_reload(projection_config *config) {
+    for (int i=0; i<monitors_count; i++) {
+        monitor *m = &monitors[i];
+
+        if (m->window) {
+            glfwMakeContextCurrent(m->window);
+
+            if (m->virtual_screen_data) {
+                for (int j=0; j<m->config->count_virtual_screen; j++) {
+                    shutdown_virtual_screen(m->virtual_screen_data[j]);
+                }
+
+                free(m->virtual_screen_data);
+                m->virtual_screen_data = NULL;
+            }
+
+            for (int j = 0; j < config->count_display; j++) {
+                config_display *dsp = &config->display[j];
+
+                if (monitor_match_bounds(&dsp->monitor_bounds, m) && dsp->projection_enabled) {
+                    m->config = dsp;
+                    m->virtual_screen_data = (void**) calloc(dsp->count_virtual_screen, sizeof(void*));
+
+                    for (int k=0; k<m->config->count_virtual_screen; k++) {
+                        initialize_virtual_screen(&dsp->monitor_bounds, &m->config->virtual_screens[k], &m->virtual_screen_data[k]);
+                    }
+                }
+            }
+        }
+    }
+}
+
 void monitors_init(render_output *data, int render_output_count) {
     int width, height;
 
@@ -196,15 +222,6 @@ void monitors_init(render_output *data, int render_output_count) {
 
             glfwGetFramebufferSize(m->window, &width, &height);
             glViewport(0, 0, width, height);
-
-            glPushMatrix();
-            glOrtho(0.f, width, height, 0.f, 0.f, 1.f );
-
-            for (int j=0; j<m->config->count_virtual_screen; j++) {
-                initialize_virtual_screen(&m->config->virtual_screens[j], &m->virtual_screen_data[j]);
-            }
-
-            glPopMatrix();
         }
     }
 }
@@ -213,12 +230,17 @@ void monitors_terminate() {
     for (int i=0; i<monitors_count; i++) {
         monitor *m = &monitors[i];
 
-        if (m->virtual_screen_data) {
-            for (int j=0; j<m->config->count_virtual_screen; j++) {
-                if (m->virtual_screen_data[j]) {
+        if (m->window) {
+            glfwMakeContextCurrent(m->window);
+
+            if (m->virtual_screen_data) {
+                for (int j=0; j<m->config->count_virtual_screen; j++) {
                     shutdown_virtual_screen(m->virtual_screen_data[j]);
                     m->virtual_screen_data[j] = NULL;
                 }
+
+                free(m->virtual_screen_data);
+                m->virtual_screen_data = NULL;
             }
         }
     }

@@ -232,11 +232,17 @@ void* transfer_window_loop(void*) {
     return NULL;
 }
 
-void create_render(config_render *render_conf, render_layer *render) {
+void configure_render(config_render *render_conf, render_layer *render) {
     memcpy(&render->config, render_conf, sizeof(config_render));
 
     if (render->config.render_mode & CONFIG_RENDER_MODE_MAIN) {
         render_text_set_size(render->config.text_area.w, render->config.text_area.h);
+    }
+}
+
+void renders_config_hot_reload(projection_config *config) {
+    for (int i=0; i < config->count_renders; i++) {
+        configure_render(&config->renders[i], &renders[i]);
     }
 }
 
@@ -248,7 +254,7 @@ void activate_renders(GLFWwindow *shared_context, projection_config *config) {
 
     for (int i=0; i < config->count_renders; i++) {
         output[i].render_id = config->renders[i].render_id;
-        create_render(&config->renders[i], &renders[i]);
+        configure_render(&config->renders[i], &renders[i]);
     }
 
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);

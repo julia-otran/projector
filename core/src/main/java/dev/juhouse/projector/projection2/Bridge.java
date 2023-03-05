@@ -7,6 +7,8 @@ public class Bridge {
 
     public native void loadConfig(String fileName);
 
+    public native void generateConfig(String fileName);
+
     public native int getTextRenderAreaWidth();
 
     public native int getTextRenderAreaHeight();

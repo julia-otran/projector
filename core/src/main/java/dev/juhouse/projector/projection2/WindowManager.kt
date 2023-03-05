@@ -65,6 +65,10 @@ class WindowManager(private val settingsService: SettingsService) : CanvasDelega
         return bridge
     }
 
+    override fun createConfigs(filePath: String?) {
+        bridge.generateConfig(filePath);
+    }
+
     override fun updateConfigs(filePath: String?) {
         bridge.loadConfig(filePath)
         manager.rebuild()

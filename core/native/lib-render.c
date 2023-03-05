@@ -49,28 +49,56 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_initialize(
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_loadConfig(JNIEnv *env, jobject, jstring j_file_path) {
     CHECK_INITIALIZE
 
-    if (config) {
-        log_debug("Config was loaded! restarting engine.\n");
-        terminate_main_loop();
-        shutdown_renders();
-        shutdown_monitors();
-        free_projection_config(config);
-    }
+    projection_config *new_config;
 
     if (j_file_path != NULL) {
         char *file_path = (char*) (*env)->GetStringUTFChars(env, j_file_path, 0);
-        config = load_config(file_path);
+        new_config = load_config(file_path);
         (*env)->ReleaseStringUTFChars(env, j_file_path, file_path);
     } else {
-        config = load_config(NULL);
+        new_config = load_config(NULL);
     }
 
     log_debug("Will load config:\n");
-    print_projection_config(config);
+    print_projection_config(new_config);
+
+    if (config) {
+        if (!config_change_requires_restart(new_config, config)) {
+            log_debug("New config was loaded! hot reloading...\n");
+
+            projection_config *old_config = config;
+            config = new_config;
+
+            renders_config_hot_reload(config);
+            main_loop_schedule_config_reload(config);
+
+            free_projection_config(old_config);
+            return;
+        } else {
+            log_debug("New config was loaded! restart engine required.\n");
+
+            log_debug("Shutting down main loop...\n");
+            main_loop_terminate();
+            log_debug("Shutting down renders...\n");
+            shutdown_renders();
+            log_debug("Freeing configs...\n");
+            free_projection_config(config);
+        }
+    }
+
+    log_debug("Staring engine...\n");
+    config = new_config;
 
     activate_monitors(config);
     activate_renders(get_gl_share_context(), config);
-    start_main_loop();
+    main_loop_schedule_config_reload(config);
+    main_loop_start();
+}
+
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_generateConfig(JNIEnv *env, jobject, jstring j_path) {
+    char *file_path = (char*) (*env)->GetStringUTFChars(env, j_path, 0);
+    generate_config(file_path);
+    (*env)->ReleaseStringUTFChars(env, j_path, file_path);
 }
 
 JNIEXPORT jint JNICALL Java_dev_juhouse_projector_projection2_Bridge_getTextRenderAreaWidth(JNIEnv *, jobject) {
@@ -165,7 +193,7 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setRenderWe
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_shutdown(JNIEnv *, jobject) {
     CHECK_INITIALIZE
 
-    terminate_main_loop();
+    main_loop_terminate();
     shutdown_renders();
     shutdown_monitors();
     glfwTerminate();

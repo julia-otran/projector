@@ -107,15 +107,6 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.openjfx</groupId>
-                <artifactId>javafx-maven-plugin</artifactId>
-                <version>0.0.4</version>
-                <configuration>
-                    <mainClass>dev.juhouse.projector.Main</mainClass>
-                </configuration>
-            </plugin>
-
-            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>native-maven-plugin</artifactId>
                 <version>1.0-alpha-11</version>
@@ -135,6 +126,7 @@
                                 <fileName>lib-render.c</fileName>
                                 <fileName>loop.c</fileName>
                                 <fileName>monitor.c</fileName>
+                                <fileName>ogl-loader.c</fileName>
                                 <fileName>render.c</fileName>
                                 <fileName>render-fader.c</fileName>
                                 <fileName>render-image.c</fileName>
@@ -144,6 +136,7 @@
                                 <fileName>render-web-view.c</fileName>
                                 <fileName>virtual-screen.c</fileName>
                                 <fileName>vs-color-corrector.c</fileName>
+                                <fileName>vs-blend.c</fileName>
                             </fileNames>
                         </source>
                     </sources>
@@ -198,6 +191,26 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.4</version>
+                <configuration>
+                    <mainClass>dev.juhouse.projector.Main</mainClass>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <compilerArgs>
+                        <arg>-h</arg>
+                        <arg>core/native/include</arg>
+                    </compilerArgs>
+                </configuration>
             </plugin>
 
             <!-- Maven Assembly Plugin -->

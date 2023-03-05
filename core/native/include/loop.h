@@ -5,7 +5,8 @@
 #ifndef _LOOP_H_
 #define _LOOP_H_
 
-void start_main_loop();
-void terminate_main_loop();
+void main_loop_start();
+void main_loop_schedule_config_reload(projection_config *config);
+void main_loop_terminate();
 
 #endif

@@ -23,6 +23,7 @@ public class WindowConfigsObserver implements Runnable, WindowConfigsLoaderPrope
     private final ReadOnlyObjectWrapper<String> loadedConfigFile = new ReadOnlyObjectWrapper<>();
 
     public interface WindowConfigsObserverCallback {
+        void createConfigs(String filePath);
         void updateConfigs(String filePath);
     }
 
@@ -147,14 +148,14 @@ public class WindowConfigsObserver implements Runnable, WindowConfigsLoaderPrope
             return false;
         }
 
-        return loadConfigs(configFile);
+        return loadConfigFile(configFile);
     }
 
     public void loadConfigs(String fileName) {
         File configFile = FileSystems.getDefault().getPath(FilePaths.PROJECTOR_WINDOW_CONFIG_PATH.toString(), fileName).toFile();
 
         if (configFile.canRead()) {
-            loadConfigs(configFile);
+            loadConfigFile(configFile);
         }
     }
 
@@ -164,10 +165,29 @@ public class WindowConfigsObserver implements Runnable, WindowConfigsLoaderPrope
         Platform.runLater(() -> loadedConfigFile.set(null));
     }
 
-    private boolean loadConfigs(File configFile) {
+    @Override
+    public boolean createConfigFileFromDefaults(String name) {
+        File configFile = FileSystems.getDefault().getPath(FilePaths.PROJECTOR_WINDOW_CONFIG_PATH.toString(), name).toFile();
+
+        try {
+            if (configFile.createNewFile()) {
+                ProjectorPreferences.setWindowConfigFile(configFile.getName());
+                callback.createConfigs(configFile.toString());
+                return true;
+            }
+        } catch (IOException e) {
+            return false;
+        }
+
+        return false;
+    }
+
+    private boolean loadConfigFile(File configFile) {
         if (configFile != null && configFile.canRead()) {
             ProjectorPreferences.setWindowConfigFile(configFile.getName());
-            callback.updateConfigs(configFile.toPath().toString());
+            Platform.runLater(() -> loadedConfigFile.set(configFile.getName()));
+            callback.updateConfigs(configFile.toString());
+            return true;
         }
 
         return false;

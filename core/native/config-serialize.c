@@ -18,7 +18,6 @@ cJSON* serialize_config_blend(config_blend *in) {
 
     cJSON_AddItemToObject(config_blend_json, "position", serialize_config_bounds(&in->position));
     cJSON_AddItemToObject(config_blend_json, "direction", cJSON_CreateNumber(in->direction));
-    cJSON_AddItemToObject(config_blend_json, "use_curve", cJSON_CreateNumber(in->use_curve));
 
     return config_blend_json;
 }
@@ -74,7 +73,9 @@ cJSON* serialize_config_black_level_adjust(config_black_level_adjust *in) {
     cJSON_AddItemToObject(config_black_level_adjust_json, "y1", cJSON_CreateNumber(in->y1));
     cJSON_AddItemToObject(config_black_level_adjust_json, "x2", cJSON_CreateNumber(in->x2));
     cJSON_AddItemToObject(config_black_level_adjust_json, "y2", cJSON_CreateNumber(in->y2));
-    cJSON_AddItemToObject(config_black_level_adjust_json, "offset", cJSON_CreateNumber(in->offset));
+    cJSON_AddItemToObject(config_black_level_adjust_json, "alpha", cJSON_CreateNumber(in->alpha));
+
+    cJSON_AddItemToObject(config_black_level_adjust_json, "color", serialize_config_color_factor(&in->color));
 
     return config_black_level_adjust_json;
 }

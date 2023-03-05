@@ -21,6 +21,8 @@ typedef struct {
 
 void reload_monitors();
 void activate_monitors(projection_config *config);
+void monitors_config_hot_reload(projection_config *config);
+
 void shutdown_monitors();
 
 void get_default_projection_monitor_bounds(config_bounds *in, int *no_secondary_mon);

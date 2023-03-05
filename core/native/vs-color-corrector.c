@@ -166,35 +166,7 @@ static const GLchar* FRAGMENT_SHADER_SRC[1] = {
 
 static GLint FRAGMENT_SHADER_SRC_LEN = 0;
 
-GLuint loadShader(const GLchar* const *shaderSource, GLint *sourceLen, GLuint type, char *name) {
-    GLuint shaderID = glCreateShader(type);
-
-    glShaderSource(shaderID, 1, shaderSource, sourceLen);
-    glCompileShader(shaderID);
-
-    GLint compileStatus;
-
-     glGetShaderiv(shaderID, GL_COMPILE_STATUS, &compileStatus);
-
-    if (compileStatus == 0) {
-        GLsizei len;
-        GLchar log_buffer[255];
-
-        log_debug("Failed compiling shader: %s\n", name);
-        log_debug("Shader SRC:\n\n")
-        log_debug("--->\n%s<---\n", shaderSource[0]);
-
-        glGetShaderInfoLog(shaderID, sizeof(log_buffer) - 1, &len, (GLchar*) &log_buffer);
-
-        log_buffer[len - 1] = 0;
-
-        log_debug("%s\n", log_buffer);
-    }
-
-    return shaderID;
-}
-
-void load_coordinates(config_virtual_screen *config, vs_color_corrector *data) {
+void vs_color_corrector_load_coordinates(config_bounds *display_bounds, config_virtual_screen *config, vs_color_corrector *data) {
     GLuint vertexarray;
     glGenVertexArrays(1, &vertexarray);
     glBindVertexArray(vertexarray);
@@ -203,23 +175,32 @@ void load_coordinates(config_virtual_screen *config, vs_color_corrector *data) {
 
     GLfloat *indexed_vertices = calloc(16, sizeof(GLfloat));
 
-    indexed_vertices[0] = config->output_bounds.x;
-    indexed_vertices[1] = config->output_bounds.y;
+    GLfloat x, y, w, h;
+
+    x = (config->output_bounds.x * 2.0 / display_bounds->w) - 1;
+    y = (config->output_bounds.y * 2.0 / display_bounds->h) - 1;
+    w = (config->output_bounds.w * 2.0 / display_bounds->w);
+    h = (config->output_bounds.h * 2.0 / display_bounds->h);
+
+    log_debug("Color corrector bounds: x %f y %f w %f h %f\n", x, y, w, h);
+
+    indexed_vertices[0] = x;
+    indexed_vertices[1] = y;
     indexed_vertices[2] = 0.0;
     indexed_vertices[3] = 1.0;
 
-    indexed_vertices[4] = config->output_bounds.x;
-    indexed_vertices[5] = config->output_bounds.y + config->output_bounds.h;
+    indexed_vertices[4] = x;
+    indexed_vertices[5] = y + h;
     indexed_vertices[6] = 0.0;
     indexed_vertices[7] = 1.0;
 
-    indexed_vertices[8] = config->output_bounds.x + config->output_bounds.w;
-    indexed_vertices[9] = config->output_bounds.y + config->output_bounds.h;
+    indexed_vertices[8] = x + w;
+    indexed_vertices[9] = y + h;
     indexed_vertices[10] = 0.0;
     indexed_vertices[11] = 1.0;
 
-    indexed_vertices[12] = config->output_bounds.x + config->output_bounds.w;
-    indexed_vertices[13] = config->output_bounds.y;
+    indexed_vertices[12] = x + w;
+    indexed_vertices[13] = y;
     indexed_vertices[14] = 0.0;
     indexed_vertices[15] = 1.0;
 
@@ -264,12 +245,12 @@ void load_coordinates(config_virtual_screen *config, vs_color_corrector *data) {
     glBindVertexArray(0);
 }
 
-void setup_shaders(config_virtual_screen *, vs_color_corrector *data) {
+void vs_color_corrector_setup_shaders(config_virtual_screen *, vs_color_corrector *data) {
     VERTEX_SHADER_SRC_LEN = strlen(VERTEX_SHADER_SRC[0]);
     FRAGMENT_SHADER_SRC_LEN = strlen(FRAGMENT_SHADER_SRC[0]);
 
-    data->vertexshader = loadShader(VERTEX_SHADER_SRC, &VERTEX_SHADER_SRC_LEN, GL_VERTEX_SHADER, "Vertex Shader");
-    data->fragmentshader = loadShader(FRAGMENT_SHADER_SRC, &FRAGMENT_SHADER_SRC_LEN, GL_FRAGMENT_SHADER, "Fragment Shader");
+    data->vertexshader = loadShader(VERTEX_SHADER_SRC, &VERTEX_SHADER_SRC_LEN, GL_VERTEX_SHADER, "Color Corrector Vertex Shader");
+    data->fragmentshader = loadShader(FRAGMENT_SHADER_SRC, &FRAGMENT_SHADER_SRC_LEN, GL_FRAGMENT_SHADER, "Color Corrector Fragment Shader");
 
     data->program = glCreateProgram();
     glAttachShader(data->program, data->vertexshader);
@@ -292,7 +273,7 @@ void setup_shaders(config_virtual_screen *, vs_color_corrector *data) {
     glUseProgram(0);
 }
 
-void initUniforms(config_virtual_screen *config, vs_color_corrector *data) {
+void vs_color_corrector_init_uniforms(config_virtual_screen *config, vs_color_corrector *data) {
     glUseProgram(data->program);
 
     glUniform3f(data->brightAdjustUniform, config->white_balance.bright.r, config->white_balance.bright.g, config->white_balance.bright.b);
@@ -306,28 +287,57 @@ void initUniforms(config_virtual_screen *config, vs_color_corrector *data) {
     glUseProgram(0);
 }
 
-void vs_color_corrector_init(config_virtual_screen *config, vs_color_corrector *data) {
-    load_coordinates(config, data);
-    setup_shaders(config, data);
-    initUniforms(config, data);
+void vs_color_corrector_init(config_bounds *display_bounds, config_virtual_screen *config, vs_color_corrector *data) {
+    vs_color_corrector_load_coordinates(display_bounds, config, data);
+    vs_color_corrector_setup_shaders(config, data);
+    vs_color_corrector_init_uniforms(config, data);
 }
 
 void vs_color_corrector_render_texture(GLuint texture_id, vs_color_corrector *data) {
-        glUseProgram(data->program);
+    glUseProgram(data->program);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture_id);
-        glUniform1i(data->textureUniform, 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+    glUniform1i(data->textureUniform, 0);
 
-        glBindVertexArray(data->vertexarray);
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
+    glBindVertexArray(data->vertexarray);
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
 
-        glDrawArrays(GL_QUADS, 0, 4);
+    glDrawArrays(GL_QUADS, 0, 4);
 
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glDisableVertexAttribArray(0);
-        glDisableVertexAttribArray(1);
-        glBindVertexArray(0);
-        glUseProgram(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+    glBindVertexArray(0);
+    glUseProgram(0);
+}
+
+void vs_color_corrector_shutdown(vs_color_corrector *data) {
+    glUseProgram(0);
+
+    glDetachShader(data->program, data->vertexshader);
+    glDetachShader(data->program, data->fragmentshader);
+    glDeleteShader(data->vertexshader);
+    glDeleteShader(data->fragmentshader);
+    glDeleteProgram(data->program);
+
+    // Select the VAO
+    glBindVertexArray(data->vertexarray);
+
+    // Disable the VBO index from the VAO attributes list
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+
+    // Delete the vertex VBO
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glDeleteBuffers(1, &data->vertexbuffer);
+
+    // Delete the color VBO
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glDeleteBuffers(1, &data->uvbuffer);
+
+    // Delete the VAO
+    glBindVertexArray(0);
+    glDeleteVertexArrays(1, &data->vertexarray);
 }

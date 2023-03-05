@@ -22,6 +22,7 @@ typedef struct {
 
 void initialize_renders();
 void activate_renders(GLFWwindow *shared_context, projection_config *config);
+void renders_config_hot_reload(projection_config *config);
 void shutdown_renders();
 
 void lock_renders();

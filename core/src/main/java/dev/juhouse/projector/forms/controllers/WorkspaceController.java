@@ -97,6 +97,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
         graphicsHelper.getWindowConfigsLoaderProperty().getConfigFiles().addListener((ListChangeListener<String>) c -> buildPresetsMenu());
 
         graphicsHelper.getWindowConfigsLoaderProperty().loadedConfigFileProperty().addListener((prop, oldValue, newValue) -> updateSelectedPreset(newValue));
+        updateSelectedPreset(graphicsHelper.getWindowConfigsLoaderProperty().loadedConfigFileProperty().getValue());
 
         graphicsHelper.getProjectionManager().addTextWrapperChangeListener(factory -> {
             wrapperFactory = factory;
@@ -139,9 +140,6 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
 
     @FXML
     private Menu windowConfigsPresetsMenu;
-
-    @FXML
-    private CheckMenuItem fullScreenCheckMenuItem;
 
     @FXML
     private CheckMenuItem darkenBackgroundMenuItem;
@@ -234,20 +232,19 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
 
         newValue.ifPresent(value -> {
             if (FilePaths.ALLOWED_WINDOW_CONFIG_FILE_NAME_PATTERN.matcher(value).matches()) {
-                // TODO: fix default config creation
-                /* if (graphicsHelper.getWindowConfigsLoaderProperty().createConfigFileFromDefaults(value + ".json")) {
+                if (graphicsHelper.getWindowConfigsLoaderProperty().createConfigFileFromDefaults(value + ".json")) {
                     Alert a = new Alert(Alert.AlertType.INFORMATION);
                     a.setTitle("OK");
                     a.setHeaderText("Preset criado");
                     a.setContentText("O novo arquivo de preset foi criado");
                     a.show();
-                } else { */
+                } else {
                     Alert a = new Alert(Alert.AlertType.ERROR);
                     a.setTitle("Erro");
                     a.setHeaderText("Falha ao criar novo preset");
                     a.setContentText("Verifique se já não existe um com mesmo nome.");
                     a.show();
-                // }
+                }
             } else {
                 Alert a = new Alert(Alert.AlertType.ERROR);
                 a.setTitle("Erro");

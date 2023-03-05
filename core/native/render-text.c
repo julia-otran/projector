@@ -29,11 +29,22 @@ void render_text_initialize() {
 }
 
 void render_text_set_size(int width_in, int height_in) {
-    width = width_in;
-    height = height_in;
-    share_pixel_data = malloc(width_in * height_in * 4);
-    pixel_data_changed = 0;
-    clear_text = 0;
+    if (width != width_in || height != height_in) {
+        pthread_mutex_lock(&thread_mutex);
+
+        width = width_in;
+        height = height_in;
+
+        if (share_pixel_data) {
+            free(share_pixel_data);
+        }
+
+        share_pixel_data = malloc(width_in * height_in * 4);
+        pixel_data_changed = 0;
+        clear_text = 0;
+
+        pthread_mutex_unlock(&thread_mutex);
+    }
 }
 
 void render_text_set_image(void *pixel_data) {

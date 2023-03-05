@@ -4,4 +4,6 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+GLuint loadShader(const GLchar* const *shaderSource, GLint *sourceLen, GLuint type, char *name);
+
 #endif
