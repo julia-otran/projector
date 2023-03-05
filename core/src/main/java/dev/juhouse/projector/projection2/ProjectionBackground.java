@@ -33,18 +33,7 @@ public class ProjectionBackground extends ProjectionImage {
         getCanvasDelegate().getSettingsService().storeLastBackground(model);
     }
 
-    protected void update() {
-        if (getRender()) {
-            BufferedImage image = getModel().getStaticBackground();
-
-            canvasDelegate.getBridge().setImageBackgroundAsset(
-                    ((DataBufferInt) image.getRaster().getDataBuffer()).getData(),
-                    image.getWidth(),
-                    image.getHeight(),
-                    getCropBackground()
-            );
-        } else {
-            canvasDelegate.getBridge().setImageBackgroundAsset(null, 0, 0, getCropBackground());
-        }
+    protected void setImageAsset(int[] buffer, int width, int height, boolean crop) {
+        canvasDelegate.getBridge().setImageBackgroundAsset(buffer, width, height, crop);
     }
 }

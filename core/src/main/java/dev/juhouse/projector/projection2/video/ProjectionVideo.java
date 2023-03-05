@@ -2,6 +2,9 @@ package dev.juhouse.projector.projection2.video;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.scene.image.PixelBuffer;
+import javafx.scene.image.PixelFormat;
+import javafx.scene.image.WritableImage;
 import lombok.Getter;
 import lombok.Setter;
 import sun.misc.Unsafe;
@@ -12,30 +15,31 @@ import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormatCall
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.RenderCallback;
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.format.RV32BufferFormat;
 import dev.juhouse.projector.projection2.CanvasDelegate;
-import dev.juhouse.projector.projection2.Projectable;
 import dev.juhouse.projector.utils.VlcPlayerFactory;
 
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
 import java.lang.reflect.Field;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.HashMap;
 
 public class ProjectionVideo {
-    public interface BufferSizeChangeCallback {
-        void onBufferSizeChange(int width, int height);
+    public interface PreviewBufferCallback {
+        void onPreviewBufferChange(ByteBuffer buffer, int width, int height);
+        void onPreviewBufferUpdated();
     }
 
     @Getter
     @Setter
-    private BufferSizeChangeCallback bufferSizeChangeCallback;
+    private PreviewBufferCallback previewBufferCallback;
 
     private final CanvasDelegate delegate;
 
     protected MediaPlayer player;
 
-    protected BufferedImage image;
+    @Getter
+    @Setter
+    private boolean enablePreview;
 
     protected int videoW = 0;
     protected int videoH = 0;
@@ -76,18 +80,16 @@ public class ProjectionVideo {
         updateBufferAddress();
     }
 
-    public BufferedImage getImage() {
-        return image;
-    }
+    protected void preparePreview(int w, int h) {
+        if (videoW != w || videoH != h) {
+            videoW = w;
+            videoH = h;
 
-    protected void generateBuffer(int w, int h) {
-        videoW = w;
-        videoH = h;
-
-        image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
-
-        if (bufferSizeChangeCallback != null) {
-            bufferSizeChangeCallback.onBufferSizeChange(w, h);
+            if (enablePreview) {
+                if (previewBufferCallback != null) {
+                    previewBufferCallback.onPreviewBufferChange(buffers[0], w, h);
+                }
+            }
         }
     }
 
@@ -128,20 +130,24 @@ public class ProjectionVideo {
     }
 
     private final class MyRenderCallback implements RenderCallback {
-        private int previewUpdateCount;
+        private long previewUpdateTime;
 
         MyRenderCallback() {
-            previewUpdateCount = 0;
+            previewUpdateTime = 0;
         }
-
 
         @Override
         public void display(MediaPlayer mediaPlayer, ByteBuffer[] nativeBuffers, BufferFormat bufferFormat) {
-            if (previewUpdateCount >= 10) {
-                nativeBuffers[0].asIntBuffer().get(((DataBufferInt) image.getRaster().getDataBuffer()).getData());
-                previewUpdateCount = 0;
-            } else {
-                previewUpdateCount += 1;
+            if (enablePreview) {
+                long ms = System.currentTimeMillis();
+
+                if (ms - previewUpdateTime > 100) {
+                    if (previewBufferCallback != null) {
+                        previewBufferCallback.onPreviewBufferUpdated();
+                    }
+
+                    previewUpdateTime = ms;
+                }
             }
 
             if (render.get()) {
@@ -151,13 +157,18 @@ public class ProjectionVideo {
     }
 
     private void updateBufferAddress() {
-        if (buffers != null && buffers[0] != null && render.get()) {
-            delegate.getBridge().setVideoBuffer(UnsafeAccess.getAddress(buffers[0]), videoW, videoH, cropVideo);
+        if (buffers != null && buffers[0] != null) {
+            if (render.get()) {
+                delegate.getBridge().setVideoBuffer(UnsafeAccess.getAddress(buffers[0]), videoW, videoH, cropVideo);
+            }
         }
     }
 
     private final class MyBufferFormatCallback implements BufferFormatCallback {
         private final HashMap<String, RV32BufferFormat> buffers = new HashMap<>();
+
+        int sourceWidth;
+        int sourceHeight;
 
         MyBufferFormatCallback() {
         }
@@ -172,15 +183,18 @@ public class ProjectionVideo {
                 buffers.put(bufferIdentifier, buffer);
             }
 
-            generateBuffer(sourceWidth, sourceHeight);
+            this.sourceWidth = sourceWidth;
+            this.sourceHeight = sourceHeight;
 
             return buffer;
         }
 
         @Override
         public void allocatedBuffers(ByteBuffer[] buffers) {
-            assert buffers[0].capacity() == videoW * videoH * 4;
+            assert buffers[0].capacity() == sourceWidth * sourceHeight * 4;
+
             ProjectionVideo.this.buffers = buffers;
+            preparePreview(sourceWidth, sourceHeight);
             updateBufferAddress();
         }
     }

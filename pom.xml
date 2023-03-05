@@ -7,13 +7,12 @@
     <packaging>pom</packaging>
 
     <properties>
-        <maven.compiler.release>13</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <fx.version>13.0.2</fx.version>
+        <fx.version>19.0.2.1</fx.version>
         <revision>2.21</revision>
-        <lwjgl.version>3.2.3</lwjgl.version>
         <lib_name>render</lib_name>
+        <maven.compiler.release>17</maven.compiler.release>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
     </properties>

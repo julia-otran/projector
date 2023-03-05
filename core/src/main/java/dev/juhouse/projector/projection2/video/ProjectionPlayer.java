@@ -5,28 +5,32 @@
  */
 package dev.juhouse.projector.projection2.video;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 
 import dev.juhouse.projector.projection2.Projectable;
 import javafx.application.Platform;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelBuffer;
+import javafx.scene.image.PixelFormat;
 import javafx.scene.image.WritableImage;
-import dev.juhouse.projector.projection2.CanvasDelegate;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 
 /**
  *
  * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
-public class ProjectionPlayer implements Projectable, ProjectionVideo.BufferSizeChangeCallback {
-    private PlayerPreview preview;
-    private ProjectionVideo video;
+public class ProjectionPlayer implements Projectable {
+    private final PlayerPreview preview;
+    private final ProjectionVideo video;
 
     public ProjectionPlayer(ProjectionVideo video) {
         this.video = video;
         this.preview = new PlayerPreview();
+
+        video.setEnablePreview(true);
+        video.setPreviewBufferCallback(this.preview);
     }
 
     public boolean isCropVideo() {
@@ -47,16 +51,13 @@ public class ProjectionPlayer implements Projectable, ProjectionVideo.BufferSize
 
     @Override
     public void init() {
-        preview.start();
         video.init();
-        video.setBufferSizeChangeCallback(this);
     }
 
     @Override
     public void finish() {
         video.finish();
-        preview.stop();
-        video.setBufferSizeChangeCallback(null);
+        video.setPreviewBufferCallback(null);
     }
 
     @Override
@@ -72,64 +73,34 @@ public class ProjectionPlayer implements Projectable, ProjectionVideo.BufferSize
         this.video.player.media().prepare(file.getAbsolutePath());
     }
 
-    @Override
-    public void onBufferSizeChange(int width, int height) {
-        preview.recreatePreview(width, height);
-    }
-
-    public class PlayerPreview extends ImageView implements Runnable {
-        private WritableImage fxImage;
-        private Thread previewThread;
+    public static class PlayerPreview extends ImageView implements ProjectionVideo.PreviewBufferCallback {
         private boolean running;
+        private PixelBuffer<IntBuffer> previewImagePixelBuffer;
 
         public PlayerPreview() {
             setPreserveRatio(true);
         }
 
-        public void recreatePreview(int width, int height) {
-            fxImage = new WritableImage(width, height);
-
-            Platform.runLater(() -> setImage(fxImage));
+        @Override
+        public void onPreviewBufferChange(ByteBuffer buffer, int w, int h) {
+            Platform.runLater(() -> {
+                previewImagePixelBuffer = new PixelBuffer<>(w, h, buffer.asIntBuffer(), PixelFormat.getIntArgbPreInstance());
+                setImage(new WritableImage(previewImagePixelBuffer));
+            });
         }
 
-        public void start() {
-            previewThread = new Thread(this);
+        @Override
+        public void onPreviewBufferUpdated() {
+            if (running) {
+                return;
+            }
 
             running = true;
-            previewThread.start();
-        }
 
-        public void stop() {
-            running = false;
-            if (previewThread != null) {
-                try {
-                    previewThread.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                previewThread = null;
-            }
-        }
-
-        @SuppressWarnings("BusyWait")
-        @Override
-        public void run() {
-            while (running) {
-                try {
-                    Thread.sleep(200);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                BufferedImage src = ProjectionPlayer.this.video.getImage();
-                WritableImage dst = fxImage;
-
-                if (dst == null || src == null) {
-                    continue;
-                }
-
-                SwingFXUtils.toFXImage(src, dst);
-            }
+            Platform.runLater(() -> {
+                setImage(new WritableImage(previewImagePixelBuffer));
+                running = false;
+            });
         }
     }
 }

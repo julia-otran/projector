@@ -5,25 +5,11 @@
  */
 package dev.juhouse.projector.projection2;
 
-import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.util.HashMap;
-
 import javafx.application.Platform;
-import javafx.embed.swing.JFXPanel;
-import javafx.embed.swing.SwingFXUtils;
-import javafx.embed.swing.SwingNode;
-import javafx.scene.Node;
-import javafx.scene.Scene;
-import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
 import javafx.scene.image.WritablePixelFormat;
-import javafx.scene.layout.Pane;
 import javafx.scene.web.WebView;
-
-import javax.swing.*;
 
 /**
  *

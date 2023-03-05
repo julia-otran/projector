@@ -12,7 +12,6 @@ import java.awt.GraphicsEnvironment;
 import dev.juhouse.projector.utils.FontCreatorUtil;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
@@ -82,10 +81,12 @@ public class AwtFontChooseDialog extends Dialog<Object> implements ChangeListene
         hbox.getChildren().add(sizes);
         
         vbox.getChildren().add(hbox);
-        
-        SwingNode previewNode = new SwingNode();
-        previewNode.setContent(previewLabel);
-        vbox.getChildren().add(previewNode);
+
+        // No more swing adapter, need fix
+        // TODO: Fix font preview
+//        SwingNode previewNode = new SwingNode();
+//        previewNode.setContent(previewLabel);
+//        vbox.getChildren().add(previewNode);
 
         fontNames.getItems().add(FontCreatorUtil.getMontserratFont().getFamily());
         fontNames.getItems().addAll(getFontNames());

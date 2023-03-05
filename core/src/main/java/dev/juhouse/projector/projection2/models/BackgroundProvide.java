@@ -1,7 +1,7 @@
 package dev.juhouse.projector.projection2.models;
 
-import java.awt.image.BufferedImage;
+import javafx.scene.image.Image;
 
 public interface BackgroundProvide {
-    BufferedImage getStaticBackground();
+    Image getStaticBackground();
 }

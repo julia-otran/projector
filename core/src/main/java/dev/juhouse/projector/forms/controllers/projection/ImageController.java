@@ -8,6 +8,7 @@ package dev.juhouse.projector.forms.controllers.projection;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URL;
+import java.nio.IntBuffer;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,11 +17,11 @@ import java.util.ResourceBundle;
 import dev.juhouse.projector.projection2.ProjectionImage;
 import dev.juhouse.projector.projection2.ProjectionManager;
 import javafx.application.Platform;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.WritablePixelFormat;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
@@ -70,7 +71,7 @@ public class ImageController extends ProjectionController implements Runnable {
     private ImageView imageView;
 
     private boolean running = false;
-    private final List<BufferedImage> awtImages = new ArrayList<>();
+
     private final List<File> openedImages = new ArrayList<>();
 
     @FXML
@@ -121,9 +122,9 @@ public class ImageController extends ProjectionController implements Runnable {
         imagesList.setCellFactory(cellFactory);
 
         imagesList.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
-            projectable.setModel(() -> awtImages.get(newValue.intValue()));
-
-            imageView.setImage(imagesList.getItems().get(newValue.intValue()));
+            Image image = imagesList.getItems().get(newValue.intValue());
+            projectable.setModel(() -> image);
+            imageView.setImage(image);
         });
 
         formatTimeLabel();
@@ -198,8 +199,6 @@ public class ImageController extends ProjectionController implements Runnable {
                 continue;
             }
 
-            BufferedImage awt = SwingFXUtils.fromFXImage(adding.getImage(), null);
-            awtImages.add(awt);
             imagesList.getItems().add(adding.getImage());
 
             if (adding.getFile() != null) {
@@ -241,8 +240,6 @@ public class ImageController extends ProjectionController implements Runnable {
                     if (file.canRead()) {
                         try {
                             Image img = new Image(file.toURI().toString());
-                            BufferedImage awt = SwingFXUtils.fromFXImage(img, null);
-                            awtImages.add(awt);
                             imagesList.getItems().add(img);
                             openedImages.add(file);
                         } catch (Exception ex) {

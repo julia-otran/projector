@@ -311,7 +311,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
         projectionListChoice.setConverter(new StringConverter<>() {
             @Override
             public String toString(SimpleProjectionList object) {
-                return object.getTitle();
+                return object != null ? object.getTitle() : "";
             }
 
             @Override

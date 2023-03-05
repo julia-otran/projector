@@ -6,9 +6,12 @@
 package dev.juhouse.projector.projection2;
 
 import dev.juhouse.projector.projection2.models.BackgroundProvide;
+import javafx.scene.image.Image;
+import javafx.scene.image.WritablePixelFormat;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.nio.IntBuffer;
 
 /**
  *
@@ -72,22 +75,27 @@ public class ProjectionImage implements Projectable {
         update();
     }
 
-    protected void update() {
+    protected void setImageAsset(int[] buffer, int width, int height, boolean crop) {
+        canvasDelegate.getBridge().setImageAsset(buffer, width, height, crop);
+    }
+
+    private void update() {
         if (render) {
-            BufferedImage image = getModel().getStaticBackground();
+            Image image = getModel().getStaticBackground();
 
             if (image == null) {
-                canvasDelegate.getBridge().setImageAsset(null, 0, 0, cropBackground);
+                setImageAsset(null, 0, 0, cropBackground);
             } else {
-                canvasDelegate.getBridge().setImageAsset(
-                        ((DataBufferInt) image.getRaster().getDataBuffer()).getData(),
-                        image.getWidth(),
-                        image.getHeight(),
-                        cropBackground
-                );
+                int w = (int) Math.round(image.getWidth());
+                int h = (int) Math.round(image.getHeight());
+
+                IntBuffer buffer = IntBuffer.allocate(w * h);
+                image.getPixelReader().getPixels(0, 0, w, h, WritablePixelFormat.getIntArgbInstance(), buffer.array(), 0, w);
+
+                setImageAsset(buffer.array(), w, h, cropBackground);
             }
         } else {
-            canvasDelegate.getBridge().setImageAsset(null, 0, 0, cropBackground);
+            setImageAsset(null, 0, 0, cropBackground);
         }
     }
 }

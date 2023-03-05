@@ -6,14 +6,8 @@
 package dev.juhouse.projector.projection2;
 
 import javafx.application.Platform;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
-
-import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-
 
 /**
  *
@@ -21,9 +15,6 @@ import java.awt.image.BufferedImage;
  */
 public class PreviewImageView extends ImageView implements Runnable {
     private PixelBufferProvider bufferProvider;
-
-    private BufferedImage targetRender;
-    private Graphics2D targetGraphics;
     private WritableImage fxTargetRender;
 
     private boolean repainting = false;
@@ -39,14 +30,7 @@ public class PreviewImageView extends ImageView implements Runnable {
             int width = bufferProvider.getWidth();
             int height = bufferProvider.getHeight();
 
-            if (targetRender == null || targetRender.getWidth() != width || targetRender.getHeight() != height) {
-                if (targetGraphics != null) {
-                    targetGraphics.dispose();
-                }
-
-                targetRender = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-                targetGraphics = targetRender.createGraphics();
-
+            if (fxTargetRender == null || Math.round(fxTargetRender.getWidth()) != width || Math.round(fxTargetRender.getHeight()) != height) {
                 fxTargetRender = new WritableImage(width, height);
             }
         }
@@ -90,36 +74,9 @@ public class PreviewImageView extends ImageView implements Runnable {
 
             repainting = true;
 
-            updateTargetRenderIfNeeded();
-
-            int width = targetRender.getWidth();
-            int height = targetRender.getHeight();
-
-            targetGraphics.setColor(Color.BLACK);
-            targetGraphics.fillRect(0, 0, width, height);
-
             if (bufferProvider != null) {
-                int dw = bufferProvider.getWidth();
-                int dh = bufferProvider.getHeight();
-
-                double scaleX = width / (double) dw;
-                double scaleY = height / (double) dh;
-                double scale = Math.min(scaleX, scaleY);
-
-                int pw = (int) Math.round(dw * scale);
-                int ph = (int) Math.round(dh * scale);
-                int px = (width - pw) / 2;
-                int py = (height - ph) / 2;
-
-                AffineTransform old = targetGraphics.getTransform();
-                targetGraphics.translate(px, py);
-                targetGraphics.scale(scale, scale);
-
+                updateTargetRenderIfNeeded();
                 // TODO: Copy image from pixel buffer provider
-
-                targetGraphics.setTransform(old);
-
-                SwingFXUtils.toFXImage(targetRender, fxTargetRender);
 
                 Platform.runLater(() -> {
                     setImage(fxTargetRender);

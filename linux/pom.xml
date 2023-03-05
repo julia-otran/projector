@@ -12,22 +12,9 @@
 
     <properties>
         <classifier>linux</classifier>
-        <lwjgl.natives>natives-linux</lwjgl.natives>
     </properties>
 
     <name>Projector Linux</name>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.lwjgl</groupId>
-                <artifactId>lwjgl-bom</artifactId>
-                <version>${lwjgl.version}</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -67,13 +54,6 @@
 
         <dependency>
             <groupId>org.openjfx</groupId>
-            <artifactId>javafx-swing</artifactId>
-            <version>${fx.version}</version>
-            <classifier>${classifier}</classifier>
-        </dependency>
-
-        <dependency>
-            <groupId>org.openjfx</groupId>
             <artifactId>javafx-web</artifactId>
             <version>${fx.version}</version>
             <classifier>${classifier}</classifier>
@@ -91,10 +71,6 @@
                 <exclusion>
                     <groupId>org.openjfx</groupId>
                     <artifactId>javafx-fxml</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-swing</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>org.openjfx</groupId>
