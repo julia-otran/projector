@@ -28,6 +28,10 @@ void render_pixel_unpack_buffer_deallocate(render_pixel_unpack_buffer_instance *
     free(instance);
 }
 
+render_pixel_unpack_buffer_node* render_pixel_unpack_buffer_get_all_buffers(render_pixel_unpack_buffer_instance *instance) {
+    return &instance->buffers;
+}
+
 render_pixel_unpack_buffer_node* render_pixel_unpack_buffer_dequeue_for_read(render_pixel_unpack_buffer_instance *instance) {
     pthread_mutex_lock(&instance->thread_mutex);
 

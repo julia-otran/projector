@@ -32,4 +32,6 @@ public class Bridge {
     public native void setWebViewBuffer(int[] buffer, int width, int height);
 
     public native void setRenderWebViewBuffer(boolean render);
+
+    public native void downloadPreviewData(byte[] buffer);
 }

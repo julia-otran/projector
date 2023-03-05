@@ -10,6 +10,7 @@
 #include "render-video.h"
 #include "render-web-view.h"
 #include "render-image.h"
+#include "render-preview.h"
 
 static int count_renders;
 static render_layer *renders;
@@ -55,6 +56,7 @@ void initialize_renders() {
     render_text_initialize();
     render_web_view_initialize();
     render_image_initialize();
+    render_preview_initialize();
 }
 
 void shutdown_renders() {
@@ -65,6 +67,7 @@ void shutdown_renders() {
     render_text_shutdown();
     render_web_view_shutdown();
     render_image_shutdown();
+    render_preview_shutdown();
 
     free(output);
     free(renders);
@@ -120,6 +123,7 @@ void render_init(render_layer *render) {
         render_text_create_assets();
         render_web_view_create_assets();
         render_image_create_assets();
+        render_preview_create_assets();
     }
 }
 
@@ -133,6 +137,7 @@ void render_cycle(render_layer *render) {
         render_video_update_assets();
         render_web_view_update_assets();
         render_image_update_assets();
+        render_preview_update_assets();
     }
 
     config_color_factor *background_clear_color = &render->config.background_clear_color;
@@ -162,6 +167,10 @@ void render_cycle(render_layer *render) {
     render_text_render(render);
     render_web_view_render(render);
 
+    if (render->config.render_mode & CONFIG_RENDER_MODE_MAIN) {
+        render_preview_cycle();
+    }
+
     glPopMatrix();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -173,6 +182,7 @@ void render_terminate(render_layer *render) {
         render_video_deallocate_assets();
         render_web_view_deallocate_assets();
         render_image_deallocate_assets();
+        render_preview_deallocate_assets();
     }
 
     for (int i=0; i < count_renders; i++) {
@@ -213,6 +223,7 @@ void* transfer_window_loop(void*) {
     render_video_create_buffers();
     render_web_view_create_buffers();
     render_image_create_buffers();
+    render_preview_create_buffers();
 
     transfer_window_initialized = 1;
 
@@ -221,6 +232,7 @@ void* transfer_window_loop(void*) {
         render_text_update_buffers();
         render_web_view_update_buffers();
         render_image_update_buffers();
+        render_preview_update_buffers();
         usleep(1000);
     }
 
@@ -228,6 +240,7 @@ void* transfer_window_loop(void*) {
     render_text_deallocate_buffers();
     render_web_view_deallocate_buffers();
     render_image_deallocate_buffers();
+    render_preview_deallocate_buffers();
 
     return NULL;
 }
@@ -237,6 +250,7 @@ void configure_render(config_render *render_conf, render_layer *render) {
 
     if (render->config.render_mode & CONFIG_RENDER_MODE_MAIN) {
         render_text_set_size(render->config.text_area.w, render->config.text_area.h);
+        render_preview_set_size(render->config.w, render->config.h);
     }
 }
 
