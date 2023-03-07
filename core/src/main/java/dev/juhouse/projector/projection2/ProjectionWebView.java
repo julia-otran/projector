@@ -105,14 +105,15 @@ public class ProjectionWebView implements Projectable, Runnable {
 
             Platform.runLater(() -> {
                 webView.snapshot(null, snapshotImage);
-                snapshotImage.getPixelReader().getPixels(0, 0, width, height, PixelFormat.getByteBgraInstance(), snapshotBuffer, width * 4);
-                delegate.getBridge().setWebViewBuffer(snapshotBuffer, width, height);
                 snapshotRendered = true;
             });
 
             do {
                 Thread.yield();
             } while (!snapshotRendered && render);
+
+            snapshotImage.getPixelReader().getPixels(0, 0, width, height, PixelFormat.getByteBgraInstance(), snapshotBuffer, width * 4);
+            delegate.getBridge().setWebViewBuffer(snapshotBuffer, width, height);
         }
     }
 }
