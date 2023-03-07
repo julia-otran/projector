@@ -9,15 +9,10 @@ class WindowManager(private val settingsService: SettingsService) : CanvasDelega
     private val bridge: Bridge = Bridge()
 
     val configsObserver: WindowConfigsObserver = WindowConfigsObserver(this)
-    val preview: PreviewImageView = PreviewImageView()
+    val preview: PreviewImageView = PreviewImageView(this)
     val manager: ProjectionManager = ProjectionManagerImpl(this)
 
     private var running: Boolean = false
-
-    init {
-        // TODO: Fix me when buffer provider gets implemented
-        preview.setPixelBufferProvider(null)
-    }
 
     fun startEngine() {
         if (!running) {
@@ -32,6 +27,7 @@ class WindowManager(private val settingsService: SettingsService) : CanvasDelega
         if (running) {
             running = false
             configsObserver.stop()
+            preview.stop()
             manager.finish()
             bridge.shutdown()
         }
@@ -70,7 +66,9 @@ class WindowManager(private val settingsService: SettingsService) : CanvasDelega
     }
 
     override fun updateConfigs(filePath: String?) {
+        preview.stop()
         bridge.loadConfig(filePath)
         manager.rebuild()
+        preview.start()
     }
 }

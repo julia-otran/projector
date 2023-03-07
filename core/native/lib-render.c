@@ -12,6 +12,7 @@
 #include "render-text.h"
 #include "render-web-view.h"
 #include "render-image.h"
+#include "render-preview.h"
 
 static int initialized = 0;
 static projection_config *config;
@@ -188,6 +189,11 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setWebViewB
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setRenderWebViewBuffer(JNIEnv *, jobject, jboolean render) {
     render_web_view_src_set_render(render);
+}
+
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_downloadPreviewData(JNIEnv *env, jobject, jobject j_buffer) {
+    jbyte *data = (jbyte*) (*env)->GetDirectBufferAddress(env, j_buffer);
+    render_preview_download_buffer((void*) data);
 }
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_shutdown(JNIEnv *, jobject) {

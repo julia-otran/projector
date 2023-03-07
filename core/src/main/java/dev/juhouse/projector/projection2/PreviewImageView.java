@@ -7,54 +7,31 @@ package dev.juhouse.projector.projection2;
 
 import javafx.application.Platform;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelBuffer;
+import javafx.scene.image.PixelFormat;
 import javafx.scene.image.WritableImage;
+
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 
 /**
  *
  * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class PreviewImageView extends ImageView implements Runnable {
-    private PixelBufferProvider bufferProvider;
-    private WritableImage fxTargetRender;
+    private ByteBuffer buffer;
+    private PixelBuffer<IntBuffer> pixelBuffer;
+
+    private final CanvasDelegate delegate;
 
     private boolean repainting = false;
     private boolean running = false;
     private Thread updateThread = null;
 
-    public PreviewImageView() {
+    public PreviewImageView(CanvasDelegate delegate) {
         setPreserveRatio(true);
-    }
-
-    private void updateTargetRenderIfNeeded() {
-        if (bufferProvider != null) {
-            int width = bufferProvider.getWidth();
-            int height = bufferProvider.getHeight();
-
-            if (fxTargetRender == null || Math.round(fxTargetRender.getWidth()) != width || Math.round(fxTargetRender.getHeight()) != height) {
-                fxTargetRender = new WritableImage(width, height);
-            }
-        }
-    }
-
-    void setPixelBufferProvider(PixelBufferProvider provider) {
-        this.bufferProvider = provider;
-
-        if (provider == null) {
-            running = false;
-            if (updateThread != null) {
-                try {
-                    updateThread.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                updateThread = null;
-            }
-        } else {
-            running = true;
-            repainting = false;
-            updateThread = new Thread(this);
-            updateThread.start();
-        }
+        setScaleY(-1);
+        this.delegate = delegate;
     }
 
     @SuppressWarnings("BusyWait")
@@ -74,15 +51,35 @@ public class PreviewImageView extends ImageView implements Runnable {
 
             repainting = true;
 
-            if (bufferProvider != null) {
-                updateTargetRenderIfNeeded();
-                // TODO: Copy image from pixel buffer provider
+            delegate.getBridge().downloadPreviewData(buffer);
 
-                Platform.runLater(() -> {
-                    setImage(fxTargetRender);
-                    repainting = false;
-                });
+            Platform.runLater(() -> {
+                setImage(new WritableImage(pixelBuffer));
+                repainting = false;
+            });
+        }
+    }
+
+    public void stop() {
+        if (running) {
+            running = false;
+
+            try {
+                updateThread.join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
+        }
+    }
+
+    public void start() {
+        if (!running) {
+            buffer = ByteBuffer.allocateDirect(delegate.getMainWidth() * delegate.getMainHeight() * 4);
+            pixelBuffer = new PixelBuffer<>(delegate.getMainWidth(), delegate.getMainHeight(), buffer.asIntBuffer(), PixelFormat.getIntArgbPreInstance());
+
+            running = true;
+            updateThread = new Thread(this);
+            updateThread.start();
         }
     }
 }

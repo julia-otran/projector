@@ -23,12 +23,12 @@ void render_preview_set_size(int in_width, int in_height) {
     width = in_width;
     height = in_height;
 
-    data_buffer = calloc(width * height, 3);
+    data_buffer = calloc(width * height, 4);
 }
 
 void render_preview_download_buffer(void *buffer) {
     pthread_mutex_lock(&thread_mutex);
-    memcpy(buffer, data_buffer, width * height * 3);
+    memcpy(buffer, data_buffer, width * height * 4);
     pthread_mutex_unlock(&thread_mutex);
 }
 
@@ -41,7 +41,7 @@ void render_preview_create_buffers() {
         render_pixel_unpack_buffer_node *buffer = &buffers[i];
 
         glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer->gl_buffer);
-        glBufferData(GL_PIXEL_PACK_BUFFER, width * height * 3, NULL, GL_STREAM_READ);
+        glBufferData(GL_PIXEL_PACK_BUFFER, width * height * 4, NULL, GL_STREAM_READ);
         glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
     }
 }
@@ -54,7 +54,7 @@ void render_preview_update_buffers() {
         void *data = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
 
         pthread_mutex_lock(&thread_mutex);
-        memcpy(data_buffer, data, width * height * 3);
+        memcpy(data_buffer, data, width * height * 4);
         pthread_mutex_unlock(&thread_mutex);
 
         glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
@@ -77,7 +77,7 @@ void render_preview_cycle() {
 
     if (buffer) {
         glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer->gl_buffer);
-        glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, 0L);
+        glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, 0L);
         glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
     }
 

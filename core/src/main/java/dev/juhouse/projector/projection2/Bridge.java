@@ -1,5 +1,7 @@
 package dev.juhouse.projector.projection2;
 
+import java.nio.ByteBuffer;
+
 public class Bridge {
     public native void initialize();
 
@@ -33,5 +35,5 @@ public class Bridge {
 
     public native void setRenderWebViewBuffer(boolean render);
 
-    public native void downloadPreviewData(byte[] buffer);
+    public native void downloadPreviewData(ByteBuffer buffer);
 }
