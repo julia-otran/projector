@@ -140,10 +140,11 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setTextImag
 
 // Video render methods
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setVideoBuffer
-    (JNIEnv *, jobject, jlong buf_address, jint width, jint height, jboolean crop) {
+  (JNIEnv *env, jobject, jobject j_buffer, jint width, jint height, jboolean crop) {
 
+    jbyte *data = (jbyte*) (*env)->GetDirectBufferAddress(env, j_buffer);
     render_video_src_set_crop_video(crop);
-    render_video_src_set_buffer((void*)buf_address, width, height);
+    render_video_src_set_buffer((void*)data, width, height);
 }
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setRenderVideoBuffer
@@ -171,20 +172,14 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setImageAss
     }
   }
 
-JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setImageBackgroundAsset
-  (JNIEnv *, jobject, jintArray, jint, jint, jboolean) {
-  }
-
 // WebView render methods
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setWebViewBuffer
-  (JNIEnv *env, jobject, jintArray arr, jint width, jint height) {
+  (JNIEnv *env, jobject, jobject j_buffer, jint width, jint height) {
 
     // Null buffer isn't expected, set render false instead
-    jint *data = (*env)->GetIntArrayElements(env, arr, 0);
+    jbyte *data = (jbyte*) (*env)->GetDirectBufferAddress(env, j_buffer);
     render_web_view_src_set_buffer((void*) data, width, height);
     render_web_view_src_buffer_update();
-    (*env)->ReleaseIntArrayElements(env, arr, data, 0);
-
 }
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setRenderWebViewBuffer(JNIEnv *, jobject, jboolean render) {

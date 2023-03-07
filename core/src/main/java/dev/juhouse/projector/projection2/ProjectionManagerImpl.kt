@@ -74,7 +74,9 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
 
         currentProjectable.set(projectable)
 
+        background.render = projectable == null
         backgroundVideo.setRender(projectable == null)
+
         projectable?.setRender(true)
     }
 
@@ -125,8 +127,10 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
 
         if (musicId != null) {
             backgroundVideo.startBackground(musicId, preferred)
+            background.render = false
         } else {
             backgroundVideo.stopBackground()
+            background.render = currentProjectable.get() == null
         }
     }
 

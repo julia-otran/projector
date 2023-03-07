@@ -21,7 +21,7 @@ public class Bridge {
 
     public native void setTextImage(int[] data, int textHeight);
 
-    public native void setVideoBuffer(long buffer_address, int width, int height, boolean crop);
+    public native void setVideoBuffer(ByteBuffer buffer, int width, int height, boolean crop);
 
     public native void setRenderVideoBuffer(boolean render);
 
@@ -29,9 +29,7 @@ public class Bridge {
 
     public native void setImageAsset(int[] data, int width, int height, boolean crop);
 
-    public native void setImageBackgroundAsset(int[] data, int width, int height, boolean crop);
-
-    public native void setWebViewBuffer(int[] buffer, int width, int height);
+    public native void setWebViewBuffer(ByteBuffer buffer, int width, int height);
 
     public native void setRenderWebViewBuffer(boolean render);
 

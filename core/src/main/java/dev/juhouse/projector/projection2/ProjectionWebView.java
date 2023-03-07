@@ -5,10 +5,10 @@
  */
 package dev.juhouse.projector.projection2;
 
-import java.nio.IntBuffer;
+import java.nio.ByteBuffer;
 import javafx.application.Platform;
+import javafx.scene.image.PixelFormat;
 import javafx.scene.image.WritableImage;
-import javafx.scene.image.WritablePixelFormat;
 import javafx.scene.web.WebView;
 
 /**
@@ -25,11 +25,9 @@ public class ProjectionWebView implements Projectable, Runnable {
 
     private Thread bufferUpdateThread;
 
-    private final Object renderSync = new Object();
-
     private WritableImage snapshotImage;
 
-    private IntBuffer snapshotBuffer;
+    private ByteBuffer snapshotBuffer;
 
     private int width;
 
@@ -66,7 +64,7 @@ public class ProjectionWebView implements Projectable, Runnable {
             this.width = width;
             this.height = height;
 
-            snapshotBuffer = IntBuffer.allocate(width * height);
+            snapshotBuffer = ByteBuffer.allocateDirect(width * height * 4);
             snapshotImage = new WritableImage(width, height);
 
             webView.setPrefWidth(width);
@@ -102,33 +100,19 @@ public class ProjectionWebView implements Projectable, Runnable {
     
     @Override
     public void run() {
-        snapshotRendered = false;
-
         while (render) {
+            snapshotRendered = false;
+
             Platform.runLater(() -> {
-                synchronized (renderSync) {
-                    webView.snapshot(null, snapshotImage);
-                    snapshotRendered = true;
-                    renderSync.notifyAll();
-                }
+                webView.snapshot(null, snapshotImage);
+                snapshotImage.getPixelReader().getPixels(0, 0, width, height, PixelFormat.getByteBgraInstance(), snapshotBuffer, width * 4);
+                delegate.getBridge().setWebViewBuffer(snapshotBuffer, width, height);
+                snapshotRendered = true;
             });
 
-            synchronized (renderSync) {
-                try {
-                    if (!snapshotRendered) {
-                        renderSync.wait(100);
-                    }
-
-                    snapshotRendered = false;
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            if (snapshotImage != null) {
-                snapshotImage.getPixelReader().getPixels(0, 0, width, height, WritablePixelFormat.getIntArgbInstance(), snapshotBuffer.array(), 0, width);
-                delegate.getBridge().setWebViewBuffer(snapshotBuffer.array(), width, height);
-            }
+            do {
+                Thread.yield();
+            } while (!snapshotRendered && render);
         }
     }
 }

@@ -32,8 +32,4 @@ public class ProjectionBackground extends ProjectionImage {
         super.setModel(model);
         getCanvasDelegate().getSettingsService().storeLastBackground(model);
     }
-
-    protected void setImageAsset(int[] buffer, int width, int height, boolean crop) {
-        canvasDelegate.getBridge().setImageBackgroundAsset(buffer, width, height, crop);
-    }
 }
