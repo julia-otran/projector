@@ -1,9 +1,8 @@
-#include <cjson/cJSON.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
 
+#include "cJSON.h"
 #include "debug.h"
 #include "config-parse.h"
 #include "config-serialize.h"
@@ -56,12 +55,15 @@ void free_projection_config(projection_config *in) {
 }
 
 projection_config* load_config(const char *filePath) {
-    if (filePath == NULL || access(filePath, F_OK) != 0) {
+    if (filePath == NULL) {
         log_debug("Config file null or cannot access.\nReturning default\n.");
         return &default_config;
     }
 
-    FILE *config_file = fopen(filePath, "r");
+    FILE* config_file;
+    
+    open_file(&config_file, filePath, "r");
+
     fseek(config_file, 0L, SEEK_END);
 
     unsigned long long size = ftell(config_file);
@@ -100,11 +102,13 @@ projection_config* load_config(const char *filePath) {
 }
 
 void generate_config(const char *file_path) {
-    if (file_path == NULL || access(file_path, F_OK) != 0) {
+    if (file_path == NULL) {
         return;
     }
 
-    FILE *config_file = fopen(file_path, "w");
+    FILE* config_file;
+    
+    open_file(&config_file, file_path, "w");
 
     cJSON *json = serialize_projection_config(&default_config);
 

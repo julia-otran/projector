@@ -2,9 +2,9 @@
 #include <inttypes.h>
 #include <math.h>
 #include <stdio.h>
-#include <time.h>
 #include <string.h>
 
+#include "clock.h"
 #include "debug.h"
 #include "render-fader.h"
 
@@ -48,7 +48,7 @@ fade_node* find_or_create_fade_node(render_fader_instance *instance, int fade_id
 
     node = (fade_node*) calloc(1, sizeof(fade_node));
     node->fade_id = fade_id;
-    clock_gettime(CLOCK_REALTIME, &node->start_time_spec);
+    get_time(&node->start_time_spec);
     node->mode = 0;
 
     node->next = instance->fade_node_list;
@@ -63,7 +63,7 @@ long timespec_to_ms(struct timespec *spec) {
 
 void render_fader_fade_in(render_fader_instance *instance, int fade_id, int duration_ms) {
     struct timespec spec;
-    clock_gettime(CLOCK_REALTIME, &spec);
+    get_time(&spec);
 
     fade_node *node = find_or_create_fade_node(instance, fade_id);
 
@@ -87,7 +87,7 @@ void render_fader_fade_out(render_fader_instance *instance, int fade_id, int dur
     struct timespec spec;
 
     if (node && node->mode == RENDER_FADER_MODE_IN) {
-        clock_gettime(CLOCK_REALTIME, &spec);
+        get_time(&spec);
 
         long current_ms = timespec_to_ms(&spec);
         long init_ms = timespec_to_ms(&node->start_time_spec);
@@ -110,7 +110,7 @@ void render_fader_fade_in_out(render_fader_instance *instance, int fade_id, int 
 
 float render_fader_get_alpha(fade_node *node) {
     struct timespec spec;
-    clock_gettime(CLOCK_REALTIME, &spec);
+    get_time(&spec);
 
     long current_ms = timespec_to_ms(&spec);
     long init_ms = timespec_to_ms(&node->start_time_spec);
@@ -139,7 +139,7 @@ float render_fader_get_alpha(fade_node *node) {
 int render_fader_is_hidden(fade_node *node) {
     if (node->mode == RENDER_FADER_MODE_OUT) {
         struct timespec spec;
-        clock_gettime(CLOCK_REALTIME, &spec);
+        get_time(&spec);
 
         long current_ms = round(spec.tv_nsec / 1.0e6) + (spec.tv_sec * 1000);
         long init_ms = round(node->start_time_spec.tv_nsec / 1.0e6) + (node->start_time_spec.tv_sec * 1000);

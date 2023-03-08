@@ -1,4 +1,4 @@
-#include <cjson/cJSON.h>
+#include "cJSON.h"
 #include "config-structs.h"
 
 #ifndef _CONFIG_PARSE_H_

@@ -1,4 +1,4 @@
-#include <pthread.h>
+#include "tinycthread.h"
 #include <string.h>
 
 #include "render.h"
@@ -11,7 +11,7 @@
 static int initialized = 0;
 static int width, height;
 
-static pthread_mutex_t thread_mutex;
+static mtx_t thread_mutex;
 
 static void *share_pixel_data;
 static int pixel_data_changed;
@@ -21,7 +21,7 @@ static render_fader_instance *fader_instance;
 static render_pixel_unpack_buffer_instance *buffer_instance;
 
 void render_text_initialize() {
-    pthread_mutex_init(&thread_mutex, 0);
+    mtx_init(&thread_mutex, 0);
 
     render_fader_init(&fader_instance);
 
@@ -30,7 +30,7 @@ void render_text_initialize() {
 
 void render_text_set_size(int width_in, int height_in) {
     if (width != width_in || height != height_in) {
-        pthread_mutex_lock(&thread_mutex);
+        mtx_lock(&thread_mutex);
 
         width = width_in;
         height = height_in;
@@ -43,12 +43,12 @@ void render_text_set_size(int width_in, int height_in) {
         pixel_data_changed = 0;
         clear_text = 0;
 
-        pthread_mutex_unlock(&thread_mutex);
+        mtx_unlock(&thread_mutex);
     }
 }
 
 void render_text_set_image(void *pixel_data) {
-    pthread_mutex_lock(&thread_mutex);
+    mtx_lock(&thread_mutex);
 
     if (pixel_data) {
         memcpy(share_pixel_data, pixel_data, width * height * 4);
@@ -59,7 +59,7 @@ void render_text_set_image(void *pixel_data) {
         clear_text = 1;
     }
 
-    pthread_mutex_unlock(&thread_mutex);
+    mtx_unlock(&thread_mutex);
 }
 
 void render_text_create_buffers() {
@@ -76,7 +76,7 @@ void render_text_update_buffers() {
 
     render_pixel_unpack_buffer_node* buffer = render_pixel_unpack_buffer_dequeue_for_write(buffer_instance);
 
-    pthread_mutex_lock(&thread_mutex);
+    mtx_lock(&thread_mutex);
 
     if (pixel_data_changed && buffer) {
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
@@ -97,7 +97,7 @@ void render_text_update_buffers() {
         pixel_data_changed = 0;
     }
 
-    pthread_mutex_unlock(&thread_mutex);
+    mtx_unlock(&thread_mutex);
 
     if (buffer_updated) {
         render_pixel_unpack_buffer_enqueue_for_read(buffer_instance, buffer);

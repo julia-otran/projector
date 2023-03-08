@@ -1,9 +1,8 @@
-#include <cjson/cJSON.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
 
+#include "cJSON.h"
 #include "debug.h"
 #include "config-structs.h"
 #include "config-parse.h"

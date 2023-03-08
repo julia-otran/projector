@@ -1,4 +1,4 @@
-#include <pthread.h>
+#include "tinycthread.h"
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -8,9 +8,10 @@
 #include "debug.h"
 #include "ogl-loader.h"
 #include "render-fader.h"
-#include "render-web-view.h"
+#include "render-video.h"
 #include "render-pixel-unpack-buffer.h"
 
+static int src_crop;
 static void *src_buffer;
 static int src_width;
 static int src_height;
@@ -20,8 +21,8 @@ static int src_update_buffer;
 static int dst_width = 0;
 static int dst_height = 0;
 
-static pthread_mutex_t thread_mutex;
-static pthread_cond_t thread_cond;
+static mtx_t thread_mutex;
+static cnd_t thread_cond;
 
 static render_fader_instance *fader_instance;
 static render_pixel_unpack_buffer_instance *buffer_instance;
@@ -30,54 +31,59 @@ static GLuint texture_id;
 static int texture_loaded;
 static int should_clear;
 
-void render_web_view_initialize() {
+void render_video_initialize() {
+    src_crop = 0;
     src_update_buffer = 0;
     src_render = 0;
     texture_loaded = 0;
     should_clear = 0;
 
-    pthread_mutex_init(&thread_mutex, 0);
-    pthread_cond_init(&thread_cond, 0);
+    mtx_init(&thread_mutex, 0);
+    cnd_init(&thread_cond, 0);
 
     render_fader_init(&fader_instance);
 }
 
-void render_web_view_src_set_buffer(void *buffer, int width, int height) {
+void render_video_src_set_crop_video(int in_crop) {
+    src_crop = in_crop;
+}
+
+void render_video_src_set_buffer(void *buffer, int width, int height) {
     src_buffer = buffer;
     src_width = width;
     src_height = height;
 }
 
-void render_web_view_src_set_render(int render) {
+void render_video_src_set_render(int render) {
     src_render = render;
 }
 
-void render_web_view_src_buffer_update() {
-    pthread_mutex_lock(&thread_mutex);
+void render_video_src_buffer_update() {
+    mtx_lock(&thread_mutex);
 
     if (src_update_buffer == 0) {
         src_update_buffer = 1;
-        pthread_cond_wait(&thread_cond, &thread_mutex);
+        cnd_wait(&thread_cond, &thread_mutex);
     }
 
-    pthread_mutex_unlock(&thread_mutex);
+    mtx_unlock(&thread_mutex);
 }
 
-void render_web_view_create_buffers() {
+void render_video_create_buffers() {
     render_pixel_unpack_buffer_create(&buffer_instance);
 }
 
-void render_web_view_deallocate_buffers() {
+void render_video_deallocate_buffers() {
     render_pixel_unpack_buffer_deallocate(buffer_instance);
     buffer_instance = NULL;
 }
 
-void render_web_view_update_buffers() {
+void render_video_update_buffers() {
     int buffer_updated = 0;
 
     render_pixel_unpack_buffer_node* buffer = render_pixel_unpack_buffer_dequeue_for_write(buffer_instance);
 
-    pthread_mutex_lock(&thread_mutex);
+    mtx_lock(&thread_mutex);
 
     if (src_update_buffer) {
         src_update_buffer = 0;
@@ -91,19 +97,19 @@ void render_web_view_update_buffers() {
                 buffer->height = src_height;
             }
 
+            buffer_updated = 1;
+
             void *data = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
             memcpy(data, src_buffer, src_width * src_height * 4);
             glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
             glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-
-            buffer_updated = 1;
         }
 
-        pthread_cond_signal(&thread_cond);
+        cnd_signal(&thread_cond);
     }
 
-    pthread_mutex_unlock(&thread_mutex);
+    mtx_unlock(&thread_mutex);
 
     if (buffer_updated) {
         render_pixel_unpack_buffer_enqueue_for_read(buffer_instance, buffer);
@@ -112,11 +118,11 @@ void render_web_view_update_buffers() {
     }
 }
 
-void render_web_view_create_assets() {
+void render_video_create_assets() {
     glGenTextures(1, &texture_id);
 }
 
-void render_web_view_update_assets() {
+void render_video_update_assets() {
     render_pixel_unpack_buffer_node* buffer = render_pixel_unpack_buffer_dequeue_for_read(buffer_instance);
 
     if (buffer) {
@@ -151,7 +157,7 @@ void render_web_view_update_assets() {
     }
 }
 
-void render_web_view_render(render_layer *layer) {
+void render_video_render(render_layer *layer) {
     if (dst_width <= 0 || dst_height <= 0) {
         return;
     }
@@ -164,12 +170,22 @@ void render_web_view_render(render_layer *layer) {
     float w_sz = layer->config.h * w_scale;
     float h_sz = layer->config.w * h_scale;
 
-    if (w_sz < layer->config.w) {
-        w = w_sz;
-        h = h_scale * w;
+    if (src_crop) {
+        if (w_sz > layer->config.w) {
+            w = w_sz;
+            h = h_scale * w;
+        } else {
+            h = h_sz;
+            w = w_scale * h;
+        }
     } else {
-        h = h_sz;
-        w = w_scale * h;
+        if (w_sz < layer->config.w) {
+            w = w_sz;
+            h = h_scale * w;
+        } else {
+            h = h_sz;
+            w = w_scale * h;
+        }
     }
 
     x = (layer->config.w - w) / 2;
@@ -198,10 +214,10 @@ void render_web_view_render(render_layer *layer) {
     }
 }
 
-void render_web_view_deallocate_assets() {
+void render_video_deallocate_assets() {
     glDeleteTextures(1, &texture_id);
 }
 
-void render_web_view_shutdown() {
+void render_video_shutdown() {
     render_fader_terminate(fader_instance);
 }

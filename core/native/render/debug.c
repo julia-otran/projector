@@ -3,8 +3,8 @@
 #include <inttypes.h>
 #include <math.h>
 #include <stdio.h>
-#include <time.h>
 
+#include "clock.h"
 #include "debug.h"
 
 #define LOG_FPS_INTERVAL_SECS 3
@@ -15,7 +15,7 @@ static long render_last_time_sec = 0;
 
 void register_render_frame() {
     struct timespec spec;
-    clock_gettime(CLOCK_REALTIME, &spec);
+    get_time(&spec);
 
     render_frame_count++;
 
@@ -42,7 +42,7 @@ static long monitor_last_time_sec = 0;
 
 void register_monitor_frame() {
     struct timespec spec;
-    clock_gettime(CLOCK_REALTIME, &spec);
+    get_time(&spec);
 
     monitor_frame_count++;
 

@@ -4,8 +4,8 @@
 #ifndef _DEBUG_H_
 #define _DEBUG_H_
 
-#define log_debug(args...) {\
-    printf(args);\
+#define log_debug(...) {\
+    printf(__VA_ARGS__);\
     fflush(stdout);\
 }
 

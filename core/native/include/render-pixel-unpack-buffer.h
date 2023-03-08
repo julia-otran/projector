@@ -1,4 +1,4 @@
-#include <pthread.h>
+#include "tinycthread.h"
 #include "ogl-loader.h"
 
 #ifndef _RENDER_PIXEL_UNPACK_BUFFER_H_
@@ -15,7 +15,7 @@ typedef struct {
 } render_pixel_unpack_buffer_node;
 
 typedef struct {
-    pthread_mutex_t thread_mutex;
+    mtx_t thread_mutex;
     render_pixel_unpack_buffer_node buffers[RENDER_PIXEL_UNPACK_BUFFER_BUFFER_COUNT];
     render_pixel_unpack_buffer_node* read_buffers[RENDER_PIXEL_UNPACK_BUFFER_BUFFER_COUNT];
     render_pixel_unpack_buffer_node* write_buffers[RENDER_PIXEL_UNPACK_BUFFER_BUFFER_COUNT];

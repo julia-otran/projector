@@ -1,18 +1,18 @@
-#include <pthread.h>
+#include "tinycthread.h"
 #include <string.h>
 #include <stdlib.h>
 #include "ogl-loader.h"
 #include "render-preview.h"
 #include "render-pixel-unpack-buffer.h"
 
-static pthread_mutex_t thread_mutex;
+static mtx_t thread_mutex;
 static void *data_buffer;
 static int width;
 static int height;
 static render_pixel_unpack_buffer_instance *buffer_instance;
 
 void render_preview_initialize() {
-    pthread_mutex_init(&thread_mutex, 0);
+    mtx_init(&thread_mutex, 0);
 }
 
 void render_preview_set_size(int in_width, int in_height) {
@@ -27,9 +27,9 @@ void render_preview_set_size(int in_width, int in_height) {
 }
 
 void render_preview_download_buffer(void *buffer) {
-    pthread_mutex_lock(&thread_mutex);
+    mtx_lock(&thread_mutex);
     memcpy(buffer, data_buffer, width * height * 4);
-    pthread_mutex_unlock(&thread_mutex);
+    mtx_unlock(&thread_mutex);
 }
 
 void render_preview_create_buffers() {
@@ -53,9 +53,9 @@ void render_preview_update_buffers() {
         glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer->gl_buffer);
         void *data = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
 
-        pthread_mutex_lock(&thread_mutex);
+        mtx_lock(&thread_mutex);
         memcpy(data_buffer, data, width * height * 4);
-        pthread_mutex_unlock(&thread_mutex);
+        mtx_unlock(&thread_mutex);
 
         glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
         glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
@@ -85,7 +85,7 @@ void render_preview_cycle() {
 }
 
 void render_preview_shutdown() {
-    pthread_mutex_destroy(&thread_mutex);
+    mtx_destroy(&thread_mutex);
 
     if (data_buffer) {
         free(data_buffer);

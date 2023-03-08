@@ -1,4 +1,4 @@
-#include <cjson/cJSON.h>
+#include "cJSON.h"
 #include "config-structs.h"
 #include "config-serialize.h"
 

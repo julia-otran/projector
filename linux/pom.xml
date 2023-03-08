@@ -91,8 +91,21 @@
                     <javahOS>linux</javahOS>
                     <sources>
                         <source>
+                            <directory>../core/native/tinycthread/source</directory>
+                            <fileNames>
+                                <fileName>tinycthread.c</fileName>
+                            </fileNames>
+                        </source>
+                        <source>
+                            <directory>../core/native/cJSON</directory>
+                            <fileNames>
+                                <fileName>cJSON.c</fileName>
+                                <fileName>cJSON_Utils.c</fileName>
+                            </fileNames>
+                        </source>
+                        <source>
                             <!-- path to the C/C++ sources -->
-                            <directory>../core/native</directory>
+                            <directory>../core/native/render</directory>
                             <fileNames>
                                 <fileName>config.c</fileName>
                                 <fileName>config-debug.c</fileName>
@@ -125,9 +138,9 @@
                         <compilerStartOption>-Wall</compilerStartOption>
                         <compilerStartOption>-Wextra</compilerStartOption>
                         <compilerStartOption>-O3</compilerStartOption>
-                        <compilerStartOption>-I${env.JAVA_HOME}/include</compilerStartOption>
-                        <compilerStartOption>-I${env.JAVA_HOME}/include/linux</compilerStartOption>
                         <compilerStartOption>-I${project.basedir}/../core/native/include</compilerStartOption>
+                        <compilerStartOption>-I${project.basedir}/../core/native/cJSON</compilerStartOption>
+                        <compilerStartOption>-I${project.basedir}/../core/native/tinycthread/source</compilerStartOption>
                         <compilerStartOption>-I/usr/include</compilerStartOption>
                         <compilerStartOption>-fPIC</compilerStartOption>
                     </compilerStartOptions>
@@ -148,9 +161,6 @@
                         </linkerEndOption>
                         <linkerEndOption>
                             -lglfw
-                        </linkerEndOption>
-                        <linkerEndOption>
-                            -lcjson
                         </linkerEndOption>
                         <linkerEndOption>
                             -o ${project.build.sourceDirectory}/../resources/lib${lib_name}.so

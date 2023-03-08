@@ -245,7 +245,7 @@ void vs_color_corrector_load_coordinates(config_bounds *display_bounds, config_v
     glBindVertexArray(0);
 }
 
-void vs_color_corrector_setup_shaders(config_virtual_screen *, vs_color_corrector *data) {
+void vs_color_corrector_setup_shaders(config_virtual_screen *config, vs_color_corrector *data) {
     VERTEX_SHADER_SRC_LEN = strlen(VERTEX_SHADER_SRC[0]);
     FRAGMENT_SHADER_SRC_LEN = strlen(FRAGMENT_SHADER_SRC[0]);
 

@@ -1,7 +1,6 @@
-#include <pthread.h>
+#include "tinycthread.h"
 #include <string.h>
 #include <stdlib.h>
-#include <unistd.h>
 
 #include "debug.h"
 #include "ogl-loader.h"
@@ -19,9 +18,9 @@ static render_output *output = NULL;
 static int transfer_window_thread_run;
 static int transfer_window_initialized;
 static GLFWwindow *transfer_window;
-static pthread_t transfer_window_thread;
-static pthread_mutex_t transfer_window_thread_mutex;
-static pthread_cond_t transfer_window_thread_cond;
+static thrd_t transfer_window_thread;
+static mtx_t transfer_window_thread_mutex;
+static cnd_t transfer_window_thread_cond;
 
 void get_main_output_size(render_output_size *output_size) {
     for (int i = 0; i < count_renders; i++) {
@@ -61,7 +60,7 @@ void initialize_renders() {
 
 void shutdown_renders() {
     transfer_window_thread_run = 0;
-    pthread_join(transfer_window_thread, NULL);
+    thrd_join(transfer_window_thread, NULL);
 
     render_video_shutdown();
     render_text_shutdown();
@@ -215,7 +214,7 @@ void renders_terminate() {
     }
 }
 
-void* transfer_window_loop(void*) {
+void* transfer_window_loop(void *_) {
     glfwMakeContextCurrent(transfer_window);
     glewInit();
 
@@ -274,11 +273,11 @@ void activate_renders(GLFWwindow *shared_context, projection_config *config) {
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
     transfer_window = glfwCreateWindow(800, 600, "Projector Render Transfer Window", NULL, shared_context);
 
-    pthread_mutex_init(&transfer_window_thread_mutex, 0);
-    pthread_cond_init(&transfer_window_thread_cond, 0);
+    mtx_init(&transfer_window_thread_mutex, 0);
+    cnd_init(&transfer_window_thread_cond, 0);
 
     transfer_window_thread_run = 1;
     transfer_window_initialized = 0;
-    pthread_create(&transfer_window_thread, 0, transfer_window_loop, NULL);
+    thrd_create(&transfer_window_thread, transfer_window_loop, NULL);
     log_debug("renders activated\n");
 }

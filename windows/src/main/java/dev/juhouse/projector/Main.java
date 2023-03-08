@@ -10,13 +10,13 @@ import java.io.OutputStream;
 
 public class Main {
     private static void loadNativeLib() {
-        InputStream libInputStream = Main.class.getResourceAsStream("librender.dll");
+        InputStream libInputStream = Main.class.getResourceAsStream("bin\\LibRender.lib");
 
         if (libInputStream != null) {
             File libExportFile;
 
             try {
-                libExportFile = File.createTempFile("librender", ".dll");
+                libExportFile = File.createTempFile("LibRender", ".lib");
                 libExportFile.deleteOnExit();
 
                 OutputStream output = FileUtils.openOutputStream(libExportFile);
@@ -29,7 +29,7 @@ public class Main {
                 throw new RuntimeException(e);
             }
         } else {
-            System.out.println("Failed to find librender.dll resource");
+            System.out.println("Failed to find LibRender.lib resource");
         }
     }
     public static void main(String[] args) {
