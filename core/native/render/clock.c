@@ -1,3 +1,5 @@
+#include <time.h>
+
 #include "clock.h"
 
 #ifdef _WIN32

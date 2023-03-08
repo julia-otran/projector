@@ -11,7 +11,7 @@
 
 #ifndef _WIN32 
 
-#define open_file(ptr, ...) (*ptr) = fopen(__VA_ARGS__);
+#define open_file(ptr, ...) ((*ptr) = fopen(__VA_ARGS__))
 
 #endif
 

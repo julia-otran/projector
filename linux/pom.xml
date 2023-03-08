@@ -107,6 +107,7 @@
                             <!-- path to the C/C++ sources -->
                             <directory>../core/native/render</directory>
                             <fileNames>
+                                <fileName>clock.c</fileName>
                                 <fileName>config.c</fileName>
                                 <fileName>config-debug.c</fileName>
                                 <fileName>config-parse.c</fileName>
@@ -137,11 +138,14 @@
                         <compilerStartOption>-m64</compilerStartOption>
                         <compilerStartOption>-Wall</compilerStartOption>
                         <compilerStartOption>-Wextra</compilerStartOption>
+                        <compilerStartOption>-Wno-unused-parameter</compilerStartOption>
                         <compilerStartOption>-O3</compilerStartOption>
                         <compilerStartOption>-I${project.basedir}/../core/native/include</compilerStartOption>
                         <compilerStartOption>-I${project.basedir}/../core/native/cJSON</compilerStartOption>
                         <compilerStartOption>-I${project.basedir}/../core/native/tinycthread/source</compilerStartOption>
                         <compilerStartOption>-I/usr/include</compilerStartOption>
+                        <compilerStartOption>-I${java.home}/include</compilerStartOption>
+                        <compilerStartOption>-I${java.home}/include/linux</compilerStartOption>
                         <compilerStartOption>-fPIC</compilerStartOption>
                     </compilerStartOptions>
                     <linkerOutputDirectory>target</linkerOutputDirectory>

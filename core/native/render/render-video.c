@@ -39,7 +39,7 @@ void render_video_initialize() {
     should_clear = 0;
 
     mtx_init(&thread_mutex, 0);
-    cnd_init(&thread_cond, 0);
+    cnd_init(&thread_cond);
 
     render_fader_init(&fader_instance);
 }

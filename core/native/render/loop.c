@@ -14,7 +14,7 @@ static cnd_t thread_cond;
 
 static projection_config *pending_config_reload;
 
-void* loop(void *_) {
+int loop(void *_) {
 
     render_output *output;
     int render_output_count;
@@ -53,7 +53,7 @@ void* loop(void *_) {
     renders_terminate();
     monitors_terminate();
 
-    return NULL;
+    return 0;
 }
 
 void main_loop_schedule_config_reload(projection_config *config) {

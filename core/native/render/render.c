@@ -1,7 +1,7 @@
-#include "tinycthread.h"
 #include <string.h>
 #include <stdlib.h>
 
+#include "tinycthread.h"
 #include "debug.h"
 #include "ogl-loader.h"
 #include "render.h"
@@ -214,7 +214,7 @@ void renders_terminate() {
     }
 }
 
-void* transfer_window_loop(void *_) {
+int transfer_window_loop(void *_) {
     glfwMakeContextCurrent(transfer_window);
     glewInit();
 
@@ -232,7 +232,7 @@ void* transfer_window_loop(void *_) {
         render_web_view_update_buffers();
         render_image_update_buffers();
         render_preview_update_buffers();
-        usleep(1000);
+        thrd_yield();
     }
 
     render_video_deallocate_buffers();
@@ -241,7 +241,7 @@ void* transfer_window_loop(void *_) {
     render_image_deallocate_buffers();
     render_preview_deallocate_buffers();
 
-    return NULL;
+    return 0;
 }
 
 void configure_render(config_render *render_conf, render_layer *render) {
@@ -274,7 +274,7 @@ void activate_renders(GLFWwindow *shared_context, projection_config *config) {
     transfer_window = glfwCreateWindow(800, 600, "Projector Render Transfer Window", NULL, shared_context);
 
     mtx_init(&transfer_window_thread_mutex, 0);
-    cnd_init(&transfer_window_thread_cond, 0);
+    cnd_init(&transfer_window_thread_cond);
 
     transfer_window_thread_run = 1;
     transfer_window_initialized = 0;
