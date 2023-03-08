@@ -8,30 +8,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import static dev.juhouse.projector.utils.ResourceManager.unpackResource;
+
 public class Main {
     private static void loadNativeLib() {
-        InputStream libInputStream = Main.class.getResourceAsStream("/librender.so");
-
-        if (libInputStream != null) {
-            File libExportFile;
-
-            try {
-                libExportFile = File.createTempFile("librender", ".so");
-                libExportFile.deleteOnExit();
-
-                OutputStream output = FileUtils.openOutputStream(libExportFile);
-                IOUtils.copy(libInputStream, output);
-                output.close();
-                libInputStream.close();
-
-                System.load(libExportFile.toString());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            System.out.println("Failed to find librender.so resource");
-        }
+        File libExportFile = unpackResource("/librender.so");
+        System.load(libExportFile.toString());
     }
+
     public static void main(String[] args) {
         loadNativeLib();
         Projector.main(args);

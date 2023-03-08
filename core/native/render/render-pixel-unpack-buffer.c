@@ -29,7 +29,7 @@ void render_pixel_unpack_buffer_deallocate(render_pixel_unpack_buffer_instance *
 }
 
 render_pixel_unpack_buffer_node* render_pixel_unpack_buffer_get_all_buffers(render_pixel_unpack_buffer_instance *instance) {
-    return &instance->buffers;
+    return (render_pixel_unpack_buffer_node*) &instance->buffers;
 }
 
 render_pixel_unpack_buffer_node* render_pixel_unpack_buffer_dequeue_for_read(render_pixel_unpack_buffer_instance *instance) {
