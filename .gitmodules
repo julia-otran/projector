@@ -1,0 +1,6 @@
+[submodule "core/native/cJSON"]
+	path = core/native/cJSON
+	url = https://github.com/DaveGamble/cJSON.git
+[submodule "core/native/tinycthread"]
+	path = core/native/tinycthread
+	url = https://github.com/tinycthread/tinycthread.git
