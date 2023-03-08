@@ -83,6 +83,93 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+                <version>1.0-alpha-11</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <javahOS>linux</javahOS>
+                    <sources>
+                        <source>
+                            <!-- path to the C/C++ sources -->
+                            <directory>../core/native</directory>
+                            <fileNames>
+                                <fileName>config.c</fileName>
+                                <fileName>config-debug.c</fileName>
+                                <fileName>config-parse.c</fileName>
+                                <fileName>config-serialize.c</fileName>
+                                <fileName>debug.c</fileName>
+                                <fileName>lib-render.c</fileName>
+                                <fileName>loop.c</fileName>
+                                <fileName>monitor.c</fileName>
+                                <fileName>ogl-loader.c</fileName>
+                                <fileName>render.c</fileName>
+                                <fileName>render-fader.c</fileName>
+                                <fileName>render-image.c</fileName>
+                                <fileName>render-pixel-unpack-buffer.c</fileName>
+                                <fileName>render-preview.c</fileName>
+                                <fileName>render-text.c</fileName>
+                                <fileName>render-video.c</fileName>
+                                <fileName>render-web-view.c</fileName>
+                                <fileName>virtual-screen.c</fileName>
+                                <fileName>vs-color-corrector.c</fileName>
+                                <fileName>vs-blend.c</fileName>
+                            </fileNames>
+                        </source>
+                    </sources>
+                    <compilerProvider>generic-classic</compilerProvider>
+                    <compilerExecutable>gcc</compilerExecutable>
+                    <!-- compiler options -->
+                    <compilerStartOptions>
+                        <compilerStartOption>-m64</compilerStartOption>
+                        <compilerStartOption>-Wall</compilerStartOption>
+                        <compilerStartOption>-Wextra</compilerStartOption>
+                        <compilerStartOption>-O3</compilerStartOption>
+                        <compilerStartOption>-I${env.JAVA_HOME}/include</compilerStartOption>
+                        <compilerStartOption>-I${env.JAVA_HOME}/include/linux</compilerStartOption>
+                        <compilerStartOption>-I${project.basedir}/../core/native/include</compilerStartOption>
+                        <compilerStartOption>-I/usr/include</compilerStartOption>
+                    </compilerStartOptions>
+                    <linkerOutputDirectory>target</linkerOutputDirectory>
+                    <linkerExecutable>gcc</linkerExecutable>
+                    <!-- linker options -->
+                    <linkerStartOptions>
+                        <linkerStartOption>-m64</linkerStartOption>
+                        <linkerStartOption>-shared</linkerStartOption>
+                    </linkerStartOptions>
+                    <linkerEndOptions>
+                        <linkerEndOption>-L/usr/lib64</linkerEndOption>
+                        <linkerEndOption>-lGLEW</linkerEndOption>
+                        <linkerEndOption>-lGL</linkerEndOption>
+                        <linkerEndOption>-lX11</linkerEndOption>
+                        <linkerEndOption>
+                            -L/usr/lib
+                        </linkerEndOption>
+                        <linkerEndOption>
+                            -lglfw
+                        </linkerEndOption>
+                        <linkerEndOption>
+                            -lcjson
+                        </linkerEndOption>
+                        <linkerEndOption>
+                            -o ${project.build.sourceDirectory}/../resources/lib${lib_name}.dll
+                        </linkerEndOption>
+                    </linkerEndOptions>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>compile-lib-render</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>initialize</goal>
+                            <goal>compile</goal>
+                            <goal>link</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.4</version>

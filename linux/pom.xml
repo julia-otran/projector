@@ -159,7 +159,7 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <id>javah</id>
+                        <id>compile-lib-render</id>
                         <phase>compile</phase>
                         <goals>
                             <goal>initialize</goal>
@@ -191,7 +191,7 @@
                     <!-- MainClass in mainfest make a executable jar -->
                     <archive>
                         <manifest>
-                            <mainClass>dev.juhouse.projector.linux.Main</mainClass>
+                            <mainClass>dev.juhouse.projector.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
