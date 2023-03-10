@@ -15,156 +15,156 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\core\native\cJSON\cJSON.h">
+    <ClInclude Include="src\cJSON\cJSON.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\core\native\cJSON\cJSON_Utils.h">
+    <ClInclude Include="src\cJSON\cJSON_Utils.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\core\native\include\config.h">
+    <ClInclude Include="src\include\clock.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\core\native\include\config-debug.h">
+    <ClInclude Include="src\include\config-debug.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\core\native\include\config-parse.h">
+    <ClInclude Include="src\include\config-parse.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\core\native\include\config-serialize.h">
+    <ClInclude Include="src\include\config-serialize.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\core\native\include\config-structs.h">
+    <ClInclude Include="src\include\config-structs.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\core\native\include\debug.h">
+    <ClInclude Include="src\include\config.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\core\native\include\dev_juhouse_projector_projection2_Bridge.h">
+    <ClInclude Include="src\include\debug.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\core\native\include\lib-render.h">
+    <ClInclude Include="src\include\dev_juhouse_projector_projection2_Bridge.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\core\native\include\loop.h">
+    <ClInclude Include="src\include\lib-render.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\core\native\include\monitor.h">
+    <ClInclude Include="src\include\loop.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\core\native\include\ogl-loader.h">
+    <ClInclude Include="src\include\monitor.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\core\native\include\render.h">
+    <ClInclude Include="src\include\ogl-loader.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\core\native\include\render-fader.h">
+    <ClInclude Include="src\include\render-fader.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\core\native\include\render-image.h">
+    <ClInclude Include="src\include\render-image.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\core\native\include\render-pixel-unpack-buffer.h">
+    <ClInclude Include="src\include\render-pixel-unpack-buffer.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\core\native\include\render-preview.h">
+    <ClInclude Include="src\include\render-preview.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\core\native\include\render-text.h">
+    <ClInclude Include="src\include\render-text.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\core\native\include\render-video.h">
+    <ClInclude Include="src\include\render-video.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\core\native\include\render-web-view.h">
+    <ClInclude Include="src\include\render-web-view.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\core\native\tinycthread\source\tinycthread.h">
+    <ClInclude Include="src\include\render.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\core\native\include\virtual-screen.h">
+    <ClInclude Include="src\include\virtual-screen.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\core\native\include\vs-blend.h">
+    <ClInclude Include="src\include\vs-blend.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\core\native\include\vs-color-corrector.h">
+    <ClInclude Include="src\include\vs-color-corrector.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\core\native\include\clock.h">
+    <ClInclude Include="src\tinycthread\source\tinycthread.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\core\native\cJSON\cJSON.c">
+    <ClCompile Include="src\cJSON\cJSON.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\core\native\cJSON\cJSON_Utils.c">
+    <ClCompile Include="src\cJSON\cJSON_Utils.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\core\native\render\config.c">
+    <ClCompile Include="src\render\clock.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\core\native\render\config-debug.c">
+    <ClCompile Include="src\render\config-debug.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\core\native\render\config-parse.c">
+    <ClCompile Include="src\render\config-parse.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\core\native\render\config-serialize.c">
+    <ClCompile Include="src\render\config-serialize.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\core\native\render\debug.c">
+    <ClCompile Include="src\render\config.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\core\native\render\lib-render.c">
+    <ClCompile Include="src\render\debug.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\core\native\render\loop.c">
+    <ClCompile Include="src\render\lib-render.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\core\native\render\monitor.c">
+    <ClCompile Include="src\render\loop.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\core\native\render\ogl-loader.c">
+    <ClCompile Include="src\render\monitor.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\core\native\render\render.c">
+    <ClCompile Include="src\render\ogl-loader.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\core\native\render\render-fader.c">
+    <ClCompile Include="src\render\render-fader.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\core\native\render\render-image.c">
+    <ClCompile Include="src\render\render-image.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\core\native\render\render-pixel-unpack-buffer.c">
+    <ClCompile Include="src\render\render-pixel-unpack-buffer.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\core\native\render\render-preview.c">
+    <ClCompile Include="src\render\render-preview.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\core\native\render\render-text.c">
+    <ClCompile Include="src\render\render-text.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\core\native\render\render-video.c">
+    <ClCompile Include="src\render\render-video.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\core\native\render\render-web-view.c">
+    <ClCompile Include="src\render\render-web-view.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\core\native\render\virtual-screen.c">
+    <ClCompile Include="src\render\render.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\core\native\render\vs-blend.c">
+    <ClCompile Include="src\render\virtual-screen.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\core\native\render\vs-color-corrector.c">
+    <ClCompile Include="src\render\vs-blend.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\core\native\tinycthread\source\tinycthread.c">
+    <ClCompile Include="src\render\vs-color-corrector.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\core\native\render\clock.c">
+    <ClCompile Include="src\tinycthread\source\tinycthread.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
   </ItemGroup>

@@ -21,11 +21,6 @@ public class VlcPlayerFactory {
             NativeLibrary.getInstance("vlccore");
         }
 
-        if (OsCheck.getOperatingSystemType().equals(OsCheck.OSType.Windows)) {
-            // Precisa setar a ENV VLC_PLUGIN_PATH com valor C:\VLC\plugins
-            NativeLibrary.addSearchPath("libvlc", "C:\\VLC");
-        }
-
         factory = new MediaPlayerFactory(vlcArgs);
     }
 

@@ -12,7 +12,11 @@ import java.nio.file.Files;
 public class ResourceManager {
     private static File tmpDirectory = null;
 
-    public static File unpackResource(String name) {
+    public static File unpackResource(String resouce) {
+        return unpackResource(resouce, resouce);
+    }
+
+    public static File unpackResource(String resouce, String outputName) {
         if (tmpDirectory == null) {
             try {
                 tmpDirectory = Files.createTempDirectory("projector-resources").toFile();
@@ -23,13 +27,13 @@ public class ResourceManager {
             tmpDirectory.deleteOnExit();
         }
 
-        InputStream libInputStream = ResourceManager.class.getResourceAsStream(name);
+        InputStream libInputStream = ResourceManager.class.getResourceAsStream(resouce);
 
         if (libInputStream != null) {
             File libExportFile;
 
             try {
-                libExportFile = new File(tmpDirectory, name);
+                libExportFile = new File(tmpDirectory, outputName);
                 libExportFile.deleteOnExit();
 
                 OutputStream output = FileUtils.openOutputStream(libExportFile);
@@ -43,6 +47,6 @@ public class ResourceManager {
             }
         }
 
-        throw new RuntimeException("Resource not found: " + name);
+        throw new RuntimeException("Resource not found: " + resouce);
     }
 }
