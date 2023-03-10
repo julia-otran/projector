@@ -16,10 +16,14 @@ import java.awt.image.DataBufferInt;
  * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class ProjectionBackground extends ProjectionImage {
-    
+
     ProjectionBackground(CanvasDelegate canvasDelegate) {
         super(canvasDelegate);
+    }
 
+    @Override
+    public void init() {
+        super.init();
         this.setModel(getCanvasDelegate().getSettingsService().getLastBackground());
         this.setCropBackground(ProjectorPreferences.getCropBackground());
     }
