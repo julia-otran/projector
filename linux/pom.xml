@@ -147,6 +147,7 @@
                         <compilerStartOption>-I${java.home}/include</compilerStartOption>
                         <compilerStartOption>-I${java.home}/include/linux</compilerStartOption>
                         <compilerStartOption>-fPIC</compilerStartOption>
+                        <compilerStartOption>-DENABLE_LOCALES</compilerStartOption>
                     </compilerStartOptions>
                     <linkerOutputDirectory>target</linkerOutputDirectory>
                     <linkerExecutable>gcc</linkerExecutable>
@@ -167,7 +168,7 @@
                             -lglfw
                         </linkerEndOption>
                         <linkerEndOption>
-                            -o ${project.build.sourceDirectory}/../resources/lib${lib_name}.so
+                            -o ${project.build.outputDirectory}/lib${lib_name}.so
                         </linkerEndOption>
                     </linkerEndOptions>
                 </configuration>

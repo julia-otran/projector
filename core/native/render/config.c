@@ -8,6 +8,8 @@
 #include "config-serialize.h"
 #include "config.h"
 
+#define DEFAULT_RENDER_NAME "Tela"
+
 static projection_config default_config;
 
 void free_config_virtual_screen(config_virtual_screen *in) {
@@ -34,9 +36,19 @@ void free_config_display(config_display *in) {
     }
 }
 
+void free_render(config_render *render) {
+    if (render->render_name) {
+        free(render->render_name);
+    }
+}
+
 void free_projection_config(projection_config *in) {
     if (in == &default_config) {
         return;
+    }
+
+    for (int i = 0; i < in->count_renders; i++) {
+        free_render(&in->renders[i]);
     }
 
     if (in->renders) {
@@ -90,6 +102,12 @@ projection_config* load_config(const char *filePath) {
 
     cJSON *json = cJSON_ParseWithLength(config_json_string, size);
     free(config_json_string);
+
+    if (json == NULL) {
+        const char *error_ptr = cJSON_GetErrorPtr();
+        log_debug("Config JSON parse error: %s\n", error_ptr);
+        return &default_config;
+    }
 
     projection_config *config = (projection_config*) malloc(sizeof(projection_config));
     parse_projection_config(json, config);
@@ -180,6 +198,8 @@ void prepare_default_config(config_bounds *default_monitor_bounds, int no_displa
     default_config.renders = (config_render*) calloc(1, sizeof(config_render));
 
     default_config.renders[0].render_id = 1;
+    default_config.renders[0].render_name = DEFAULT_RENDER_NAME;
+
     default_config.renders[0].w = default_monitor_bounds->w;
     default_config.renders[0].h = default_monitor_bounds->h;
 

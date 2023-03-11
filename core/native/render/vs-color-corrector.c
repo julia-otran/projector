@@ -177,10 +177,11 @@ void vs_color_corrector_load_coordinates(config_bounds *display_bounds, config_v
 
     GLfloat x, y, w, h;
 
-    x = (config->output_bounds.x * 2.0 / display_bounds->w) - 1;
-    y = (config->output_bounds.y * 2.0 / display_bounds->h) - 1;
     w = (config->output_bounds.w * 2.0 / display_bounds->w);
     h = (config->output_bounds.h * 2.0 / display_bounds->h);
+
+    x = (config->output_bounds.x * 2.0 / display_bounds->w) - 1.0;
+    y = 1.0 - h - (config->output_bounds.y * 2.0 / display_bounds->h);
 
     log_debug("Color corrector bounds: x %f y %f w %f h %f\n", x, y, w, h);
 

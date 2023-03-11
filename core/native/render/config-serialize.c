@@ -129,6 +129,13 @@ cJSON* serialize_config_render(config_render *in) {
     cJSON *config_render_json = cJSON_CreateObject();
 
     cJSON_AddItemToObject(config_render_json, "render_id", cJSON_CreateNumber(in->render_id));
+
+    if (in->render_name == NULL) {
+        cJSON_AddItemToObject(config_render_json, "render_name", cJSON_CreateNull());
+    } else {
+        cJSON_AddItemToObject(config_render_json, "render_name", cJSON_CreateString(in->render_name));
+    }
+
     cJSON_AddItemToObject(config_render_json, "w", cJSON_CreateNumber(in->w));
     cJSON_AddItemToObject(config_render_json, "h", cJSON_CreateNumber(in->h));
 

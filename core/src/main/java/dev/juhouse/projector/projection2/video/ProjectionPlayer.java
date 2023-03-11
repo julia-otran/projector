@@ -9,6 +9,8 @@ import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
+import dev.juhouse.projector.projection2.BridgeRender;
+import dev.juhouse.projector.projection2.BridgeRenderFlag;
 import dev.juhouse.projector.projection2.Projectable;
 import javafx.application.Platform;
 import javafx.scene.image.ImageView;
@@ -31,6 +33,7 @@ public class ProjectionPlayer implements Projectable {
 
         video.setEnablePreview(true);
         video.setPreviewBufferCallback(this.preview);
+        video.getRenderFlag().applyDefault(BridgeRender::getEnableRenderVideo);
     }
 
     public boolean isCropVideo() {

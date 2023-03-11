@@ -73,19 +73,23 @@ void vs_blend_load_coordinates(config_bounds *display_bounds, config_virtual_scr
 
     GLfloat *indexed_vertices = calloc(16, sizeof(GLfloat));
 
-    GLfloat x, y, w, h;
+    GLfloat vsx, vsy, vsw, vsh, x, y, w, h;
 
     // Virtual screen bounds
-    x = (virtual_screen->output_bounds.x * 2.0 / display_bounds->w) - 1;
-    y = (virtual_screen->output_bounds.y * 2.0 / display_bounds->h) - 1;
-    w = (virtual_screen->output_bounds.w * 2.0 / display_bounds->w);
-    h = (virtual_screen->output_bounds.h * 2.0 / display_bounds->h);
+    vsw = (virtual_screen->output_bounds.w * 2.0 / display_bounds->w);
+    vsh = (virtual_screen->output_bounds.h * 2.0 / display_bounds->h);
+    vsx = virtual_screen->output_bounds.x * 2.0 / display_bounds->w;
+    vsy = virtual_screen->output_bounds.y * 2.0 / display_bounds->h;
 
     // Blend bounds inside VS
-    x = (config->position.x * w / virtual_screen->output_bounds.w) + x;
-    y = (config->position.y * h / virtual_screen->output_bounds.h) + y;
-    w = (config->position.w * w / virtual_screen->output_bounds.w);
-    h = (config->position.h * h / virtual_screen->output_bounds.h);
+    w = (config->position.w / virtual_screen->output_bounds.w) * vsw;
+    h = (config->position.h / virtual_screen->output_bounds.h) * vsh;
+
+    x = ((config->position.x / virtual_screen->output_bounds.w) * vsw) + vsx;
+    y = ((config->position.y / virtual_screen->output_bounds.h) * vsh) + vsy;
+
+    x = x - 1.0;
+    y = 1.0 - h - y;
 
     log_debug("Blend vertices x %f y %f w %f h %f\n", x, y, w, h);
 

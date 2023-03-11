@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "tinycthread.h"
 #include "debug.h"
@@ -87,9 +88,8 @@ void render_init(render_layer *render) {
     // Give an empty image to OpenGL ( the last "0" )
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,GL_RGBA, GL_UNSIGNED_BYTE, 0);
 
-    // Poor filtering. Needed !
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -215,6 +215,10 @@ void renders_terminate() {
 }
 
 int transfer_window_loop(void *_) {
+    struct timespec sleep_interval;
+    sleep_interval.tv_nsec = 9 * 1000 * 1000;
+    sleep_interval.tv_sec = 0;
+
     glfwMakeContextCurrent(transfer_window);
     glewInit();
 
@@ -232,7 +236,7 @@ int transfer_window_loop(void *_) {
         render_web_view_update_buffers();
         render_image_update_buffers();
         render_preview_update_buffers();
-        thrd_yield();
+        thrd_sleep(&sleep_interval, NULL);
     }
 
     render_video_deallocate_buffers();

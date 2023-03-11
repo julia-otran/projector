@@ -162,6 +162,10 @@ void render_video_render(render_layer *layer) {
         return;
     }
 
+    if (!(src_render & (1 << layer->config.render_id))) {
+        return;
+    }
+
     float x, y, w, h;
 
     float w_scale = (dst_width / (float)dst_height);

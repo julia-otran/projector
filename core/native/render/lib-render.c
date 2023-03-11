@@ -126,6 +126,35 @@ JNIEXPORT jint JNICALL Java_dev_juhouse_projector_projection2_Bridge_getRenderAr
     return out_size.render_height;
 }
 
+JNIEXPORT jobjectArray JNICALL Java_dev_juhouse_projector_projection2_Bridge_getRenderSettings(JNIEnv *env, jobject _) {
+    jclass BridgeRenderClass = (*env)->FindClass(env, "dev/juhouse/projector/projection2/BridgeRender");
+
+    jfieldID render_id_field = (*env)->GetFieldID(env, BridgeRenderClass, "renderId", "I");
+    jfieldID render_name_field = (*env)->GetFieldID(env, BridgeRenderClass, "renderName", "Ljava/lang/String;");
+    jfieldID enable_render_background_assets_field = (*env)->GetFieldID(env, BridgeRenderClass, "enableRenderBackgroundAssets", "Z");
+    jfieldID enable_render_image_field = (*env)->GetFieldID(env, BridgeRenderClass, "enableRenderImage", "Z");
+    jfieldID enable_render_video_field = (*env)->GetFieldID(env, BridgeRenderClass, "enableRenderVideo", "Z");
+
+    jobjectArray result = (*env)->NewObjectArray(env, config->count_renders, BridgeRenderClass, NULL);
+
+    for (int i = 0; i < config->count_renders; i++) {
+        config_render *render = &config->renders[i];
+        jobject render_object = (*env)->AllocObject(env, BridgeRenderClass);
+
+        (*env)->SetIntField(env, render_object, render_id_field, render->render_id);
+
+        (*env)->SetObjectField(env, render_object, render_name_field, (*env)->NewStringUTF(env, render->render_name));
+
+        (*env)->SetBooleanField(env, render_object, enable_render_background_assets_field, render->enable_render_background_assets);
+        (*env)->SetBooleanField(env, render_object, enable_render_image_field, render->enable_render_image);
+        (*env)->SetBooleanField(env, render_object, enable_render_video_field, render->enable_render_video);
+
+        (*env)->SetObjectArrayElement(env, result, i, render_object);
+    }
+
+    return result;
+}
+
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setTextImage
   (JNIEnv *env, jobject _, jintArray arr, jint text_height) {
 
@@ -147,9 +176,7 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setVideoBuf
     render_video_src_set_buffer((void*)data, width, height);
 }
 
-JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setRenderVideoBuffer
-  (JNIEnv *env, jobject _, jboolean render) {
-
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setVideoBufferRenderFlag(JNIEnv *env, jobject _, jint render) {
     render_video_src_set_render(render);
 }
 

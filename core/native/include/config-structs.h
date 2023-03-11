@@ -78,6 +78,8 @@ typedef struct {
 typedef struct {
     int render_id, w, h;
 
+    char *render_name;
+
     config_bounds text_area;
     config_color_factor background_clear_color;
     config_color_factor text_color;

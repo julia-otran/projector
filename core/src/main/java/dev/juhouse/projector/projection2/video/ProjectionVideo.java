@@ -1,5 +1,6 @@
 package dev.juhouse.projector.projection2.video;
 
+import dev.juhouse.projector.projection2.BridgeRenderFlag;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import lombok.Getter;
@@ -48,9 +49,13 @@ public class ProjectionVideo {
     protected CallbackVideoSurface videoSurface;
 
     private ByteBuffer[] buffers;
+    @Getter
+    private final BridgeRenderFlag renderFlag;
 
     public ProjectionVideo(CanvasDelegate delegate) {
         this.delegate = delegate;
+        renderFlag = new BridgeRenderFlag(delegate);
+        renderFlag.getFlagValueProperty().addListener(observable -> updateRender());
     }
     public void init() {
         renderCallback = new ProjectionVideo.MyRenderCallback();
@@ -64,8 +69,16 @@ public class ProjectionVideo {
 
     public void setRender(boolean render) {
         this.render.setValue(render);
-        this.delegate.getBridge().setRenderVideoBuffer(render);
         updateBufferAddress();
+        updateRender();
+    }
+
+    private void updateRender() {
+        if (render.get()) {
+            this.delegate.getBridge().setVideoBufferRenderFlag(renderFlag.getFlagValue());
+        } else {
+            this.delegate.getBridge().setVideoBufferRenderFlag(BridgeRenderFlag.NO_RENDER);
+        }
     }
 
     public void setCropVideo(boolean cropVideo) {

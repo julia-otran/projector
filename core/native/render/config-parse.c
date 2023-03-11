@@ -128,6 +128,15 @@ void parse_config_render(cJSON *config_render_json, config_render *out) {
     out->w = cJSON_GetObjectItemCaseSensitive(config_render_json, "w")->valueint;
     out->h = cJSON_GetObjectItemCaseSensitive(config_render_json, "h")->valueint;
 
+    cJSON *render_name_json = cJSON_GetObjectItemCaseSensitive(config_render_json, "render_name");
+
+    if (cJSON_IsString(render_name_json) && render_name_json->valuestring != NULL) {
+        out->render_name = malloc(strlen(render_name_json->valuestring) + 1);
+        memcpy(out->render_name, render_name_json->valuestring, strlen(render_name_json->valuestring));
+    } else {
+        out->render_name = NULL;
+    }
+
     parse_config_color_factor(cJSON_GetObjectItemCaseSensitive(config_render_json, "background_clear_color"), &out->background_clear_color);
     parse_config_color_factor(cJSON_GetObjectItemCaseSensitive(config_render_json, "text_color"), &out->text_color);
 

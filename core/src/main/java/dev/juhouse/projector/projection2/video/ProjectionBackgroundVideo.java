@@ -1,5 +1,6 @@
 package dev.juhouse.projector.projection2.video;
 
+import dev.juhouse.projector.projection2.BridgeRender;
 import dev.juhouse.projector.projection2.Projectable;
 import dev.juhouse.projector.utils.ThemeFinder;
 
@@ -27,6 +28,7 @@ public class ProjectionBackgroundVideo implements Projectable {
     public void init() {
         videoProjector.init();
         videoProjector.getPlayer().audio().setMute(true);
+        videoProjector.getRenderFlag().applyDefault(BridgeRender::getEnableRenderBackgroundAssets);
         loadMedia();
     }
 
