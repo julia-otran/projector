@@ -130,9 +130,6 @@ public class ProjectionLabel implements Projectable {
             // get the shape object
             Shape textShape = glyphVector.getOutline();
 
-            g.setColor(Color.black);
-            g.draw(textShape);
-
             g.setColor(Color.white);
             g.fill(textShape);
 

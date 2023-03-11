@@ -1,12 +1,14 @@
-#include "tinycthread.h"
 #include <string.h>
+#include <math.h>
 
+#include "tinycthread.h"
 #include "render.h"
 #include "debug.h"
 #include "render-text.h"
 #include "ogl-loader.h"
 #include "render-fader.h"
 #include "render-pixel-unpack-buffer.h"
+#include "render-text-outline-shader.h"
 
 static int initialized = 0;
 static int width, height;
@@ -107,6 +109,7 @@ void render_text_update_buffers() {
 }
 
 void render_text_create_assets() {
+    render_text_outline_shader_initialize(width, height);
 }
 
 void render_text_update_assets() {
@@ -149,45 +152,31 @@ void render_text_update_assets() {
     render_fader_cleanup(fader_instance);
 }
 
+void render_text_start(render_layer *layer) {
+    render_text_outline_shader_start(layer);
+}
+
 void render_text_render(render_layer *layer) {
-    float x, y, w, h;
-
-    x = layer->config.text_area.x;
-    y = layer->config.text_area.y;
-    w = layer->config.text_area.w;
-    h = layer->config.text_area.h;
-
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnable(GL_TEXTURE_2D);
 
     render_fader_for_each(fader_instance) {
         if (node->fade_id) {
             glBindTexture(GL_TEXTURE_2D, node->fade_id);
-
-            float alpha = render_fader_get_alpha(node);
-
-            glColor4f(
-                layer->config.text_color.r * alpha,
-                layer->config.text_color.g * alpha,
-                layer->config.text_color.b * alpha,
-                alpha
-            );
-
-            glBegin(GL_QUADS);
-
-            glTexCoord2i(0,0); glVertex2d(x, y);
-            glTexCoord2i(0, 1); glVertex2d(x, y + h);
-            glTexCoord2i(1, 1); glVertex2d(x + w, y + h);
-            glTexCoord2i(1, 0); glVertex2d(x + w, y);
-
-            glEnd();
+            render_text_outline_shader_render(layer);
         }
     }
 
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void render_text_stop(render_layer *layer) {
+    render_text_outline_shader_stop(layer);
+}
+
 void render_text_deallocate_assets() {
+    render_text_outline_shader_shutdown();
+
     render_fader_for_each(fader_instance) {
         GLuint tex_id = (unsigned int) node->fade_id;
 

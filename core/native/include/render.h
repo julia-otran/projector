@@ -8,6 +8,10 @@ typedef struct {
     config_render config;
     GLuint rendered_texture;
     GLuint framebuffer_name;
+
+    GLuint outline_vertex_array;
+    GLuint outline_vertex_buffer;
+    GLuint outline_uv_buffer;
 } render_layer;
 
 typedef struct {

@@ -124,6 +124,8 @@ void render_init(render_layer *render) {
         render_image_create_assets();
         render_preview_create_assets();
     }
+
+    render_text_start(render);
 }
 
 void render_cycle(render_layer *render) {
@@ -176,6 +178,8 @@ void render_cycle(render_layer *render) {
 }
 
 void render_terminate(render_layer *render) {
+    render_text_stop(render);
+
     if (render->config.render_mode & CONFIG_RENDER_MODE_MAIN) {
         render_text_deallocate_assets();
         render_video_deallocate_assets();
