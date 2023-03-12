@@ -5,31 +5,22 @@
  */
 package dev.juhouse.projector.projection2.models;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
 /**
  *
  * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
+@Data
+@AllArgsConstructor
 public class StringWithPosition {
-
     private final int x;
     private final int y;
+
+    private final int w;
+
+    private final int h;
+
     private final String text;
-
-    public StringWithPosition(String text, int x, int y) {
-        this.text = text;
-        this.x = x;
-        this.y = y;
-    }
-
-    public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public String getText() {
-        return text;
-    }
 }

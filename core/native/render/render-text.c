@@ -8,56 +8,58 @@
 #include "ogl-loader.h"
 #include "render-fader.h"
 #include "render-pixel-unpack-buffer.h"
-#include "render-text-outline-shader.h"
-
-static int initialized = 0;
-static int width, height;
 
 static mtx_t thread_mutex;
 
-static void *share_pixel_data;
+static int text_datum_count;
+static render_text_data *text_datum;
+
 static int pixel_data_changed;
 static int clear_text;
 
-static render_fader_instance *fader_instance;
-static render_pixel_unpack_buffer_instance *buffer_instance;
+static int renders_count;
+static render_layer *renders;
+
+static render_fader_instance **fader_instances;
+static render_pixel_unpack_buffer_instance **buffer_instances;
 
 void render_text_initialize() {
     mtx_init(&thread_mutex, 0);
-
-    render_fader_init(&fader_instance);
-
-    initialized = 1;
 }
 
-void render_text_set_size(int width_in, int height_in) {
-    if (width != width_in || height != height_in) {
-        mtx_lock(&thread_mutex);
+void render_text_set_config(render_layer *in_renders, int count) {
+    renders = in_renders;
+    renders_count = count;
 
-        width = width_in;
-        height = height_in;
+    fader_instances = (render_fader_instance**) calloc(count, sizeof(render_fader_instance*));
 
-        if (share_pixel_data) {
-            free(share_pixel_data);
-        }
-
-        share_pixel_data = malloc(width_in * height_in * 4);
-        pixel_data_changed = 0;
-        clear_text = 0;
-
-        mtx_unlock(&thread_mutex);
+    for (int i = 0; i < count; i++) {
+        render_fader_init(&fader_instances[i]);
     }
 }
 
-void render_text_set_image(void *pixel_data) {
+void render_text_set_data(render_text_data *data, int count) {
     mtx_lock(&thread_mutex);
 
-    if (pixel_data) {
-        memcpy(share_pixel_data, pixel_data, width * height * 4);
+    for (int i = 0; i < text_datum_count; i++) {
+        free(text_datum[i].image_data);
+    }
+
+    if (text_datum) {
+        free(text_datum);
+    }
+
+    text_datum = data;
+    text_datum_count = count;
+
+    if (data) {
+        if (count != renders_count) {
+            log_debug("[BUG] Text data set does not match renders quantity.\n Engine will crash soon.\n");
+        }
+
         clear_text = 0;
-        pixel_data_changed = 1;
+        pixel_data_changed = count;
     } else {
-        log_debug("Clear text received\n");
         clear_text = 1;
     }
 
@@ -65,105 +67,157 @@ void render_text_set_image(void *pixel_data) {
 }
 
 void render_text_create_buffers() {
-    render_pixel_unpack_buffer_create(&buffer_instance);
+    buffer_instances = (render_pixel_unpack_buffer_instance**) calloc(renders_count, sizeof(render_pixel_unpack_buffer_instance*));
+
+    for (int i = 0; i < renders_count; i++) {
+        render_pixel_unpack_buffer_create(&buffer_instances[i]);
+    }
 }
 
 void render_text_deallocate_buffers() {
-    render_pixel_unpack_buffer_deallocate(buffer_instance);
-    buffer_instance = NULL;
+    for (int i = 0; i < renders_count; i++) {
+        render_pixel_unpack_buffer_deallocate(buffer_instances[i]);
+    }
+
+    free(buffer_instances);
+    buffer_instances = NULL;
 }
 
 void render_text_update_buffers() {
-    int buffer_updated = 0;
+    for (int i = 0; i < renders_count; i++) {
+        int buffer_updated = 0;
 
-    render_pixel_unpack_buffer_node* buffer = render_pixel_unpack_buffer_dequeue_for_write(buffer_instance);
+        render_pixel_unpack_buffer_node* buffer = render_pixel_unpack_buffer_dequeue_for_write(buffer_instances[i]);
 
-    mtx_lock(&thread_mutex);
+        mtx_lock(&thread_mutex);
 
-    if (pixel_data_changed && buffer) {
-        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
+        if (pixel_data_changed > 0) {
+            int width = text_datum[i].image_w;
+            int height = text_datum[i].image_h;
 
-        if (buffer->width != width || buffer->height != height) {
-            glBufferData(GL_PIXEL_UNPACK_BUFFER, width * height * 4, 0, GL_DYNAMIC_DRAW);
-            buffer->width = width;
-            buffer->height = height;
+            glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
+
+            if (buffer->width != width || buffer->height != height) {
+                glBufferData(GL_PIXEL_UNPACK_BUFFER, width * height * 4, 0, GL_DYNAMIC_DRAW);
+                buffer->width = width;
+                buffer->height = height;
+            }
+
+            void *data = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+
+            // At the present moment, text_data indexes matches renders indexes
+            memcpy(data, text_datum[i].image_data, width * height * 4);
+
+            glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+
+            glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+            buffer_updated = 1;
+            pixel_data_changed = pixel_data_changed - 1;
         }
 
-        void *data = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
-        memcpy(data, share_pixel_data, width * height * 4);
-        glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+        mtx_unlock(&thread_mutex);
 
-        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-
-        buffer_updated = 1;
-        pixel_data_changed = 0;
-    }
-
-    mtx_unlock(&thread_mutex);
-
-    if (buffer_updated) {
-        render_pixel_unpack_buffer_enqueue_for_read(buffer_instance, buffer);
-    } else {
-        render_pixel_unpack_buffer_enqueue_for_write(buffer_instance, buffer);
+        if (buffer_updated) {
+            render_pixel_unpack_buffer_enqueue_for_read(buffer_instances[i], buffer);
+        } else {
+            render_pixel_unpack_buffer_enqueue_for_write(buffer_instances[i], buffer);
+        }
     }
 }
 
 void render_text_create_assets() {
-    render_text_outline_shader_initialize(width, height);
+}
+
+void render_text_do_clear() {
+    for (int i = 0; i < renders_count; i++) {
+        render_fader_fade_in_out(fader_instances[i], 0, RENDER_FADER_DEFAULT_TIME_MS);
+    }
 }
 
 void render_text_update_assets() {
     if (clear_text) {
-        render_fader_fade_in_out(fader_instance, 0, RENDER_FADER_DEFAULT_TIME_MS);
+        render_text_do_clear();
     } else {
-        // TODO: add a debouce. if text changes too fast we may allocate too many textures
-        render_pixel_unpack_buffer_node* buffer = render_pixel_unpack_buffer_dequeue_for_read(buffer_instance);
+        for (int i = 0; i < renders_count; i++) {
+            // TODO: add a debouce. if text changes too fast we may allocate too many textures
+            render_pixel_unpack_buffer_node* buffer = render_pixel_unpack_buffer_dequeue_for_read(buffer_instances[i]);
 
-        if (buffer) {
-            GLuint texture_id = 0;
-            glGenTextures(1, &texture_id);
+            if (buffer) {
+                GLuint texture_id = 0;
+                glGenTextures(1, &texture_id);
 
-            glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
-            glBindTexture(GL_TEXTURE_2D, texture_id);
+                glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
+                glBindTexture(GL_TEXTURE_2D, texture_id);
 
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, 0);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, buffer->width, buffer->height, 0, GL_BGRA, GL_UNSIGNED_BYTE, 0);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-            glBindTexture(GL_TEXTURE_2D, 0);
-            glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+                glBindTexture(GL_TEXTURE_2D, 0);
+                glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-            render_fader_fade_in_out(fader_instance, texture_id, RENDER_FADER_DEFAULT_TIME_MS);
+                render_fader_fade_in_out(fader_instances[i], texture_id, RENDER_FADER_DEFAULT_TIME_MS);
+            }
+
+            render_pixel_unpack_buffer_enqueue_for_write(buffer_instances[i], buffer);
         }
-
-        render_pixel_unpack_buffer_enqueue_for_write(buffer_instance, buffer);
     }
 
-    render_fader_for_each(fader_instance) {
-        if (render_fader_is_hidden(node)) {
-            GLuint tex_id = (unsigned int) node->fade_id;
+    for (int i = 0; i < renders_count; i++) {
+        render_fader_for_each(fader_instances[i]) {
+            if (render_fader_is_hidden(node)) {
+                GLuint tex_id = (unsigned int) node->fade_id;
 
-            if (tex_id) {
-                glDeleteTextures(1, &tex_id);
+                if (tex_id) {
+                    glDeleteTextures(1, &tex_id);
+                }
             }
         }
-    }
 
-    render_fader_cleanup(fader_instance);
+        render_fader_cleanup(fader_instances[i]);
+    }
 }
 
 void render_text_start(render_layer *layer) {
-    render_text_outline_shader_start(layer);
 }
 
 void render_text_render(render_layer *layer) {
+    float x, y, w, h;
+
+    x = layer->config.text_area.x;
+    y = layer->config.text_area.y;
+    w = layer->config.text_area.w;
+    h = layer->config.text_area.h;
+
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnable(GL_TEXTURE_2D);
 
-    render_fader_for_each(fader_instance) {
-        if (node->fade_id) {
-            glBindTexture(GL_TEXTURE_2D, node->fade_id);
-            render_text_outline_shader_render(layer);
+    for (int i = 0; i < renders_count; i++) {
+        if (renders[i].config.render_id == layer->config.render_id) {
+            render_fader_for_each(fader_instances[i]) {
+                if (node->fade_id) {
+                    glBindTexture(GL_TEXTURE_2D, node->fade_id);
+
+                    float alpha = render_fader_get_alpha(node);
+
+                    glColor4f(
+                        layer->config.text_color.r * alpha,
+                        layer->config.text_color.g * alpha,
+                        layer->config.text_color.b * alpha,
+                        alpha
+                    );
+
+                    glBegin(GL_QUADS);
+
+                    glTexCoord2i(0,0); glVertex2d(x, y);
+                    glTexCoord2i(0, 1); glVertex2d(x, y + h);
+                    glTexCoord2i(1, 1); glVertex2d(x + w, y + h);
+                    glTexCoord2i(1, 0); glVertex2d(x + w, y);
+
+                    glEnd();
+                }
+            }
         }
     }
 
@@ -171,27 +225,27 @@ void render_text_render(render_layer *layer) {
 }
 
 void render_text_stop(render_layer *layer) {
-    render_text_outline_shader_stop(layer);
 }
 
 void render_text_deallocate_assets() {
-    render_text_outline_shader_shutdown();
+    for (int i = 0; i < renders_count; i++) {
+        render_fader_for_each(fader_instances[i]) {
+            GLuint tex_id = (unsigned int) node->fade_id;
 
-    render_fader_for_each(fader_instance) {
-        GLuint tex_id = (unsigned int) node->fade_id;
-
-        if (tex_id) {
-            glDeleteTextures(1, &tex_id);
+            if (tex_id) {
+                glDeleteTextures(1, &tex_id);
+            }
         }
-    }
 
-    render_fader_cleanup(fader_instance);
+        render_fader_cleanup(fader_instances[i]);
+    }
 }
 
 void render_text_shutdown() {
-    if (share_pixel_data) {
-        free(share_pixel_data);
+    for (int i = 0; i < renders_count; i++) {
+        render_fader_terminate(fader_instances[i]);
     }
 
-    render_fader_terminate(fader_instance);
+    free(fader_instances);
+    fader_instances = NULL;
 }

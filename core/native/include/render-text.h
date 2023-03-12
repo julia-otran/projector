@@ -3,10 +3,19 @@
 #ifndef _RENDER_TEXT_H_
 #define _RENDER_TEXT_H_
 
+typedef struct {
+    int render_id;
+
+    void *image_data;
+    int image_w, image_h;
+
+    double x, y, w, h;
+} render_text_data;
+
 void render_text_initialize();
 
-void render_text_set_size(int width, int height);
-void render_text_set_image(void *pixel_data);
+void render_text_set_config(render_layer *renders, int count);
+void render_text_set_data(render_text_data *data, int count);
 
 void render_text_create_buffers();
 void render_text_update_buffers();

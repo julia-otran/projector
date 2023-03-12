@@ -256,7 +256,6 @@ void configure_render(config_render *render_conf, render_layer *render) {
     memcpy(&render->config, render_conf, sizeof(config_render));
 
     if (render->config.render_mode & CONFIG_RENDER_MODE_MAIN) {
-        render_text_set_size(render->config.text_area.w, render->config.text_area.h);
         render_preview_set_size(render->config.w, render->config.h);
     }
 }
@@ -277,6 +276,8 @@ void activate_renders(GLFWwindow *shared_context, projection_config *config) {
         output[i].render_id = config->renders[i].render_id;
         configure_render(&config->renders[i], &renders[i]);
     }
+
+    render_text_set_config(renders, count_renders);
 
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
     transfer_window = glfwCreateWindow(800, 600, "Projector Render Transfer Window", NULL, shared_context);

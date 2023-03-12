@@ -42,19 +42,15 @@ class WindowManager(private val settingsService: SettingsService) : CanvasDelega
     }
 
     override fun getTextWidth(): Int {
-        return bridge.textRenderAreaWidth
+        return bridge.textAreaWidth
     }
 
     override fun getTextHeight(): Int {
-        return bridge.textRenderAreaHeight
+        return bridge.textAreaHeight
     }
 
     override fun getSettingsService(): SettingsService {
         return settingsService;
-    }
-
-    override fun getDefaultDevice(): GraphicsDevice {
-        return GraphicsFinder.getDefaultDevice().device
     }
 
     override fun getBridge(): Bridge {

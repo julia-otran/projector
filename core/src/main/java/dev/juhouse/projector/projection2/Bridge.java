@@ -5,12 +5,11 @@ import org.apache.commons.io.IOUtils;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 public class Bridge {
     private static String[] getShaderNames() {
         return new String[] {
-                "bicubic-filter.fragment.shader",
-                "bicubic-filter.vertex.shader",
                 "blend.fragment.shader",
                 "blend.vertex.shader",
                 "color-corrector.fragment.shader",
@@ -42,17 +41,9 @@ public class Bridge {
 
     public native void generateConfig(String fileName);
 
-    public native int getTextRenderAreaWidth();
-
-    public native int getTextRenderAreaHeight();
-
-    public native int getRenderAreaWidth();
-
-    public native int getRenderAreaHeight();
-
     public native BridgeRender[] getRenderSettings();
 
-    public native void setTextImage(int[] data, int textHeight);
+    public native void setTextData(BridgeTextData[] data);
 
     public native void setVideoBuffer(ByteBuffer buffer, int width, int height, boolean crop);
 
@@ -67,4 +58,20 @@ public class Bridge {
     public native void setRenderWebViewBuffer(boolean render);
 
     public native void downloadPreviewData(ByteBuffer buffer);
+
+    public int getRenderAreaWidth() {
+        return Arrays.stream(getRenderSettings()).filter(config -> config.getRenderMode() == 1).findFirst().map(BridgeRender::getWidth).orElse(1280);
+    }
+
+    public int getRenderAreaHeight() {
+        return Arrays.stream(getRenderSettings()).filter(config -> config.getRenderMode() == 1).findFirst().map(BridgeRender::getHeight).orElse(720);
+    }
+
+    public int getTextAreaWidth() {
+        return Arrays.stream(getRenderSettings()).filter(config -> config.getRenderMode() == 1).findFirst().map(BridgeRender::getTextAreaWidth).orElse(1280);
+    }
+
+    public int getTextAreaHeight() {
+        return Arrays.stream(getRenderSettings()).filter(config -> config.getRenderMode() == 1).findFirst().map(BridgeRender::getTextAreaHeight).orElse(720);
+    }
 }

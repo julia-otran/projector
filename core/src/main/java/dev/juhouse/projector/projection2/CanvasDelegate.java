@@ -25,7 +25,5 @@ public interface CanvasDelegate {
 
     SettingsService getSettingsService();
 
-    GraphicsDevice getDefaultDevice();
-
     Bridge getBridge();
 }

@@ -5,8 +5,7 @@ import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import java.util.List;
 
 import dev.juhouse.projector.projection2.models.StringWithPosition;
@@ -15,6 +14,8 @@ import dev.juhouse.projector.projection2.text.WrapperFactory;
 import dev.juhouse.projector.utils.FontCreatorUtil;
 import javafx.application.Platform;
 import dev.juhouse.projector.other.ProjectorPreferences;
+
+import javax.swing.border.StrokeBorder;
 
 /**
  *
@@ -35,12 +36,14 @@ public class ProjectionLabel implements Projectable {
     // Internal control
     private List<StringWithPosition> drawLines = Collections.emptyList();
 
-    private BufferedImage image;
-    private Graphics2D g;
+    private final Map<Integer, BufferedImage> renderImages = new HashMap<>();
+    private final Map<Integer, Graphics2D> graphics = new HashMap<>();
+
+    private Graphics2D defaultGraphics;
 
     private final Color clearColor;
 
-    private BasicStroke stroke;
+    private BridgeRender[] renders;
 
     public ProjectionLabel(CanvasDelegate canvasDelegate) {
         this.canvasDelegate = canvasDelegate;
@@ -68,8 +71,19 @@ public class ProjectionLabel implements Projectable {
 
     @Override
     public void rebuild() {
-        image = new BufferedImage(canvasDelegate.getTextWidth(), canvasDelegate.getTextHeight(), BufferedImage.TYPE_INT_ARGB);
-        g = image.createGraphics();
+        this.renders = canvasDelegate.getBridge().getRenderSettings();
+
+        for (BridgeRender render : renders) {
+            BufferedImage img = new BufferedImage(render.getTextAreaWidth(), render.getTextAreaHeight(), BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = img.createGraphics();
+
+            renderImages.put(render.getRenderId(), img);
+            graphics.put(render.getRenderId(), g);
+
+            if (render.getRenderMode() == 1) {
+                defaultGraphics = img.createGraphics();
+            }
+        }
     }
 
     @Override
@@ -84,12 +98,10 @@ public class ProjectionLabel implements Projectable {
     public void setFont(Font font) {
         this.font = font;
 
-        if (g != null) {
-            this.fontMetrics = g.getFontMetrics(font);
+        if (defaultGraphics != null) {
+            this.fontMetrics = defaultGraphics.getFontMetrics(font);
             onFactoryChange();
         }
-
-        stroke = new BasicStroke(font.getSize() * 0.05f);
 
         ProjectorPreferences.setProjectionLabelFontName(font.getFamily());
         ProjectorPreferences.setProjectionLabelFontStyle(font.getStyle());
@@ -101,53 +113,82 @@ public class ProjectionLabel implements Projectable {
         generateLines();
     }
 
-    private void renderText(int textHeight) {
+    private void renderText() {
         if (getFont() == null || drawLines.isEmpty()) {
-            canvasDelegate.getBridge().setTextImage(null, 0);
+            canvasDelegate.getBridge().setTextData(null);
             return;
         }
 
-        Composite oldComposite = g.getComposite();
-        g.setComposite(AlphaComposite.Clear);
-        g.setColor(clearColor);
-        g.fillRect(0, 0, image.getWidth(), image.getHeight());
-        g.setComposite(oldComposite);
+        BridgeTextData[] textData = new BridgeTextData[renders.length];
 
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        g.setStroke(stroke);
+        for (int i = 0; i < renders.length; i++) {
+            BridgeRender render = renders[i];
 
-        AffineTransform oldTransform = g.getTransform();
+            Graphics2D g = graphics.get(render.getRenderId());
 
-        drawLines.forEach((pt) -> {
-            g.translate(pt.getX(), pt.getY());
-            // create a glyph vector from your text
-            GlyphVector glyphVector = getFont().createGlyphVector(g.getFontRenderContext(), pt.getText());
+            Composite oldComposite = g.getComposite();
+            g.setComposite(AlphaComposite.Clear);
+            g.setColor(clearColor);
+            g.fillRect(0, 0, render.getWidth(), render.getHeight());
+            g.setComposite(oldComposite);
 
-            // get the shape object
-            Shape textShape = glyphVector.getOutline();
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
-            g.setColor(Color.black);
-            g.draw(textShape);
+            float scaleX = render.getTextAreaWidth() / (float)canvasDelegate.getTextWidth();
+            float scaleY = render.getTextAreaHeight() / (float)canvasDelegate.getTextHeight();
+            float newFontSize = getFont().getSize() * Math.min(scaleX, scaleY);
 
-            g.setColor(Color.white);
-            g.fill(textShape);
+            g.setStroke(new BasicStroke(3f + (newFontSize * 0.025f)));
 
-            g.setTransform(oldTransform);
-        });
+            AffineTransform baseTransform = g.getTransform();
 
-        canvasDelegate.getBridge().setTextImage(((DataBufferInt)image.getRaster().getDataBuffer()).getData(), textHeight);
+            drawLines.forEach((pt) -> {
+                g.translate(pt.getX() * scaleX, pt.getY() * scaleY);
+
+                // create a glyph vector from your text
+                GlyphVector glyphVectorOutline = getFont()
+                        .deriveFont(newFontSize)
+                        .createGlyphVector(g.getFontRenderContext(), pt.getText());
+
+                Shape textShape = glyphVectorOutline.getOutline();
+
+                g.setColor(Color.black);
+                g.draw(textShape);
+
+                g.setColor(Color.white);
+                g.fill(textShape);
+
+                g.setTransform(baseTransform);
+            });
+
+            BufferedImage img = renderImages.get(render.getRenderId());
+            int[] imgData = ((DataBufferInt)img.getData().getDataBuffer()).getData();
+
+            textData[i] = new BridgeTextData(
+                    render.getRenderId(),
+                    imgData,
+                    img.getWidth(),
+                    img.getHeight(),
+                    drawLines.stream().map(StringWithPosition::getX).min(Integer::compareTo).orElse(0) * scaleX,
+                    drawLines.stream().map(StringWithPosition::getY).min(Integer::compareTo).orElse(0) * scaleY,
+                    drawLines.stream().map(StringWithPosition::getW).max(Integer::compareTo).orElse(0) * scaleX,
+                    drawLines.stream().map(s -> s.getY() + s.getH()).max(Integer::compareTo).orElse(0) * scaleY
+                    );
+        }
+
+        canvasDelegate.getBridge().setTextData(textData);
     }
 
     private void generateLines() {
         if (text == null) {
             drawLines = Collections.emptyList();
-            renderText(0);
+            renderText();
             return;
         }
 
         if (font == null) {
-            renderText( 0);
+            renderText();
             return;
         }
 
@@ -155,7 +196,7 @@ public class ProjectionLabel implements Projectable {
 
         if (lines == null || text.isEmpty() || lines.isEmpty()) {
             drawLines = Collections.emptyList();
-            renderText( 0);
+            renderText();
             return;
         }
 
@@ -186,18 +227,18 @@ public class ProjectionLabel implements Projectable {
                 translateY += between;
             }
 
-            pendingLines.add(new StringWithPosition(line, x, y));
+            pendingLines.add(new StringWithPosition(x, y, lineWidth, y - translateY, line));
         }
 
         if (pendingLines.stream().allMatch(l -> l.getText().isEmpty())) {
             drawLines = Collections.emptyList();
-            renderText( 0);
+            renderText();
             return;
         }
 
         drawLines = pendingLines;
 
-        renderText(totalHeight);
+        renderText();
     }
 
     private int getFreeWidth() {

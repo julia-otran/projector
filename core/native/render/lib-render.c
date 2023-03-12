@@ -112,38 +112,22 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_generateCon
     (*env)->ReleaseStringUTFChars(env, j_path, file_path);
 }
 
-JNIEXPORT jint JNICALL Java_dev_juhouse_projector_projection2_Bridge_getTextRenderAreaWidth(JNIEnv *env, jobject _) {
-    config_bounds text_area;
-    get_main_text_area(&text_area);
-    return (jint) text_area.w;
-}
-
-JNIEXPORT jint JNICALL Java_dev_juhouse_projector_projection2_Bridge_getTextRenderAreaHeight(JNIEnv *env, jobject _) {
-    config_bounds text_area;
-    get_main_text_area(&text_area);
-    return (jint) text_area.h;
-}
-
-JNIEXPORT jint JNICALL Java_dev_juhouse_projector_projection2_Bridge_getRenderAreaWidth(JNIEnv *env, jobject _) {
-    render_output_size out_size;
-    get_main_output_size(&out_size);
-    return out_size.render_width;
-}
-
-JNIEXPORT jint JNICALL Java_dev_juhouse_projector_projection2_Bridge_getRenderAreaHeight(JNIEnv *env, jobject _) {
-    render_output_size out_size;
-    get_main_output_size(&out_size);
-    return out_size.render_height;
-}
-
 JNIEXPORT jobjectArray JNICALL Java_dev_juhouse_projector_projection2_Bridge_getRenderSettings(JNIEnv *env, jobject _) {
     jclass BridgeRenderClass = (*env)->FindClass(env, "dev/juhouse/projector/projection2/BridgeRender");
 
     jfieldID render_id_field = (*env)->GetFieldID(env, BridgeRenderClass, "renderId", "I");
     jfieldID render_name_field = (*env)->GetFieldID(env, BridgeRenderClass, "renderName", "Ljava/lang/String;");
+
     jfieldID enable_render_background_assets_field = (*env)->GetFieldID(env, BridgeRenderClass, "enableRenderBackgroundAssets", "Z");
     jfieldID enable_render_image_field = (*env)->GetFieldID(env, BridgeRenderClass, "enableRenderImage", "Z");
     jfieldID enable_render_video_field = (*env)->GetFieldID(env, BridgeRenderClass, "enableRenderVideo", "Z");
+    jfieldID render_mode_field = (*env)->GetFieldID(env, BridgeRenderClass, "renderMode", "I");
+
+    jfieldID render_width_field = (*env)->GetFieldID(env, BridgeRenderClass, "width", "I");
+    jfieldID render_height_field = (*env)->GetFieldID(env, BridgeRenderClass, "height", "I");
+    jfieldID render_text_area_width_field = (*env)->GetFieldID(env, BridgeRenderClass, "textAreaWidth", "I");
+    jfieldID render_text_area_height_field = (*env)->GetFieldID(env, BridgeRenderClass, "textAreaHeight", "I");
+
 
     jobjectArray result = (*env)->NewObjectArray(env, config->count_renders, BridgeRenderClass, NULL);
 
@@ -158,6 +142,12 @@ JNIEXPORT jobjectArray JNICALL Java_dev_juhouse_projector_projection2_Bridge_get
         (*env)->SetBooleanField(env, render_object, enable_render_background_assets_field, render->enable_render_background_assets);
         (*env)->SetBooleanField(env, render_object, enable_render_image_field, render->enable_render_image);
         (*env)->SetBooleanField(env, render_object, enable_render_video_field, render->enable_render_video);
+        (*env)->SetIntField(env, render_object, render_mode_field, render->render_mode);
+
+        (*env)->SetIntField(env, render_object, render_width_field, render->w);
+        (*env)->SetIntField(env, render_object, render_height_field, render->h);
+        (*env)->SetIntField(env, render_object, render_text_area_width_field, render->text_area.w);
+        (*env)->SetIntField(env, render_object, render_text_area_height_field, render->text_area.h);
 
         (*env)->SetObjectArrayElement(env, result, i, render_object);
     }
@@ -165,17 +155,53 @@ JNIEXPORT jobjectArray JNICALL Java_dev_juhouse_projector_projection2_Bridge_get
     return result;
 }
 
-JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setTextImage
-  (JNIEnv *env, jobject _, jintArray arr, jint text_height) {
-
-    if (arr) {
-        jint *data = (*env)->GetIntArrayElements(env, arr, 0);
-        render_text_set_image((void*) data);
-        (*env)->ReleaseIntArrayElements(env, arr, data, 0);
-    } else {
-        render_text_set_image(NULL);
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setTextData(JNIEnv *env, jobject _, jobjectArray j_text_data_arr) {
+    if (j_text_data_arr == NULL) {
+        render_text_set_data(NULL, 0);
+        return;
     }
-  }
+
+    jclass BridgeTextDataClass = (*env)->FindClass(env, "dev/juhouse/projector/projection2/BridgeTextData");
+
+    jfieldID render_id_field = (*env)->GetFieldID(env, BridgeTextDataClass, "renderId", "I");
+
+    jfieldID image_data_field = (*env)->GetFieldID(env, BridgeTextDataClass, "imageData", "[I");
+    jfieldID image_w_field = (*env)->GetFieldID(env, BridgeTextDataClass, "imageWidth", "I");
+    jfieldID image_h_field = (*env)->GetFieldID(env, BridgeTextDataClass, "imageHeight", "I");
+
+    jfieldID x_field = (*env)->GetFieldID(env, BridgeTextDataClass, "x", "D");
+    jfieldID y_field = (*env)->GetFieldID(env, BridgeTextDataClass, "y", "D");
+    jfieldID w_field = (*env)->GetFieldID(env, BridgeTextDataClass, "w", "D");
+    jfieldID h_field = (*env)->GetFieldID(env, BridgeTextDataClass, "h", "D");
+
+    jsize data_length = (*env)->GetArrayLength(env, j_text_data_arr);
+
+    render_text_data *datum = calloc(data_length, sizeof(render_text_data));
+
+    for (int i = 0; i < data_length; i++) {
+        render_text_data *data = &datum[i];
+        jobject obj = (*env)->GetObjectArrayElement(env, j_text_data_arr, i);
+
+        data->render_id = (*env)->GetIntField(env, obj, render_id_field);
+        data->image_w = (*env)->GetIntField(env, obj, image_w_field);
+        data->image_h = (*env)->GetIntField(env, obj, image_h_field);
+
+        jintArray j_img_data = (*env)->GetObjectField(env, obj, image_data_field);
+        jint *img_data = (*env)->GetIntArrayElements(env, j_img_data, NULL);
+
+        data->image_data = (void*) malloc(data->image_w * data->image_h * 4);
+        memcpy(data->image_data, img_data, data->image_w * data->image_h * 4);
+
+        (*env)->ReleaseIntArrayElements(env, j_img_data, img_data, 0);
+
+        data->x = (*env)->GetIntField(env, obj, x_field);
+        data->y = (*env)->GetIntField(env, obj, y_field);
+        data->w = (*env)->GetIntField(env, obj, w_field);
+        data->h = (*env)->GetIntField(env, obj, h_field);
+    }
+
+    render_text_set_data(datum, data_length);
+}
 
 // Video render methods
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setVideoBuffer
