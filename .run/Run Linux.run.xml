@@ -5,7 +5,6 @@
     <option name="MAIN_CLASS_NAME" value="dev.juhouse.projector.Main" />
     <module name="projector-linux" />
     <method v="2">
-      <option name="Make" enabled="true" />
       <option name="Maven.BeforeRunTask" enabled="true" file="$PROJECT_DIR$/pom.xml" goal="compile -pl core,linux" />
     </method>
   </configuration>

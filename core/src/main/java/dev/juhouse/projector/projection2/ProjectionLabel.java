@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package dev.juhouse.projector.projection2;
 
 import java.awt.*;
@@ -88,11 +83,13 @@ public class ProjectionLabel implements Projectable {
 
     public void setFont(Font font) {
         this.font = font;
-        this.fontMetrics = Toolkit.getDefaultToolkit().getFontMetrics(font);
+
+        if (g != null) {
+            this.fontMetrics = g.getFontMetrics(font);
+            onFactoryChange();
+        }
 
         stroke = new BasicStroke(font.getSize() * 0.05f);
-
-        onFactoryChange();
 
         ProjectorPreferences.setProjectionLabelFontName(font.getFamily());
         ProjectorPreferences.setProjectionLabelFontStyle(font.getStyle());
@@ -129,6 +126,9 @@ public class ProjectionLabel implements Projectable {
 
             // get the shape object
             Shape textShape = glyphVector.getOutline();
+
+            g.setColor(Color.black);
+            g.draw(textShape);
 
             g.setColor(Color.white);
             g.fill(textShape);

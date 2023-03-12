@@ -6,60 +6,11 @@
 #include "debug.h"
 #include "render-text-outline-shader.h"
 
-static const GLchar* VERTEX_SHADER_SRC[1] =  {
- "\n"
- "        attribute vec4 in_Position;\n"
- "        attribute vec2 in_Uv;\n"
- "        \n"
- "        varying vec2 uv_Center;\n"
- "        \n"
- "        void main(void) {\n"
- "            gl_Position = in_Position;\n"
- "            uv_Center = in_Uv;\n"
- "        }\n"
- };
-
-static GLint VERTEX_SHADER_SRC_LEN = 0;
-
-static const GLchar* FRAGMENT_SHADER_SRC[1] = {
-"\n"
-"varying vec2 uv_Center;\n"
-"\n"
-"uniform sampler2D image;\n"
-"uniform vec2 pixelunit;"
-"\n"
-"void main(void) {\n"
-"   vec2 uvLeft    = vec2(uv_Center.x - pixelunit.x, uv_Center.y);\n"
-"   vec2 uvTop     = vec2(uv_Center.x, uv_Center.y - pixelunit.y);\n"
-"   vec2 uvTopLeft = uv_Center - pixelunit;\n"
-"\n"
-"   vec4 pixel        = texture2D(image, uv_Center);\n"
-"   vec4 pixelLeft    = texture2D(image, uvLeft);\n"
-"   vec4 pixelTop     = texture2D(image, uvTop);\n"
-"   vec4 pixelTopLeft = texture2D(image, uvTopLeft);\n"
-"\n"
-"   vec3 dT  = abs(pixel.rgb - pixelTop.rgb);\n"
-"   vec3 dL  = abs(pixel.rgb - pixelLeft.rgb);\n"
-"   vec3 dTL = abs(pixel.rgb - pixelTopLeft.rgb);\n"
-"\n"
-"   vec3 delta = dT;\n"
-"   delta = max(delta, dL);\n"
-"   delta = max(delta, dTL);\n"
-"   delta = 1.0 - delta;\n"
-"\n"
-"   vec4 outline = vec4(delta.r, pixelLeft.r, pixelunit.x * 30.0, 1.0);\n"
-"\n"
-"   gl_FragColor = outline;\n"
-"}\n"
-};
-
-static GLint FRAGMENT_SHADER_SRC_LEN = 0;
-
 static GLuint program;
 static GLuint vertexshader;
 static GLuint fragmentshader;
 static GLuint textureuniform;
-static GLuint pixel_unit_uniform;
+static GLuint texture_size_uniform;
 
 static const GLfloat RENDER_TEXT_OUTLINE_UV[8] = {
     0.0, 1.0,
@@ -68,14 +19,11 @@ static const GLfloat RENDER_TEXT_OUTLINE_UV[8] = {
     1.0, 1.0
 };
 
-void render_text_outline_shader_initialize(GLdouble width, GLdouble height) {
-    VERTEX_SHADER_SRC_LEN = strlen(VERTEX_SHADER_SRC[0]);
-    FRAGMENT_SHADER_SRC_LEN = strlen(FRAGMENT_SHADER_SRC[0]);
-
+void render_text_outline_shader_initialize(int in_width, int in_height) {
     program = glCreateProgram();
 
-    vertexshader = loadShader(VERTEX_SHADER_SRC, &VERTEX_SHADER_SRC_LEN, GL_VERTEX_SHADER, "Outline Vertex Shader");
-    fragmentshader = loadShader(FRAGMENT_SHADER_SRC, &FRAGMENT_SHADER_SRC_LEN, GL_FRAGMENT_SHADER, "Outline Fragment Shader");
+    vertexshader = loadShader(GL_VERTEX_SHADER, "bicubic-filter.vertex.shader");
+    fragmentshader = loadShader(GL_FRAGMENT_SHADER, "bicubic-filter.fragment.shader");
 
     glAttachShader(program, vertexshader);
     glAttachShader(program, fragmentshader);
@@ -86,12 +34,12 @@ void render_text_outline_shader_initialize(GLdouble width, GLdouble height) {
     glLinkProgram(program);
     glValidateProgram(program);
 
-    pixel_unit_uniform = glGetUniformLocation(program, "pixelunit");
+    glUseProgram(program);
+
     textureuniform = glGetUniformLocation(program, "image");
+    texture_size_uniform = glGetUniformLocation(program, "inTexSize");
 
-    log_debug("%f %f\n", width, height);
-
-    glUniform2d(pixel_unit_uniform, (10.0d / width), (10.0d / height));
+    glProgramUniform2f(program, texture_size_uniform, (GLfloat)in_width, (GLfloat)in_height);
 
     glUseProgram(0);
 }
@@ -166,6 +114,7 @@ void render_text_outline_shader_start(render_layer *render) {
 
 void render_text_outline_shader_render(render_layer *render) {
     glUseProgram(program);
+
     glUniform1i(textureuniform, 0);
 
     glBindVertexArray(render->outline_vertex_array);

@@ -37,33 +37,6 @@ static const GLfloat UV_VS_BLEND_MODE[4][8] = {
     },
 };
 
-static const GLchar* VERTEX_SHADER_SRC[1] =  {
- "\n"
- "        attribute vec4 in_Position;\n"
- "        attribute vec2 in_Uv;\n"
- "        \n"
- "        varying vec2 frag_Uv;\n"
- "        \n"
- "        void main(void) {\n"
- "            gl_Position = in_Position;\n"
- "            frag_Uv = in_Uv;\n"
- "        }\n"
- };
-
-static GLint VERTEX_SHADER_SRC_LEN = 0;
-
-static const GLchar* FRAGMENT_SHADER_SRC[1] = {
-"\n"
-"varying vec2 frag_Uv;\n"
-"\n"
-"void main(void) {\n"
-"    float alpha = frag_Uv.x + frag_Uv.y;\n"
-"    gl_FragColor = vec4(0.0, 0.0, 0.0, alpha * alpha);\n"
-"}"
-};
-
-static GLint FRAGMENT_SHADER_SRC_LEN = 0;
-
 void vs_blend_load_coordinates(config_bounds *display_bounds, config_virtual_screen *virtual_screen, config_blend *config, vs_blend_vertex *data) {
     GLuint vertexarray;
     glGenVertexArrays(1, &vertexarray);
@@ -140,11 +113,8 @@ void vs_blend_load_coordinates(config_bounds *display_bounds, config_virtual_scr
 }
 
 void vs_blend_setup_shaders(vs_blend *data) {
-    VERTEX_SHADER_SRC_LEN = strlen(VERTEX_SHADER_SRC[0]);
-    FRAGMENT_SHADER_SRC_LEN = strlen(FRAGMENT_SHADER_SRC[0]);
-
-    data->vertexshader = loadShader(VERTEX_SHADER_SRC, &VERTEX_SHADER_SRC_LEN, GL_VERTEX_SHADER, "Blend Vertex Shader");
-    data->fragmentshader = loadShader(FRAGMENT_SHADER_SRC, &FRAGMENT_SHADER_SRC_LEN, GL_FRAGMENT_SHADER, "Blend Fragment Shader");
+    data->vertexshader = loadShader(GL_VERTEX_SHADER, "blend.vertex.shader");
+    data->fragmentshader = loadShader(GL_FRAGMENT_SHADER, "blend.fragment.shader");
 
     data->program = glCreateProgram();
     glAttachShader(data->program, data->vertexshader);

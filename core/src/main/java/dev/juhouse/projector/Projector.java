@@ -15,7 +15,6 @@ import java.util.logging.Logger;
 import dev.juhouse.projector.forms.controllers.GraphicsDeviceHelper;
 import dev.juhouse.projector.forms.controllers.SceneManager;
 import dev.juhouse.projector.forms.controllers.WorkspaceController;
-import dev.juhouse.projector.other.RuntimeProperties;
 import dev.juhouse.projector.other.SQLiteJDBCDriverConnection;
 import dev.juhouse.projector.utils.ThemeFinder;
 import dev.juhouse.projector.utils.VlcPlayerFactory;
@@ -39,7 +38,6 @@ public class Projector extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        RuntimeProperties.init(args);
         launch(args);
     }
 

@@ -23,6 +23,16 @@ static projection_config *config;
     }\
 }
 
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_loadShader(JNIEnv *env, jobject _, jstring shader_name, jstring shader_data) {
+    char *name = (char*) (*env)->GetStringUTFChars(env, shader_name, 0);
+    char *data = (char*) (*env)->GetStringUTFChars(env, shader_data, 0);
+
+    add_shader_data(name, data);
+
+    (*env)->ReleaseStringUTFChars(env, shader_name, name);
+    (*env)->ReleaseStringUTFChars(env, shader_data, data);
+}
+
 void glfwIntErrorCallback(GLint _, const GLchar *error_string) {
     log_debug("Catch GLFW error: %s\n", error_string);
 }

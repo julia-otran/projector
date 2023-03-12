@@ -1,8 +1,39 @@
 package dev.juhouse.projector.projection2;
 
+import org.apache.commons.io.IOUtils;
+
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 public class Bridge {
+    private static String[] getShaderNames() {
+        return new String[] {
+                "bicubic-filter.fragment.shader",
+                "bicubic-filter.vertex.shader",
+                "blend.fragment.shader",
+                "blend.vertex.shader",
+                "color-corrector.fragment.shader",
+                "color-corrector.vertex.shader",
+        };
+    }
+
+    private void loadShaders() {
+        for (String shaderName : getShaderNames()) {
+            try {
+                this.loadShader(shaderName, IOUtils.resourceToString("/shaders/" + shaderName, StandardCharsets.UTF_8));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public Bridge() {
+        loadShaders();
+    }
+
+    public native void loadShader(String name, String data);
+
     public native void initialize();
 
     public native void shutdown();
