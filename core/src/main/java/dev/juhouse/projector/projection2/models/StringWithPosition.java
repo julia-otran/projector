@@ -5,22 +5,8 @@
  */
 package dev.juhouse.projector.projection2.models;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
 /**
- *
  * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
-@Data
-@AllArgsConstructor
-public class StringWithPosition {
-    private final int x;
-    private final int y;
-
-    private final int w;
-
-    private final int h;
-
-    private final String text;
+public record StringWithPosition(int x, int y, int w, int h, String text) {
 }

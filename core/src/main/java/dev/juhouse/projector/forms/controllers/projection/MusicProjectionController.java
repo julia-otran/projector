@@ -7,6 +7,7 @@ package dev.juhouse.projector.forms.controllers.projection;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -243,7 +244,7 @@ public class MusicProjectionController extends ProjectionController {
                     markedPosition = null;
                 }
 
-                currentPhraseNumber = text.getSourcePhraseNumber();
+                currentPhraseNumber = text.sourcePhraseNumber();
                 projecting = true;
                 projectionManager.setText(text);
                 playTheme();
@@ -320,7 +321,7 @@ public class MusicProjectionController extends ProjectionController {
         for (int i = 0; i < lst.size(); i++) {
             wt = lst.get(i);
 
-            if (oldPhraseNumber != null && oldPhraseNumber.equals(wt.getSourcePhraseNumber()) && wrappedTextFirstIndex == null) {
+            if (oldPhraseNumber != null && oldPhraseNumber.equals(wt.sourcePhraseNumber()) && wrappedTextFirstIndex == null) {
                 wrappedTextFirstIndex = i;
             }
 
@@ -471,7 +472,7 @@ public class MusicProjectionController extends ProjectionController {
     public static class SelectionText {
         public SelectionText(WrappedText text) {
             this.text = text;
-            this.lines = FXCollections.observableArrayList(text.getLines());
+            this.lines = FXCollections.observableArrayList(text.renderLines().values().stream().findFirst().orElse(Collections.emptyList()));
             this.selected = new SimpleBooleanProperty(false);
             this.firstLine = new SimpleBooleanProperty(false);
         }

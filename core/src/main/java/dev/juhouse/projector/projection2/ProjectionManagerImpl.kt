@@ -27,6 +27,7 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
 
     override fun init() {
         projectablesList.forEach { it.init() }
+        projectablesList.forEach { it.rebuild() }
     }
 
     override fun finish() {

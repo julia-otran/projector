@@ -16,10 +16,10 @@ class WindowManager(private val settingsService: SettingsService) : CanvasDelega
 
     fun startEngine() {
         if (!running) {
-            running = true
             bridge.initialize()
             configsObserver.start()
             manager.init()
+            running = true
         }
     }
 
@@ -64,7 +64,11 @@ class WindowManager(private val settingsService: SettingsService) : CanvasDelega
     override fun updateConfigs(filePath: String?) {
         preview.stop()
         bridge.loadConfig(filePath)
-        manager.rebuild()
+
+        if (running) {
+            manager.rebuild()
+        }
+
         preview.start()
     }
 }

@@ -5,33 +5,19 @@
  */
 package dev.juhouse.projector.projection2.text;
 
-import java.awt.FontMetrics;
+import lombok.AllArgsConstructor;
+
+import java.util.List;
 
 /**
  *
  * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
+@AllArgsConstructor
 public class WrapperFactory {
-
-    private final int maxWidth;
-    private final int maxHeight;
-    private final FontMetrics fontMetrics;
-
-    public WrapperFactory(int maxWidth, int maxHeight, FontMetrics fontMetrics) {
-        this.maxWidth = maxWidth;
-        this.maxHeight = maxHeight;
-        this.fontMetrics = fontMetrics;
-    }
+    private final List<TextWrapperMetrics> metrics;
 
     public TextWrapper getTextWrapper(boolean multiPhrases) {
-        if (fontMetrics == null || maxWidth <= 0 || maxHeight <= 0) {
-            return new NoTextWrapper();
-        }
-
-        if (multiPhrases) {
-            return new MultilineTextWrapper(fontMetrics, maxWidth, maxHeight);
-        }
-
-        return new SingleLineTextWrapper(fontMetrics, maxWidth, maxHeight);
+        return new SingleLineTextWrapper(metrics);
     }
 }

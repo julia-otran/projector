@@ -5,42 +5,32 @@
  */
 package dev.juhouse.projector.projection2.text;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
 
 /**
- *
  * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
-public class WrappedText {
-    @Getter
-    private final int sourcePhraseNumber;
-    private final List<String> lines;
-
-    WrappedText(List<String> lines, int sourcePhraseNumber) {
-        this.sourcePhraseNumber = sourcePhraseNumber;
-        this.lines = Collections.unmodifiableList(lines);
-    }
-
+public record WrappedText(@Getter Map<Integer, List<String>> renderLines, @Getter int sourcePhraseNumber) {
     public static WrappedText blankText() {
-        return new WrappedText(Collections.singletonList(" "), 0);
-    }
-
-    public List<String> getLines() {
-        return lines;
+        return new WrappedText(new HashMap<>(), 0);
     }
 
     public boolean isEmpty() {
-        if (lines.size() == 1) {
-            return lines.get(0).trim().isEmpty();
+        if (renderLines.isEmpty()) {
+            return true;
         }
 
-        return lines.isEmpty();
+        return renderLines.values().stream().map(l -> l.isEmpty() || l.get(0).isEmpty()).allMatch(Predicate.isEqual(true));
     }
 
     public String getJoinedLines() {
-        return String.join(" ", lines);
+        return renderLines.values().stream().findAny().map(lines -> String.join(" ", lines)).orElse("");
     }
 }
