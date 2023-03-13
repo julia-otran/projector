@@ -31,7 +31,9 @@ import javafx.stage.Stage;
  *
  * @author 15096134
  */
-public class Projector extends Application {
+public class Projector extends Application implements Runnable {
+    private GraphicsDeviceHelper graphicsHelper;
+
     private WorkspaceController controller;
 
     /**
@@ -40,13 +42,24 @@ public class Projector extends Application {
     public static void main(String[] args) {
         launch(args);
     }
+    @Override
+    public void run() {
+        ThemeFinder.loadThemes();
+
+        Platform.runLater(() -> {
+            VlcPlayerFactory.init();
+
+            graphicsHelper = new GraphicsDeviceHelper();
+            graphicsHelper.start();
+
+            controller.init(graphicsHelper);
+        });
+    }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         SQLiteJDBCDriverConnection.connect();
         SQLiteJDBCDriverConnection.migrate();
-
-        Platform.runLater(() -> Thread.currentThread().setPriority(Thread.MIN_PRIORITY));
 
         primaryStage.setTitle("Projector");
         primaryStage.setMaxWidth(Double.MAX_VALUE);
@@ -102,14 +115,6 @@ public class Projector extends Application {
             Platform.runLater(() -> System.exit(0));
         });
 
-        ThemeFinder.loadThemes();
-
-        VlcPlayerFactory.init();
-
-        final GraphicsDeviceHelper graphicsHelper = new GraphicsDeviceHelper();
-
-        graphicsHelper.init();
-
-        controller.init(graphicsHelper);
+        new Thread(this).start();
     }
 }

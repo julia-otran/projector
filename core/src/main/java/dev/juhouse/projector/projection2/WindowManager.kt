@@ -16,6 +16,7 @@ class WindowManager(private val settingsService: SettingsService) : CanvasDelega
 
     fun startEngine() {
         if (!running) {
+            bridge.loadShaders()
             bridge.initialize()
             configsObserver.start()
             manager.init()

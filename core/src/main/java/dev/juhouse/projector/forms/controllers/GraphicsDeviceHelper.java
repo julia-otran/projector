@@ -27,9 +27,7 @@ public class GraphicsDeviceHelper {
         return windowManager.getManager();
     }
 
-    public void init() {
-        reloadDevices();
-    }
+    public void start() { windowManager.startEngine(); }
 
     void stop() {
         windowManager.stopEngine();

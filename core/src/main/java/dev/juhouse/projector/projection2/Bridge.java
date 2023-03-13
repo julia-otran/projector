@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 public class Bridge {
+    private boolean shadersLoaded = false;
     private static String[] getShaderNames() {
         return new String[] {
                 "blend.fragment.shader",
@@ -17,7 +18,13 @@ public class Bridge {
         };
     }
 
-    private void loadShaders() {
+    public void loadShaders() {
+        if (shadersLoaded) {
+            return;
+        }
+
+        shadersLoaded = true;
+
         for (String shaderName : getShaderNames()) {
             try {
                 this.loadShader(shaderName, IOUtils.resourceToString("/shaders/" + shaderName, StandardCharsets.UTF_8));
@@ -27,11 +34,7 @@ public class Bridge {
         }
     }
 
-    public Bridge() {
-        loadShaders();
-    }
-
-    public native void loadShader(String name, String data);
+    private native void loadShader(String name, String data);
 
     public native void initialize();
 
