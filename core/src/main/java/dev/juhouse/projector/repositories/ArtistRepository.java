@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -89,5 +90,33 @@ public class ArtistRepository {
 
             throw new SQLException();
         }
+    }
+
+    public List<Artist> search(String term) {
+        List<Artist> result = new ArrayList<>();
+
+        try {
+
+            try (PreparedStatement stmt = SQLiteJDBCDriverConnection
+                    .getConn()
+                    .prepareStatement("SELECT id, name FROM artists WHERE name LIKE ?;")) {
+
+                stmt.setString(1, "%" + term + "%");
+
+                ResultSet rs = stmt.executeQuery();
+                Artist a;
+
+                while (rs.next()) {
+                    a = new Artist();
+                    a.getIdProperty().setValue(rs.getInt("id"));
+                    a.getNameProperty().setValue(rs.getString("name"));
+                    result.add(a);
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ArtistRepository.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return result;
     }
 }

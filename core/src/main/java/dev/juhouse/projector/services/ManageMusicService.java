@@ -274,6 +274,12 @@ public class ManageMusicService {
                 .map(a -> a.getNameProperty().getValue())
                 .collect(Collectors.toList());
     }
+
+    public List<String> searchArtists(String term) {
+        return artistRepo.search(term).stream()
+                .map(a -> a.getNameProperty().getValue())
+                .collect(Collectors.toList());
+    }
     
     public List<ListMusicDTO> listByTermIfPresentWithLimit(String term) throws PersistenceException {
         List<ListMusicDTO> musics;

@@ -7,6 +7,7 @@ package dev.juhouse.projector.forms.controllers;
  */
 
 import java.net.URL;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -14,6 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import dev.juhouse.projector.dtos.ImportingMusicDTO;
+import dev.juhouse.projector.models.Artist;
 import dev.juhouse.projector.models.Music;
 import dev.juhouse.projector.models.MusicTheme;
 import dev.juhouse.projector.services.ManageMusicService;
@@ -26,6 +28,8 @@ import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
+import org.controlsfx.control.textfield.AutoCompletionBinding;
+import org.controlsfx.control.textfield.TextFields;
 
 /**
  * FXML Controller class
@@ -42,7 +46,7 @@ public class MusicFormController implements Initializable {
     private TextField titleTextField;
     
     @FXML
-    private ComboBox<String> artistCombo;
+    private TextField artistTextField;
 
     @FXML
     private ComboBox<MusicTheme> themeCombo;
@@ -144,7 +148,7 @@ public class MusicFormController implements Initializable {
     
     private void save(boolean addToList) {
         String name = titleTextField.getText();
-        String artist = artistCombo.getSelectionModel().getSelectedItem();
+        String artist = artistTextField.getText();
         String music = musicTextArea.getText();
 
         MusicTheme theme = themeCombo.getSelectionModel().getSelectedItem();
@@ -222,17 +226,7 @@ public class MusicFormController implements Initializable {
     }
 
     private void populateArtists() {
-        ObservableList<String> list = FXCollections.observableArrayList(musicService.listArtists());
-        
-        if (creatingArtist != null) {
-            if (!list.contains(creatingArtist)) {
-                list.add(0, creatingArtist);
-            }
-            artistCombo.setItems(list);
-            artistCombo.getSelectionModel().select(creatingArtist);
-        } else {
-            artistCombo.setItems(list);
-        }
+        TextFields.bindAutoCompletion(artistTextField, suggestionRequest -> musicService.searchArtists(suggestionRequest.getUserText()));
     }
 
     private void populateThemes() {
@@ -245,7 +239,7 @@ public class MusicFormController implements Initializable {
         editingMusic = musicService.openMusic(id);
         
         if (editingMusic.getArtist() != null) {
-            artistCombo.getSelectionModel().select(editingMusic.getArtist().getNameProperty().getValue());
+            artistTextField.setText(editingMusic.getArtist().getNameProperty().getValue());
         }
         
         titleTextField.setText(editingMusic.getName());
