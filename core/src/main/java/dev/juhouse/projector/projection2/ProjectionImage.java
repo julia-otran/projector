@@ -6,6 +6,7 @@
 package dev.juhouse.projector.projection2;
 
 import dev.juhouse.projector.projection2.models.BackgroundProvide;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.scene.image.Image;
 import javafx.scene.image.WritablePixelFormat;
 
@@ -21,12 +22,14 @@ public class ProjectionImage implements Projectable {
 
     protected final CanvasDelegate canvasDelegate;
 
+    private final ReadOnlyObjectWrapper<BridgeRenderFlag> renderFlag;
     private boolean cropBackground;
 
     private boolean render;
     private BackgroundProvide model;
 
     public ProjectionImage(CanvasDelegate canvasDelegate) {
+        this.renderFlag = new ReadOnlyObjectWrapper<>(new BridgeRenderFlag(canvasDelegate));
         this.canvasDelegate = canvasDelegate;
     }
 
@@ -42,7 +45,7 @@ public class ProjectionImage implements Projectable {
 
     @Override
     public void rebuild() {
-
+        renderFlag.get().applyDefault(BridgeRender::getEnableRenderImage);
     }
 
     @Override
@@ -76,7 +79,11 @@ public class ProjectionImage implements Projectable {
     }
 
     protected void setImageAsset(int[] buffer, int width, int height, boolean crop) {
-        canvasDelegate.getBridge().setImageAsset(buffer, width, height, crop);
+        if (buffer != null) {
+            canvasDelegate.getBridge().setImageAsset(buffer, width, height, crop, renderFlag.get().getFlagValue());
+        } else {
+            canvasDelegate.getBridge().setImageAsset(null, width, height, crop, BridgeRenderFlag.NO_RENDER);
+        }
     }
 
     private void update() {

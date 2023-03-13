@@ -51,11 +51,11 @@ public class Bridge {
 
     public native void updateVideoBuffer();
 
-    public native void setImageAsset(int[] data, int width, int height, boolean crop);
+    public native void setImageAsset(int[] data, int width, int height, boolean crop, int renderFlag);
 
     public native void setWebViewBuffer(ByteBuffer buffer, int width, int height);
 
-    public native void setRenderWebViewBuffer(boolean render);
+    public native void setRenderWebViewBuffer(int renderFlag);
 
     public native void downloadPreviewData(ByteBuffer buffer);
 

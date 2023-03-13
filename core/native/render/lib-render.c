@@ -225,13 +225,13 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_updateVideo
 
 // Image render methods
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setImageAsset
-  (JNIEnv *env, jobject _, jintArray arr, jint width, jint height, jboolean crop) {
+  (JNIEnv *env, jobject _, jintArray arr, jint width, jint height, jboolean crop, jint renderFlag) {
     if (arr) {
         jint *data = (*env)->GetIntArrayElements(env, arr, 0);
-        render_image_set_image((void*) data, width, height, crop);
+        render_image_set_image((void*) data, width, height, crop, renderFlag);
         (*env)->ReleaseIntArrayElements(env, arr, data, 0);
     } else {
-        render_image_set_image(NULL, 0, 0, 0);
+        render_image_set_image(NULL, 0, 0, 0, 0);
     }
   }
 
@@ -245,7 +245,7 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setWebViewB
     render_web_view_src_buffer_update();
 }
 
-JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setRenderWebViewBuffer(JNIEnv *env, jobject _, jboolean render) {
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setRenderWebViewBuffer(JNIEnv *env, jobject _, jint render) {
     render_web_view_src_set_render(render);
 }
 

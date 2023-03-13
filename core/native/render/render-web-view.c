@@ -19,6 +19,7 @@ static int src_update_buffer;
 
 static int dst_width = 0;
 static int dst_height = 0;
+static int dst_render = 0;
 
 static mtx_t thread_mutex;
 static cnd_t thread_cond;
@@ -139,6 +140,7 @@ void render_web_view_update_assets() {
 
     if (src_render) {
         if (texture_loaded) {
+            dst_render = src_render;
             should_clear = 1;
             render_fader_fade_in(fader_instance, 1, RENDER_FADER_DEFAULT_TIME_MS);
         }
@@ -153,6 +155,10 @@ void render_web_view_update_assets() {
 
 void render_web_view_render(render_layer *layer) {
     if (dst_width <= 0 || dst_height <= 0) {
+        return;
+    }
+
+    if (!(dst_render & (1 << layer->config.render_id))) {
         return;
     }
 

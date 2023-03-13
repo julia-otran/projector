@@ -18,6 +18,7 @@ static mtx_t thread_mutex;
 static void *share_pixel_data;
 static int pixel_data_changed;
 static int clear_image;
+static int render_flag;
 
 static render_fader_instance *fader_instance;
 static render_pixel_unpack_buffer_instance *buffer_instance;
@@ -30,10 +31,14 @@ void render_image_initialize() {
     initialized = 1;
 }
 
-void render_image_set_image(void *pixel_data, int width_in, int height_in, int crop_in) {
+void render_image_set_image(void *pixel_data, int width_in, int height_in, int crop_in, int render_flag_in) {
     mtx_lock(&thread_mutex);
 
     crop = crop_in;
+
+    if (render_flag_in) {
+        render_flag = render_flag_in;
+    }
 
     if (pixel_data) {
         if (width != width_in || height != height_in) {
@@ -153,6 +158,10 @@ void render_image_update_assets() {
 
 void render_image_render(render_layer *layer) {
     if (dst_width <= 0 || dst_height <= 0) {
+        return;
+    }
+
+    if (!(render_flag & (1 << layer->config.render_id))) {
         return;
     }
 

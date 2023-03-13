@@ -20,6 +20,7 @@ static int src_update_buffer;
 
 static int dst_width = 0;
 static int dst_height = 0;
+static int dst_render = 0;
 
 static mtx_t thread_mutex;
 static cnd_t thread_cond;
@@ -144,6 +145,8 @@ void render_video_update_assets() {
     render_pixel_unpack_buffer_enqueue_for_write(buffer_instance, buffer);
 
     if (src_render) {
+        dst_render = src_render;
+
         if (texture_loaded) {
             should_clear = 1;
             render_fader_fade_in(fader_instance, 1, RENDER_FADER_DEFAULT_TIME_MS);
@@ -162,7 +165,7 @@ void render_video_render(render_layer *layer) {
         return;
     }
 
-    if (!(src_render & (1 << layer->config.render_id))) {
+    if (!(dst_render & (1 << layer->config.render_id))) {
         return;
     }
 

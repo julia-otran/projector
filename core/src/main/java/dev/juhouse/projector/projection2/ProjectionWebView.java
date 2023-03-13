@@ -7,6 +7,7 @@ package dev.juhouse.projector.projection2;
 
 import java.nio.ByteBuffer;
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.scene.image.PixelFormat;
 import javafx.scene.image.WritableImage;
 import javafx.scene.web.WebView;
@@ -18,7 +19,9 @@ import javafx.scene.web.WebView;
 public class ProjectionWebView implements Projectable, Runnable {
     private final CanvasDelegate delegate;
     private WebView webView;
-    
+
+    private final ReadOnlyObjectWrapper<BridgeRenderFlag> renderFlag;
+
     private boolean render;
 
     private boolean snapshotRendered;
@@ -35,6 +38,7 @@ public class ProjectionWebView implements Projectable, Runnable {
     
     public ProjectionWebView(CanvasDelegate delegate) {
         this.delegate = delegate;
+        this.renderFlag = new ReadOnlyObjectWrapper<>(new BridgeRenderFlag(delegate));
     }
 
     @Override
@@ -42,8 +46,6 @@ public class ProjectionWebView implements Projectable, Runnable {
         if (webView == null) {
             webView = new WebView();
         }
-
-        rebuild();
     }
 
     @Override
@@ -53,6 +55,8 @@ public class ProjectionWebView implements Projectable, Runnable {
 
     @Override
     public void rebuild() {
+        renderFlag.get().applyDefault(BridgeRender::getEnableRenderVideo);
+
         boolean oldRender = render;
 
         int width = delegate.getMainWidth();
@@ -91,8 +95,12 @@ public class ProjectionWebView implements Projectable, Runnable {
             }
         }
 
-        delegate.getBridge().setRenderWebViewBuffer(render);
-    }   
+        if (render) {
+            delegate.getBridge().setRenderWebViewBuffer(renderFlag.get().getFlagValue());
+        } else {
+            delegate.getBridge().setRenderWebViewBuffer(BridgeRenderFlag.NO_RENDER);
+        }
+    }
 
     public WebView getWebView() {
         return webView;
