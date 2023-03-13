@@ -10,14 +10,14 @@ import static dev.juhouse.projector.utils.ResourceManager.unpackResource;
 public class Main {
 
     private static void loadNativeLib() {
-        File glfwLib = unpackResource("/bin/glfw3.dll", "glfw3.dll");
+        File glfwLib = unpackResource("/glfw3.dll", "glfw3.dll");
         System.load(glfwLib.toString());
 
-        unpackResource("/bin/LibRender.exp", "LibRender.exp");
-        unpackResource("/bin/LibRender.pdb", "LibRender.pdb");
-        unpackResource("/bin/LibRender.lib", "LibRender.lib");
+        unpackResource("/LibRender.exp", "LibRender.exp");
+        unpackResource("/LibRender.pdb", "LibRender.pdb");
+        unpackResource("/LibRender.lib", "LibRender.lib");
 
-        File libExportFile = unpackResource("/bin/LibRender.dll", "LibRender.dll");
+        File libExportFile = unpackResource("/LibRender.dll", "LibRender.dll");
         System.load(libExportFile.toString());
     }
 

@@ -81,6 +81,21 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>
+                    native/LibRender/x64/Debug
+                </directory>
+                <includes>
+                    <include>glfw3.dll</include>
+                    <include>LibRender.dll</include>
+                    <include>LibRender.exp</include>
+                    <include>LibRender.lib</include>
+                    <include>LibRender.map</include>
+                    <include>LibRender.pdb</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.openjfx</groupId>
