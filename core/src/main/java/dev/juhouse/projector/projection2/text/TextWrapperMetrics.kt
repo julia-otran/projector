@@ -34,7 +34,7 @@ data class TextWrapperMetrics(
     // This may occur with gigant font sizes.
     // TODO: Fix this workaround
     // Beware! zero lines may bugs lot of things!
-    private val maxLines: Int get() = (textAreaHeight / fontMetrics.height).coerceAtLeast(1)
+    private val maxLines: Int get() = (textAreaHeight / (fontMetrics.height + fontMetrics.leading + fontMetrics.descent)).coerceAtLeast(1)
 
     private fun isSeparator(c: Char): Boolean {
         return Character.isWhitespace(c) || c == ','
