@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import dev.juhouse.projector.projection2.ProjectionLabel;
 import dev.juhouse.projector.projection2.ProjectionManager;
 import dev.juhouse.projector.projection2.TextWrapperFactoryChangeListener;
 import dev.juhouse.projector.projection2.text.TextWrapper;
@@ -18,13 +19,14 @@ import dev.juhouse.projector.projection2.text.WrapperFactory;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Pane;
 
 /**
  * FXML Controller class
  *
  * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
-public class TextController extends ProjectionController implements TextWrapperFactoryChangeListener {
+public class TextController extends ProjectionController implements TextWrapperFactoryChangeListener, ProjectionBarControlCallbacks {
 
     /**
      * Initializes the controller class.
@@ -32,23 +34,25 @@ public class TextController extends ProjectionController implements TextWrapperF
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         projecting = false;
-        endProjectionButton.disableProperty().set(true);
     }    
     
     @FXML
-    private Button beginProjectionButton;
-    
-    @FXML
-    private Button endProjectionButton;
+    private Pane projectionControlPane;
+
+    private final ProjectionBarControl controlBar = new ProjectionBarControl();
     
     @FXML
     private TextField projectionText;
     
     private boolean projecting;
 
+    private ProjectionLabel projectable;
+
     @Override
     public void initWithProjectionManager(ProjectionManager projectionManager) {
         super.initWithProjectionManager(projectionManager);
+
+        projectable = projectionManager.createLabel();
 
         projectionText.textProperty().addListener((observable, oldValue, newValue) -> {
             int sz = newValue != null ? newValue.length() : 0;
@@ -65,25 +69,11 @@ public class TextController extends ProjectionController implements TextWrapperF
         getProjectionManager().addTextWrapperChangeListener(this);
 
         getObserver().getProperty("TEXT").ifPresent(s -> projectionText.textProperty().setValue(s));
-    }
-    
-    @FXML
-    public void onBeginProjection() {
-        printText();
-        beginProjectionButton.disableProperty().set(true);
-        endProjectionButton.disableProperty().set(false);
-        projectionText.disableProperty().set(true);
-        
-        projecting = true;
-    }
-    
-    @FXML
-    public void onEndProjection() {
-        projectionText.disableProperty().set(false);
-        beginProjectionButton.disableProperty().set(false);
-        endProjectionButton.disableProperty().set(true);
-        getProjectionManager().setText(null);
-        projecting = false;
+
+        controlBar.setProjectable(projectable);
+        controlBar.setCallback(this);
+        controlBar.setManager(projectionManager);
+        controlBar.attach(projectionControlPane);
     }
 
     @Override
@@ -103,18 +93,35 @@ public class TextController extends ProjectionController implements TextWrapperF
         }
         
         // TODO: Warn a error. Too much text to fit on screen if text.size() > 1
-        getProjectionManager().setText(text.get(0));
+        projectable.setText(text.get(0));
     }
 
     @Override
     public void onEscapeKeyPressed() {
-        if (!endProjectionButton.isDisabled()) {
-            endProjectionButton.fire();
+        if (controlBar.getProjecting()) {
+            onProjectionEnd();
         }
     }
 
     @Override
     public void stop() {
         onEscapeKeyPressed();
+        projectionManager.stop(projectable);
+    }
+
+    @Override
+    public void onProjectionBegin() {
+        projectionManager.setProjectable(projectable);
+        printText();
+        projectionText.disableProperty().set(true);
+        projecting = true;
+    }
+
+    @Override
+    public void onProjectionEnd() {
+        projectionManager.setProjectable(null);
+        projectionText.disableProperty().set(false);
+        projectable.setText(null);
+        projecting = false;
     }
 }

@@ -20,12 +20,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.input.DragEvent;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import uk.co.caprica.vlcj.media.MediaRef;
 import uk.co.caprica.vlcj.media.TrackType;
@@ -37,7 +32,7 @@ import uk.co.caprica.vlcj.player.base.MediaPlayerEventListener;
  *
  * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
-public class PlayerController extends ProjectionController implements FileDragDropService.Client, MediaPlayerEventListener {
+public class PlayerController extends ProjectionController implements FileDragDropService.Client, MediaPlayerEventListener, ProjectionBarControlCallbacks {
 
     private FileDragDropService dragDropService;
 
@@ -46,7 +41,6 @@ public class PlayerController extends ProjectionController implements FileDragDr
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        endProjectionButton.disableProperty().set(true);
     }
 
     private ProjectionPlayer projectionPlayer;
@@ -65,10 +59,9 @@ public class PlayerController extends ProjectionController implements FileDragDr
 
     // Controls
     @FXML
-    private Button beginProjectionButton;
+    private Pane projectionControlPane;
 
-    @FXML
-    private Button endProjectionButton;
+    private final ProjectionBarControl controlBar = new ProjectionBarControl();
 
     @FXML
     private BorderPane playerContainer;
@@ -103,16 +96,16 @@ public class PlayerController extends ProjectionController implements FileDragDr
     @FXML
     private CheckBox fullScreenCheckBox;
 
-    @FXML
-    public void onBeginProjection() {
+    @Override
+    public void onProjectionBegin() {
         getProjectionManager().setProjectable(projectionPlayer);
 
         withSoundButton.fire();
         withSoundButton.setSelected(true);
     }
 
-    @FXML
-    public void onEndProjection() {
+    @Override
+    public void onProjectionEnd() {
         getProjectionManager().setProjectable(null);
 
         withoutSoundButton.fire();
@@ -163,23 +156,18 @@ public class PlayerController extends ProjectionController implements FileDragDr
             }
         }
 
-        getProjectionManager().projectableProperty().addListener((observableValue, oldValue, newValue) -> {
-            if (newValue == projectionPlayer) {
-                beginProjectionButton.disableProperty().set(true);
-                endProjectionButton.disableProperty().set(false);
-            } else {
-                beginProjectionButton.disableProperty().set(false);
-                endProjectionButton.disableProperty().set(true);
-            }
-        });
-
         fullScreenCheckBox.setSelected(projectionPlayer.isCropVideo());
+
+        controlBar.setProjectable(projectionPlayer);
+        controlBar.setCallback(this);
+        controlBar.setManager(projectionManager);
+        controlBar.attach(projectionControlPane);
     }
 
     @Override
     public void onEscapeKeyPressed() {
-        if (!endProjectionButton.isDisabled()) {
-            endProjectionButton.fire();
+        if (controlBar.getProjecting()) {
+            onProjectionEnd();
         }
     }
 

@@ -9,6 +9,8 @@ import java.nio.ByteBuffer;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.image.PixelFormat;
 import javafx.scene.image.WritableImage;
 import javafx.scene.web.WebView;
@@ -47,6 +49,8 @@ public class ProjectionWebView implements Projectable, Runnable {
         if (webView == null) {
             webView = new WebView();
         }
+
+        renderFlag.get().getFlagValueProperty().addListener((observableValue, number, t1) -> updateRenderFlag());
     }
 
     @Override
@@ -96,6 +100,10 @@ public class ProjectionWebView implements Projectable, Runnable {
             }
         }
 
+        updateRenderFlag();
+    }
+
+    private void updateRenderFlag() {
         if (render) {
             delegate.getBridge().setRenderWebViewBuffer(renderFlag.get().getFlagValue());
         } else {

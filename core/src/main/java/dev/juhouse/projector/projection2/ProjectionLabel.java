@@ -5,10 +5,9 @@ import java.util.*;
 import java.util.List;
 
 import dev.juhouse.projector.projection2.text.*;
-import dev.juhouse.projector.utils.FontCreatorUtil;
 import javafx.application.Platform;
-import dev.juhouse.projector.other.ProjectorPreferences;
 import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 
 /**
  *
@@ -22,18 +21,39 @@ public class ProjectionLabel implements Projectable {
     private BridgeRender[] bridgeRenders;
     private final Map<Integer, TextRenderer> textRenders;
 
+    private final ReadOnlyObjectWrapper<BridgeRenderFlag> renderFlagProperty = new ReadOnlyObjectWrapper<>();
+
+    private WrappedText currentText;
+
     public ProjectionLabel(CanvasDelegate canvasDelegate) {
+        renderFlagProperty.set(new BridgeRenderFlag(canvasDelegate));
+        renderFlagProperty.get().renderToAll();
+
         this.canvasDelegate = canvasDelegate;
         factoryChangeListeners = new ArrayList<>();
         textRenders = new HashMap<>();
 
-        canvasDelegate.getFontProperty().addListener((prop, oldValue, newValue) -> {
-            updateFont();
-        });
+        canvasDelegate.getFontProperty().addListener((prop, oldValue, newValue) -> updateFont());
     }
 
     @Override
     public void init() {
+        renderFlagProperty.get().getFlagValueProperty().addListener((observableValue, number, t1) -> {
+            boolean changed = false;
+
+            for (TextRenderer textRender : textRenders.values()) {
+                boolean enable = renderFlagProperty.get().isRenderEnabled(textRender.getBounds().getRenderId());
+
+                if (enable != textRender.getEnabled()) {
+                    textRender.setEnabled(enable);
+                    changed = true;
+                }
+            }
+
+            if (changed) {
+                doRender();
+            }
+        });
     }
 
     @Override
@@ -53,8 +73,14 @@ public class ProjectionLabel implements Projectable {
                     render.getTextAreaWidth(),
                     render.getTextAreaHeight());
 
-            this.textRenders.put(render.getRenderId(), new TextRenderer(bounds, getFontFor(render.getRenderId())));
+            TextRenderer textRender = new TextRenderer(bounds, getFontFor(render.getRenderId()));
+
+            textRender.setEnabled(renderFlagProperty.get().isRenderEnabled(render.getRenderId()));
+
+            this.textRenders.put(render.getRenderId(), textRender);
         }
+
+        doRender();
     }
 
     @Override
@@ -64,12 +90,13 @@ public class ProjectionLabel implements Projectable {
 
     @Override
     public ReadOnlyObjectProperty<BridgeRenderFlag> getRenderFlagProperty() {
-        return null;
+        return renderFlagProperty.getReadOnlyProperty();
     }
 
     private void updateFont() {
         this.textRenders.values().forEach(tr -> tr.setFont(getFontFor(tr.getBounds().getRenderId())));
         onFactoryChange();
+        doRender();
     }
 
     public Font getFontFor(int renderId) {
@@ -97,14 +124,19 @@ public class ProjectionLabel implements Projectable {
     }
 
     public void setText(WrappedText text) {
-        if (text == null || text.isEmpty()) {
+        currentText = text;
+        doRender();
+    }
+
+    private void doRender() {
+        if (currentText == null || currentText.isEmpty()) {
             canvasDelegate.getBridge().setTextData(null);
             return;
         }
 
         final BridgeTextData[] textData = new BridgeTextData[bridgeRenders.length];
 
-        text.renderLines().forEach((renderId, lines) -> textData[getRenderIndex(renderId)] = textRenders.get(renderId).renderText(lines));
+        currentText.renderLines().forEach((renderId, lines) -> textData[getRenderIndex(renderId)] = textRenders.get(renderId).renderText(lines));
 
         canvasDelegate.getBridge().setTextData(textData);
     }

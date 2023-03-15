@@ -34,6 +34,8 @@ public interface ProjectionManager {
 
     void addTextWrapperChangeListener(TextWrapperFactoryChangeListener wrapperChangeListener);
 
+    ProjectionLabel createLabel();
+
     ProjectionWebView createWebView();
 
     ProjectionImage createImage();

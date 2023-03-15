@@ -50,6 +50,18 @@ class ProjectionBarControl: VBox(), ProjectionManagerCallbacks {
             value?.addCallback(this)
         }
 
+    var canProject: Boolean = true
+        set(value) {
+            field = value
+
+            beginProjectionButton.disableProperty().value = value
+        }
+
+    val projecting: Boolean
+        get() {
+            return manager?.projectableProperty()?.value == projectable
+        }
+
     init {
         fillWidthProperty().value = true
 

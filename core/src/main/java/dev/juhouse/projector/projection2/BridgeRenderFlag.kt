@@ -1,15 +1,17 @@
 package dev.juhouse.projector.projection2
 
+import javafx.beans.property.ReadOnlyIntegerProperty
 import javafx.beans.property.ReadOnlyIntegerWrapper
 
 class BridgeRenderFlag(private val delegate: CanvasDelegate) {
     companion object {
         const val NO_RENDER = 0
+        const val RENDER_ALL = Int.MAX_VALUE
     }
 
     private val flagValueIntProperty = ReadOnlyIntegerWrapper(0)
 
-    val flagValueProperty = flagValueIntProperty.readOnlyProperty
+    val flagValueProperty: ReadOnlyIntegerProperty = flagValueIntProperty.readOnlyProperty
 
     val flagValue: Int get() { return flagValueIntProperty.value }
 
@@ -23,6 +25,10 @@ class BridgeRenderFlag(private val delegate: CanvasDelegate) {
 
     fun disableRenderId(renderId: Int) {
         flagValueIntProperty.set(flagValueIntProperty.get() and (1 shl renderId).inv())
+    }
+
+    fun renderToAll() {
+        flagValueIntProperty.set(RENDER_ALL)
     }
 
     fun applyDefault(configMapper: (config: BridgeRender) -> Boolean) {

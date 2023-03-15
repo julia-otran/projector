@@ -5,10 +5,8 @@
  */
 package dev.juhouse.projector.forms.controllers.projection;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URL;
-import java.nio.IntBuffer;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +19,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.image.WritablePixelFormat;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
@@ -33,33 +30,27 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
-import lombok.Setter;
 
 /**
  * FXML Controller class
  *
  * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
-public class ImageController extends ProjectionController implements Runnable {
+public class ImageController extends ProjectionController implements Runnable, ProjectionBarControlCallbacks {
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-
-        beginProjectionButton.disableProperty().set(true);
-        endProjectionButton.disableProperty().set(true);
         imageView.fitWidthProperty().bind(imagePane.widthProperty());
         imageView.fitHeightProperty().bind(imagePane.heightProperty());
     }
 
     @FXML
-    private Button beginProjectionButton;
+    private Pane projectionControlPane;
 
-    @FXML
-    private Button endProjectionButton;
+    private final ProjectionBarControl controlBar = new ProjectionBarControl();
 
     @FXML
     private Label dragDropLabel;
@@ -133,25 +124,13 @@ public class ImageController extends ProjectionController implements Runnable {
 
         loadOpenedImages();
 
-        getProjectionManager().projectableProperty().addListener((observableValue, oldValue, newValue) -> {
-            if (newValue == projectable) {
-                beginProjectionButton.disableProperty().set(true);
-                endProjectionButton.disableProperty().set(false);
-            } else {
-                beginProjectionButton.disableProperty().set(false);
-                endProjectionButton.disableProperty().set(true);
-            }
-        });
+        controlBar.setProjectable(this.projectable);
+        controlBar.setCallback(this);
+        controlBar.setManager(projectionManager);
+        controlBar.attach(projectionControlPane);
     }
 
-    @AllArgsConstructor
-    private static class ToAddImage {
-        @Getter
-        private final Image image;
-
-        @Getter
-        private final File file;
-    }
+    private record ToAddImage(@Getter Image image, @Getter File file) { }
 
     private final List<ToAddImage> toAdd = new ArrayList<>();
 
@@ -171,7 +150,7 @@ public class ImageController extends ProjectionController implements Runnable {
             }
 
             if (toAdd.size() > 0) {
-                imageView.setImage(toAdd.get(0).getImage());
+                imageView.setImage(toAdd.get(0).image());
                 dragDropLabel.setText(toAdd.size() + " arquivos a serem adicionados");
                 event.acceptTransferModes(TransferMode.LINK);
             }
@@ -193,21 +172,21 @@ public class ImageController extends ProjectionController implements Runnable {
     @FXML
     public void onDragDropped(DragEvent event) {
         for (ToAddImage adding : toAdd) {
-            if (adding.getImage().isError()) {
+            if (adding.image().isError()) {
                 System.out.println("Image errored");
-                System.out.println(adding.getImage().exceptionProperty().get().toString());
+                System.out.println(adding.image().exceptionProperty().get().toString());
                 continue;
             }
 
-            imagesList.getItems().add(adding.getImage());
+            imagesList.getItems().add(adding.image());
 
-            if (adding.getFile() != null) {
-                openedImages.add(adding.getFile());
+            if (adding.file() != null) {
+                openedImages.add(adding.file());
             }
         }
 
         if (imagesList.getItems().size() > 0) {
-            beginProjectionButton.setDisable(false);
+            controlBar.setCanProject(false);
         }
 
         saveOpenedImages();
@@ -251,7 +230,7 @@ public class ImageController extends ProjectionController implements Runnable {
         }
 
         if (imagesList.getItems().size() > 0) {
-            beginProjectionButton.setDisable(false);
+            controlBar.setCanProject(true);
         }
 
         setOriginal();
@@ -280,14 +259,14 @@ public class ImageController extends ProjectionController implements Runnable {
         }
     }
 
-    @FXML
-    public void onBeginProjection() {
+    @Override
+    public void onProjectionBegin() {
         getProjectionManager().setProjectable(projectable);
         start();
     }
 
-    @FXML
-    public void onEndProjection() {
+    @Override
+    public void onProjectionEnd() {
         getProjectionManager().setProjectable(null);
         stopRunning();
     }
@@ -347,8 +326,8 @@ public class ImageController extends ProjectionController implements Runnable {
 
     @Override
     public void onEscapeKeyPressed() {
-        if (!endProjectionButton.isDisabled()) {
-            endProjectionButton.fire();
+        if (controlBar.getProjecting()) {
+            onProjectionEnd();
         }
     }
 

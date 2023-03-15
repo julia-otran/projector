@@ -29,7 +29,7 @@ import javafx.scene.web.WebEngine;
  *
  * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
-public class BrowserController extends ProjectionController {
+public class BrowserController extends ProjectionController implements ProjectionBarControlCallbacks {
 
     public static final String URL_PROPERTY = "URL";
 
@@ -40,16 +40,15 @@ public class BrowserController extends ProjectionController {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        endProjectionButton.disableProperty().set(true);
+
     }
 
     private ProjectionWebView projectionWebView;
 
     @FXML
-    private Button beginProjectionButton;
+    private Pane proectionControlPane;
 
-    @FXML
-    private Button endProjectionButton;
+    private final ProjectionBarControl controlBar = new ProjectionBarControl();
 
     @FXML
     private TextField adddressTextField;
@@ -59,14 +58,13 @@ public class BrowserController extends ProjectionController {
 
     @FXML
     private ProgressBar browserProgressBar;
-
-    @FXML
-    public void onBeginProjection() {
+    @Override
+    public void onProjectionBegin() {
         getProjectionManager().setProjectable(projectionWebView);
     }
 
-    @FXML
-    public void onEndProjection() {
+    @Override
+    public void onProjectionEnd() {
         getProjectionManager().setProjectable(null);
     }
 
@@ -140,21 +138,16 @@ public class BrowserController extends ProjectionController {
 
         engine.load(url);
 
-        getProjectionManager().projectableProperty().addListener((observableValue, oldValue, newValue) -> {
-            if (newValue == projectionWebView) {
-                beginProjectionButton.disableProperty().set(true);
-                endProjectionButton.disableProperty().set(false);
-            } else {
-                beginProjectionButton.disableProperty().set(false);
-                endProjectionButton.disableProperty().set(true);
-            }
-        });
+        controlBar.setProjectable(this.projectionWebView);
+        controlBar.setCallback(this);
+        controlBar.setManager(projectionManager);
+        controlBar.attach(proectionControlPane);
     }
 
     @Override
     public void onEscapeKeyPressed() {
-        if (!endProjectionButton.isDisabled()) {
-            endProjectionButton.fire();
+        if (controlBar.getProjecting()) {
+            onProjectionEnd();
         }
     }
 

@@ -46,6 +46,7 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
     }
 
     override fun setText(text: WrappedText?) {
+        label.renderFlagProperty.get().renderToAll()
         label.setText(text)
     }
 
@@ -59,6 +60,16 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
 
     override fun addTextWrapperChangeListener(wrapperChangeListener: TextWrapperFactoryChangeListener?) {
         label.addWrapperChangeListener(wrapperChangeListener)
+    }
+
+    override fun createLabel(): ProjectionLabel {
+        val label = ProjectionLabel(delegate)
+        label.init()
+        label.rebuild()
+
+        projectablesList.add(label)
+
+        return label
     }
 
     override fun createWebView(): ProjectionWebView {
