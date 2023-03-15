@@ -17,6 +17,8 @@ class TextRenderer(val bounds: TextRendererBounds, var font: Font) {
     private val clearColor = Color(0, 0, 0,0)
     private val graphics2D: Graphics2D = image.createGraphics()
 
+    var enabled: Boolean = true
+
     private val fontMetrics: FontMetrics get() {
         return graphics2D.getFontMetrics(font)
     }
@@ -26,14 +28,29 @@ class TextRenderer(val bounds: TextRendererBounds, var font: Font) {
     }
 
     fun renderText(text: List<String>): BridgeTextData {
+        clearImage()
+
+        if (!enabled) {
+            return BridgeTextData(
+                    bounds.renderId,
+                    (image.data.dataBuffer as DataBufferInt).data,
+                    bounds.x,
+                    bounds.y,
+                    image.width,
+                    image.height,
+                    bounds.x.toDouble(),
+                    bounds.y.toDouble(),
+                    bounds.w.toDouble(),
+                    bounds.h.toDouble()
+            )
+        }
+
         val linePositions = generateLinePositions(text)
         printTextOnImage(linePositions)
 
-        val imgData = (image.data.dataBuffer as DataBufferInt).data;
-
         return BridgeTextData(
                     bounds.renderId,
-                    imgData,
+                    (image.data.dataBuffer as DataBufferInt).data,
                     bounds.x,
                     bounds.y,
                     image.width,
@@ -45,7 +62,7 @@ class TextRenderer(val bounds: TextRendererBounds, var font: Font) {
         )
     }
 
-    private fun printTextOnImage(drawLines: List<StringWithPosition>) {
+    private fun clearImage() {
         val g: Graphics2D = graphics2D
 
         val oldComposite = g.composite
@@ -53,6 +70,10 @@ class TextRenderer(val bounds: TextRendererBounds, var font: Font) {
         g.color = clearColor
         g.fillRect(0, 0, bounds.w, bounds.h)
         g.composite = oldComposite
+    }
+
+    private fun printTextOnImage(drawLines: List<StringWithPosition>) {
+        val g: Graphics2D = graphics2D
 
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
         g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)

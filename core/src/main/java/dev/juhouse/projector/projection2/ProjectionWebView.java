@@ -7,6 +7,7 @@ package dev.juhouse.projector.projection2;
 
 import java.nio.ByteBuffer;
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.scene.image.PixelFormat;
 import javafx.scene.image.WritableImage;
@@ -100,6 +101,11 @@ public class ProjectionWebView implements Projectable, Runnable {
         } else {
             delegate.getBridge().setRenderWebViewBuffer(BridgeRenderFlag.NO_RENDER);
         }
+    }
+
+    @Override
+    public ReadOnlyObjectProperty<BridgeRenderFlag> getRenderFlagProperty() {
+        return renderFlag.getReadOnlyProperty();
     }
 
     public WebView getWebView() {

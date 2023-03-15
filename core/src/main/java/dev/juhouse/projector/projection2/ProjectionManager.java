@@ -64,4 +64,8 @@ public interface ProjectionManager {
 
     boolean getCropBackground();
 
+    void addCallback(ProjectionManagerCallbacks callback);
+
+    void removeCallback(ProjectionManagerCallbacks callback);
+
 }

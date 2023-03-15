@@ -8,6 +8,7 @@ import dev.juhouse.projector.projection2.text.*;
 import dev.juhouse.projector.utils.FontCreatorUtil;
 import javafx.application.Platform;
 import dev.juhouse.projector.other.ProjectorPreferences;
+import javafx.beans.property.ReadOnlyObjectProperty;
 
 /**
  *
@@ -59,6 +60,11 @@ public class ProjectionLabel implements Projectable {
     @Override
     public void setRender(boolean render) {
         // I think we will never prevent label rendering
+    }
+
+    @Override
+    public ReadOnlyObjectProperty<BridgeRenderFlag> getRenderFlagProperty() {
+        return null;
     }
 
     private void updateFont() {

@@ -13,6 +13,7 @@ import dev.juhouse.projector.projection2.BridgeRender;
 import dev.juhouse.projector.projection2.BridgeRenderFlag;
 import dev.juhouse.projector.projection2.Projectable;
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelBuffer;
 import javafx.scene.image.PixelFormat;
@@ -33,7 +34,7 @@ public class ProjectionPlayer implements Projectable {
 
         video.setEnablePreview(true);
         video.setPreviewBufferCallback(this.preview);
-        video.getRenderFlag().applyDefault(BridgeRender::getEnableRenderVideo);
+        video.getRenderFlagProperty().get().applyDefault(BridgeRender::getEnableRenderVideo);
     }
 
     public boolean isCropVideo() {
@@ -50,6 +51,11 @@ public class ProjectionPlayer implements Projectable {
 
     public void setRender(boolean render) {
         video.setRender(render);
+    }
+
+    @Override
+    public ReadOnlyObjectProperty<BridgeRenderFlag> getRenderFlagProperty() {
+        return video.getRenderFlagProperty();
     }
 
     @Override

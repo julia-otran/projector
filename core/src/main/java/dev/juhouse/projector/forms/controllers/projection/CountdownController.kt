@@ -9,14 +9,9 @@ import java.net.URL
 import java.util.*
 import dev.juhouse.projector.projection2.countdown.ProjectionCountdown
 import javafx.application.Platform
+import javafx.scene.layout.Pane
 
-class CountdownController: ProjectionController(), Runnable {
-    @FXML
-    private lateinit var beginProjectionButton: Button
-
-    @FXML
-    private lateinit var endProjectionButton: Button
-
+class CountdownController: ProjectionController(), Runnable, ProjectionBarControlCallbacks {
     @FXML
     private lateinit var countdownTextField: TextField
 
@@ -25,6 +20,11 @@ class CountdownController: ProjectionController(), Runnable {
 
     @FXML
     private lateinit var countdownPause: ToggleButton
+
+    @FXML
+    private lateinit var projectionControls: Pane
+
+    private val controlBar = ProjectionBarControl()
 
     private var countdownExecute = false
 
@@ -36,7 +36,6 @@ class CountdownController: ProjectionController(), Runnable {
     private lateinit var projectionCountdown: ProjectionCountdown
 
     override fun initialize(p0: URL?, p1: ResourceBundle?) {
-        endProjectionButton.disableProperty().value = true
         countdownPause.selectedProperty().value = false
         countdownRun.selectedProperty().value = false
     }
@@ -46,16 +45,6 @@ class CountdownController: ProjectionController(), Runnable {
 
         projectionCountdown = getProjectionManager().createCountdown()
 
-        getProjectionManager().projectableProperty().addListener { _, _, newValue ->
-            if (newValue == projectionCountdown) {
-                endProjectionButton.disableProperty().value = false
-                beginProjectionButton.disableProperty().value = true
-            } else {
-                endProjectionButton.disableProperty().value = true
-                beginProjectionButton.disableProperty().value = false
-            }
-        }
-
         intervalMs = observer.getProperty("INTERVAL_MS").map { i -> i.toLong() }.orElse(5 * 60 * 1000L)
         countdownTextField.text = formatInterval(intervalMs)
 
@@ -64,10 +53,15 @@ class CountdownController: ProjectionController(), Runnable {
                 observer.updateProperty("INTERVAL_MS", getIntervalMilis().toString())
             }
         }
+
+        controlBar.projectable = projectionCountdown
+        controlBar.callback = this
+        controlBar.manager = projectionManager
+        controlBar.attach(projectionControls)
     }
 
     override fun onEscapeKeyPressed() {
-        onEndProjection()
+        onProjectionEnd()
     }
 
     override fun stop() {
@@ -77,17 +71,6 @@ class CountdownController: ProjectionController(), Runnable {
         if (!countdownTextField.disableProperty().value) {
             intervalMs = getIntervalMilis()
         }
-    }
-
-    @FXML
-    fun onBeginProjection() {
-        onCountdownRun()
-        getProjectionManager().setProjectable(projectionCountdown)
-    }
-
-    @FXML
-    fun onEndProjection() {
-        getProjectionManager().setProjectable(null)
     }
 
     @FXML
@@ -163,5 +146,14 @@ class CountdownController: ProjectionController(), Runnable {
         val hours = ms / (60 * 60 * 1000)
 
         return String.format("%02d:%02d:%02d", hours, mins, secs)
+    }
+
+    override fun onProjectionBegin() {
+        onCountdownRun()
+        getProjectionManager().setProjectable(projectionCountdown)
+    }
+
+    override fun onProjectionEnd() {
+        getProjectionManager().setProjectable(null)
     }
 }

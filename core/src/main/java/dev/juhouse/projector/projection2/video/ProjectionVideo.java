@@ -2,6 +2,8 @@ package dev.juhouse.projector.projection2.video;
 
 import dev.juhouse.projector.projection2.BridgeRenderFlag;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -49,14 +51,19 @@ public class ProjectionVideo {
     protected CallbackVideoSurface videoSurface;
 
     private ByteBuffer[] buffers;
-    @Getter
-    private final BridgeRenderFlag renderFlag;
+    private final ReadOnlyObjectWrapper<BridgeRenderFlag> renderFlagProperty = new ReadOnlyObjectWrapper<>();
 
     public ProjectionVideo(CanvasDelegate delegate) {
         this.delegate = delegate;
-        renderFlag = new BridgeRenderFlag(delegate);
-        renderFlag.getFlagValueProperty().addListener(observable -> updateRender());
+
+        renderFlagProperty.set(new BridgeRenderFlag(delegate));
+        renderFlagProperty.get().getFlagValueProperty().addListener(observable -> updateRender());
     }
+
+    public ReadOnlyObjectProperty<BridgeRenderFlag> getRenderFlagProperty() {
+        return renderFlagProperty.getReadOnlyProperty();
+    }
+
     public void init() {
         renderCallback = new ProjectionVideo.MyRenderCallback();
         bufferFormatCallback = new ProjectionVideo.MyBufferFormatCallback();
@@ -75,7 +82,7 @@ public class ProjectionVideo {
 
     private void updateRender() {
         if (render.get()) {
-            this.delegate.getBridge().setVideoBufferRenderFlag(renderFlag.getFlagValue());
+            this.delegate.getBridge().setVideoBufferRenderFlag(renderFlagProperty.get().getFlagValue());
         } else {
             this.delegate.getBridge().setVideoBufferRenderFlag(BridgeRenderFlag.NO_RENDER);
         }

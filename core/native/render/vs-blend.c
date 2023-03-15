@@ -141,6 +141,8 @@ void vs_blend_initialize(config_bounds *display_bounds, config_virtual_screen *v
 }
 
 void vs_blend_render(vs_blend *instance) {
+    glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_ALPHA);
+
     glBindTexture(GL_TEXTURE_2D, 0);
 
     glUseProgram(instance->program);
@@ -158,6 +160,8 @@ void vs_blend_render(vs_blend *instance) {
     }
 
     glUseProgram(0);
+
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void vs_blend_shutdown(vs_blend *instance) {

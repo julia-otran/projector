@@ -14,11 +14,13 @@ import java.io.File
 
 class ProjectionManagerImpl(private val delegate: CanvasDelegate):
     ProjectionManager {
+
     private val label = ProjectionLabel(delegate)
     private val backgroundVideo = ProjectionBackgroundVideo(ProjectionVideo(delegate))
     private val background = ProjectionBackground(delegate)
     private val currentProjectable = ReadOnlyObjectWrapper<Projectable?>()
     private val projectablesList = ArrayList<Projectable>()
+    private val callbackList = ArrayList<ProjectionManagerCallbacks>()
 
     init {
         projectablesList.add(label)
@@ -37,6 +39,10 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
 
     override fun rebuild() {
         projectablesList.forEach { it.rebuild() }
+
+        val renders = delegate.bridge.renderSettings
+
+        callbackList.forEach { it.onRebuild(renders) }
     }
 
     override fun setText(text: WrappedText?) {
@@ -154,5 +160,14 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
 
     override fun getCropBackground(): Boolean {
         return background.cropBackground
+    }
+
+    override fun addCallback(callback: ProjectionManagerCallbacks) {
+        callbackList.add(callback)
+        callback.onRebuild(delegate.bridge.renderSettings)
+    }
+
+    override fun removeCallback(callback: ProjectionManagerCallbacks) {
+        callbackList.remove(callback)
     }
 }

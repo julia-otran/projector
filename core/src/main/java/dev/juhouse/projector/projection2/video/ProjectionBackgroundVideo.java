@@ -1,8 +1,11 @@
 package dev.juhouse.projector.projection2.video;
 
 import dev.juhouse.projector.projection2.BridgeRender;
+import dev.juhouse.projector.projection2.BridgeRenderFlag;
 import dev.juhouse.projector.projection2.Projectable;
 import dev.juhouse.projector.utils.ThemeFinder;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 
 import java.io.File;
 import java.util.*;
@@ -28,7 +31,7 @@ public class ProjectionBackgroundVideo implements Projectable {
     public void init() {
         videoProjector.init();
         videoProjector.getPlayer().audio().setMute(true);
-        videoProjector.getRenderFlag().applyDefault(BridgeRender::getEnableRenderBackgroundAssets);
+        videoProjector.getRenderFlagProperty().get().applyDefault(BridgeRender::getEnableRenderBackgroundAssets);
         loadMedia();
     }
 
@@ -46,6 +49,11 @@ public class ProjectionBackgroundVideo implements Projectable {
     public void setRender(boolean render) {
         externalRender = render;
         updateRender();
+    }
+
+    @Override
+    public ReadOnlyObjectProperty<BridgeRenderFlag> getRenderFlagProperty() {
+        return videoProjector.getRenderFlagProperty();
     }
 
     private void updateRender() {

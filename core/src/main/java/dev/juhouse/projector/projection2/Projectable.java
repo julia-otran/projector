@@ -5,6 +5,8 @@
  */
 package dev.juhouse.projector.projection2;
 
+import javafx.beans.property.ReadOnlyObjectProperty;
+
 /**
  *
  * @author Julia Otranto Aulicino julia.otranto@outlook.com
@@ -18,4 +20,6 @@ public interface Projectable {
     void rebuild();
 
     void setRender(boolean render);
+
+    ReadOnlyObjectProperty<BridgeRenderFlag> getRenderFlagProperty();
 }

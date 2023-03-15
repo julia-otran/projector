@@ -13,6 +13,10 @@ class BridgeRenderFlag(private val delegate: CanvasDelegate) {
 
     val flagValue: Int get() { return flagValueIntProperty.value }
 
+    fun isRenderEnabled(renderId: Int): Boolean {
+        return (flagValueIntProperty.get() and (1 shl renderId)) > 0
+    }
+
     fun enableRenderId(renderId: Int) {
         flagValueIntProperty.set(flagValueIntProperty.get() or (1 shl renderId))
     }
