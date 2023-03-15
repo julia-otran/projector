@@ -1,18 +1,42 @@
 package dev.juhouse.projector.projection2
 
 import dev.juhouse.projector.other.GraphicsFinder
+import dev.juhouse.projector.other.ProjectorPreferences
 import dev.juhouse.projector.services.SettingsService
+import dev.juhouse.projector.utils.FontCreatorUtil
 import dev.juhouse.projector.utils.WindowConfigsObserver
+import javafx.beans.property.ObjectProperty
+import javafx.beans.property.ObjectPropertyBase
+import javafx.beans.property.Property
+import javafx.beans.property.SimpleObjectProperty
+import java.awt.Font
 import java.awt.GraphicsDevice
 
 class WindowManager(private val settingsService: SettingsService) : CanvasDelegate, WindowConfigsObserver.WindowConfigsObserverCallback {
     private val bridge: Bridge = Bridge()
+    private val fontProperty = SimpleObjectProperty<Font>()
 
     val configsObserver: WindowConfigsObserver = WindowConfigsObserver(this)
     val preview: PreviewImageView = PreviewImageView(this)
     val manager: ProjectionManager = ProjectionManagerImpl(this)
 
     private var running: Boolean = false
+
+    init {
+        fontProperty.set(
+            FontCreatorUtil.createFont(
+                        ProjectorPreferences.getProjectionLabelFontName(),
+                        ProjectorPreferences.getProjectionLabelFontStyle(),
+                        ProjectorPreferences.getProjectionLabelFontSize()
+            )
+        )
+
+        fontProperty.addListener { _, _, font ->
+            ProjectorPreferences.setProjectionLabelFontName(font.family);
+            ProjectorPreferences.setProjectionLabelFontStyle(font.style);
+            ProjectorPreferences.setProjectionLabelFontSize(font.size);
+        }
+    }
 
     fun startEngine() {
         if (!running) {
@@ -48,6 +72,10 @@ class WindowManager(private val settingsService: SettingsService) : CanvasDelega
 
     override fun getTextHeight(): Int {
         return bridge.textAreaHeight
+    }
+
+    override fun getFontProperty(): Property<Font> {
+        return fontProperty
     }
 
     override fun getSettingsService(): SettingsService {

@@ -1,5 +1,6 @@
 package dev.juhouse.projector.projection2
 
+import dev.juhouse.projector.projection2.countdown.ProjectionCountdown
 import dev.juhouse.projector.projection2.models.BackgroundModel
 import dev.juhouse.projector.projection2.text.WrappedText
 import dev.juhouse.projector.projection2.text.WrapperFactory
@@ -43,11 +44,11 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
     }
 
     override fun getTextFont(): Font {
-        return label.font
+        return delegate.fontProperty.value
     }
 
     override fun setTextFont(font: Font?) {
-        label.font = font
+        delegate.fontProperty.value = font
     }
 
     override fun addTextWrapperChangeListener(wrapperChangeListener: TextWrapperFactoryChangeListener?) {
@@ -56,7 +57,10 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
 
     override fun createWebView(): ProjectionWebView {
         val webView = ProjectionWebView(delegate)
+
         webView.init()
+        webView.rebuild()
+
         projectablesList.add(webView)
         return webView
     }
@@ -107,7 +111,20 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
         projectablesList.add(player)
 
         player.init()
-        return player;
+        player.rebuild()
+
+        return player
+    }
+
+    override fun createCountdown(): ProjectionCountdown {
+        val countdown = ProjectionCountdown(delegate)
+
+        projectablesList.add(countdown)
+
+        countdown.init()
+        countdown.rebuild()
+
+        return countdown
     }
 
     override fun getDarkenBackground(): Boolean {

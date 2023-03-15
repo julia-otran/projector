@@ -5,6 +5,8 @@ data class BridgeRender(
     val renderName: String,
     val width: Int,
     val height: Int,
+    val textAreaX: Int,
+    val textAreaY: Int,
     val textAreaWidth: Int,
     val textAreaHeight: Int,
     val enableRenderBackgroundAssets: Boolean,

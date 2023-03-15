@@ -8,6 +8,7 @@ package dev.juhouse.projector.scenes;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import dev.juhouse.projector.projection2.ProjectionManager;
 import dev.juhouse.projector.repositories.ProjectionListRepository;
@@ -111,7 +112,7 @@ public abstract class ProjectionItemSubScene extends SubScene implements Control
     }
 
     @Override
-    public String getProperty(String key) {
-        return itemProperties.get(key);
+    public Optional<String> getProperty(String key) {
+        return Optional.ofNullable(itemProperties.get(key));
     }
 }

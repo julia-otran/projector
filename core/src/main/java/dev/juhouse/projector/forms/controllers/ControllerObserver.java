@@ -5,6 +5,8 @@
  */
 package dev.juhouse.projector.forms.controllers;
 
+import java.util.Optional;
+
 /**
  *
  * @author Julia Otranto Aulicino julia.otranto@outlook.com
@@ -12,5 +14,5 @@ package dev.juhouse.projector.forms.controllers;
 public interface ControllerObserver {
     void onTitleChanged(String newTitle);
     void updateProperty(String key, String value);
-    String getProperty(String key);
+    Optional<String> getProperty(String key);
 }

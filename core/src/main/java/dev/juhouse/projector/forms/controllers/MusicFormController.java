@@ -105,28 +105,7 @@ public class MusicFormController implements Initializable {
             }
         });
     }    
-    
-    @FXML
-    public void onCreateArtist() {
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("Criar artista");
-        dialog.setHeaderText("Incluir um novo artista");
-        dialog.setContentText("Digite o nome do artista:");
 
-        Optional<String> result = dialog.showAndWait();
-        result.ifPresent(name -> {
-            String trimmed = name.trim();
-            
-            if (trimmed.isEmpty()) {
-                creatingArtist = null;
-            } else {
-                creatingArtist = trimmed;
-            }
-            
-            populateArtists();
-        });
-    }
-    
     @FXML
     public void onCancel() {
         if (editingMusic != null) {

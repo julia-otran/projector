@@ -63,7 +63,8 @@ public class TextController extends ProjectionController implements TextWrapperF
         });
 
         getProjectionManager().addTextWrapperChangeListener(this);
-        projectionText.textProperty().setValue(getObserver().getProperty("TEXT"));
+
+        getObserver().getProperty("TEXT").ifPresent(s -> projectionText.textProperty().setValue(s));
     }
     
     @FXML

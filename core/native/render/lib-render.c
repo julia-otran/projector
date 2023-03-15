@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 
 #include "debug.h"
 #include "ogl-loader.h"
@@ -125,6 +126,9 @@ JNIEXPORT jobjectArray JNICALL Java_dev_juhouse_projector_projection2_Bridge_get
 
     jfieldID render_width_field = (*env)->GetFieldID(env, BridgeRenderClass, "width", "I");
     jfieldID render_height_field = (*env)->GetFieldID(env, BridgeRenderClass, "height", "I");
+
+    jfieldID render_text_area_x_field = (*env)->GetFieldID(env, BridgeRenderClass, "textAreaX", "I");
+    jfieldID render_text_area_y_field = (*env)->GetFieldID(env, BridgeRenderClass, "textAreaY", "I");
     jfieldID render_text_area_width_field = (*env)->GetFieldID(env, BridgeRenderClass, "textAreaWidth", "I");
     jfieldID render_text_area_height_field = (*env)->GetFieldID(env, BridgeRenderClass, "textAreaHeight", "I");
 
@@ -146,6 +150,9 @@ JNIEXPORT jobjectArray JNICALL Java_dev_juhouse_projector_projection2_Bridge_get
 
         (*env)->SetIntField(env, render_object, render_width_field, render->w);
         (*env)->SetIntField(env, render_object, render_height_field, render->h);
+
+        (*env)->SetIntField(env, render_object, render_text_area_x_field, render->text_area.x);
+        (*env)->SetIntField(env, render_object, render_text_area_y_field, render->text_area.y);
         (*env)->SetIntField(env, render_object, render_text_area_width_field, render->text_area.w);
         (*env)->SetIntField(env, render_object, render_text_area_height_field, render->text_area.h);
 
@@ -166,6 +173,8 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setTextData
     jfieldID render_id_field = (*env)->GetFieldID(env, BridgeTextDataClass, "renderId", "I");
 
     jfieldID image_data_field = (*env)->GetFieldID(env, BridgeTextDataClass, "imageData", "[I");
+    jfieldID position_x_field = (*env)->GetFieldID(env, BridgeTextDataClass, "positionX", "I");
+    jfieldID position_y_field = (*env)->GetFieldID(env, BridgeTextDataClass, "positionY", "I");
     jfieldID image_w_field = (*env)->GetFieldID(env, BridgeTextDataClass, "imageWidth", "I");
     jfieldID image_h_field = (*env)->GetFieldID(env, BridgeTextDataClass, "imageHeight", "I");
 
@@ -183,6 +192,8 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setTextData
         jobject obj = (*env)->GetObjectArrayElement(env, j_text_data_arr, i);
 
         data->render_id = (*env)->GetIntField(env, obj, render_id_field);
+        data->position_x = (*env)->GetIntField(env, obj, position_x_field);
+        data->position_y = (*env)->GetIntField(env, obj, position_y_field);
         data->image_w = (*env)->GetIntField(env, obj, image_w_field);
         data->image_h = (*env)->GetIntField(env, obj, image_h_field);
 

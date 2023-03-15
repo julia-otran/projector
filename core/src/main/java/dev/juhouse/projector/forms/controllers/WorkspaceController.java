@@ -636,6 +636,16 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
         }
     }
 
+    @FXML
+    public void onAddTimer() {
+        try {
+            listRepository.createItem(projectionList, "Timer", ProjectionListItemType.TIMER);
+            reloadProjectables();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public boolean addMusic(Integer id) {
         for (ProjectionItemSubScene i : itemSubScenes.values()) {

@@ -61,7 +61,7 @@ long timespec_to_ms(struct timespec *spec) {
     return round(spec->tv_nsec / 1.0e6) + (spec->tv_sec * 1000);
 }
 
-void render_fader_fade_in(render_fader_instance *instance, int fade_id, int duration_ms) {
+void render_fader_fade_in_data(render_fader_instance *instance, int fade_id, int duration_ms, void *extra_data) {
     struct timespec spec;
     get_time(&spec);
 
@@ -80,6 +80,12 @@ void render_fader_fade_in(render_fader_instance *instance, int fade_id, int dura
         node->mode = RENDER_FADER_MODE_IN;
         node->duration_ms = duration_ms;
     }
+
+    node->extra_data = extra_data;
+}
+
+void render_fader_fade_in(render_fader_instance *instance, int fade_id, int duration_ms) {
+    render_fader_fade_in_data(instance, fade_id, duration_ms, NULL);
 }
 
 void render_fader_fade_out(render_fader_instance *instance, int fade_id, int duration_ms) {
@@ -98,14 +104,18 @@ void render_fader_fade_out(render_fader_instance *instance, int fade_id, int dur
     }
 }
 
-void render_fader_fade_in_out(render_fader_instance *instance, int fade_id, int duration_ms) {
-    render_fader_fade_in(instance, fade_id, duration_ms);
+void render_fader_fade_in_out_data(render_fader_instance *instance, int fade_id, int duration_ms, void *data) {
+    render_fader_fade_in_data(instance, fade_id, duration_ms, data);
 
     render_fader_for_each(instance) {
         if (node->fade_id != fade_id) {
             render_fader_fade_out(instance, node->fade_id, duration_ms);
         }
     }
+}
+
+void render_fader_fade_in_out(render_fader_instance *instance, int fade_id, int duration_ms) {
+    render_fader_fade_in_out_data(instance, fade_id, duration_ms, NULL);
 }
 
 float render_fader_get_alpha(fade_node *node) {

@@ -5,9 +5,10 @@
  */
 package dev.juhouse.projector.projection2;
 
-import java.awt.GraphicsDevice;
+import java.awt.*;
 
 import dev.juhouse.projector.services.SettingsService;
+import javafx.beans.property.Property;
 
 /**
  *
@@ -22,6 +23,8 @@ public interface CanvasDelegate {
     int getTextWidth();
 
     int getTextHeight();
+
+    Property<Font> getFontProperty();
 
     SettingsService getSettingsService();
 

@@ -154,7 +154,8 @@ public class PlayerController extends ProjectionController implements FileDragDr
             }
         });
 
-        String fileStr = getObserver().getProperty("VIDEO_FILE");
+        String fileStr = getObserver().getProperty("VIDEO_FILE").orElse(null);
+
         if (fileStr != null) {
             File file = new File(fileStr);
             if (file.canRead()) {

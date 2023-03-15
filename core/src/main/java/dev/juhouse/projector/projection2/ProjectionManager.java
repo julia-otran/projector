@@ -8,6 +8,7 @@ package dev.juhouse.projector.projection2;
 import java.awt.Font;
 import java.io.File;
 
+import dev.juhouse.projector.projection2.countdown.ProjectionCountdown;
 import dev.juhouse.projector.projection2.models.BackgroundModel;
 import dev.juhouse.projector.projection2.text.WrappedText;
 import dev.juhouse.projector.projection2.text.WrapperFactory;
@@ -50,6 +51,8 @@ public interface ProjectionManager {
     void setCropBackground(boolean selected);
 
     ProjectionPlayer createPlayer();
+
+    ProjectionCountdown createCountdown();
 
     boolean getDarkenBackground();
 

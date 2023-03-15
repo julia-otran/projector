@@ -7,6 +7,7 @@ typedef struct {
     int render_id;
 
     void *image_data;
+    int position_x, position_y;
     int image_w, image_h;
 
     double x, y, w, h;

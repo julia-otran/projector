@@ -84,7 +84,7 @@ public class BrowserController extends ProjectionController {
         super.initWithProjectionManager(projectionManager);
         this.projectionWebView = projectionManager.createWebView();
 
-        String url = this.getObserver().getProperty(URL_PROPERTY);
+        String url = this.getObserver().getProperty(URL_PROPERTY).orElse(null);
 
         if (url == null) {
             url = "https://google.com.br";

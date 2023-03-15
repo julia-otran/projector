@@ -1,23 +1,13 @@
 package dev.juhouse.projector.projection2;
 
 import java.awt.*;
-import java.awt.font.GlyphVector;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
 import java.util.*;
 import java.util.List;
 
-import dev.juhouse.projector.projection2.models.StringWithPosition;
-import dev.juhouse.projector.projection2.text.TextRenderer;
-import dev.juhouse.projector.projection2.text.TextWrapperMetrics;
-import dev.juhouse.projector.projection2.text.WrappedText;
-import dev.juhouse.projector.projection2.text.WrapperFactory;
+import dev.juhouse.projector.projection2.text.*;
 import dev.juhouse.projector.utils.FontCreatorUtil;
 import javafx.application.Platform;
 import dev.juhouse.projector.other.ProjectorPreferences;
-
-import javax.swing.border.StrokeBorder;
 
 /**
  *
@@ -26,33 +16,27 @@ import javax.swing.border.StrokeBorder;
 public class ProjectionLabel implements Projectable {
     private final CanvasDelegate canvasDelegate;
 
-    private Font font;
-
     private final List<TextWrapperFactoryChangeListener> factoryChangeListeners;
 
     private BridgeRender[] bridgeRenders;
-    private Map<Integer, TextRenderer> textRenders;
+    private final Map<Integer, TextRenderer> textRenders;
 
     public ProjectionLabel(CanvasDelegate canvasDelegate) {
         this.canvasDelegate = canvasDelegate;
         factoryChangeListeners = new ArrayList<>();
         textRenders = new HashMap<>();
+
+        canvasDelegate.getFontProperty().addListener((prop, oldValue, newValue) -> {
+            updateFont();
+        });
     }
 
     @Override
     public void init() {
-        setFont(
-                FontCreatorUtil.createFont(
-                        ProjectorPreferences.getProjectionLabelFontName(),
-                        ProjectorPreferences.getProjectionLabelFontStyle(),
-                        ProjectorPreferences.getProjectionLabelFontSize()
-                )
-        );
     }
 
     @Override
     public void finish() {
-
     }
 
     @Override
@@ -61,7 +45,14 @@ public class ProjectionLabel implements Projectable {
         this.bridgeRenders = canvasDelegate.getBridge().getRenderSettings();
 
         for (BridgeRender render : bridgeRenders) {
-            this.textRenders.put(render.getRenderId(), new TextRenderer(render, getFontFor(render.getRenderId())));
+            TextRendererBounds bounds = new TextRendererBounds(
+                    render.getRenderId(),
+                    render.getTextAreaX(),
+                    render.getTextAreaY(),
+                    render.getTextAreaWidth(),
+                    render.getTextAreaHeight());
+
+            this.textRenders.put(render.getRenderId(), new TextRenderer(bounds, getFontFor(render.getRenderId())));
         }
     }
 
@@ -70,35 +61,23 @@ public class ProjectionLabel implements Projectable {
         // I think we will never prevent label rendering
     }
 
-    public Font getFont() {
-        return font;
-    }
-
-    public void setFont(Font font) {
-        this.font = font;
-        this.textRenders.values().forEach(tr -> tr.setFont(getFontFor(tr.getRender().getRenderId())));
-
+    private void updateFont() {
+        this.textRenders.values().forEach(tr -> tr.setFont(getFontFor(tr.getBounds().getRenderId())));
         onFactoryChange();
-
-        ProjectorPreferences.setProjectionLabelFontName(font.getFamily());
-        ProjectorPreferences.setProjectionLabelFontStyle(font.getStyle());
-        ProjectorPreferences.setProjectionLabelFontSize(font.getSize());
     }
 
     public Font getFontFor(int renderId) {
-        for (int i = 0; i < bridgeRenders.length; i++) {
-            BridgeRender render = bridgeRenders[i];
-
+        for (BridgeRender render : bridgeRenders) {
             if (render.getRenderId() == renderId) {
-                float scaleX = render.getTextAreaWidth() / (float)canvasDelegate.getTextWidth();
-                float scaleY = render.getTextAreaHeight() / (float)canvasDelegate.getTextHeight();
-                float newFontSize = getFont().getSize() * Math.min(scaleX, scaleY);
+                float scaleX = render.getTextAreaWidth() / (float) canvasDelegate.getTextWidth();
+                float scaleY = render.getTextAreaHeight() / (float) canvasDelegate.getTextHeight();
+                float newFontSize = canvasDelegate.getFontProperty().getValue().getSize() * Math.min(scaleX, scaleY);
 
-                return getFont().deriveFont(newFontSize);
+                return canvasDelegate.getFontProperty().getValue().deriveFont(newFontSize);
             }
         }
 
-        return getFont();
+        return canvasDelegate.getFontProperty().getValue();
     }
 
     private int getRenderIndex(int renderId) {
@@ -112,16 +91,14 @@ public class ProjectionLabel implements Projectable {
     }
 
     public void setText(WrappedText text) {
-        if (getFont() == null || text == null || text.isEmpty()) {
+        if (text == null || text.isEmpty()) {
             canvasDelegate.getBridge().setTextData(null);
             return;
         }
 
         final BridgeTextData[] textData = new BridgeTextData[bridgeRenders.length];
 
-        text.renderLines().forEach((renderId, lines) -> {
-            textData[getRenderIndex(renderId)] = textRenders.get(renderId).renderText(lines);
-        });
+        text.renderLines().forEach((renderId, lines) -> textData[getRenderIndex(renderId)] = textRenders.get(renderId).renderText(lines));
 
         canvasDelegate.getBridge().setTextData(textData);
     }

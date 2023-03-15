@@ -9,8 +9,10 @@ import java.awt.image.BufferedImage
 import java.awt.image.DataBufferInt
 import java.util.function.Consumer
 
-class TextRenderer(val render: BridgeRender, var font: Font) {
-    private val image: BufferedImage = BufferedImage(render.textAreaWidth,render.textAreaHeight, BufferedImage.TYPE_INT_ARGB)
+data class TextRendererBounds(val renderId: Int, val x: Int, val y: Int, val w: Int, val h: Int)
+
+class TextRenderer(val bounds: TextRendererBounds, var font: Font) {
+    private val image: BufferedImage = BufferedImage(bounds.w, bounds.h, BufferedImage.TYPE_INT_ARGB)
 
     private val clearColor = Color(0, 0, 0,0)
     private val graphics2D: Graphics2D = image.createGraphics()
@@ -20,7 +22,7 @@ class TextRenderer(val render: BridgeRender, var font: Font) {
     }
 
     val textWrapperMetrics: TextWrapperMetrics get() {
-        return TextWrapperMetrics(render.renderId, fontMetrics, render.textAreaWidth, render.textAreaHeight)
+        return TextWrapperMetrics(bounds.renderId, fontMetrics, bounds.w, bounds.h)
     }
 
     fun renderText(text: List<String>): BridgeTextData {
@@ -30,8 +32,10 @@ class TextRenderer(val render: BridgeRender, var font: Font) {
         val imgData = (image.data.dataBuffer as DataBufferInt).data;
 
         return BridgeTextData(
-                    render.renderId,
+                    bounds.renderId,
                     imgData,
+                    bounds.x,
+                    bounds.y,
                     image.width,
                     image.height,
                     linePositions.maxOf { it.x }.toDouble(),
@@ -47,7 +51,7 @@ class TextRenderer(val render: BridgeRender, var font: Font) {
         val oldComposite = g.composite
         g.composite = AlphaComposite.Clear
         g.color = clearColor
-        g.fillRect(0, 0, render.width, render.height)
+        g.fillRect(0, 0, bounds.w, bounds.h)
         g.composite = oldComposite
 
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
@@ -84,10 +88,10 @@ class TextRenderer(val render: BridgeRender, var font: Font) {
 
         val totalHeight = fontHeight * lines.size + between * (lineCount - 1)
 
-        val emptyHeight: Int = render.textAreaHeight  - totalHeight
+        val emptyHeight: Int = bounds.h  - totalHeight
 
         var translateY = fontHeight + emptyHeight / 2
-        val width: Int = render.textAreaWidth
+        val width: Int = bounds.w
 
         val pendingLines: MutableList<StringWithPosition> = ArrayList()
 

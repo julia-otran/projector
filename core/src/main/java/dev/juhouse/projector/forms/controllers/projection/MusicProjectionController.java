@@ -169,7 +169,10 @@ public class MusicProjectionController extends ProjectionController {
     @Override
     public void initWithProjectionManager(final ProjectionManager projectionManager) {
         super.initWithProjectionManager(projectionManager);
-        loadMusicWithId(Integer.parseInt(getObserver().getProperty(MUSIC_ID_PROPERTY)));
+
+        getObserver().getProperty(MUSIC_ID_PROPERTY).ifPresent(musicId -> {
+            loadMusicWithId(Integer.parseInt(musicId));
+        });
 
         notifyTitleChange(music.getNameWithArtistProperty().getValue());
 

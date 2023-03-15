@@ -5,10 +5,12 @@ import dev.juhouse.projector.scenes.*;
 import java.io.IOException;
 
 public enum ProjectionListItemType {
-    MUSIC, VIDEO, IMAGE, WEB_SITE, TEXT;
+    MUSIC, VIDEO, IMAGE, WEB_SITE, TEXT, TIMER;
 
     public ProjectionItemSubScene createSubScene(double width, double height) throws IOException {
         switch (this) {
+            case TIMER:
+                return TimerSubScene.Companion.createTimerScene(width, height);
             case WEB_SITE:
                 return BrowserSubScene.createScene(width, height);
             case IMAGE:

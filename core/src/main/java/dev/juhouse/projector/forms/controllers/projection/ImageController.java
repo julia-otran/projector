@@ -228,12 +228,12 @@ public class ImageController extends ProjectionController implements Runnable {
     }
 
     private void loadOpenedImages() {
-        String countStr = getObserver().getProperty("IMAGES_COUNT");
+        String countStr = getObserver().getProperty("IMAGES_COUNT").orElse(null);
 
         if (countStr != null) {
             int count = Integer.parseInt(countStr);
             for (int i=0; i<count; i++) {
-                String imgPath = getObserver().getProperty("IMAGE[" + i + "]");
+                String imgPath = getObserver().getProperty("IMAGE[" + i + "]").orElse(null);
                 if (imgPath != null) {
                     File file = new File(imgPath);
 

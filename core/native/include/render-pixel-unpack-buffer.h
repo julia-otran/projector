@@ -11,6 +11,8 @@ typedef struct {
     int height;
     int updated;
 
+    void *extra_data;
+
     GLuint gl_buffer;
 } render_pixel_unpack_buffer_node;
 

@@ -23,6 +23,10 @@ static render_layer *renders;
 static render_fader_instance **fader_instances;
 static render_pixel_unpack_buffer_instance **buffer_instances;
 
+typedef struct {
+    int x, y, w, h;
+} render_text_extra_data;
+
 void render_text_initialize() {
     mtx_init(&thread_mutex, 0);
 }
@@ -71,11 +75,23 @@ void render_text_create_buffers() {
 
     for (int i = 0; i < renders_count; i++) {
         render_pixel_unpack_buffer_create(&buffer_instances[i]);
+
+        render_pixel_unpack_buffer_node *buffers = render_pixel_unpack_buffer_get_all_buffers(buffer_instances[i]);
+
+        for (int i = 0; i < RENDER_PIXEL_UNPACK_BUFFER_BUFFER_COUNT; i++) {
+            buffers[i].extra_data = (void*) calloc(1, sizeof(render_text_extra_data));
+        }
     }
 }
 
 void render_text_deallocate_buffers() {
     for (int i = 0; i < renders_count; i++) {
+        render_pixel_unpack_buffer_node *buffers = render_pixel_unpack_buffer_get_all_buffers(buffer_instances[i]);
+
+        for (int i = 0; i < RENDER_PIXEL_UNPACK_BUFFER_BUFFER_COUNT; i++) {
+            free(buffers[i].extra_data);
+        }
+
         render_pixel_unpack_buffer_deallocate(buffer_instances[i]);
     }
 
@@ -87,13 +103,20 @@ void render_text_update_buffers() {
     for (int i = 0; i < renders_count; i++) {
         int buffer_updated = 0;
 
-        render_pixel_unpack_buffer_node* buffer = render_pixel_unpack_buffer_dequeue_for_write(buffer_instances[i]);
+        render_pixel_unpack_buffer_node *buffer = render_pixel_unpack_buffer_dequeue_for_write(buffer_instances[i]);
 
         mtx_lock(&thread_mutex);
 
         if (pixel_data_changed > 0) {
+            render_text_extra_data *extra_data = (render_text_extra_data*) buffer->extra_data;
+
             int width = text_datum[i].image_w;
             int height = text_datum[i].image_h;
+
+            extra_data->x = text_datum[i].position_x;
+            extra_data->y = text_datum[i].position_y;
+            extra_data->w = width;
+            extra_data->h = height;
 
             glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
 
@@ -157,7 +180,7 @@ void render_text_update_assets() {
                 glBindTexture(GL_TEXTURE_2D, 0);
                 glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-                render_fader_fade_in_out(fader_instances[i], texture_id, RENDER_FADER_DEFAULT_TIME_MS);
+                render_fader_fade_in_out_data(fader_instances[i], texture_id, RENDER_FADER_DEFAULT_TIME_MS, buffer->extra_data);
             }
 
             render_pixel_unpack_buffer_enqueue_for_write(buffer_instances[i], buffer);
@@ -183,23 +206,29 @@ void render_text_start(render_layer *layer) {
 }
 
 void render_text_render(render_layer *layer) {
-    float x, y, w, h;
-
-    x = layer->config.text_area.x;
-    y = layer->config.text_area.y;
-    w = layer->config.text_area.w;
-    h = layer->config.text_area.h;
-
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnable(GL_TEXTURE_2D);
+
+    glBlendFunc(GL_ONE_MINUS_CONSTANT_COLOR, GL_ONE_MINUS_SRC_ALPHA);
 
     for (int i = 0; i < renders_count; i++) {
         if (renders[i].config.render_id == layer->config.render_id) {
             render_fader_for_each(fader_instances[i]) {
                 if (node->fade_id) {
+                    render_text_extra_data *extra_data = (render_text_extra_data*) node->extra_data;
+
+                    float x, y, w, h;
+
+                    x = extra_data->x;
+                    y = extra_data->y;
+                    w = extra_data->w;
+                    h = extra_data->h;
+
                     glBindTexture(GL_TEXTURE_2D, node->fade_id);
 
                     float alpha = render_fader_get_alpha(node);
+
+                    alpha = (-1.0f * alpha * alpha) + 2.0f * alpha;
 
                     glColor4f(
                         layer->config.text_color.r * alpha,
@@ -210,7 +239,7 @@ void render_text_render(render_layer *layer) {
 
                     glBegin(GL_QUADS);
 
-                    glTexCoord2i(0,0); glVertex2d(x, y);
+                    glTexCoord2i(0, 0); glVertex2d(x, y);
                     glTexCoord2i(0, 1); glVertex2d(x, y + h);
                     glTexCoord2i(1, 1); glVertex2d(x + w, y + h);
                     glTexCoord2i(1, 0); glVertex2d(x + w, y);
@@ -221,6 +250,7 @@ void render_text_render(render_layer *layer) {
         }
     }
 
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 

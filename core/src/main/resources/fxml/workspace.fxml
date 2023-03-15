@@ -1,38 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import javafx.collections.*?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
+<?import java.lang.String?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.CheckMenuItem?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.RadioMenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<VBox id="RootBox" prefHeight="600.0" prefWidth="900.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="dev.juhouse.projector.forms.controllers.WorkspaceController">
+<VBox id="RootBox" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dev.juhouse.projector.forms.controllers.WorkspaceController">
   <MenuBar fx:id="menuBar" VBox.vgrow="NEVER">
     <Menu mnemonicParsing="false" text="Gerenciar Letras">
       <MenuItem mnemonicParsing="false" onAction="#onOpenMusicList" text="Lista De Letras" />
       <MenuItem mnemonicParsing="false" onAction="#onShowStatistics" text="Estatísticas" />
     </Menu>
     <Menu mnemonicParsing="false" text="Imagem de Fundo">
-      <CheckMenuItem mnemonicParsing="false" onAction="#onDarkenBackgroundChanged" text="Escurecer Fundo" fx:id="darkenBackgroundMenuItem" />
+      <CheckMenuItem fx:id="darkenBackgroundMenuItem" mnemonicParsing="false" onAction="#onDarkenBackgroundChanged" text="Escurecer Fundo" />
       <MenuItem mnemonicParsing="false" onAction="#onSelectBackgroundImageFile" text="Alterar Fundo" />
-      <CheckMenuItem mnemonicParsing="false" onAction="#onCropBackgroundChanged" selected="true" text="Corte De Imagem" fx:id="cropBackgroundMenuItem" />
+      <CheckMenuItem fx:id="cropBackgroundMenuItem" mnemonicParsing="false" onAction="#onCropBackgroundChanged" selected="true" text="Corte De Imagem" />
     </Menu>
     <Menu mnemonicParsing="false" text="Configurações">
       <MenuItem mnemonicParsing="false" onAction="#onChangeFont" text="Alterar Fonte" />
       <Menu mnemonicParsing="false" text="Telas">
-        <Menu mnemonicParsing="false" text="Presets" fx:id="windowConfigsPresetsMenu" />
+        <Menu fx:id="windowConfigsPresetsMenu" mnemonicParsing="false" text="Presets" />
         <MenuItem mnemonicParsing="false" onAction="#onCreateWindowConfigPreset" text="Criar Preset" />
         <MenuItem mnemonicParsing="false" onAction="#onReloadScreens" text="Redectar Telas" />
       </Menu>
-      <CheckMenuItem mnemonicParsing="false" onAction="#onChangeFullScreen" text="Modo Tela Cheia" fx:id="fullScreenCheckMenuItem" />
+      <CheckMenuItem fx:id="fullScreenCheckMenuItem" mnemonicParsing="false" onAction="#onChangeFullScreen" text="Modo Tela Cheia" />
       <Menu mnemonicParsing="false" text="Modo de Projeção de Letras">
-        <RadioMenuItem mnemonicParsing="false" onAction="#onSingleLineProjection" selected="true" text="Uma linha por vez" fx:id="singleLineProjectionMenuItem">
+        <RadioMenuItem fx:id="singleLineProjectionMenuItem" mnemonicParsing="false" onAction="#onSingleLineProjection" selected="true" text="Uma linha por vez">
           <toggleGroup>
             <ToggleGroup fx:id="multilineProjection" />
           </toggleGroup>
         </RadioMenuItem>
-        <RadioMenuItem mnemonicParsing="false" onAction="#onMultilineProjection" text="Várias linhas" toggleGroup="$multilineProjection" fx:id="multilineProjectionMenuItem" />
+        <RadioMenuItem fx:id="multilineProjectionMenuItem" mnemonicParsing="false" onAction="#onMultilineProjection" text="Várias linhas" toggleGroup="$multilineProjection" />
       </Menu>
       <Menu mnemonicParsing="false" text="Tela Chroma">
         <items>
@@ -85,6 +100,7 @@
               <MenuItem mnemonicParsing="false" onAction="#onAddYouTube" text="YouTube" />
               <MenuItem mnemonicParsing="false" onAction="#onAddPicture" text="Imagem" />
               <MenuItem mnemonicParsing="false" onAction="#onAddText" text="Texto" />
+                     <MenuItem mnemonicParsing="false" onAction="#onAddTimer" text="Timer" />
               <MenuItem mnemonicParsing="false" onAction="#onAddBrowser" text="Site WEB" />
               <MenuItem mnemonicParsing="false" onAction="#onAddPlayer" text="Arquivo de vídeo" />
             </items>

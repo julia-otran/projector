@@ -15,6 +15,7 @@
 
 typedef struct {
     int fade_id;
+    void *extra_data;
 
     int mode;
     int duration_ms;
@@ -31,8 +32,12 @@ typedef struct {
 void render_fader_init(render_fader_instance **instance);
 
 void render_fader_fade_in(render_fader_instance *instance, int fade_id, int duration_ms);
+void render_fader_fade_in_data(render_fader_instance *instance, int fade_id, int duration_ms, void *extra_data);
+
 void render_fader_fade_out(render_fader_instance *instance, int fade_id, int duration_ms);
+
 void render_fader_fade_in_out(render_fader_instance *instance, int fade_id, int duration_ms);
+void render_fader_fade_in_out_data(render_fader_instance *instance, int fade_id, int duration_ms, void *extra_data);
 
 int render_fader_is_hidden(fade_node *node);
 void render_fader_cleanup(render_fader_instance *instance);
