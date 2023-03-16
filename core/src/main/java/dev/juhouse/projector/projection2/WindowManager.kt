@@ -1,16 +1,12 @@
 package dev.juhouse.projector.projection2
 
-import dev.juhouse.projector.other.GraphicsFinder
 import dev.juhouse.projector.other.ProjectorPreferences
 import dev.juhouse.projector.services.SettingsService
 import dev.juhouse.projector.utils.FontCreatorUtil
 import dev.juhouse.projector.utils.WindowConfigsObserver
-import javafx.beans.property.ObjectProperty
-import javafx.beans.property.ObjectPropertyBase
 import javafx.beans.property.Property
 import javafx.beans.property.SimpleObjectProperty
 import java.awt.Font
-import java.awt.GraphicsDevice
 
 class WindowManager(private val settingsService: SettingsService) : CanvasDelegate, WindowConfigsObserver.WindowConfigsObserverCallback {
     private val bridge: Bridge = Bridge()

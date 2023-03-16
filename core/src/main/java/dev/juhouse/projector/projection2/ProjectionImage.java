@@ -36,7 +36,7 @@ public class ProjectionImage implements Projectable {
 
     @Override
     public void init() {
-
+        renderFlag.get().getFlagValueProperty().addListener((observableValue, number, t1) -> update());
     }
 
     @Override
