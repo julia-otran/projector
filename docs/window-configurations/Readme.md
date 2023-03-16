@@ -13,7 +13,7 @@ There are some examples of various types of configs. You should generate a new p
 and adjust it according to a sample or by creating your own config.
 
 ## Examples Index
-- Sample 1 
+- [Sample 1](https://github.com/julia-otran/projector/tree/master/docs/window-configurations/sample-1)
 
 ## Example of a complete window config preset
 
