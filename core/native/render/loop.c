@@ -71,6 +71,7 @@ void main_loop_schedule_config_reload(projection_config *config) {
 
 void main_loop_start() {
     mtx_init(&thread_mutex, 0);
+    cnd_init(&thread_cond);
 
     run = 1;
 
@@ -81,5 +82,6 @@ void main_loop_terminate() {
     run = 0;
 
     thrd_join(thread_id, NULL);
+    cnd_destroy(&thread_cond);
     mtx_destroy(&thread_mutex);
 }

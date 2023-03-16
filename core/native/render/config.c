@@ -74,7 +74,7 @@ projection_config* load_config(const char *filePath) {
 
     FILE* config_file;
     
-    open_file(&config_file, filePath, "r");
+    open_file(&config_file, filePath, "rb");
 
     fseek(config_file, 0L, SEEK_END);
 
@@ -91,11 +91,24 @@ projection_config* load_config(const char *filePath) {
     fseek(config_file, 0L, SEEK_SET);
 
     char *config_json_string = malloc(size);
-    size_t read_size = fread(config_json_string, 1, size, config_file);
+    size_t read_size = 0;
+    size_t current_read_bytes = 0;
+
+    do {
+        char* dst = config_json_string + read_size;
+
+        current_read_bytes = fread(dst, 1, size - read_size, config_file);
+
+        read_size += current_read_bytes;
+    } while (current_read_bytes > 0 && read_size < size);
+
     fclose(config_file);
 
     if (read_size != size) {
-        log_debug("Failed reading json data\n");
+        log_debug("Failed reading json data. Read size %llu; Expected %llu\n", read_size, size);
+
+        perror(NULL);
+
         free(config_json_string);
         return &default_config;
     }

@@ -16,6 +16,8 @@ void render_preview_initialize() {
 }
 
 void render_preview_set_size(int in_width, int in_height) {
+    mtx_lock(&thread_mutex);
+
     if (data_buffer) {
         free(data_buffer);
     }
@@ -24,6 +26,8 @@ void render_preview_set_size(int in_width, int in_height) {
     height = in_height;
 
     data_buffer = calloc(width * height, 4);
+
+    mtx_unlock(&thread_mutex);
 }
 
 void render_preview_download_buffer(void *buffer) {
