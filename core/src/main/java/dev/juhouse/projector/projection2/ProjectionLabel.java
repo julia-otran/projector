@@ -32,12 +32,12 @@ public class ProjectionLabel implements Projectable {
         this.canvasDelegate = canvasDelegate;
         factoryChangeListeners = new ArrayList<>();
         textRenders = new HashMap<>();
-
-        canvasDelegate.getFontProperty().addListener((prop, oldValue, newValue) -> updateFont());
     }
 
     @Override
     public void init() {
+        canvasDelegate.getFontProperty().addListener((prop, oldValue, newValue) -> updateFont());
+
         renderFlagProperty.get().getFlagValueProperty().addListener((observableValue, number, t1) -> {
             boolean changed = false;
 
