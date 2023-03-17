@@ -11,8 +11,10 @@ typedef struct {
     vs_blend blend;
 } virtual_screen;
 
-void initialize_virtual_screen(config_bounds *display_bounds, config_virtual_screen *config, void **data);
-void render_virtual_screen(GLuint texture_id, void *data);
-void shutdown_virtual_screen(void *data);
+void virtual_screen_initialize();
+void virtual_screen_start(config_bounds *display_bounds, config_virtual_screen *config, void **data);
+void virtual_screen_render(GLuint texture_id, config_virtual_screen *config, void *data);
+void virtual_screen_stop(void *data);
+void virtual_screen_shutdown();
 
 #endif

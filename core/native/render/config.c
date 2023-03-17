@@ -78,9 +78,9 @@ projection_config* load_config(const char *filePath) {
 
     fseek(config_file, 0L, SEEK_END);
 
-    unsigned long long size = ftell(config_file);
+    size_t size = ftell(config_file);
 
-    log_debug("File string size %llu\n", size);
+    log_debug("File string size %lu\n", size);
 
     if (size > 1024 * 1024) {
         log_debug("Config file too large. Skipped loading this config\n");
@@ -105,7 +105,7 @@ projection_config* load_config(const char *filePath) {
     fclose(config_file);
 
     if (read_size != size) {
-        log_debug("Failed reading json data. Read size %llu; Expected %llu\n", read_size, size);
+        log_debug("Failed reading json data. Read size %lu; Expected %lu\n", read_size, size);
 
         perror(NULL);
 

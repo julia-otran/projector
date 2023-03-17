@@ -37,6 +37,27 @@ static const GLfloat UV_VS_BLEND_MODE[4][8] = {
     },
 };
 
+static GLuint vertexshader;
+static GLuint fragmentshader;
+static GLuint program;
+
+void vs_blend_initialize() {
+    vertexshader = loadShader(GL_VERTEX_SHADER, "blend.vertex.shader");
+    fragmentshader = loadShader(GL_FRAGMENT_SHADER, "blend.fragment.shader");
+
+    program = glCreateProgram();
+    glAttachShader(program, vertexshader);
+    glAttachShader(program, fragmentshader);
+
+    glBindAttribLocation(program, 0, "in_Position");
+    glBindAttribLocation(program, 1, "in_Uv");
+
+    glLinkProgram(program);
+    glValidateProgram(program);
+
+    glUseProgram(0);
+}
+
 void vs_blend_load_coordinates(config_bounds *display_bounds, config_virtual_screen *virtual_screen, config_blend *config, vs_blend_vertex *data) {
     GLuint vertexarray;
     glGenVertexArrays(1, &vertexarray);
@@ -112,32 +133,13 @@ void vs_blend_load_coordinates(config_bounds *display_bounds, config_virtual_scr
     glBindVertexArray(0);
 }
 
-void vs_blend_setup_shaders(vs_blend *data) {
-    data->vertexshader = loadShader(GL_VERTEX_SHADER, "blend.vertex.shader");
-    data->fragmentshader = loadShader(GL_FRAGMENT_SHADER, "blend.fragment.shader");
-
-    data->program = glCreateProgram();
-    glAttachShader(data->program, data->vertexshader);
-    glAttachShader(data->program, data->fragmentshader);
-
-    glBindAttribLocation(data->program, 0, "in_Position");
-    glBindAttribLocation(data->program, 1, "in_Uv");
-
-    glLinkProgram(data->program);
-    glValidateProgram(data->program);
-
-    glUseProgram(0);
-}
-
-void vs_blend_initialize(config_bounds *display_bounds, config_virtual_screen *virtual_screen, vs_blend *instance) {
+void vs_blend_start(config_bounds *display_bounds, config_virtual_screen *virtual_screen, vs_blend *instance) {
     instance->vertexes = (vs_blend_vertex*) calloc(virtual_screen->count_blends, sizeof(vs_blend_vertex));
     instance->vertexes_count = virtual_screen->count_blends;
 
     for (int i = 0; i < virtual_screen->count_blends; i++) {
         vs_blend_load_coordinates(display_bounds, virtual_screen, &virtual_screen->blends[i], &instance->vertexes[i]);
     }
-
-    vs_blend_setup_shaders(instance);
 }
 
 void vs_blend_render(vs_blend *instance) {
@@ -145,7 +147,7 @@ void vs_blend_render(vs_blend *instance) {
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    glUseProgram(instance->program);
+    glUseProgram(program);
 
     for (int i = 0; i < instance->vertexes_count; i++) {
         glBindVertexArray(instance->vertexes[i].vertexarray);
@@ -164,7 +166,7 @@ void vs_blend_render(vs_blend *instance) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void vs_blend_shutdown(vs_blend *instance) {
+void vs_blend_stop(vs_blend *instance) {
     for (int i = 0; i < instance->vertexes_count; i++) {
         vs_blend_vertex *data = &instance->vertexes[i];
 
@@ -189,12 +191,14 @@ void vs_blend_shutdown(vs_blend *instance) {
     }
 
     free(instance->vertexes);
+}
 
+void vs_blend_shutdown() {
     glUseProgram(0);
 
-    glDetachShader(instance->program, instance->vertexshader);
-    glDetachShader(instance->program, instance->fragmentshader);
-    glDeleteShader(instance->vertexshader);
-    glDeleteShader(instance->fragmentshader);
-    glDeleteProgram(instance->program);
+    glDetachShader(program, vertexshader);
+    glDetachShader(program, fragmentshader);
+    glDeleteShader(vertexshader);
+    glDeleteShader(fragmentshader);
+    glDeleteProgram(program);
 }

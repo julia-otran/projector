@@ -182,7 +182,7 @@ void monitors_config_hot_reload(projection_config *config) {
 
             if (m->virtual_screen_data) {
                 for (int j=0; j<m->config->count_virtual_screen; j++) {
-                    shutdown_virtual_screen(m->virtual_screen_data[j]);
+                    virtual_screen_stop(m->virtual_screen_data[j]);
                 }
 
                 free(m->virtual_screen_data);
@@ -197,7 +197,7 @@ void monitors_config_hot_reload(projection_config *config) {
                     m->virtual_screen_data = (void**) calloc(dsp->count_virtual_screen, sizeof(void*));
 
                     for (int k=0; k<m->config->count_virtual_screen; k++) {
-                        initialize_virtual_screen(&dsp->monitor_bounds, &m->config->virtual_screens[k], &m->virtual_screen_data[k]);
+                        virtual_screen_start(&dsp->monitor_bounds, &m->config->virtual_screens[k], &m->virtual_screen_data[k]);
                     }
                 }
             }
@@ -224,6 +224,8 @@ void monitors_init(render_output *data, int render_output_count) {
             glViewport(0, 0, width, height);
         }
     }
+
+    virtual_screen_initialize();
 }
 
 void monitors_terminate() {
@@ -235,7 +237,7 @@ void monitors_terminate() {
 
             if (m->virtual_screen_data) {
                 for (int j=0; j<m->config->count_virtual_screen; j++) {
-                    shutdown_virtual_screen(m->virtual_screen_data[j]);
+                    virtual_screen_stop(m->virtual_screen_data[j]);
                     m->virtual_screen_data[j] = NULL;
                 }
 
@@ -244,6 +246,8 @@ void monitors_terminate() {
             }
         }
     }
+
+    virtual_screen_shutdown();
 }
 
 GLuint find_texture_id(config_virtual_screen *vs_config) {
@@ -290,7 +294,7 @@ void monitors_cycle() {
                 texture_id = find_texture_id(&m->config->virtual_screens[j]);
 
                 if (texture_id) {
-                    render_virtual_screen(texture_id, vs_data);
+                    virtual_screen_render(texture_id, &m->config->virtual_screens[j], vs_data);
                 }
             }
 

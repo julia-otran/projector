@@ -30,10 +30,14 @@ When blending projectors, we got something like:
 - The middle of the screen is composed by overlapping both projectors.
 
 - The render width should be the sum of the projector width, minus one time the size of overlapping area
+    
     In this example, we considered that the projectors will use 960x540 resolution. 
+    
     (the HDMI wall ctrl may upscale it to 1920x1080, or maybe 1280x720, however what really matters in such case is the aspect ratio,
     so using 960x540 makes calcs easy. You might have a 4k output and just multiply these values by 2)
+    
     So, 960+960 = 1920, however we had a 100px overlapping area, Which results into a 1820 total width
+    
     As result, the main render will be sized 1820x540
 
 - The input bound width of the virtual screens #1 #2 should have 960 pixels: This gives a width of ~0.527472 (960/1820)

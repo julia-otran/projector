@@ -46,7 +46,7 @@ GLuint loadShader(GLuint type, char *name) {
 
     GLuint shaderID = glCreateShader(type);
 
-    glShaderSource(shaderID, 1, shader_code, shader_size);
+    glShaderSource(shaderID, 1, (const GLchar * const *) shader_code, shader_size);
     glCompileShader(shaderID);
 
     GLint compileStatus;

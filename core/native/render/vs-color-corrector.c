@@ -5,7 +5,44 @@
 #include "debug.h"
 #include "vs-color-corrector.h"
 
-void vs_color_corrector_load_coordinates(config_bounds *display_bounds, config_virtual_screen *config, vs_color_corrector *data) {
+static GLuint vertexshader;
+static GLuint fragmentshader;
+static GLuint program;
+
+static GLuint textureUniform;
+static GLuint brightAdjustUniform;
+static GLuint exposureAdjustUniform;
+static GLuint lowAdjustUniform;
+static GLuint midAdjustUniform;
+static GLuint highAdjustUniform;
+static GLuint preserveLumUniform;
+
+void vs_color_corrector_init() {
+    vertexshader = loadShader(GL_VERTEX_SHADER, "color-corrector.vertex.shader");
+    fragmentshader = loadShader(GL_FRAGMENT_SHADER, "color-corrector.fragment.shader");
+
+    program = glCreateProgram();
+    glAttachShader(program, vertexshader);
+    glAttachShader(program, fragmentshader);
+
+    glBindAttribLocation(program, 0, "in_Position");
+    glBindAttribLocation(program, 1, "in_Uv");
+
+    glLinkProgram(program);
+    glValidateProgram(program);
+
+    textureUniform = glGetUniformLocation(program, "image");
+    brightAdjustUniform = glGetUniformLocation(program, "brightAdjust");
+    exposureAdjustUniform = glGetUniformLocation(program, "exposureAdjust");
+    lowAdjustUniform = glGetUniformLocation(program, "lowAdjust");
+    midAdjustUniform = glGetUniformLocation(program, "midAdjust");
+    highAdjustUniform = glGetUniformLocation(program, "highAdjust");
+    preserveLumUniform = glGetUniformLocation(program, "preserveLuminosity");
+
+    glUseProgram(0);
+}
+
+void vs_color_corrector_start(config_bounds *display_bounds, config_virtual_screen *config, vs_color_corrector *data) {
     GLuint vertexarray;
     glGenVertexArrays(1, &vertexarray);
     glBindVertexArray(vertexarray);
@@ -85,57 +122,25 @@ void vs_color_corrector_load_coordinates(config_bounds *display_bounds, config_v
     glBindVertexArray(0);
 }
 
-void vs_color_corrector_setup_shaders(config_virtual_screen *config, vs_color_corrector *data) {
-    data->vertexshader = loadShader(GL_VERTEX_SHADER, "color-corrector.vertex.shader");
-    data->fragmentshader = loadShader(GL_FRAGMENT_SHADER, "color-corrector.fragment.shader");
+void vs_color_corrector_set_uniforms(config_virtual_screen *config) {
+    glUniform3f(brightAdjustUniform, config->white_balance.bright.r, config->white_balance.bright.g, config->white_balance.bright.b);
+    glUniform3f(exposureAdjustUniform, config->white_balance.exposure.r, config->white_balance.exposure.g, config->white_balance.exposure.b);
 
-    data->program = glCreateProgram();
-    glAttachShader(data->program, data->vertexshader);
-    glAttachShader(data->program, data->fragmentshader);
-
-    glBindAttribLocation(data->program, 0, "in_Position");
-    glBindAttribLocation(data->program, 1, "in_Uv");
-
-    glLinkProgram(data->program);
-    glValidateProgram(data->program);
-
-    data->textureUniform = glGetUniformLocation(data->program, "image");
-    data->brightAdjustUniform = glGetUniformLocation(data->program, "brightAdjust");
-    data->exposureAdjustUniform = glGetUniformLocation(data->program, "exposureAdjust");
-    data->lowAdjustUniform = glGetUniformLocation(data->program, "lowAdjust");
-    data->midAdjustUniform = glGetUniformLocation(data->program, "midAdjust");
-    data->highAdjustUniform = glGetUniformLocation(data->program, "highAdjust");
-    data->preserveLumUniform = glGetUniformLocation(data->program, "preserveLuminosity");
-
-    glUseProgram(0);
+    glUniform3f(lowAdjustUniform, config->color_balance.shadows.r, config->color_balance.shadows.g, config->color_balance.shadows.b);
+    glUniform3f(midAdjustUniform, config->color_balance.midtones.r, config->color_balance.midtones.g, config->color_balance.midtones.b);
+    glUniform3f(highAdjustUniform, config->color_balance.highlights.r, config->color_balance.highlights.g, config->color_balance.highlights.b);
+    glUniform1f(preserveLumUniform, config->color_balance.preserve_luminosity);
 }
 
-void vs_color_corrector_init_uniforms(config_virtual_screen *config, vs_color_corrector *data) {
-    glUseProgram(data->program);
 
-    glUniform3f(data->brightAdjustUniform, config->white_balance.bright.r, config->white_balance.bright.g, config->white_balance.bright.b);
-    glUniform3f(data->exposureAdjustUniform, config->white_balance.exposure.r, config->white_balance.exposure.g, config->white_balance.exposure.b);
+void vs_color_corrector_render_texture(GLuint texture_id, config_virtual_screen *config, vs_color_corrector *data) {
+    glUseProgram(program);
 
-    glUniform3f(data->lowAdjustUniform, config->color_balance.shadows.r, config->color_balance.shadows.g, config->color_balance.shadows.b);
-    glUniform3f(data->midAdjustUniform, config->color_balance.midtones.r, config->color_balance.midtones.g, config->color_balance.midtones.b);
-    glUniform3f(data->highAdjustUniform, config->color_balance.highlights.r, config->color_balance.highlights.g, config->color_balance.highlights.b);
-    glUniform1f(data->preserveLumUniform, config->color_balance.preserve_luminosity);
-
-    glUseProgram(0);
-}
-
-void vs_color_corrector_init(config_bounds *display_bounds, config_virtual_screen *config, vs_color_corrector *data) {
-    vs_color_corrector_load_coordinates(display_bounds, config, data);
-    vs_color_corrector_setup_shaders(config, data);
-    vs_color_corrector_init_uniforms(config, data);
-}
-
-void vs_color_corrector_render_texture(GLuint texture_id, vs_color_corrector *data) {
-    glUseProgram(data->program);
+    vs_color_corrector_set_uniforms(config);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture_id);
-    glUniform1i(data->textureUniform, 0);
+    glUniform1i(textureUniform, 0);
 
     glBindVertexArray(data->vertexarray);
     glEnableVertexAttribArray(0);
@@ -147,18 +152,11 @@ void vs_color_corrector_render_texture(GLuint texture_id, vs_color_corrector *da
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
     glBindVertexArray(0);
+
     glUseProgram(0);
 }
 
-void vs_color_corrector_shutdown(vs_color_corrector *data) {
-    glUseProgram(0);
-
-    glDetachShader(data->program, data->vertexshader);
-    glDetachShader(data->program, data->fragmentshader);
-    glDeleteShader(data->vertexshader);
-    glDeleteShader(data->fragmentshader);
-    glDeleteProgram(data->program);
-
+void vs_color_corrector_stop(vs_color_corrector *data) {
     // Select the VAO
     glBindVertexArray(data->vertexarray);
 
@@ -177,4 +175,14 @@ void vs_color_corrector_shutdown(vs_color_corrector *data) {
     // Delete the VAO
     glBindVertexArray(0);
     glDeleteVertexArrays(1, &data->vertexarray);
+}
+
+void vs_color_corrector_shutdown() {
+    glUseProgram(0);
+
+    glDetachShader(program, vertexshader);
+    glDetachShader(program, fragmentshader);
+    glDeleteShader(vertexshader);
+    glDeleteShader(fragmentshader);
+    glDeleteProgram(program);
 }

@@ -1,0 +1,304 @@
+{
+  "renders": [
+    {
+      "render_id": 1,
+      "w": 1820,
+      "h": 540,
+      "text_area": {
+        "x": 30,
+        "y": 70,
+        "w": 1760,
+        "h": 400
+      },
+      "enable_render_background_assets": 1,
+      "enable_render_image": 1,
+      "enable_render_video": 1,
+      "render_mode": 1,
+      "background_clear_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      "text_color": {
+        "r": 1,
+        "g": 1,
+        "b": 1
+      }
+    },
+    {
+      "render_id": 2,
+      "w": 960,
+      "h": 540,
+      "text_area": {
+        "x": 30,
+        "y": 30,
+        "w": 900,
+        "h": 480
+      },
+      "enable_render_background_assets": 1,
+      "enable_render_image": 1,
+      "enable_render_video": 1,
+      "render_mode": 2,
+      "background_clear_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      "text_color": {
+        "r": 1,
+        "g": 1,
+        "b": 1
+      }
+    },
+    {
+      "render_id": 3,
+      "w": 960,
+      "h": 540,
+      "text_area": {
+        "x": 30,
+        "y": 440,
+        "w": 900,
+        "h": 80
+      },
+      "enable_render_background_assets": 0,
+      "enable_render_image": 0,
+      "enable_render_video": 0,
+      "render_mode": 2,
+      "background_clear_color": {
+        "r": 0,
+        "g": 1,
+        "b": 0
+      },
+      "text_color": {
+        "r": 1,
+        "g": 1,
+        "b": 0
+      }
+    }
+  ],
+  "display": [
+    {
+      "monitor_bounds": {
+        "x": 0,
+        "y": 0,
+        "w": 1920,
+        "h": 1080
+      },
+      "projection_enabled": 1,
+      "virtual_screens": [
+        {
+          "source_render_id": 1,
+          "input_bounds": {
+            "x": 0,
+            "y": 0,
+            "w": 0.526041667,
+            "h": 1
+          },
+          "output_bounds": {
+            "x": 0,
+            "y": 0,
+            "w": 960,
+            "h": 540
+          },
+          "color_balance": {
+            "shadows": {
+              "r": 0,
+              "g": 0,
+              "b": 0
+            },
+            "midtones": {
+              "r": 0,
+              "g": 0,
+              "b": 0
+            },
+            "highlights": {
+              "r": 0,
+              "g": 0,
+              "b": 0
+            },
+            "preserve_luminosity": 1
+          },
+          "white_balance": {
+            "bright": {
+              "r": 0,
+              "g": 0,
+              "b": 0
+            },
+            "exposure": {
+              "r": 1,
+              "g": 1,
+              "b": 1
+            }
+          },
+          "blends": [
+            {
+              "position": {
+                "x": 862,
+                "y": 0,
+                "w": 98,
+                "h": 540
+              },
+              "direction": 0
+            }
+          ],
+          "help_lines": [],
+          "black_level_adjusts": []
+        },
+        {
+          "source_render_id": 1,
+          "input_bounds": {
+            "x": 0.473958333,
+            "y": 0,
+            "w": 0.526041667,
+            "h": 1
+          },
+          "output_bounds": {
+            "x": 960,
+            "y": 0,
+            "w": 960,
+            "h": 540
+          },
+          "color_balance": {
+            "shadows": {
+              "r": 0,
+              "g": 0,
+              "b": 0
+            },
+            "midtones": {
+              "r": 0,
+              "g": 0,
+              "b": 0
+            },
+            "highlights": {
+              "r": 0,
+              "g": 0,
+              "b": 0
+            },
+            "preserve_luminosity": 1
+          },
+          "white_balance": {
+            "bright": {
+              "r": 0,
+              "g": 0,
+              "b": 0
+            },
+            "exposure": {
+              "r": 1,
+              "g": 1,
+              "b": 1
+            }
+          },
+          "blends": [
+            {
+              "position": {
+                "x": 0,
+                "y": 0,
+                "w": 98,
+                "h": 540
+              },
+              "direction": 1
+            }
+          ],
+          "help_lines": [],
+          "black_level_adjusts": []
+        },
+        {
+          "source_render_id": 2,
+          "input_bounds": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "output_bounds": {
+            "x": 0,
+            "y": 540,
+            "w": 960,
+            "h": 540
+          },
+          "color_balance": {
+            "shadows": {
+              "r": 0,
+              "g": 0,
+              "b": 0
+            },
+            "midtones": {
+              "r": 0,
+              "g": 0,
+              "b": 0
+            },
+            "highlights": {
+              "r": 0,
+              "g": 0,
+              "b": 0
+            },
+            "preserve_luminosity": 1
+          },
+          "white_balance": {
+            "bright": {
+              "r": 0,
+              "g": 0,
+              "b": 0
+            },
+            "exposure": {
+              "r": 1,
+              "g": 1,
+              "b": 1
+            }
+          },
+          "blends": [],
+          "help_lines": [],
+          "black_level_adjusts": []
+        },
+        {
+          "source_render_id": 3,
+          "input_bounds": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "output_bounds": {
+            "x": 960,
+            "y": 540,
+            "w": 960,
+            "h": 540
+          },
+          "color_balance": {
+            "shadows": {
+              "r": 0,
+              "g": 0,
+              "b": 0
+            },
+            "midtones": {
+              "r": 0,
+              "g": 0,
+              "b": 0
+            },
+            "highlights": {
+              "r": 0,
+              "g": 0,
+              "b": 0
+            },
+            "preserve_luminosity": 1
+          },
+          "white_balance": {
+            "bright": {
+              "r": 0,
+              "g": 0,
+              "b": 0
+            },
+            "exposure": {
+              "r": 1,
+              "g": 1,
+              "b": 1
+            }
+          },
+          "blends": [],
+          "help_lines": [],
+          "black_level_adjusts": []
+        }
+      ]
+    }
+  ]
+}
