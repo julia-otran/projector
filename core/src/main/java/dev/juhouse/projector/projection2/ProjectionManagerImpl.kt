@@ -88,7 +88,20 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
         projectablesList.add(image)
 
         image.init()
+        image.rebuild()
+
         return image
+    }
+
+    override fun createWindowCapture(): ProjectionWindowCapture {
+        val windowCapture = ProjectionWindowCapture(delegate)
+
+        projectablesList.add(windowCapture)
+
+        windowCapture.init()
+        windowCapture.rebuild()
+
+        return windowCapture
     }
 
     override fun setProjectable(projectable: Projectable?) {

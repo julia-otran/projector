@@ -97,12 +97,13 @@
           <MenuButton fx:id="addItemButtonGroup" mnemonicParsing="false" prefHeight="25.0" text="+ Incluir item">
             <items>
               <MenuItem mnemonicParsing="false" onAction="#onAddMusic" text="Letra de Musica" />
-              <MenuItem mnemonicParsing="false" onAction="#onAddYouTube" text="YouTube" />
               <MenuItem mnemonicParsing="false" onAction="#onAddPicture" text="Imagem" />
-              <MenuItem mnemonicParsing="false" onAction="#onAddText" text="Texto" />
-                     <MenuItem mnemonicParsing="false" onAction="#onAddTimer" text="Timer" />
-              <MenuItem mnemonicParsing="false" onAction="#onAddBrowser" text="Site WEB" />
               <MenuItem mnemonicParsing="false" onAction="#onAddPlayer" text="Arquivo de vídeo" />
+                     <MenuItem mnemonicParsing="false" onAction="#onAddTimer" text="Timer" />
+              <MenuItem mnemonicParsing="false" onAction="#onAddText" text="Texto" />
+                     <MenuItem mnemonicParsing="false" onAction="#onAddWindowCapture" text="Captura de Janela" />
+              <MenuItem mnemonicParsing="false" onAction="#onAddYouTube" text="YouTube" />
+              <MenuItem mnemonicParsing="false" onAction="#onAddBrowser" text="Site WEB" />
             </items>
           </MenuButton>
           <ListView fx:id="projectablesListView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="322.0" prefWidth="268.0" VBox.vgrow="ALWAYS">

@@ -62,6 +62,8 @@ public class Bridge {
 
     public native void downloadPreviewData(ByteBuffer buffer);
 
+    public native String[] getWindowList();
+
     public int getRenderAreaWidth() {
         return Arrays.stream(getRenderSettings()).filter(config -> config.getRenderMode() == 1).findFirst().map(BridgeRender::getWidth).orElse(1280);
     }

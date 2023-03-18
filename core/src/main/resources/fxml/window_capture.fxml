@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dev.juhouse.projector.forms.controllers.projection.WindowCaptureController">
+   <children>
+      <VBox layoutX="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <Pane fx:id="projectionControlsPane" VBox.vgrow="NEVER" />
+            <BorderPane VBox.vgrow="ALWAYS">
+               <center>
+                  <HBox fillHeight="false" maxHeight="-Infinity" maxWidth="-Infinity" BorderPane.alignment="CENTER">
+                     <children>
+                        <ChoiceBox fx:id="windowListChoiceBox" maxHeight="1.7976931348623157E308" prefHeight="32.0" prefWidth="350.0" HBox.hgrow="ALWAYS">
+                           <HBox.margin>
+                              <Insets right="16.0" />
+                           </HBox.margin>
+                        </ChoiceBox>
+                        <Button mnemonicParsing="false" onAction="#onRefreshWindowList" text="⟳">
+                           <font>
+                              <Font size="17.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </HBox>
+               </center>
+            </BorderPane>
+         </children>
+      </VBox>
+   </children>
+   <padding>
+      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+   </padding>
+</AnchorPane>

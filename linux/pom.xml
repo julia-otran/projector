@@ -104,8 +104,15 @@
                                 <fileName>cJSON_Utils.c</fileName>
                             </fileNames>
                         </source>
+
                         <source>
-                            <!-- path to the C/C++ sources -->
+                            <directory>../core/native/render/linux</directory>
+                            <fileNames>
+                                <fileName>window-capture.c</fileName>
+                            </fileNames>
+                        </source>
+
+                        <source>
                             <directory>../core/native/render</directory>
                             <fileNames>
                                 <fileName>clock.c</fileName>
@@ -134,6 +141,7 @@
                             </fileNames>
                         </source>
                     </sources>
+
                     <compilerProvider>generic-classic</compilerProvider>
                     <compilerExecutable>gcc</compilerExecutable>
                     <!-- compiler options -->

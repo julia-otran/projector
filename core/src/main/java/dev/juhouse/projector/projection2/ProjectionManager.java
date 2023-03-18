@@ -40,6 +40,8 @@ public interface ProjectionManager {
 
     ProjectionImage createImage();
 
+    ProjectionWindowCapture createWindowCapture();
+
     void setProjectable(Projectable webView);
 
     WrapperFactory getWrapperFactory();

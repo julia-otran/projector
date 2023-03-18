@@ -5,24 +5,17 @@ import dev.juhouse.projector.scenes.*;
 import java.io.IOException;
 
 public enum ProjectionListItemType {
-    MUSIC, VIDEO, IMAGE, WEB_SITE, TEXT, TIMER;
+    MUSIC, VIDEO, IMAGE, WEB_SITE, TEXT, TIMER, WINDOW_CAPTURE;
 
     public ProjectionItemSubScene createSubScene(double width, double height) throws IOException {
-        switch (this) {
-            case TIMER:
-                return TimerSubScene.Companion.createTimerScene(width, height);
-            case WEB_SITE:
-                return BrowserSubScene.createScene(width, height);
-            case IMAGE:
-                return ImageSubScene.createScene(width, height);
-            case VIDEO:
-                return PlayerSubScene.createScene(width, height);
-            case MUSIC:
-                return MusicProjectionScene.createScene(width, height);
-            case TEXT:
-                return TextSubScene.createScene(width, height);
-        }
-
-        return null;
+        return switch (this) {
+            case WINDOW_CAPTURE -> WindowCaptureSubScene.Companion.createWindowCaptureScene(width, height);
+            case TIMER -> TimerSubScene.Companion.createTimerScene(width, height);
+            case WEB_SITE -> BrowserSubScene.createScene(width, height);
+            case IMAGE -> ImageSubScene.createScene(width, height);
+            case VIDEO -> PlayerSubScene.createScene(width, height);
+            case MUSIC -> MusicProjectionScene.createScene(width, height);
+            case TEXT -> TextSubScene.createScene(width, height);
+        };
     }
 }

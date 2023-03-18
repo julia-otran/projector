@@ -646,6 +646,16 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
         }
     }
 
+    @FXML
+    public void onAddWindowCapture() {
+        try {
+            listRepository.createItem(projectionList, "Captura de Janela", ProjectionListItemType.WINDOW_CAPTURE);
+            reloadProjectables();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public boolean addMusic(Integer id) {
         for (ProjectionItemSubScene i : itemSubScenes.values()) {

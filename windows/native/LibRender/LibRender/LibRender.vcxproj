@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClInclude Include="src\cJSON\cJSON.h" />
     <ClInclude Include="src\cJSON\cJSON_Utils.h" />
+    <ClInclude Include="src\tinycthread\source\tinycthread.h" />
     <ClInclude Include="src\include\clock.h" />
     <ClInclude Include="src\include\config-debug.h" />
     <ClInclude Include="src\include\config-parse.h" />
@@ -178,11 +179,13 @@
     <ClInclude Include="src\include\vs-blend.h" />
     <ClInclude Include="src\include\vs-color-corrector.h" />
     <ClInclude Include="src\include\vs-help-lines.h" />
-    <ClInclude Include="src\tinycthread\source\tinycthread.h" />
+    <ClInclude Include="src\include\window-capture.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\cJSON\cJSON.c" />
     <ClCompile Include="src\cJSON\cJSON_Utils.c" />
+    <ClCompile Include="src\tinycthread\source\tinycthread.c" />
+    <ClCompile Include="src\render\windows\window-capture.c" />
     <ClCompile Include="src\render\clock.c" />
     <ClCompile Include="src\render\config-debug.c" />
     <ClCompile Include="src\render\config-parse.c" />
@@ -206,7 +209,6 @@
     <ClCompile Include="src\render\vs-blend.c" />
     <ClCompile Include="src\render\vs-color-corrector.c" />
     <ClCompile Include="src\render\vs-help-lines.c" />
-    <ClCompile Include="src\tinycthread\source\tinycthread.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

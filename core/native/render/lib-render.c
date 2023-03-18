@@ -14,6 +14,7 @@
 #include "render-web-view.h"
 #include "render-image.h"
 #include "render-preview.h"
+#include "window-capture.h"
 
 static int initialized = 0;
 static projection_config *config;
@@ -54,6 +55,8 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_initialize(
     prepare_default_config(&default_monitor, no_display);
 
     initialize_renders();
+
+    window_capture_init();
 
     initialized = 1;
 }
@@ -265,11 +268,28 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_downloadPre
     render_preview_download_buffer((void*) data);
 }
 
+JNIEXPORT jobjectArray JNICALL Java_dev_juhouse_projector_projection2_Bridge_getWindowList(JNIEnv *env, jobject _) {
+    window_node_list *list = window_capture_get_window_list();
+
+    jclass string_class = (*env)->FindClass(env, "java/lang/String");
+    jobjectArray result = (*env)->NewObjectArray(env, list->list_size, string_class, NULL);
+
+    for (unsigned int i = 0; i < list->list_size; i++) {
+        jstring window_name = (*env)->NewStringUTF(env, list->list[i].window_name);
+        (*env)->SetObjectArrayElement(env, result, i, window_name);
+    }
+
+    window_capture_free_window_list(list);
+    return result;
+}
+
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_shutdown(JNIEnv *env, jobject _) {
     CHECK_INITIALIZE
 
     main_loop_terminate();
     shutdown_renders();
     shutdown_monitors();
+    window_capture_terminate();
+
     glfwTerminate();
 }
