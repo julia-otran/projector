@@ -129,6 +129,7 @@
                                 <fileName>virtual-screen.c</fileName>
                                 <fileName>vs-color-corrector.c</fileName>
                                 <fileName>vs-blend.c</fileName>
+                                <fileName>vs-help-lines.c</fileName>
                             </fileNames>
                         </source>
                     </sources>

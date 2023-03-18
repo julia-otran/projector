@@ -176,6 +176,7 @@
     <ClInclude Include="src\include\virtual-screen.h" />
     <ClInclude Include="src\include\vs-blend.h" />
     <ClInclude Include="src\include\vs-color-corrector.h" />
+    <ClInclude Include="src\include\vs-help-lines.h" />
     <ClInclude Include="src\tinycthread\source\tinycthread.h" />
   </ItemGroup>
   <ItemGroup>
@@ -202,6 +203,7 @@
     <ClCompile Include="src\render\virtual-screen.c" />
     <ClCompile Include="src\render\vs-blend.c" />
     <ClCompile Include="src\render\vs-color-corrector.c" />
+    <ClCompile Include="src\render\vs-help-lines.c" />
     <ClCompile Include="src\tinycthread\source\tinycthread.c" />
   </ItemGroup>
   <ItemGroup>
