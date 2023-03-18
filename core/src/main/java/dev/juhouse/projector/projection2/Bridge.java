@@ -64,6 +64,10 @@ public class Bridge {
 
     public native String[] getWindowList();
 
+    public native void setWindowCaptureWindowName(String name);
+
+    public native void setWindowCaptureRender(int renderFlag);
+
     public int getRenderAreaWidth() {
         return Arrays.stream(getRenderSettings()).filter(config -> config.getRenderMode() == 1).findFirst().map(BridgeRender::getWidth).orElse(1280);
     }

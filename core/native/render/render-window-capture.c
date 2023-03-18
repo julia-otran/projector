@@ -1,29 +1,13 @@
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
-#include <string.h>
-
 #include "tinycthread.h"
-#include "debug.h"
 #include "ogl-loader.h"
 #include "render-fader.h"
-#include "render-video.h"
 #include "render-pixel-unpack-buffer.h"
-
-static int src_crop;
-static void *src_buffer;
-static int src_width;
-static int src_height;
-static int src_render;
-static int src_update_buffer;
-
-static int dst_width = 0;
-static int dst_height = 0;
-static int dst_render = 0;
+#include "render-window-capture.h"
+#include "window-capture.h"
 
 static mtx_t thread_mutex;
-static cnd_t thread_cond;
+
+static void *window_capture_handler;
 
 static render_fader_instance *fader_instance;
 static render_pixel_unpack_buffer_instance *buffer_instance;
@@ -32,82 +16,72 @@ static GLuint texture_id;
 static int texture_loaded;
 static int should_clear;
 
-void render_video_initialize() {
-    src_crop = 0;
-    src_update_buffer = 0;
+static int src_render;
+static int dst_render;
+
+static int dst_width, dst_height;
+
+void render_window_capture_initialize() {
     src_render = 0;
+    dst_render = 0;
     texture_loaded = 0;
     should_clear = 0;
 
     mtx_init(&thread_mutex, 0);
-    cnd_init(&thread_cond);
-
     render_fader_init(&fader_instance);
 }
 
-void render_video_src_set_crop_video(int in_crop) {
-    src_crop = in_crop;
-}
-
-void render_video_src_set_buffer(void *buffer, int width, int height) {
-    src_buffer = buffer;
-    src_width = width;
-    src_height = height;
-}
-
-void render_video_src_set_render(int render) {
-    src_render = render;
-}
-
-void render_video_src_buffer_update() {
+void render_window_capture_src_set_window_name(char *window_name) {
     mtx_lock(&thread_mutex);
 
-    if (src_update_buffer == 0) {
-        src_update_buffer = 1;
-        cnd_wait(&thread_cond, &thread_mutex);
+    if (window_capture_handler) {
+        window_capture_free_handler(window_capture_handler);
     }
+
+    window_capture_handler = window_capture_get_handler(window_name);
 
     mtx_unlock(&thread_mutex);
 }
 
-void render_video_create_buffers() {
+void render_window_capture_src_set_render(int render) {
+    src_render = render;
+}
+
+void render_window_capture_create_buffers() {
     render_pixel_unpack_buffer_create(&buffer_instance);
 }
 
-void render_video_deallocate_buffers() {
-    render_pixel_unpack_buffer_deallocate(buffer_instance);
-    buffer_instance = NULL;
-}
-
-void render_video_update_buffers() {
+void render_window_capture_update_buffers() {
     int buffer_updated = 0;
 
     render_pixel_unpack_buffer_node* buffer = render_pixel_unpack_buffer_dequeue_for_write(buffer_instance);
 
     mtx_lock(&thread_mutex);
 
-    if (src_update_buffer) {
-        src_update_buffer = 0;
-
+    if (src_render && window_capture_handler) {
         if (buffer) {
             glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
 
-            if (buffer->width != src_width || buffer->height != src_height) {
-                glBufferData(GL_PIXEL_UNPACK_BUFFER, src_width * src_height * 4, 0, GL_DYNAMIC_DRAW);
-                buffer->width = src_width;
-                buffer->height = src_height;
+            int width, height;
+
+            window_capture_get_window_size(window_capture_handler, &width, &height);
+
+            if (width > 0 && height > 0) {
+                if (buffer->width != width || buffer->height != height) {
+                    glBufferData(GL_PIXEL_UNPACK_BUFFER, width * height * 4, 0, GL_DYNAMIC_DRAW);
+                    buffer->width = width;
+                    buffer->height = height;
+                }
+
+                buffer_updated = 1;
+
+                void *data = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+                window_capture_get_image(window_capture_handler, width, height, data);
+                glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+
+                glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
             }
-
-            buffer_updated = 1;
-
-            void *data = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
-            memcpy(data, src_buffer, src_width * src_height * 4);
-            glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-
-            glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
         }
-
-        cnd_signal(&thread_cond);
     }
 
     mtx_unlock(&thread_mutex);
@@ -119,11 +93,16 @@ void render_video_update_buffers() {
     }
 }
 
-void render_video_create_assets() {
+void render_window_capture_deallocate_buffers() {
+    render_pixel_unpack_buffer_deallocate(buffer_instance);
+    buffer_instance = NULL;
+}
+
+void render_window_capture_create_assets() {
     glGenTextures(1, &texture_id);
 }
 
-void render_video_update_assets() {
+void render_window_capture_update_assets() {
     render_pixel_unpack_buffer_node* buffer = render_pixel_unpack_buffer_dequeue_for_read(buffer_instance);
 
     if (buffer) {
@@ -160,7 +139,11 @@ void render_video_update_assets() {
     }
 }
 
-void render_video_render(render_layer *layer) {
+void render_window_capture_deallocate_assets() {
+    glDeleteTextures(1, &texture_id);
+}
+
+void render_window_capture_render(render_layer *layer) {
     if (dst_width <= 0 || dst_height <= 0) {
         return;
     }
@@ -177,22 +160,12 @@ void render_video_render(render_layer *layer) {
     float w_sz = layer->config.h * w_scale;
     float h_sz = layer->config.w * h_scale;
 
-    if (src_crop) {
-        if (w_sz > layer->config.w) {
-            w = w_sz;
-            h = h_scale * w;
-        } else {
-            h = h_sz;
-            w = w_scale * h;
-        }
+    if (w_sz < layer->config.w) {
+        w = w_sz;
+        h = h_scale * w;
     } else {
-        if (w_sz < layer->config.w) {
-            w = w_sz;
-            h = h_scale * w;
-        } else {
-            h = h_sz;
-            w = w_scale * h;
-        }
+        h = h_sz;
+        w = w_scale * h;
     }
 
     x = (layer->config.w - w) / 2;
@@ -221,10 +194,7 @@ void render_video_render(render_layer *layer) {
     }
 }
 
-void render_video_deallocate_assets() {
-    glDeleteTextures(1, &texture_id);
-}
-
-void render_video_shutdown() {
+void render_window_capture_shutdown() {
+    mtx_destroy(&thread_mutex);
     render_fader_terminate(fader_instance);
 }

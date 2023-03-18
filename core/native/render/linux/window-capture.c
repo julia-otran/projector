@@ -43,8 +43,8 @@ window_node_list* window_capture_get_window_list() {
 
     unsigned int valid_item_count = 0;
 
-    char **names;
-    window_capture_extra_data *extra_datum;
+    char **names = NULL;
+    window_capture_extra_data *extra_datum = NULL;
 
     if (status >= Success && numItems) {
         names = (char**) calloc(numItems, sizeof(char*));
@@ -75,8 +75,8 @@ window_node_list* window_capture_get_window_list() {
 
     int valid_index = 0;
 
-    for (int i = 0; i < numItems; i++) {
-        if (names[i]) {
+    for (unsigned int i = 0; i < numItems; i++) {
+        if (names && names[i] && extra_datum) {
             window_nodes[valid_index].window_name = names[i];
 
             window_nodes[valid_index].extra_data = (window_capture_extra_data*) calloc(1, sizeof(window_capture_extra_data));
@@ -104,6 +104,56 @@ void window_capture_free_window_list(window_node_list* list) {
 
     free(list->list);
     free(list);
+}
+
+void* window_capture_get_handler(char *window_name) {
+    window_node_list* list = window_capture_get_window_list();
+    void *handle = NULL;
+    void *handle_copy = NULL;
+
+    for (unsigned int i = 0; i < list->list_size; i++) {
+        if (strcmp(list->list[i].window_name, window_name) == 0) {
+            handle = list->list[i].extra_data;
+            break;
+        }
+    }
+
+    if (handle) {
+        handle_copy = (void*) calloc(1, sizeof(window_capture_extra_data));
+        memcpy(handle_copy, handle, sizeof(window_capture_extra_data));
+    }
+
+    window_capture_free_window_list(list);
+
+    return handle_copy;
+}
+
+void window_capture_free_handler(void *handler) {
+    free(handler);
+}
+
+void window_capture_get_window_size(void *handler, int *out_width, int *out_height) {
+    window_capture_extra_data* handler_data = (window_capture_extra_data*) handler;
+
+    Window window = handler_data->window;
+
+    XWindowAttributes window_attributes;
+    XGetWindowAttributes(display, window, &window_attributes);
+
+    (*out_width) = window_attributes.width;
+    (*out_height) = window_attributes.height;
+}
+
+void window_capture_get_image(void *handler, int width, int height, void *out_data) {
+    window_capture_extra_data* handler_data = (window_capture_extra_data*) handler;
+
+    Window window = handler_data->window;
+
+    XImage *x_img = XGetImage(display, window, 0, 0, width, height, AllPlanes, ZPixmap);
+
+    memcpy(out_data, x_img->data, width * height * 4);
+
+    XFree(x_img);
 }
 
 void window_capture_terminate() {

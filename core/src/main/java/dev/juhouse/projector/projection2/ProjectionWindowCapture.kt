@@ -5,6 +5,8 @@ import javafx.beans.property.ReadOnlyObjectWrapper
 
 class ProjectionWindowCapture(private val delegate: CanvasDelegate): Projectable {
     private val renderFlagProperty = ReadOnlyObjectWrapper<BridgeRenderFlag>()
+    private var windowName: String? = null
+    private var render: Boolean = false
 
     override fun init() {
         renderFlagProperty.set(BridgeRenderFlag(delegate))
@@ -19,7 +21,22 @@ class ProjectionWindowCapture(private val delegate: CanvasDelegate): Projectable
     }
 
     override fun setRender(render: Boolean) {
+        this.render = render;
+        updateRender()
+    }
 
+    fun setWindowCaptureName(name: String?) {
+        this.windowName = name
+        updateRender()
+    }
+
+    private fun updateRender() {
+        if (render && !windowName.isNullOrBlank()) {
+            delegate.bridge.setWindowCaptureWindowName(windowName)
+            delegate.bridge.setWindowCaptureRender(renderFlagProperty.get().flagValue);
+        } else {
+            delegate.bridge.setWindowCaptureRender(BridgeRenderFlag.NO_RENDER);
+        }
     }
 
     override fun getRenderFlagProperty(): ReadOnlyObjectProperty<BridgeRenderFlag> {

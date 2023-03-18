@@ -34,6 +34,12 @@ class WindowCaptureController : ProjectionController(), ProjectionBarControlCall
         controlBar.callback = this
         controlBar.manager = projectionManager
         controlBar.attach(projectionControlsPane)
+        controlBar.canProject = false
+
+        windowListChoiceBox.selectionModel.selectedItemProperty().addListener { _, _, newValue ->
+            controlBar.canProject = !newValue.isNullOrBlank()
+            projectable.setWindowCaptureName(newValue)
+        }
 
         onRefreshWindowList()
     }
@@ -58,6 +64,8 @@ class WindowCaptureController : ProjectionController(), ProjectionBarControlCall
 
     @FXML
     fun onRefreshWindowList() {
+        controlBar.canProject = false
+        windowListChoiceBox.selectionModel.clearSelection()
         windowListChoiceBox.items.clear()
         windowListChoiceBox.items.addAll(projectable.getWindowList())
     }

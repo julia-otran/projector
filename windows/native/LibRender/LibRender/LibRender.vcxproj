@@ -172,6 +172,7 @@
     <ClInclude Include="src\include\render-preview.h" />
     <ClInclude Include="src\include\render-text.h" />
     <ClInclude Include="src\include\render-video.h" />
+    <ClInclude Include="src\include\render-window-capture.h" />
     <ClInclude Include="src\include\render-web-view.h" />
     <ClInclude Include="src\include\render.h" />
     <ClInclude Include="src\include\virtual-screen.h" />
@@ -202,6 +203,7 @@
     <ClCompile Include="src\render\render-preview.c" />
     <ClCompile Include="src\render\render-text.c" />
     <ClCompile Include="src\render\render-video.c" />
+    <ClCompile Include="src\render\render-window-capture.c" />
     <ClCompile Include="src\render\render-web-view.c" />
     <ClCompile Include="src\render\render.c" />
     <ClCompile Include="src\render\virtual-screen.c" />

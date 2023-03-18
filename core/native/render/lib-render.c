@@ -12,6 +12,7 @@
 #include "render-video.h"
 #include "render-text.h"
 #include "render-web-view.h"
+#include "render-window-capture.h"
 #include "render-image.h"
 #include "render-preview.h"
 #include "window-capture.h"
@@ -281,6 +282,18 @@ JNIEXPORT jobjectArray JNICALL Java_dev_juhouse_projector_projection2_Bridge_get
 
     window_capture_free_window_list(list);
     return result;
+}
+
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setWindowCaptureWindowName(JNIEnv *env, jobject _, jstring j_window_name) {
+    char *window_name = (char*) (*env)->GetStringUTFChars(env, j_window_name, 0);
+
+    render_window_capture_src_set_window_name(window_name);
+
+    (*env)->ReleaseStringUTFChars(env, j_window_name, window_name);
+}
+
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setWindowCaptureRender(JNIEnv *env, jobject _, jint render) {
+    render_window_capture_src_set_render(render);
 }
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_shutdown(JNIEnv *env, jobject _) {

@@ -54,7 +54,7 @@ class ProjectionBarControl: VBox(), ProjectionManagerCallbacks {
         set(value) {
             field = value
 
-            beginProjectionButton.disableProperty().value = value
+            beginProjectionButton.disableProperty().value = !value
         }
 
     val projecting: Boolean
