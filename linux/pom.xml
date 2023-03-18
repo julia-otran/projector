@@ -127,8 +127,9 @@
                                 <fileName>render-video.c</fileName>
                                 <fileName>render-web-view.c</fileName>
                                 <fileName>virtual-screen.c</fileName>
-                                <fileName>vs-color-corrector.c</fileName>
+                                <fileName>vs-black-level-adjust.c</fileName>
                                 <fileName>vs-blend.c</fileName>
+                                <fileName>vs-color-corrector.c</fileName>
                                 <fileName>vs-help-lines.c</fileName>
                             </fileNames>
                         </source>

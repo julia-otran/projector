@@ -33,7 +33,7 @@ typedef struct {
 } config_white_balance;
 
 typedef struct {
-    int x1, x2, y1, y2;
+    int x1, x2, x3, x4, y1, y2, y3, y4;
     config_color_factor color;
     double alpha;
 } config_black_level_adjust;

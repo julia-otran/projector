@@ -2,6 +2,7 @@
 
 #include "ogl-loader.h"
 #include "virtual-screen.h"
+#include "vs-black-level-adjust.h"
 #include "vs-blend.h"
 #include "vs-color-corrector.h"
 #include "vs-help-lines.h"
@@ -25,6 +26,7 @@ void virtual_screen_render(GLuint texture_id, config_virtual_screen *config, voi
     vs_color_corrector_render_texture(texture_id, config, &vs->color_corrector);
     vs_blend_render(&vs->blend);
     vs_help_lines_render(config);
+    vs_black_level_adjust_render(config);
 }
 
 void virtual_screen_stop(void *data) {

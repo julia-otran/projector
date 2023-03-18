@@ -49,8 +49,14 @@ void parse_config_white_balance(cJSON *config_white_balance_json, config_white_b
 void parse_config_black_level_adjust(cJSON *config_black_level_adjust_json, config_black_level_adjust *out) {
     out->x1 = cJSON_GetObjectItemCaseSensitive(config_black_level_adjust_json, "x1")->valueint;
     out->x2 = cJSON_GetObjectItemCaseSensitive(config_black_level_adjust_json, "x2")->valueint;
+    out->x3 = cJSON_GetObjectItemCaseSensitive(config_black_level_adjust_json, "x3")->valueint;
+    out->x4 = cJSON_GetObjectItemCaseSensitive(config_black_level_adjust_json, "x4")->valueint;
+
     out->y1 = cJSON_GetObjectItemCaseSensitive(config_black_level_adjust_json, "y1")->valueint;
     out->y2 = cJSON_GetObjectItemCaseSensitive(config_black_level_adjust_json, "y2")->valueint;
+    out->y3 = cJSON_GetObjectItemCaseSensitive(config_black_level_adjust_json, "y3")->valueint;
+    out->y4 = cJSON_GetObjectItemCaseSensitive(config_black_level_adjust_json, "y4")->valueint;
+
     out->alpha = cJSON_GetObjectItemCaseSensitive(config_black_level_adjust_json, "alpha")->valuedouble;
 
     parse_config_color_factor(cJSON_GetObjectItemCaseSensitive(config_black_level_adjust_json, "color"), &out->color);

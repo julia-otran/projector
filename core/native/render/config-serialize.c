@@ -70,9 +70,15 @@ cJSON* serialize_config_black_level_adjust(config_black_level_adjust *in) {
     cJSON *config_black_level_adjust_json = cJSON_CreateObject();
 
     cJSON_AddItemToObject(config_black_level_adjust_json, "x1", cJSON_CreateNumber(in->x1));
-    cJSON_AddItemToObject(config_black_level_adjust_json, "y1", cJSON_CreateNumber(in->y1));
     cJSON_AddItemToObject(config_black_level_adjust_json, "x2", cJSON_CreateNumber(in->x2));
+    cJSON_AddItemToObject(config_black_level_adjust_json, "x3", cJSON_CreateNumber(in->x3));
+    cJSON_AddItemToObject(config_black_level_adjust_json, "x3", cJSON_CreateNumber(in->x4));
+
+    cJSON_AddItemToObject(config_black_level_adjust_json, "y1", cJSON_CreateNumber(in->y1));
     cJSON_AddItemToObject(config_black_level_adjust_json, "y2", cJSON_CreateNumber(in->y2));
+    cJSON_AddItemToObject(config_black_level_adjust_json, "y3", cJSON_CreateNumber(in->y3));
+    cJSON_AddItemToObject(config_black_level_adjust_json, "y4", cJSON_CreateNumber(in->y4));
+
     cJSON_AddItemToObject(config_black_level_adjust_json, "alpha", cJSON_CreateNumber(in->alpha));
 
     cJSON_AddItemToObject(config_black_level_adjust_json, "color", serialize_config_color_factor(&in->color));
