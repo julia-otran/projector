@@ -1,12 +1,17 @@
 Projector
 =========
 
-Software for media (lyrics, images, videos) projection
+Software for media (lyrics, images, videos, countdown, window capture) projection
 
 Contribute
 ==========
 
 Just open a PR or a Issue. If you notice any bug, please, let me know.
+
+I18n
+=====
+
+There's only support to pt-BR right now.
 
 Build
 =====
