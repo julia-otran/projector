@@ -57,6 +57,14 @@ To execute projector software you will need:
 - GPU with OpenGL 3.2 and GLSL 1.0 support (you can even use mesa, however performance may be degraded)
 - 2GB free ram for running the software
 
+## Windows
+
+No special requirements
+
+## Linux
+
+- This software only works with X11. 
+
 Install
 ==========
 
@@ -73,7 +81,16 @@ Install
 1. Install Java 19
 2. Install Vlc Player from Ubuntu Software, or from your package manager
 
-## Window Configurations
+Window Configurations
+=====================
 
-If default window config does not work for you, many customizations are possible:
-see [Window Configuration Docs](https://github.com/julia-otran/projector/tree/master/docs/window-configurations)
+The default window config will create a projection window at the first non-primary monitor.
+
+This can be changed, and there's also a wonderful world of possibilities:
+
+- Support for blending projectors (Blending, advanced color matching, black level adjust)
+- Support for live broadcast lyrics output (with green background)
+- Support for stage monitors
+- Splitting screen support (you may use a 2x2 HDMI Wall Controller and split 1 video output into 4 independent outputs)
+
+See: [Window Configuration Docs](https://github.com/julia-otran/projector/tree/master/docs/window-configurations)
