@@ -11,11 +11,6 @@ typedef struct {
     unsigned int list_size;
 } window_node_list;
 
-typedef struct {
-    int width, height;
-    void *data;
-} window_image;
-
 void window_capture_init();
 
 window_node_list* window_capture_get_window_list();

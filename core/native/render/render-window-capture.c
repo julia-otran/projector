@@ -174,6 +174,8 @@ void render_window_capture_render(render_layer *layer) {
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnable(GL_TEXTURE_2D);
 
+    glPushMatrix();
+
     render_fader_for_each(fader_instance) {
         float alpha = render_fader_get_alpha(node);
 
@@ -183,15 +185,23 @@ void render_window_capture_render(render_layer *layer) {
 
         glBegin(GL_QUADS);
 
+#ifdef _WIN32
+        glTexCoord2f(0.0, 1.0); glVertex2d(x, y);
+        glTexCoord2f(0.0, 0.0); glVertex2d(x, y + h);
+        glTexCoord2f(1.0, 0.0); glVertex2d(x + w, y + h);
+        glTexCoord2f(1.0, 1.0); glVertex2d(x + w, y);
+#else
         glTexCoord2f(0.0, 0.0); glVertex2d(x, y);
         glTexCoord2f(0.0, 1.0); glVertex2d(x, y + h);
         glTexCoord2f(1.0, 1.0); glVertex2d(x + w, y + h);
         glTexCoord2f(1.0, 0.0); glVertex2d(x + w, y);
-
+#endif
         glEnd();
 
         glBindTexture(GL_TEXTURE_2D, 0);
     }
+
+    glPopMatrix();
 }
 
 void render_window_capture_shutdown() {
