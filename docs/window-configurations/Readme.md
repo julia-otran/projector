@@ -87,7 +87,9 @@ and adjust it according to a sample or by creating your own config.
               "g": 0,
               "b": 0
             },
-            "preserve_luminosity": 1
+            "shadows_luminance": 0.0,
+            "midtones_luminance": 0.0,
+            "highlights_luminance": 0.0
           },
           "white_balance": {
             "bright": {
