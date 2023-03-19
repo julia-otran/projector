@@ -91,6 +91,7 @@ This can be changed, and there's also a wonderful world of possibilities:
 - Support for blending projectors (Blending, advanced color matching, black level adjust)
 - Support for live broadcast lyrics output (with green background)
 - Support for stage monitors
+- Full automatic and output independent lyrics line breaking (it can break lines for main output while keeping non-broken lines for live broadcast output) 
 - Splitting screen support (you may use a 2x2 HDMI Wall Controller and split 1 video output into 4 independent outputs)
 
 See: [Window Configuration Docs](https://github.com/julia-otran/projector/tree/master/docs/window-configurations)
