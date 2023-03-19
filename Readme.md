@@ -75,4 +75,5 @@ Install
 
 ## Window Configurations
 
-See [Window Configuration Docs](https://github.com/julia-otran/projector/tree/master/docs/window-configurations)
+If default window config does not work for you, many customizations are possible:
+see [Window Configuration Docs](https://github.com/julia-otran/projector/tree/master/docs/window-configurations)
