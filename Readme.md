@@ -49,6 +49,14 @@ mvn clean package -pl core,linux
 ## Building OSX
 There's no support to OSX right now. Feel free to setup a XCode project so building librender could be possible
 
+Minimum Requirements
+====================
+
+To execute projector software you will need:
+
+- GPU with support OpenGL 3.2 (you can even use mesa, however performance may be degraded)
+- 2GB free ram for running the software
+
 Install
 ==========
 
