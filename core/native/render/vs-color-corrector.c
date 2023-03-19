@@ -15,7 +15,6 @@ static GLuint exposureAdjustUniform;
 static GLuint lowAdjustUniform;
 static GLuint midAdjustUniform;
 static GLuint highAdjustUniform;
-static GLuint preserveLumUniform;
 
 void vs_color_corrector_init() {
     vertexshader = loadShader(GL_VERTEX_SHADER, "color-corrector.vertex.shader");
@@ -37,7 +36,6 @@ void vs_color_corrector_init() {
     lowAdjustUniform = glGetUniformLocation(program, "lowAdjust");
     midAdjustUniform = glGetUniformLocation(program, "midAdjust");
     highAdjustUniform = glGetUniformLocation(program, "highAdjust");
-    preserveLumUniform = glGetUniformLocation(program, "preserveLuminosity");
 
     glUseProgram(0);
 }
@@ -126,10 +124,29 @@ void vs_color_corrector_set_uniforms(config_virtual_screen *config) {
     glUniform3f(brightAdjustUniform, config->white_balance.bright.r, config->white_balance.bright.g, config->white_balance.bright.b);
     glUniform3f(exposureAdjustUniform, config->white_balance.exposure.r, config->white_balance.exposure.g, config->white_balance.exposure.b);
 
-    glUniform3f(lowAdjustUniform, config->color_balance.shadows.r, config->color_balance.shadows.g, config->color_balance.shadows.b);
-    glUniform3f(midAdjustUniform, config->color_balance.midtones.r, config->color_balance.midtones.g, config->color_balance.midtones.b);
-    glUniform3f(highAdjustUniform, config->color_balance.highlights.r, config->color_balance.highlights.g, config->color_balance.highlights.b);
-    glUniform1f(preserveLumUniform, config->color_balance.preserve_luminosity);
+    glUniform4f(
+        lowAdjustUniform,
+        config->color_balance.shadows.r,
+        config->color_balance.shadows.g,
+        config->color_balance.shadows.b,
+        config->color_balance.shadows_luminance
+    );
+
+    glUniform4f(
+        midAdjustUniform,
+        config->color_balance.midtones.r,
+        config->color_balance.midtones.g,
+        config->color_balance.midtones.b,
+        config->color_balance.midtones_luminance
+    );
+
+    glUniform4f(
+        highAdjustUniform,
+        config->color_balance.highlights.r,
+        config->color_balance.highlights.g,
+        config->color_balance.highlights.b,
+        config->color_balance.highlights_luminance
+    );
 }
 
 

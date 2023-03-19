@@ -38,7 +38,9 @@ void parse_config_color_balance(cJSON *config_color_balance_json, config_color_b
     parse_config_color_factor(cJSON_GetObjectItemCaseSensitive(config_color_balance_json, "midtones"), &out->midtones);
     parse_config_color_factor(cJSON_GetObjectItemCaseSensitive(config_color_balance_json, "highlights"), &out->highlights);
 
-    out->preserve_luminosity = cJSON_GetObjectItemCaseSensitive(config_color_balance_json, "preserve_luminosity")->valueint;
+    out->shadows_luminance = cJSON_GetObjectItemCaseSensitive(config_color_balance_json, "shadows_luminance")->valuedouble;
+    out->midtones_luminance = cJSON_GetObjectItemCaseSensitive(config_color_balance_json, "midtones_luminance")->valuedouble;
+    out->highlights_luminance = cJSON_GetObjectItemCaseSensitive(config_color_balance_json, "highlights_luminance")->valuedouble;
 }
 
 void parse_config_white_balance(cJSON *config_white_balance_json, config_white_balance *out) {

@@ -24,7 +24,9 @@ typedef struct {
     config_color_factor midtones;
     config_color_factor highlights;
 
-    int preserve_luminosity;
+    double shadows_luminance;
+    double midtones_luminance;
+    double highlights_luminance;
 } config_color_balance;
 
 typedef struct {

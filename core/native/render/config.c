@@ -279,7 +279,9 @@ void prepare_default_config(config_bounds *default_monitor_bounds, int no_displa
     default_config.display[0].virtual_screens[0].color_balance.highlights.g = 0.0;
     default_config.display[0].virtual_screens[0].color_balance.highlights.b = 0.0;
 
-    default_config.display[0].virtual_screens[0].color_balance.preserve_luminosity = 1;
+    default_config.display[0].virtual_screens[0].color_balance.shadows_luminance = 0.0;
+    default_config.display[0].virtual_screens[0].color_balance.midtones_luminance = 0.0;
+    default_config.display[0].virtual_screens[0].color_balance.highlights_luminance = 0.0;
 
     default_config.display[0].virtual_screens[0].white_balance.bright.r = 0;
     default_config.display[0].virtual_screens[0].white_balance.bright.g = 0;

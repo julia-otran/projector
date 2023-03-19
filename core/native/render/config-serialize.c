@@ -51,8 +51,9 @@ cJSON* serialize_config_color_balance(config_color_balance *in) {
     cJSON_AddItemToObject(config_color_balance_json, "midtones", serialize_config_color_factor(&in->midtones));
     cJSON_AddItemToObject(config_color_balance_json, "highlights", serialize_config_color_factor(&in->highlights));
 
-    // TODO: Fix, it must be serialized as number
-    cJSON_AddItemToObject(config_color_balance_json, "preserve_luminosity", cJSON_CreateNumber(in->preserve_luminosity));
+    cJSON_AddItemToObject(config_color_balance_json, "shadows_luminance", cJSON_CreateNumber(in->shadows_luminance));
+    cJSON_AddItemToObject(config_color_balance_json, "midtones_luminance", cJSON_CreateNumber(in->shadows_luminance));
+    cJSON_AddItemToObject(config_color_balance_json, "highlights_luminance", cJSON_CreateNumber(in->shadows_luminance));
 
     return config_color_balance_json;
 }

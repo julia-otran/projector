@@ -4,11 +4,9 @@ uniform sampler2D image;
 uniform vec3 brightAdjust;
 uniform vec3 exposureAdjust;
 
-uniform vec3 lowAdjust;
-uniform vec3 midAdjust;
-uniform vec3 highAdjust;
-
-uniform float preserveLuminosity;
+uniform vec4 lowAdjust;
+uniform vec4 midAdjust;
+uniform vec4 highAdjust;
 
 vec3 rgbToHsl(vec3 rgbColor) {
     float minVal = min(rgbColor.r, min(rgbColor.g, rgbColor.b));
@@ -120,19 +118,19 @@ void main(void) {
     float midtonesMultiply1 = clamp((highlightsLum / (-1.0 * a)) + 0.5, 0.0, 1.0);
     float midtonesMultiply = midtonesMultiply0 * midtonesMultiply1 * scale;
 
-    vec3 shadows = shadowsMultiply * lowAdjust;
-    vec3 mids = midtonesMultiply * midAdjust;
-    vec3 highs = highlightsMultiply * highAdjust;
+    vec4 shadows = shadowsMultiply * lowAdjust;
+    vec4 mids = midtonesMultiply * midAdjust;
+    vec4 highs = highlightsMultiply * highAdjust;
 
-    vec3 colorCorrected = texel.rgb + shadows + mids + highs;
+    vec3 colorCorrected = texel.rgb + shadows.rgb + mids.rgb + highs.rgb;
     colorCorrected = clamp(colorCorrected, 0.0, 1.0);
-    vec3 colorCorrectedHsl;
 
-    if (preserveLuminosity > 0.0) {
-        colorCorrectedHsl = rgbToHsl(colorCorrected);
-        colorCorrectedHsl.b = hsl.b;
-        colorCorrected = hslToRgb(colorCorrectedHsl);
-    }
+    vec3 colorCorrectedHsl;
+    colorCorrectedHsl = rgbToHsl(colorCorrected);
+
+    colorCorrectedHsl.b = clamp(hsl.b + shadows.a + mids.a + highs.a, 0.0, 1.0);
+
+    colorCorrected = hslToRgb(colorCorrectedHsl);
 
     vec3 result = colorCorrected * exposureAdjust + brightAdjust;
 
