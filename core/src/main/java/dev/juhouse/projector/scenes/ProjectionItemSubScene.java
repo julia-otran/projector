@@ -40,6 +40,8 @@ public abstract class ProjectionItemSubScene extends SubScene implements Control
     @Setter
     private ProjectionListItem projectionListItem;
 
+    private boolean commitProperties = true;
+
     protected ProjectionItemSubScene(Parent root,
                                      double width,
                                      double height) {
@@ -100,9 +102,23 @@ public abstract class ProjectionItemSubScene extends SubScene implements Control
     }
 
     @Override
+    public void beginPropertiesUpdate() {
+        commitProperties = false;
+    }
+
+    @Override
     public void updateProperty(String key, String value) {
         itemProperties.remove(key);
         itemProperties.put(key, value);
+
+        if (commitProperties) {
+            finishPropertiesUpdate();
+        }
+    }
+
+    @Override
+    public void finishPropertiesUpdate() {
+        commitProperties = true;
 
         try {
             projectionListRepository.updateItemProperties(projectionListItem.getId(), itemProperties);

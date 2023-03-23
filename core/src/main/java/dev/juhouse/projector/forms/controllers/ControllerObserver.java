@@ -13,6 +13,12 @@ import java.util.Optional;
  */
 public interface ControllerObserver {
     void onTitleChanged(String newTitle);
+
+    void beginPropertiesUpdate();
+
     void updateProperty(String key, String value);
+
+    void finishPropertiesUpdate();
+
     Optional<String> getProperty(String key);
 }

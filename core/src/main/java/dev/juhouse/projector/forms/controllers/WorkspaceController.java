@@ -475,7 +475,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
             itemSubScenes.keySet()
                     .stream()
                     .filter(entry -> list.stream().noneMatch(item -> item.getId() == entry))
-                    .collect(Collectors.toList())
+                    .toList()
                     .forEach(key -> {
                         ProjectionItemSubScene scene = itemSubScenes.remove(key);
                         scene.stop();

@@ -3,12 +3,26 @@ package dev.juhouse.projector.forms.controllers.projection
 import dev.juhouse.projector.projection2.BridgeRender
 import dev.juhouse.projector.projection2.BridgeRenderFlag
 import dev.juhouse.projector.projection2.ProjectionManagerCallbacks
+import javafx.beans.value.ChangeListener
 import javafx.geometry.Insets
 import javafx.scene.control.CheckBox
 import javafx.scene.layout.HBox
 
 class RenderFlagBox: HBox(), ProjectionManagerCallbacks {
+    private val checkBoxesMap = HashMap<Int, CheckBox>()
+
+    private val renderFlagListener: ChangeListener<in Number> = ChangeListener { _, _, _ ->
+        checkBoxesMap.forEach {
+            it.value.selectedProperty().value = renderFlag?.isRenderEnabled(it.key) ?: false
+        }
+    }
+
     var renderFlag: BridgeRenderFlag? = null
+        set(value) {
+            field?.flagValueProperty?.removeListener(renderFlagListener)
+            field = value
+            value?.flagValueProperty?.addListener(renderFlagListener)
+        }
 
     private fun attachCheckBox(checkBox: CheckBox, renderId: Int) {
         checkBox.selectedProperty().value = renderFlag?.isRenderEnabled(renderId) ?: false
@@ -27,6 +41,7 @@ class RenderFlagBox: HBox(), ProjectionManagerCallbacks {
     }
     override fun onRebuild(renders: Array<out BridgeRender>) {
         children.clear()
+        checkBoxesMap.clear()
 
         val renderCheckBoxes = renders.map {
             val checkBox = CheckBox()
@@ -35,6 +50,8 @@ class RenderFlagBox: HBox(), ProjectionManagerCallbacks {
             attachCheckBox(checkBox, it.renderId)
 
             setMargin(checkBox, Insets(0.0, 12.0, 0.0, 0.0))
+
+            checkBoxesMap[it.renderId] = checkBox
 
             checkBox
         }

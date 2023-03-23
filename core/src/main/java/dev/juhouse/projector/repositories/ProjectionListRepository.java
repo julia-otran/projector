@@ -139,6 +139,10 @@ public class ProjectionListRepository {
     }
 
     public void updateItemProperties(long itemId, Map<String, String> properties) throws SQLException {
+        SQLiteJDBCDriverConnection
+                .getConn()
+                .setAutoCommit(false);
+
         String sql = "DELETE FROM projection_list_item_properties WHERE projection_list_item_id = ?";
 
         try (PreparedStatement stmt = SQLiteJDBCDriverConnection
@@ -160,6 +164,10 @@ public class ProjectionListRepository {
                 insert.execute();
             }
         }
+
+        SQLiteJDBCDriverConnection
+                .getConn()
+                .commit();
     }
 
     public void updateItemTitle(ProjectionListItem projectionListItem, String newTitle) throws SQLException {

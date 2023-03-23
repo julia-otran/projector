@@ -86,12 +86,15 @@ class MultiImageController: ProjectionController(), SingleImageControl.Callbacks
                     if (file.canRead()) {
                         try {
                             val control = createSingleControl()
+                            control.callback = null
 
                             control.renderFlag?.flagValue = renderFlagValue
 
                             if (control.loadImage(file)) {
                                 imageControls.add(control)
                             }
+
+                            control.callback = this
                         } catch (ex: Exception) {
                             ex.printStackTrace()
                         }
@@ -108,17 +111,25 @@ class MultiImageController: ProjectionController(), SingleImageControl.Callbacks
     }
 
     private fun saveOpenedImages() {
+        observer.beginPropertiesUpdate()
+
         observer.updateProperty("IMAGES_COUNT", imageControls.size.toString())
 
         for ((fileIndex, imageControl) in imageControls.withIndex()) {
             observer.updateProperty("IMAGE[$fileIndex]", imageControl.currentFile?.toString())
         }
+
+        observer.finishPropertiesUpdate()
     }
 
     private fun saveRenderFlags() {
+        observer.beginPropertiesUpdate()
+
         for ((fileIndex, imageControl) in imageControls.withIndex()) {
             observer.updateProperty("RENDER_FLAG[$fileIndex]", imageControl.renderFlag?.flagValue?.toString())
         }
+
+        observer.finishPropertiesUpdate()
     }
 
     override fun onImageChanged(singleImageControl: SingleImageControl) {
