@@ -115,13 +115,14 @@ public class WindowConfigsObserver implements Runnable, WindowConfigsLoaderPrope
 
                 // The filename is the
                 // context of the event.
-                WatchEvent<Path> ev = (WatchEvent<Path>)event;
-                Path filename = ev.context();
+                Object context = event.context();
 
-                Path child = FilePaths.PROJECTOR_WINDOW_CONFIG_PATH.resolve(filename);
+                if (context instanceof Path filename) {
+                    Path child = FilePaths.PROJECTOR_WINDOW_CONFIG_PATH.resolve(filename);
 
-                if (ProjectorPreferences.getWindowConfigFile() != null && child.endsWith(ProjectorPreferences.getWindowConfigFile())) {
-                    loadSavedConfigs();
+                    if (ProjectorPreferences.getWindowConfigFile() != null && child.endsWith(ProjectorPreferences.getWindowConfigFile())) {
+                        loadSavedConfigs();
+                    }
                 }
             }
 

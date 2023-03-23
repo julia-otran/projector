@@ -1,14 +1,11 @@
 package dev.juhouse.projector.forms.controllers.projection
 
-import dev.juhouse.projector.projection2.BridgeRender
 import dev.juhouse.projector.projection2.Projectable
 import dev.juhouse.projector.projection2.ProjectionManager
-import dev.juhouse.projector.projection2.ProjectionManagerCallbacks
 import javafx.beans.value.ChangeListener
 import javafx.event.EventHandler
 import javafx.geometry.Insets
 import javafx.scene.control.Button
-import javafx.scene.control.CheckBox
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
@@ -19,12 +16,12 @@ interface ProjectionBarControlCallbacks {
     fun onProjectionEnd()
 }
 
-class ProjectionBarControl: VBox(), ProjectionManagerCallbacks {
+class ProjectionBarControl: VBox() {
     private val mainControlsBox = HBox()
     private val beginProjectionButton = Button()
     private val endProjectionButton = Button()
 
-    private val renderFlagsBox = HBox()
+    private val renderFlagsBox = RenderFlagBox()
 
     private val projectablePropertyListener =  ChangeListener<Projectable> { _, _, newProjectable ->
         if (newProjectable == projectable) {
@@ -37,17 +34,22 @@ class ProjectionBarControl: VBox(), ProjectionManagerCallbacks {
     }
 
     var projectable: Projectable? = null
+        set(value) {
+            field = value
+            renderFlagsBox.renderFlag = value?.renderFlagProperty?.get()
+        }
+
     var callback: ProjectionBarControlCallbacks? = null
 
     var manager: ProjectionManager? = null
         set(value) {
-            field?.removeCallback(this)
+            field?.removeCallback(renderFlagsBox)
             field?.projectableProperty()?.removeListener(projectablePropertyListener)
 
             field = value
 
             value?.projectableProperty()?.addListener(projectablePropertyListener)
-            value?.addCallback(this)
+            value?.addCallback(renderFlagsBox)
         }
 
     var canProject: Boolean = true
@@ -100,39 +102,6 @@ class ProjectionBarControl: VBox(), ProjectionManagerCallbacks {
     }
 
     fun stop() {
-        manager?.removeCallback(this)
-    }
-
-    private fun attachCheckBox(checkBox: CheckBox, renderId: Int) {
-        checkBox.selectedProperty().value = projectable?.renderFlagProperty?.get()?.isRenderEnabled(renderId) ?: false
-
-        checkBox.selectedProperty().addListener { _, _, newValue ->
-            val active = projectable?.renderFlagProperty?.get()?.isRenderEnabled(renderId) ?: false
-
-            if (newValue != active) {
-                if (newValue) {
-                    projectable?.renderFlagProperty?.get()?.enableRenderId(renderId)
-                } else {
-                    projectable?.renderFlagProperty?.get()?.disableRenderId(renderId)
-                }
-            }
-        }
-    }
-
-    override fun onRebuild(renders: Array<out BridgeRender>) {
-        renderFlagsBox.children.clear()
-
-        val renderCheckBoxes = renders.map {
-            val checkBox = CheckBox()
-
-            checkBox.text = "#" + it.renderId + " (" + it.renderName + ")"
-            attachCheckBox(checkBox, it.renderId)
-
-            HBox.setMargin(checkBox, Insets(0.0, 12.0, 0.0, 0.0))
-
-            checkBox
-        }
-
-        renderFlagsBox.children.addAll(renderCheckBoxes)
+        manager?.removeCallback(renderFlagsBox)
     }
 }

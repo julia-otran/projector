@@ -1,7 +1,11 @@
 package dev.juhouse.projector.projection2
 
 import dev.juhouse.projector.projection2.countdown.ProjectionCountdown
+import dev.juhouse.projector.projection2.image.ProjectionBackground
+import dev.juhouse.projector.projection2.image.ProjectionImage
+import dev.juhouse.projector.projection2.image.ProjectionMultiImage
 import dev.juhouse.projector.projection2.models.BackgroundModel
+import dev.juhouse.projector.projection2.text.ProjectionLabel
 import dev.juhouse.projector.projection2.text.WrappedText
 import dev.juhouse.projector.projection2.text.WrapperFactory
 import dev.juhouse.projector.projection2.video.ProjectionBackgroundVideo
@@ -104,6 +108,17 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
         return windowCapture
     }
 
+    override fun createMultiImage(): ProjectionMultiImage {
+        val multiImage = ProjectionMultiImage(delegate)
+
+        projectablesList.add(multiImage)
+
+        multiImage.init()
+        multiImage.rebuild()
+
+        return multiImage
+    }
+
     override fun setProjectable(projectable: Projectable?) {
         currentProjectable.get()?.setRender(false)
 
@@ -193,5 +208,9 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
 
     override fun removeCallback(callback: ProjectionManagerCallbacks) {
         callbackList.remove(callback)
+    }
+
+    override fun createRenderFlag(): BridgeRenderFlag {
+        return BridgeRenderFlag(delegate)
     }
 }

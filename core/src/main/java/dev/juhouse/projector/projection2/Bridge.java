@@ -56,6 +56,8 @@ public class Bridge {
 
     public native void setImageAsset(int[] data, int width, int height, boolean crop, int renderFlag);
 
+    public native void setMultiImageAsset(int[] data, int width, int height, int renderId);
+
     public native void setWebViewBuffer(ByteBuffer buffer, int width, int height);
 
     public native void setRenderWebViewBuffer(int renderFlag);

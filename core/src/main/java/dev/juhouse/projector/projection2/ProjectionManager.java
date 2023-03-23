@@ -9,7 +9,10 @@ import java.awt.Font;
 import java.io.File;
 
 import dev.juhouse.projector.projection2.countdown.ProjectionCountdown;
+import dev.juhouse.projector.projection2.image.ProjectionImage;
+import dev.juhouse.projector.projection2.image.ProjectionMultiImage;
 import dev.juhouse.projector.projection2.models.BackgroundModel;
+import dev.juhouse.projector.projection2.text.ProjectionLabel;
 import dev.juhouse.projector.projection2.text.WrappedText;
 import dev.juhouse.projector.projection2.text.WrapperFactory;
 import dev.juhouse.projector.projection2.video.ProjectionPlayer;
@@ -42,6 +45,8 @@ public interface ProjectionManager {
 
     ProjectionWindowCapture createWindowCapture();
 
+    ProjectionMultiImage createMultiImage();
+
     void setProjectable(Projectable webView);
 
     WrapperFactory getWrapperFactory();
@@ -71,5 +76,7 @@ public interface ProjectionManager {
     void addCallback(ProjectionManagerCallbacks callback);
 
     void removeCallback(ProjectionManagerCallbacks callback);
+
+    BridgeRenderFlag createRenderFlag();
 
 }

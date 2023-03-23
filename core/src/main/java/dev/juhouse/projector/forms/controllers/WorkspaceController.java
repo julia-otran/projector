@@ -617,6 +617,16 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     }
 
     @FXML
+    public void onAddMultipleImage() {
+        try {
+            listRepository.createItem(projectionList, "Imagem Múltipla", ProjectionListItemType.MULTI_IMAGE);
+            reloadProjectables();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
     public void onAddText() {
         try {
             listRepository.createItem(projectionList, "Texto", ProjectionListItemType.TEXT);

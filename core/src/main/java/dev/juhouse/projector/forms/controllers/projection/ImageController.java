@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import dev.juhouse.projector.projection2.ProjectionImage;
+import dev.juhouse.projector.projection2.image.ProjectionImage;
 import dev.juhouse.projector.projection2.ProjectionManager;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -29,7 +29,6 @@ import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
@@ -122,12 +121,13 @@ public class ImageController extends ProjectionController implements Runnable, P
 
         changeMsecSlider.valueProperty().addListener((observable, oldValue, newValue) -> formatTimeLabel());
 
-        loadOpenedImages();
-
+        controlBar.setCanProject(false);
         controlBar.setProjectable(this.projectable);
         controlBar.setCallback(this);
         controlBar.setManager(projectionManager);
         controlBar.attach(projectionControlPane);
+
+        loadOpenedImages();
     }
 
     private record ToAddImage(@Getter Image image, @Getter File file) { }
@@ -161,6 +161,8 @@ public class ImageController extends ProjectionController implements Runnable, P
         } else {
             setError();
         }
+
+
     }
 
     @FXML
@@ -186,7 +188,7 @@ public class ImageController extends ProjectionController implements Runnable, P
         }
 
         if (imagesList.getItems().size() > 0) {
-            controlBar.setCanProject(false);
+            controlBar.setCanProject(true);
         }
 
         saveOpenedImages();

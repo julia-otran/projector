@@ -10,14 +10,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import dev.juhouse.projector.projection2.ProjectionLabel;
+import dev.juhouse.projector.projection2.text.ProjectionLabel;
 import dev.juhouse.projector.projection2.ProjectionManager;
 import dev.juhouse.projector.projection2.TextWrapperFactoryChangeListener;
 import dev.juhouse.projector.projection2.text.TextWrapper;
 import dev.juhouse.projector.projection2.text.WrappedText;
 import dev.juhouse.projector.projection2.text.WrapperFactory;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 

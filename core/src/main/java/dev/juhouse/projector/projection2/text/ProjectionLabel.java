@@ -1,9 +1,10 @@
-package dev.juhouse.projector.projection2;
+package dev.juhouse.projector.projection2.text;
 
 import java.awt.*;
 import java.util.*;
 import java.util.List;
 
+import dev.juhouse.projector.projection2.*;
 import dev.juhouse.projector.projection2.text.*;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectProperty;

@@ -3,13 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package dev.juhouse.projector.projection2;
+package dev.juhouse.projector.projection2.image;
 
+import dev.juhouse.projector.projection2.CanvasDelegate;
+import dev.juhouse.projector.projection2.image.ProjectionImage;
 import dev.juhouse.projector.projection2.models.BackgroundModel;
 import dev.juhouse.projector.other.ProjectorPreferences;
-
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
 
 /**
  *
@@ -17,7 +16,7 @@ import java.awt.image.DataBufferInt;
  */
 public class ProjectionBackground extends ProjectionImage {
 
-    ProjectionBackground(CanvasDelegate canvasDelegate) {
+    public ProjectionBackground(CanvasDelegate canvasDelegate) {
         super(canvasDelegate);
     }
 

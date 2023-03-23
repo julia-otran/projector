@@ -3,8 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package dev.juhouse.projector.projection2;
+package dev.juhouse.projector.projection2.image;
 
+import dev.juhouse.projector.projection2.BridgeRender;
+import dev.juhouse.projector.projection2.BridgeRenderFlag;
+import dev.juhouse.projector.projection2.CanvasDelegate;
+import dev.juhouse.projector.projection2.Projectable;
 import dev.juhouse.projector.projection2.models.BackgroundProvide;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;

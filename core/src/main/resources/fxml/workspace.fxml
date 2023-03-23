@@ -97,7 +97,8 @@
           <MenuButton fx:id="addItemButtonGroup" mnemonicParsing="false" prefHeight="25.0" text="+ Incluir item">
             <items>
               <MenuItem mnemonicParsing="false" onAction="#onAddMusic" text="Letra de Musica" />
-              <MenuItem mnemonicParsing="false" onAction="#onAddPicture" text="Imagem" />
+              <MenuItem mnemonicParsing="false" onAction="#onAddPicture" text="Album de Imagens" />
+                     <MenuItem mnemonicParsing="false" onAction="#onAddMultipleImage" text="Imagem Multipla" />
               <MenuItem mnemonicParsing="false" onAction="#onAddPlayer" text="Arquivo de vídeo" />
                      <MenuItem mnemonicParsing="false" onAction="#onAddTimer" text="Timer" />
               <MenuItem mnemonicParsing="false" onAction="#onAddText" text="Texto" />
