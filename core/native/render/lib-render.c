@@ -252,6 +252,13 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setImageAss
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setMultiImageAsset
   (JNIEnv *env, jobject _, jintArray arr, jint width, jint height, jint render_id) {
+    if (arr) {
+        jint *data = (*env)->GetIntArrayElements(env, arr, 0);
+        render_image_set_image_multi(data, width, height, 0, render_id);
+        (*env)->ReleaseIntArrayElements(env, arr, data, 0);
+    } else {
+        render_image_set_image_multi(NULL, 0, 0, 0, render_id);
+    }
 }
 
 // WebView render methods

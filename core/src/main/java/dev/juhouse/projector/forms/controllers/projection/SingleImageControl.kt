@@ -15,7 +15,7 @@ import java.io.File
 class SingleImageControl: BorderPane() {
     interface Callbacks {
         fun onImageChanged(singleImageControl: SingleImageControl)
-        fun onRenderingChanged(singleImageControl: SingleImageControl)
+        fun onRenderingChanged()
     }
 
     private val addImageLabel = Label()
@@ -43,7 +43,7 @@ class SingleImageControl: BorderPane() {
             if (renderFlagBox.renderFlag == null) {
                 renderFlag = value?.createRenderFlag()
 
-                renderFlag?.flagValueProperty?.addListener { _, _, _ -> callback?.onRenderingChanged(this) }
+                renderFlag?.flagValueProperty?.addListener { _, _, _ -> callback?.onRenderingChanged() }
 
                 renderFlagBox.renderFlag = renderFlag
             }
@@ -137,7 +137,7 @@ class SingleImageControl: BorderPane() {
 
             imageView.image = image
             callback?.onImageChanged(this)
-            callback?.onRenderingChanged(this)
+            callback?.onRenderingChanged()
 
             addingImage = null
             addingFile = null
@@ -158,7 +158,7 @@ class SingleImageControl: BorderPane() {
         currentFile = file
         top = renderFlagBox
 
-        callback?.onRenderingChanged(this)
+        callback?.onRenderingChanged()
 
         return true
     }

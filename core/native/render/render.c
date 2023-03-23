@@ -288,6 +288,7 @@ void activate_renders(GLFWwindow *shared_context, projection_config *config) {
     }
 
     render_text_set_config(renders, count_renders);
+    render_image_set_config(renders, count_renders);
 
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
     transfer_window = glfwCreateWindow(800, 600, "Projector Render Transfer Window", NULL, shared_context);

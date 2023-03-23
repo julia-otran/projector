@@ -107,6 +107,7 @@ class MultiImageController: ProjectionController(), SingleImageControl.Callbacks
 
         if (imageControls.size > 0) {
             beginProjectionButton.isDisable = false
+            onRenderingChanged()
         }
     }
 
@@ -142,7 +143,7 @@ class MultiImageController: ProjectionController(), SingleImageControl.Callbacks
         saveOpenedImages()
     }
 
-    override fun onRenderingChanged(singleImageControl: SingleImageControl) {
+    override fun onRenderingChanged() {
         val imagesMap = HashMap<Int, Image>()
 
         for (imageControl in imageControls) {
