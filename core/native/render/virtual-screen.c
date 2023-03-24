@@ -1,6 +1,7 @@
 #include <stdlib.h>
 
 #include "ogl-loader.h"
+#include "config-structs.h"
 #include "virtual-screen.h"
 #include "vs-black-level-adjust.h"
 #include "vs-blend.h"
@@ -51,12 +52,17 @@ void virtual_screen_start(config_bounds *display_bounds, config_virtual_screen *
 
 void virtual_screen_render(GLuint texture_id, config_virtual_screen *config, void *data) {
     virtual_screen *vs = (virtual_screen*) data;
+    config_color_factor *background_clear_color = &config->background_clear_color;
 
     glPushMatrix();
 
     glBindFramebuffer(GL_FRAMEBUFFER, vs->framebuffer_id);
 
     glViewport(0, 0, config->w, config->h);
+
+    glClearColor(background_clear_color->r, background_clear_color->g, background_clear_color->b, background_clear_color->a);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     glLoadIdentity();
     glOrtho(0.0, config->w, config->h, 0.0, 0.0, 1.0);
 

@@ -40,6 +40,7 @@ class RenderFlagBox: HBox(), ProjectionManagerCallbacks {
         }
     }
     override fun onRebuild(renders: Array<out BridgeRender>) {
+
         children.clear()
         checkBoxesMap.clear()
 

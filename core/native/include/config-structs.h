@@ -26,7 +26,7 @@ typedef struct {
 } config_help_line;
 
 typedef struct {
-    double r, g, b;
+    double r, g, b, a;
 } config_color_factor;
 
 typedef struct {
@@ -52,6 +52,8 @@ typedef struct {
 
 typedef struct {
     int source_render_id, w, h;
+
+    config_color_factor background_clear_color;
 
     config_bounds render_input_bounds;
 

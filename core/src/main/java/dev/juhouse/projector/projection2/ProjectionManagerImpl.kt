@@ -11,6 +11,7 @@ import dev.juhouse.projector.projection2.text.WrapperFactory
 import dev.juhouse.projector.projection2.video.ProjectionBackgroundVideo
 import dev.juhouse.projector.projection2.video.ProjectionPlayer
 import dev.juhouse.projector.projection2.video.ProjectionVideo
+import javafx.application.Platform
 import javafx.beans.property.ReadOnlyObjectWrapper
 import javafx.beans.property.ReadOnlyProperty
 import java.awt.Font
@@ -46,7 +47,9 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
 
         val renders = delegate.bridge.renderSettings
 
-        callbackList.forEach { it.onRebuild(renders) }
+        Platform.runLater {
+            callbackList.forEach { it.onRebuild(renders) }
+        }
     }
 
     override fun setText(text: WrappedText?) {

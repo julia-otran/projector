@@ -59,9 +59,21 @@ void parse_config_help_line(cJSON *config_help_line_json, config_help_line *out)
 }
 
 void parse_config_color_factor(cJSON *config_color_factor_json, config_color_factor *out) {
-    out->r = cJSON_GetObjectItemCaseSensitive(config_color_factor_json, "r")->valuedouble;
-    out->g = cJSON_GetObjectItemCaseSensitive(config_color_factor_json, "g")->valuedouble;
-    out->b = cJSON_GetObjectItemCaseSensitive(config_color_factor_json, "b")->valuedouble;
+    if (cJSON_IsObject(config_color_factor_json)) {
+        out->r = cJSON_GetObjectItemCaseSensitive(config_color_factor_json, "r")->valuedouble;
+        out->g = cJSON_GetObjectItemCaseSensitive(config_color_factor_json, "g")->valuedouble;
+        out->b = cJSON_GetObjectItemCaseSensitive(config_color_factor_json, "b")->valuedouble;
+
+        cJSON *alpha_json = cJSON_GetObjectItemCaseSensitive(config_color_factor_json, "a");
+
+        if (cJSON_IsNumber(alpha_json)) {
+            out->a = alpha_json->valuedouble;
+        } else {
+            out->a = 1.0;
+        }
+    } else {
+        out->a = 1.0;
+    }
 }
 
 void parse_config_color_balance(cJSON *config_color_balance_json, config_color_balance *out) {
@@ -100,6 +112,8 @@ void parse_config_virtual_screen(cJSON *config_virtual_screen_json, config_virtu
 
     out->w = cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "w")->valueint;
     out->h = cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "h")->valueint;
+
+    parse_config_color_factor(cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "background_clear_color"), &out->background_clear_color);
 
     parse_config_bounds(cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "render_input_bounds"), &out->render_input_bounds);
 

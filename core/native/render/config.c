@@ -241,6 +241,7 @@ void prepare_default_config(config_bounds *default_monitor_bounds, int no_displa
     default_config.renders[0].background_clear_color.r = 0.0;
     default_config.renders[0].background_clear_color.g = 0.0;
     default_config.renders[0].background_clear_color.b = 0.0;
+    default_config.renders[0].background_clear_color.a = 1.0;
 
     default_config.renders[0].text_color.r = 1.0;
     default_config.renders[0].text_color.g = 1.0;
@@ -267,6 +268,11 @@ void prepare_default_config(config_bounds *default_monitor_bounds, int no_displa
 
     default_config.display[0].virtual_screens[0].w = default_monitor_bounds->w;
     default_config.display[0].virtual_screens[0].h = default_monitor_bounds->h;
+
+    default_config.display[0].virtual_screens[0].background_clear_color.r = 0.0;
+    default_config.display[0].virtual_screens[0].background_clear_color.g = 0.0;
+    default_config.display[0].virtual_screens[0].background_clear_color.b = 0.0;
+    default_config.display[0].virtual_screens[0].background_clear_color.a = 1.0;
 
     default_config.display[0].virtual_screens[0].render_input_bounds.x = 0.0;
     default_config.display[0].virtual_screens[0].render_input_bounds.y = 0.0;

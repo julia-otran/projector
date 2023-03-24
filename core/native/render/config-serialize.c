@@ -66,6 +66,7 @@ cJSON* serialize_config_color_factor(config_color_factor *in) {
     cJSON_AddItemToObject(config_color_factor_json, "r", cJSON_CreateNumber(in->r));
     cJSON_AddItemToObject(config_color_factor_json, "g", cJSON_CreateNumber(in->g));
     cJSON_AddItemToObject(config_color_factor_json, "b", cJSON_CreateNumber(in->b));
+    cJSON_AddItemToObject(config_color_factor_json, "a", cJSON_CreateNumber(in->a));
 
     return config_color_factor_json;
 }
@@ -119,6 +120,8 @@ cJSON* serialize_config_virtual_screen(config_virtual_screen *in) {
     cJSON_AddItemToObject(config_virtual_screen_json, "source_render_id", cJSON_CreateNumber(in->source_render_id));
     cJSON_AddItemToObject(config_virtual_screen_json, "w", cJSON_CreateNumber(in->w));
     cJSON_AddItemToObject(config_virtual_screen_json, "h", cJSON_CreateNumber(in->h));
+
+    cJSON_AddItemToObject(config_virtual_screen_json, "background_clear_color", serialize_config_color_factor(&in->background_clear_color));
 
     cJSON_AddItemToObject(config_virtual_screen_json, "render_input_bounds", serialize_config_bounds(&in->render_input_bounds));
 
