@@ -78,7 +78,8 @@ class TextRenderer(val bounds: TextRendererBounds, var font: Font) {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
         g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
 
-        g.stroke = BasicStroke(3f + font.size * 0.025f)
+        g.stroke = BasicStroke(3f + font.size * 0.025f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
+        g.font = font
 
         val baseTransform = g.transform
 
