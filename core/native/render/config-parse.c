@@ -14,6 +14,37 @@ void parse_config_bounds(cJSON *config_bounds_json, config_bounds *out) {
     out->h = cJSON_GetObjectItemCaseSensitive(config_bounds_json, "h")->valuedouble;
 }
 
+void parse_config_point(cJSON *config_point_json, config_point *out) {
+    out->x = cJSON_GetObjectItemCaseSensitive(config_point_json, "x")->valuedouble;
+    out->y = cJSON_GetObjectItemCaseSensitive(config_point_json, "y")->valuedouble;
+}
+
+void parse_config_point_mapping(cJSON *config_point_mapping_json, config_point_mapping *out) {
+    cJSON *input_points_json = cJSON_GetObjectItemCaseSensitive(config_point_mapping_json, "input_points");
+    cJSON *output_points_json = cJSON_GetObjectItemCaseSensitive(config_point_mapping_json, "output_points");
+
+    int count_input_points = cJSON_GetArraySize(input_points_json);
+    int count_output_points = cJSON_GetArraySize(output_points_json);
+
+    if (count_input_points != count_output_points) {
+        log_debug("Invalid point mapping. Input points: %i; Output points %i\n", count_input_points, count_output_points);
+    }
+
+    int count_points = count_input_points < count_output_points ? count_input_points : count_output_points;
+
+    config_point *input_points = (config_point*) calloc(count_points, sizeof(config_point));
+    config_point *output_points = (config_point*) calloc(count_points, sizeof(config_point));
+
+    for (int i = 0; i < count_points; i++) {
+        parse_config_point(cJSON_GetArrayItem(input_points_json, i), &input_points[i]);
+        parse_config_point(cJSON_GetArrayItem(output_points_json, i), &output_points[i]);
+    }
+
+    out->input_points = input_points;
+    out->output_points = output_points;
+    out->count_points = count_points;
+}
+
 void parse_config_blend(cJSON *config_blend_json, config_blend *out) {
     parse_config_bounds(cJSON_GetObjectItemCaseSensitive(config_blend_json, "position"), &out->position);
     out->direction = cJSON_GetObjectItemCaseSensitive(config_blend_json, "direction")->valueint;
@@ -67,11 +98,15 @@ void parse_config_black_level_adjust(cJSON *config_black_level_adjust_json, conf
 void parse_config_virtual_screen(cJSON *config_virtual_screen_json, config_virtual_screen *out) {
     out->source_render_id = cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "source_render_id")->valueint;
 
-    parse_config_bounds(cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "input_bounds"), &out->input_bounds);
-    parse_config_bounds(cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "output_bounds"), &out->output_bounds);
+    out->w = cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "w")->valueint;
+    out->h = cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "h")->valueint;
+
+    parse_config_bounds(cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "render_input_bounds"), &out->render_input_bounds);
 
     parse_config_color_balance(cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "color_balance"), &out->color_balance);
     parse_config_white_balance(cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "white_balance"), &out->white_balance);
+
+    parse_config_point_mapping(cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "monitor_position"), &out->monitor_position);
 
     // Blends
     cJSON *blends = cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "blends");

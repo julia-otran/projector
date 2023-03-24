@@ -67,23 +67,14 @@ void vs_blend_load_coordinates(config_bounds *display_bounds, config_virtual_scr
 
     GLfloat *indexed_vertices = calloc(16, sizeof(GLfloat));
 
-    GLfloat vsx, vsy, vsw, vsh, x, y, w, h;
-
-    // Virtual screen bounds
-    vsw = (virtual_screen->output_bounds.w * 2.0 / display_bounds->w);
-    vsh = (virtual_screen->output_bounds.h * 2.0 / display_bounds->h);
-    vsx = virtual_screen->output_bounds.x * 2.0 / display_bounds->w;
-    vsy = virtual_screen->output_bounds.y * 2.0 / display_bounds->h;
+    GLfloat x, y, w, h;
 
     // Blend bounds inside VS
-    w = (config->position.w / virtual_screen->output_bounds.w) * vsw;
-    h = (config->position.h / virtual_screen->output_bounds.h) * vsh;
+    w = (config->position.w * 2 / virtual_screen->w);
+    h = (config->position.h * 2 / virtual_screen->h);
 
-    x = ((config->position.x / virtual_screen->output_bounds.w) * vsw) + vsx;
-    y = ((config->position.y / virtual_screen->output_bounds.h) * vsh) + vsy;
-
-    x = x - 1.0;
-    y = 1.0 - h - y;
+    x = (config->position.x * 2.0 / virtual_screen->w) - 1.0;
+    y = 1.0 - h - (config->position.y * 2.0 / virtual_screen->h);
 
     log_debug("Blend vertices x %f y %f w %f h %f\n", x, y, w, h);
 
@@ -143,7 +134,8 @@ void vs_blend_start(config_bounds *display_bounds, config_virtual_screen *virtua
 }
 
 void vs_blend_render(vs_blend *instance) {
-    glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    glColor4d(1.0, 1.0, 1.0, 1.0);
 
     glBindTexture(GL_TEXTURE_2D, 0);
 

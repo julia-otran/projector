@@ -12,6 +12,16 @@
 
 static projection_config default_config;
 
+void free_config_point_mapping(config_point_mapping *in) {
+    if (in->input_points) {
+        free(in->input_points);
+    }
+
+    if (in->output_points) {
+        free(in->output_points);
+    }
+}
+
 void free_config_virtual_screen(config_virtual_screen *in) {
     if (in->blends) {
         free(in->blends);
@@ -24,6 +34,8 @@ void free_config_virtual_screen(config_virtual_screen *in) {
     if (in->black_level_adjusts) {
         free(in->black_level_adjusts);
     }
+
+    free_config_point_mapping(&in->monitor_position);
 }
 
 void free_config_display(config_display *in) {
@@ -253,15 +265,43 @@ void prepare_default_config(config_bounds *default_monitor_bounds, int no_displa
 
     default_config.display[0].virtual_screens[0].source_render_id = 1;
 
-    default_config.display[0].virtual_screens[0].input_bounds.x = 0;
-    default_config.display[0].virtual_screens[0].input_bounds.y = 0;
-    default_config.display[0].virtual_screens[0].input_bounds.w = 1;
-    default_config.display[0].virtual_screens[0].input_bounds.h = 1;
+    default_config.display[0].virtual_screens[0].w = default_monitor_bounds->w;
+    default_config.display[0].virtual_screens[0].h = default_monitor_bounds->h;
 
-    default_config.display[0].virtual_screens[0].output_bounds.x = 0.0;
-    default_config.display[0].virtual_screens[0].output_bounds.y = 0.0;
-    default_config.display[0].virtual_screens[0].output_bounds.w = default_monitor_bounds->w;
-    default_config.display[0].virtual_screens[0].output_bounds.h = default_monitor_bounds->h;
+    default_config.display[0].virtual_screens[0].render_input_bounds.x = 0.0;
+    default_config.display[0].virtual_screens[0].render_input_bounds.y = 0.0;
+    default_config.display[0].virtual_screens[0].render_input_bounds.w = 1.0;
+    default_config.display[0].virtual_screens[0].render_input_bounds.h = 1.0;
+
+    default_config.display[0].virtual_screens[0].monitor_position.count_points = 4;
+
+    default_config.display[0].virtual_screens[0].monitor_position.input_points = (config_point*) calloc(4, sizeof(config_point));
+
+    default_config.display[0].virtual_screens[0].monitor_position.input_points[0].x = 0.0;
+    default_config.display[0].virtual_screens[0].monitor_position.input_points[0].y = 0.0;
+
+    default_config.display[0].virtual_screens[0].monitor_position.input_points[1].x = 1.0;
+    default_config.display[0].virtual_screens[0].monitor_position.input_points[1].y = 0.0;
+
+    default_config.display[0].virtual_screens[0].monitor_position.input_points[2].x = 1.0;
+    default_config.display[0].virtual_screens[0].monitor_position.input_points[2].y = 1.0;
+
+    default_config.display[0].virtual_screens[0].monitor_position.input_points[3].x = 0.0;
+    default_config.display[0].virtual_screens[0].monitor_position.input_points[3].y = 1.0;
+
+    default_config.display[0].virtual_screens[0].monitor_position.output_points = (config_point*) calloc(4, sizeof(config_point));
+
+    default_config.display[0].virtual_screens[0].monitor_position.output_points[0].x = 0.0;
+    default_config.display[0].virtual_screens[0].monitor_position.output_points[0].y = 0.0;
+
+    default_config.display[0].virtual_screens[0].monitor_position.output_points[1].x = default_monitor_bounds->w;
+    default_config.display[0].virtual_screens[0].monitor_position.output_points[1].y = 0.0;
+
+    default_config.display[0].virtual_screens[0].monitor_position.output_points[2].x = default_monitor_bounds->w;
+    default_config.display[0].virtual_screens[0].monitor_position.output_points[2].y = default_monitor_bounds->h;
+
+    default_config.display[0].virtual_screens[0].monitor_position.output_points[3].x = 0.0;
+    default_config.display[0].virtual_screens[0].monitor_position.output_points[3].y = default_monitor_bounds->h;
 
     default_config.display[0].virtual_screens[0].count_blends = 0;
     default_config.display[0].virtual_screens[0].count_help_lines = 0;

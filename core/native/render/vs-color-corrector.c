@@ -49,33 +49,23 @@ void vs_color_corrector_start(config_bounds *display_bounds, config_virtual_scre
 
     GLfloat *indexed_vertices = calloc(16, sizeof(GLfloat));
 
-    GLfloat x, y, w, h;
-
-    w = (config->output_bounds.w * 2.0 / display_bounds->w);
-    h = (config->output_bounds.h * 2.0 / display_bounds->h);
-
-    x = (config->output_bounds.x * 2.0 / display_bounds->w) - 1.0;
-    y = 1.0 - h - (config->output_bounds.y * 2.0 / display_bounds->h);
-
-    log_debug("Color corrector bounds: x %f y %f w %f h %f\n", x, y, w, h);
-
-    indexed_vertices[0] = x;
-    indexed_vertices[1] = y;
+    indexed_vertices[0] = -1.0;
+    indexed_vertices[1] = -1.0;
     indexed_vertices[2] = 0.0;
     indexed_vertices[3] = 1.0;
 
-    indexed_vertices[4] = x;
-    indexed_vertices[5] = y + h;
+    indexed_vertices[4] = -1.0;
+    indexed_vertices[5] = 1.0;
     indexed_vertices[6] = 0.0;
     indexed_vertices[7] = 1.0;
 
-    indexed_vertices[8] = x + w;
-    indexed_vertices[9] = y + h;
+    indexed_vertices[8] = 1.0;
+    indexed_vertices[9] = 1.0;
     indexed_vertices[10] = 0.0;
     indexed_vertices[11] = 1.0;
 
-    indexed_vertices[12] = x + w;
-    indexed_vertices[13] = y;
+    indexed_vertices[12] = 1.0;
+    indexed_vertices[13] = -1.0;
     indexed_vertices[14] = 0.0;
     indexed_vertices[15] = 1.0;
 
@@ -94,17 +84,17 @@ void vs_color_corrector_start(config_bounds *display_bounds, config_virtual_scre
 
     GLfloat *indexed_uvs = calloc(8, sizeof(GLfloat));
 
-    indexed_uvs[0] = config->input_bounds.x;
-    indexed_uvs[1] = config->input_bounds.y;
+    indexed_uvs[0] = config->render_input_bounds.x;
+    indexed_uvs[1] = config->render_input_bounds.y;
 
-    indexed_uvs[2] = config->input_bounds.x;
-    indexed_uvs[3] = config->input_bounds.y + config->input_bounds.h;
+    indexed_uvs[2] = config->render_input_bounds.x;
+    indexed_uvs[3] = config->render_input_bounds.y + config->render_input_bounds.h;
 
-    indexed_uvs[4] = config->input_bounds.x + config->input_bounds.w;
-    indexed_uvs[5] = config->input_bounds.y + config->input_bounds.h;
+    indexed_uvs[4] = config->render_input_bounds.x + config->render_input_bounds.w;
+    indexed_uvs[5] = config->render_input_bounds.y + config->render_input_bounds.h;
 
-    indexed_uvs[6] = config->input_bounds.x + config->input_bounds.w;
-    indexed_uvs[7] = config->input_bounds.y;
+    indexed_uvs[6] = config->render_input_bounds.x + config->render_input_bounds.w;
+    indexed_uvs[7] = config->render_input_bounds.y;
 
     GLuint uvbuffer;
     glGenBuffers(1, &uvbuffer);

@@ -13,6 +13,32 @@ cJSON* serialize_config_bounds(config_bounds *in) {
     return config_bounds_json;
 }
 
+cJSON* serialize_config_point(config_point *in) {
+    cJSON *config_point_json = cJSON_CreateObject();
+
+    cJSON_AddItemToObject(config_point_json, "x", cJSON_CreateNumber(in->x));
+    cJSON_AddItemToObject(config_point_json, "y", cJSON_CreateNumber(in->y));
+
+    return config_point_json;
+}
+
+cJSON* serialize_config_point_mapping(config_point_mapping *in) {
+    cJSON *config_point_mapping_json = cJSON_CreateObject();
+
+    cJSON *input_points_json = cJSON_CreateArray();
+    cJSON *output_points_json = cJSON_CreateArray();
+
+    for (int i = 0; i < in->count_points; i++) {
+        cJSON_AddItemToArray(input_points_json, serialize_config_point(&in->input_points[i]));
+        cJSON_AddItemToArray(output_points_json, serialize_config_point(&in->output_points[i]));
+    }
+
+    cJSON_AddItemToObject(config_point_mapping_json, "input_points", input_points_json);
+    cJSON_AddItemToObject(config_point_mapping_json, "output_points", output_points_json);
+
+    return config_point_mapping_json;
+}
+
 cJSON* serialize_config_blend(config_blend *in) {
     cJSON *config_blend_json = cJSON_CreateObject();
 
@@ -91,10 +117,15 @@ cJSON* serialize_config_virtual_screen(config_virtual_screen *in) {
     cJSON *config_virtual_screen_json = cJSON_CreateObject();
 
     cJSON_AddItemToObject(config_virtual_screen_json, "source_render_id", cJSON_CreateNumber(in->source_render_id));
-    cJSON_AddItemToObject(config_virtual_screen_json, "input_bounds", serialize_config_bounds(&in->input_bounds));
-    cJSON_AddItemToObject(config_virtual_screen_json, "output_bounds", serialize_config_bounds(&in->output_bounds));
+    cJSON_AddItemToObject(config_virtual_screen_json, "w", cJSON_CreateNumber(in->w));
+    cJSON_AddItemToObject(config_virtual_screen_json, "h", cJSON_CreateNumber(in->h));
+
+    cJSON_AddItemToObject(config_virtual_screen_json, "render_input_bounds", serialize_config_bounds(&in->render_input_bounds));
+
     cJSON_AddItemToObject(config_virtual_screen_json, "color_balance", serialize_config_color_balance(&in->color_balance));
     cJSON_AddItemToObject(config_virtual_screen_json, "white_balance", serialize_config_white_balance(&in->white_balance));
+
+    cJSON_AddItemToObject(config_virtual_screen_json, "monitor_position", serialize_config_point_mapping(&in->monitor_position));
 
     cJSON *blends_json = cJSON_CreateArray();
     for (int i=0; i < in->count_blends; i++) {

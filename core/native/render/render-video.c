@@ -169,13 +169,13 @@ void render_video_render(render_layer *layer) {
         return;
     }
 
-    float x, y, w, h;
+    double x, y, w, h;
 
-    float w_scale = (dst_width / (float)dst_height);
-    float h_scale = (dst_height / (float)dst_width);
+    double w_scale = (dst_width / (double)dst_height);
+    double h_scale = (dst_height / (double)dst_width);
 
-    float w_sz = layer->config.h * w_scale;
-    float h_sz = layer->config.w * h_scale;
+    double w_sz = layer->config.h * w_scale;
+    double h_sz = layer->config.w * h_scale;
 
     if (src_crop) {
         if (w_sz > layer->config.w) {
@@ -210,10 +210,10 @@ void render_video_render(render_layer *layer) {
 
         glBegin(GL_QUADS);
 
-        glTexCoord2f(0.0, 0.0); glVertex2d(x, y);
-        glTexCoord2f(0.0, 1.0); glVertex2d(x, y + h);
-        glTexCoord2f(1.0, 1.0); glVertex2d(x + w, y + h);
-        glTexCoord2f(1.0, 0.0); glVertex2d(x + w, y);
+        glTexCoord2d(0.0, 0.0); glVertex2d(x, y);
+        glTexCoord2d(0.0, 1.0); glVertex2d(x, y + h);
+        glTexCoord2d(1.0, 1.0); glVertex2d(x + w, y + h);
+        glTexCoord2d(1.0, 0.0); glVertex2d(x + w, y);
 
         glEnd();
 

@@ -62,6 +62,8 @@ void create_window(monitor *m) {
     glfwWindowHint(GLFW_CENTER_CURSOR, GLFW_FALSE);
     glfwWindowHint(GLFW_FOCUSED, GLFW_FALSE);
 
+    glfwWindowHint(GLFW_SAMPLES, 4);
+
     m->window = glfwCreateWindow(mode->width, mode->height, "Projector", NULL, gl_share_context);
     glfwSetWindowMonitor(m->window, monitor, m->xpos, m->ypos, mode->width, mode->height, mode->refreshRate);
 
@@ -281,6 +283,16 @@ void monitors_cycle() {
         if (m->window) {
             glfwMakeContextCurrent(m->window);
             glfwGetFramebufferSize(m->window, &width, &height);
+
+            for (int j=0; j < m->config->count_virtual_screen; j++) {
+                void *vs_data = m->virtual_screen_data[j];
+                texture_id = find_texture_id(&m->config->virtual_screens[j]);
+
+                if (texture_id) {
+                    virtual_screen_render(texture_id, &m->config->virtual_screens[j], vs_data);
+                }
+            }
+
             glViewport(0, 0, width, height);
 
             glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -291,11 +303,7 @@ void monitors_cycle() {
 
             for (int j=0; j < m->config->count_virtual_screen; j++) {
                 void *vs_data = m->virtual_screen_data[j];
-                texture_id = find_texture_id(&m->config->virtual_screens[j]);
-
-                if (texture_id) {
-                    virtual_screen_render(texture_id, &m->config->virtual_screens[j], vs_data);
-                }
+                virtual_screen_print(&m->config->virtual_screens[j], vs_data);
             }
 
             glPopMatrix();

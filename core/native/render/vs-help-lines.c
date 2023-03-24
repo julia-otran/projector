@@ -7,10 +7,6 @@ void vs_help_lines_render(config_virtual_screen *config) {
 
     glColor4f(1.0, 1.0, 1.0, 1.0);
 
-    glPushMatrix();
-
-    glTranslated(config->output_bounds.x, config->output_bounds.y, 0.0);
-
     for (int i = 0; i < config->count_help_lines; i++) {
         config_help_line *line = &config->help_lines[i];
 
@@ -22,6 +18,5 @@ void vs_help_lines_render(config_virtual_screen *config) {
         glEnd();
     }
 
-    glPopMatrix();
     glDisable(GL_MULTISAMPLE);
 }

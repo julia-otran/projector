@@ -7,10 +7,6 @@ void vs_black_level_adjust_render(config_virtual_screen *config) {
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_COLOR_MATERIAL);
 
-    glPushMatrix();
-
-    glTranslated(config->output_bounds.x, config->output_bounds.y, 0.0);
-
     for (int i = 0; i < config->count_black_level_adjusts; i++) {
         config_black_level_adjust *bla = &config->black_level_adjusts[i];
 
@@ -25,8 +21,6 @@ void vs_black_level_adjust_render(config_virtual_screen *config) {
 
         glEnd();
     }
-
-    glPopMatrix();
 
     glDisable(GL_MULTISAMPLE);
     glDisable(GL_COLOR_MATERIAL);

@@ -96,19 +96,11 @@ void render_init(render_layer *render) {
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    GLuint glDepthRenderBuffer;
-    glGenRenderbuffers(1, &glDepthRenderBuffer);
-    glBindRenderbuffer(GL_RENDERBUFFER, glDepthRenderBuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
     GLuint FramebufferName = 0;
     glGenFramebuffers(1, &FramebufferName);
     glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
 
-    // Set "renderedTexture" as our colour attachement #0
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderedTexture, 0);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, glDepthRenderBuffer);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -152,10 +144,6 @@ void render_cycle(render_layer *render) {
     int height = render->config.h;
 
     glBindFramebuffer(GL_FRAMEBUFFER, render->framebuffer_name);
-
-    // Point shaders output to correct buffer
-    GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
-    glDrawBuffers(1, DrawBuffers);
 
     glViewport(0, 0, width, height);
 
@@ -201,6 +189,7 @@ void render_terminate(render_layer *render) {
         }
     }
 
+    glDeleteFramebuffers(1, &render->framebuffer_name);
     glDeleteTextures(1, &render->rendered_texture);
 }
 
@@ -291,7 +280,8 @@ void activate_renders(GLFWwindow *shared_context, projection_config *config) {
     render_image_set_config(renders, count_renders);
 
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-    transfer_window = glfwCreateWindow(800, 600, "Projector Render Transfer Window", NULL, shared_context);
+    glfwWindowHint(GLFW_SAMPLES, 0);
+    transfer_window = glfwCreateWindow(800, 600, "Projector Stream Window", NULL, shared_context);
 
     mtx_init(&transfer_window_thread_mutex, 0);
     cnd_init(&transfer_window_thread_cond);

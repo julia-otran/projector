@@ -2,6 +2,16 @@
 #define _CONFIG_STRUCTS_H_
 
 typedef struct {
+    double x, y;
+} config_point;
+
+typedef struct {
+    config_point *input_points;
+    config_point *output_points;
+    int count_points;
+} config_point_mapping;
+
+typedef struct {
     double x, y, w, h;
 } config_bounds;
 
@@ -41,10 +51,14 @@ typedef struct {
 } config_black_level_adjust;
 
 typedef struct {
-    int source_render_id;
+    int source_render_id, w, h;
 
-    config_bounds input_bounds;
-    config_bounds output_bounds;
+    config_bounds render_input_bounds;
+
+    config_color_balance color_balance;
+    config_white_balance white_balance;
+
+    config_point_mapping monitor_position;
 
     int count_blends;
     config_blend *blends;
@@ -54,9 +68,6 @@ typedef struct {
 
     int count_black_level_adjusts;
     config_black_level_adjust *black_level_adjusts;
-
-    config_color_balance color_balance;
-    config_white_balance white_balance;
 } config_virtual_screen;
 
 typedef struct {
