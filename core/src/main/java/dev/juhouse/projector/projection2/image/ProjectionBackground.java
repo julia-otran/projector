@@ -5,6 +5,7 @@
  */
 package dev.juhouse.projector.projection2.image;
 
+import dev.juhouse.projector.projection2.BridgeRender;
 import dev.juhouse.projector.projection2.CanvasDelegate;
 import dev.juhouse.projector.projection2.image.ProjectionImage;
 import dev.juhouse.projector.projection2.models.BackgroundModel;
@@ -26,6 +27,12 @@ public class ProjectionBackground extends ProjectionImage {
         this.setModel(getCanvasDelegate().getSettingsService().getLastBackground());
         this.setCropBackground(ProjectorPreferences.getCropBackground());
         this.setRender(true);
+    }
+
+    @Override
+    public void rebuild() {
+        super.rebuild();
+        this.getRenderFlagProperty().get().applyDefault(BridgeRender::getEnableRenderBackgroundAssets);
     }
 
     private CanvasDelegate getCanvasDelegate() {

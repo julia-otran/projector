@@ -41,6 +41,7 @@ public class ProjectionImage implements Projectable {
     @Override
     public void init() {
         renderFlag.get().getFlagValueProperty().addListener((observableValue, number, t1) -> update());
+        renderFlag.get().applyDefault(BridgeRender::getEnableRenderImage);
     }
 
     @Override
@@ -50,7 +51,7 @@ public class ProjectionImage implements Projectable {
 
     @Override
     public void rebuild() {
-        renderFlag.get().applyDefault(BridgeRender::getEnableRenderImage);
+
     }
 
     @Override

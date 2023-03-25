@@ -136,7 +136,6 @@ JNIEXPORT jobjectArray JNICALL Java_dev_juhouse_projector_projection2_Bridge_get
     jfieldID render_text_area_width_field = (*env)->GetFieldID(env, BridgeRenderClass, "textAreaWidth", "I");
     jfieldID render_text_area_height_field = (*env)->GetFieldID(env, BridgeRenderClass, "textAreaHeight", "I");
 
-
     jobjectArray result = (*env)->NewObjectArray(env, config->count_renders, BridgeRenderClass, NULL);
 
     for (int i = 0; i < config->count_renders; i++) {
@@ -145,7 +144,9 @@ JNIEXPORT jobjectArray JNICALL Java_dev_juhouse_projector_projection2_Bridge_get
 
         (*env)->SetIntField(env, render_object, render_id_field, render->render_id);
 
-        (*env)->SetObjectField(env, render_object, render_name_field, (*env)->NewStringUTF(env, render->render_name));
+        if (render->render_name != NULL) {
+            (*env)->SetObjectField(env, render_object, render_name_field, (*env)->NewStringUTF(env, render->render_name));
+        }
 
         (*env)->SetBooleanField(env, render_object, enable_render_background_assets_field, render->enable_render_background_assets);
         (*env)->SetBooleanField(env, render_object, enable_render_image_field, render->enable_render_image);
