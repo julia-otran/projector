@@ -40,7 +40,7 @@ void vs_color_corrector_init() {
     glUseProgram(0);
 }
 
-void vs_color_corrector_start(config_bounds *display_bounds, config_virtual_screen *config, vs_color_corrector *data) {
+void vs_color_corrector_start(config_virtual_screen *config, render_output *render, vs_color_corrector *data) {
     GLuint vertexarray;
     glGenVertexArrays(1, &vertexarray);
     glBindVertexArray(vertexarray);
@@ -82,19 +82,26 @@ void vs_color_corrector_start(config_bounds *display_bounds, config_virtual_scre
     data->vertexbuffer = vertexbuffer;
     free(indexed_vertices);
 
+    float x, y, w, h;
+
+    x = config->render_input_bounds.x / (float) render->size.render_width;
+    y = config->render_input_bounds.y / (float) render->size.render_height;
+    w = config->render_input_bounds.w / (float) render->size.render_width;
+    h = config->render_input_bounds.h / (float) render->size.render_height;
+
     GLfloat *indexed_uvs = calloc(8, sizeof(GLfloat));
 
-    indexed_uvs[0] = config->render_input_bounds.x;
-    indexed_uvs[1] = config->render_input_bounds.y;
+    indexed_uvs[0] = x;
+    indexed_uvs[1] = y;
 
-    indexed_uvs[2] = config->render_input_bounds.x;
-    indexed_uvs[3] = config->render_input_bounds.y + config->render_input_bounds.h;
+    indexed_uvs[2] = x;
+    indexed_uvs[3] = y + h;
 
-    indexed_uvs[4] = config->render_input_bounds.x + config->render_input_bounds.w;
-    indexed_uvs[5] = config->render_input_bounds.y + config->render_input_bounds.h;
+    indexed_uvs[4] = x + w;
+    indexed_uvs[5] = y + h;
 
-    indexed_uvs[6] = config->render_input_bounds.x + config->render_input_bounds.w;
-    indexed_uvs[7] = config->render_input_bounds.y;
+    indexed_uvs[6] = x + w;
+    indexed_uvs[7] = y;
 
     GLuint uvbuffer;
     glGenBuffers(1, &uvbuffer);
@@ -140,7 +147,13 @@ void vs_color_corrector_set_uniforms(config_virtual_screen *config) {
 }
 
 
-void vs_color_corrector_render_texture(GLuint texture_id, config_virtual_screen *config, vs_color_corrector *data) {
+void vs_color_corrector_render(config_virtual_screen *config, render_output *render, vs_color_corrector *data) {
+    GLuint texture_id = render->rendered_texture;
+
+    if (!texture_id) {
+        return;
+    }
+
     glUseProgram(program);
 
     vs_color_corrector_set_uniforms(config);

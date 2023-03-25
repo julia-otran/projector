@@ -16,7 +16,7 @@ typedef struct {
 } vs_blend;
 
 void vs_blend_initialize();
-void vs_blend_start(config_bounds *display_bounds, config_virtual_screen *virtual_screen, vs_blend *instance);
+void vs_blend_start(config_virtual_screen *virtual_screen, vs_blend *instance);
 void vs_blend_render(vs_blend *instance);
 void vs_blend_stop(vs_blend *instance);
 void vs_blend_shutdown();

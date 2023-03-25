@@ -13,9 +13,11 @@ void virtual_screen_initialize() {
     vs_blend_initialize();
 }
 
-void virtual_screen_start(config_bounds *display_bounds, config_virtual_screen *config, void **data) {
+void virtual_screen_start(render_output *render, config_virtual_screen *config, void **data) {
     virtual_screen *vs = (virtual_screen*) calloc(1, sizeof(virtual_screen));
     (*data) = (void*) vs;
+
+    vs->render_output = render;
 
     int width = config->w;
     int height = config->h;
@@ -46,11 +48,11 @@ void virtual_screen_start(config_bounds *display_bounds, config_virtual_screen *
 
     vs->framebuffer_id = framebuffer_id;
 
-    vs_color_corrector_start(display_bounds, config, &vs->color_corrector);
-    vs_blend_start(display_bounds, config, &vs->blend);
+    vs_color_corrector_start(config, vs->render_output, &vs->color_corrector);
+    vs_blend_start(config, &vs->blend);
 }
 
-void virtual_screen_render(GLuint texture_id, config_virtual_screen *config, void *data) {
+void virtual_screen_render(config_virtual_screen *config, void *data) {
     virtual_screen *vs = (virtual_screen*) data;
     config_color_factor *background_clear_color = &config->background_clear_color;
 
@@ -66,7 +68,7 @@ void virtual_screen_render(GLuint texture_id, config_virtual_screen *config, voi
     glLoadIdentity();
     glOrtho(0.0, config->w, config->h, 0.0, 0.0, 1.0);
 
-    vs_color_corrector_render_texture(texture_id, config, &vs->color_corrector);
+    vs_color_corrector_render(config, vs->render_output, &vs->color_corrector);
     vs_blend_render(&vs->blend);
     vs_help_lines_render(config);
     vs_black_level_adjust_render(config);
@@ -94,8 +96,8 @@ void virtual_screen_print(config_virtual_screen *config, void *data) {
     glBegin(GL_QUADS);
 
     for (int i = 0; i < config->monitor_position.count_points; i++) {
-        tex_x = config->monitor_position.input_points[i].x;
-        tex_y = 1.0 - config->monitor_position.input_points[i].y;
+        tex_x = config->monitor_position.input_points[i].x / config->w;
+        tex_y = 1.0 - (config->monitor_position.input_points[i].y / config->h);
 
         dst_x = config->monitor_position.output_points[i].x;
         dst_y = config->monitor_position.output_points[i].y;

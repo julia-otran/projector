@@ -58,7 +58,7 @@ void vs_blend_initialize() {
     glUseProgram(0);
 }
 
-void vs_blend_load_coordinates(config_bounds *display_bounds, config_virtual_screen *virtual_screen, config_blend *config, vs_blend_vertex *data) {
+void vs_blend_load_coordinates(config_virtual_screen *virtual_screen, config_blend *config, vs_blend_vertex *data) {
     GLuint vertexarray;
     glGenVertexArrays(1, &vertexarray);
     glBindVertexArray(vertexarray);
@@ -124,12 +124,12 @@ void vs_blend_load_coordinates(config_bounds *display_bounds, config_virtual_scr
     glBindVertexArray(0);
 }
 
-void vs_blend_start(config_bounds *display_bounds, config_virtual_screen *virtual_screen, vs_blend *instance) {
+void vs_blend_start(config_virtual_screen *virtual_screen, vs_blend *instance) {
     instance->vertexes = (vs_blend_vertex*) calloc(virtual_screen->count_blends, sizeof(vs_blend_vertex));
     instance->vertexes_count = virtual_screen->count_blends;
 
     for (int i = 0; i < virtual_screen->count_blends; i++) {
-        vs_blend_load_coordinates(display_bounds, virtual_screen, &virtual_screen->blends[i], &instance->vertexes[i]);
+        vs_blend_load_coordinates(virtual_screen, &virtual_screen->blends[i], &instance->vertexes[i]);
     }
 }
 

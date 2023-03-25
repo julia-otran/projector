@@ -175,6 +175,16 @@ int window_should_close() {
     return 0;
 }
 
+render_output* get_render_output_config(config_virtual_screen *vs_config) {
+    for (int i=0; i<render_output_config_count; i++) {
+        if (render_output_config[i].render_id == vs_config->source_render_id) {
+            return &render_output_config[i];
+        }
+    }
+
+    return 0;
+}
+
 void monitors_config_hot_reload(projection_config *config) {
     for (int i=0; i<monitors_count; i++) {
         monitor *m = &monitors[i];
@@ -199,7 +209,10 @@ void monitors_config_hot_reload(projection_config *config) {
                     m->virtual_screen_data = (void**) calloc(dsp->count_virtual_screen, sizeof(void*));
 
                     for (int k=0; k<m->config->count_virtual_screen; k++) {
-                        virtual_screen_start(&dsp->monitor_bounds, &m->config->virtual_screens[k], &m->virtual_screen_data[k]);
+                        config_virtual_screen *config_vs = &m->config->virtual_screens[k];
+                        render_output *render = get_render_output_config(config_vs);
+
+                        virtual_screen_start(render, config_vs, &m->virtual_screen_data[k]);
                     }
                 }
             }
@@ -252,16 +265,6 @@ void monitors_terminate() {
     virtual_screen_shutdown();
 }
 
-GLuint find_texture_id(config_virtual_screen *vs_config) {
-    for (int i=0; i<render_output_config_count; i++) {
-        if (render_output_config[i].render_id == vs_config->source_render_id) {
-            return render_output_config[i].rendered_texture;
-        }
-    }
-
-    return 0;
-}
-
 void monitor_prepare_renders_context() {
     for (int i=0; i<monitors_count; i++) {
         monitor *m = &monitors[i];
@@ -274,7 +277,6 @@ void monitor_prepare_renders_context() {
 }
 
 void monitors_cycle() {
-    GLuint texture_id;
     int width, height;
 
     for (int i=0; i<monitors_count; i++) {
@@ -286,11 +288,8 @@ void monitors_cycle() {
 
             for (int j=0; j < m->config->count_virtual_screen; j++) {
                 void *vs_data = m->virtual_screen_data[j];
-                texture_id = find_texture_id(&m->config->virtual_screens[j]);
 
-                if (texture_id) {
-                    virtual_screen_render(texture_id, &m->config->virtual_screens[j], vs_data);
-                }
+                virtual_screen_render(&m->config->virtual_screens[j], vs_data);
             }
 
             glViewport(0, 0, width, height);

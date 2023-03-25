@@ -15,13 +15,14 @@ typedef struct {
 } render_layer;
 
 typedef struct {
-    int render_id;
-    GLuint rendered_texture;
-} render_output;
-
-typedef struct {
     int render_width, render_height;
 } render_output_size;
+
+typedef struct {
+    int render_id;
+    render_output_size size;
+    GLuint rendered_texture;
+} render_output;
 
 void initialize_renders();
 void activate_renders(GLFWwindow *shared_context, projection_config *config);

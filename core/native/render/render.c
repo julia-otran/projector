@@ -273,6 +273,9 @@ void activate_renders(GLFWwindow *shared_context, projection_config *config) {
 
     for (int i=0; i < config->count_renders; i++) {
         output[i].render_id = config->renders[i].render_id;
+        output[i].size.render_width = config->renders[i].w;
+        output[i].size.render_height = config->renders[i].h;
+
         configure_render(&config->renders[i], &renders[i]);
     }
 
