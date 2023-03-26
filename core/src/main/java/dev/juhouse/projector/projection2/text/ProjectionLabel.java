@@ -3,6 +3,7 @@ package dev.juhouse.projector.projection2.text;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import dev.juhouse.projector.projection2.*;
 import dev.juhouse.projector.projection2.text.*;
@@ -81,6 +82,7 @@ public class ProjectionLabel implements Projectable {
             this.textRenders.put(render.getRenderId(), textRender);
         }
 
+        onFactoryChange();
         doRender();
     }
 
@@ -137,7 +139,17 @@ public class ProjectionLabel implements Projectable {
 
         final BridgeTextData[] textData = new BridgeTextData[bridgeRenders.length];
 
-        currentText.renderLines().forEach((renderId, lines) -> textData[getRenderIndex(renderId)] = textRenders.get(renderId).renderText(lines));
+        final Set<Integer> srcRenderIds = Arrays.stream(bridgeRenders).map(BridgeRender::getRenderId).collect(Collectors.toSet());
+        final Set<Integer> txtRenderIds = currentText.renderLines().keySet();
+
+        if (!srcRenderIds.containsAll(txtRenderIds) || !txtRenderIds.containsAll(srcRenderIds)) {
+            return;
+        }
+
+        currentText.renderLines().forEach((renderId, lines) -> {
+            TextRenderer tr = textRenders.get(renderId);
+            textData[getRenderIndex(renderId)] = tr.renderText(lines);
+        });
 
         canvasDelegate.getBridge().setTextData(textData);
     }

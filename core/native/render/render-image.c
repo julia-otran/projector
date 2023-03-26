@@ -193,6 +193,8 @@ void render_image_update_assets() {
                 if (tex_id) {
                     glDeleteTextures(1, &tex_id);
                 }
+
+                node->mode = RENDER_FADER_MODE_DELETE;
             }
         }
 
@@ -276,6 +278,8 @@ void render_image_deallocate_assets() {
             if (tex_id) {
                 glDeleteTextures(1, &tex_id);
             }
+
+            node->mode = RENDER_FADER_MODE_DELETE;
         }
 
         render_fader_cleanup(fader_instances[i]);

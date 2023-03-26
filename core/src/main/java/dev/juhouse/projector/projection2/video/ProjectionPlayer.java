@@ -71,7 +71,7 @@ public class ProjectionPlayer implements Projectable {
 
     @Override
     public void rebuild() {
-
+        video.rebuild();
     }
 
     public PlayerPreview getPreviewPanel() {

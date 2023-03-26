@@ -169,7 +169,7 @@ void render_fader_cleanup(render_fader_instance *instance) {
     fade_node *current = (*previous_ptr);
 
     while (current) {
-        if (render_fader_is_hidden(current)) {
+        if (current->mode == RENDER_FADER_MODE_DELETE) {
             (*previous_ptr) = (fade_node *) current->next;
             free(current);
         } else {

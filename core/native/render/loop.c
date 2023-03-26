@@ -7,6 +7,7 @@
 #include "render.h"
 
 static int run;
+static int waiting;
 
 static thrd_t thread_id;
 static mtx_t thread_mutex;
@@ -34,6 +35,9 @@ int loop(void *_) {
         if (pending_config_reload) {
             monitors_config_hot_reload(pending_config_reload);
             pending_config_reload = NULL;
+        }
+
+        if (waiting) {
             cnd_signal(&thread_cond);
         }
 
@@ -59,12 +63,14 @@ int loop(void *_) {
 void main_loop_schedule_config_reload(projection_config *config) {
     if (run) {
         mtx_lock(&thread_mutex);
+        waiting = 1;
     }
 
     pending_config_reload = config;
 
     if (run) {
         cnd_wait(&thread_cond, &thread_mutex);
+        waiting = 0;
         mtx_unlock(&thread_mutex);
     }
 }
@@ -76,6 +82,13 @@ void main_loop_start() {
     run = 1;
 
     thrd_create(&thread_id, loop, NULL);
+
+    mtx_lock(&thread_mutex);
+    waiting = 1;
+    cnd_wait(&thread_cond, &thread_mutex);
+    waiting = 0;
+    mtx_unlock(&thread_mutex);
+
 }
 
 void main_loop_terminate() {

@@ -141,6 +141,8 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_loadConfig(
             shutdown_renders();
             log_debug("Freeing configs...\n");
             free_projection_config(config);
+            log_debug("Reinitialize renders");
+            initialize_renders();
         }
     }
 

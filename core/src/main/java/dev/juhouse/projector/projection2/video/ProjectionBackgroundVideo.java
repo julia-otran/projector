@@ -42,7 +42,7 @@ public class ProjectionBackgroundVideo implements Projectable {
 
     @Override
     public void rebuild() {
-
+        videoProjector.rebuild();
     }
 
     @Override

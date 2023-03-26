@@ -74,6 +74,11 @@ public class ProjectionVideo {
         this.player.video().setAdjustVideo(false);
     }
 
+    public void rebuild() {
+        updateBufferAddress();
+        updateRender();
+    }
+
     public void setRender(boolean render) {
         this.render.setValue(render);
         updateBufferAddress();

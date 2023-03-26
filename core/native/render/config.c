@@ -276,8 +276,8 @@ void prepare_default_config(config_bounds *default_monitor_bounds, int no_displa
 
     default_config.display[0].virtual_screens[0].render_input_bounds.x = 0.0;
     default_config.display[0].virtual_screens[0].render_input_bounds.y = 0.0;
-    default_config.display[0].virtual_screens[0].render_input_bounds.w = 1.0;
-    default_config.display[0].virtual_screens[0].render_input_bounds.h = 1.0;
+    default_config.display[0].virtual_screens[0].render_input_bounds.w = default_monitor_bounds->w;
+    default_config.display[0].virtual_screens[0].render_input_bounds.h = default_monitor_bounds->h;
 
     default_config.display[0].virtual_screens[0].monitor_position.count_points = 4;
 
@@ -286,14 +286,14 @@ void prepare_default_config(config_bounds *default_monitor_bounds, int no_displa
     default_config.display[0].virtual_screens[0].monitor_position.input_points[0].x = 0.0;
     default_config.display[0].virtual_screens[0].monitor_position.input_points[0].y = 0.0;
 
-    default_config.display[0].virtual_screens[0].monitor_position.input_points[1].x = 1.0;
+    default_config.display[0].virtual_screens[0].monitor_position.input_points[1].x = default_monitor_bounds->w;
     default_config.display[0].virtual_screens[0].monitor_position.input_points[1].y = 0.0;
 
-    default_config.display[0].virtual_screens[0].monitor_position.input_points[2].x = 1.0;
-    default_config.display[0].virtual_screens[0].monitor_position.input_points[2].y = 1.0;
+    default_config.display[0].virtual_screens[0].monitor_position.input_points[2].x = default_monitor_bounds->w;
+    default_config.display[0].virtual_screens[0].monitor_position.input_points[2].y = default_monitor_bounds->h;
 
     default_config.display[0].virtual_screens[0].monitor_position.input_points[3].x = 0.0;
-    default_config.display[0].virtual_screens[0].monitor_position.input_points[3].y = 1.0;
+    default_config.display[0].virtual_screens[0].monitor_position.input_points[3].y = default_monitor_bounds->h;
 
     default_config.display[0].virtual_screens[0].monitor_position.output_points = (config_point*) calloc(4, sizeof(config_point));
 
