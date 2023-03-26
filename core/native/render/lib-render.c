@@ -55,7 +55,7 @@ static projection_config *config;
 #ifdef __gnu_linux__
 
 #define jni_jstringToCharArr(env, jstr, char_out_arr) \
-	char_out_arr = (*env)->GetStringUTFChars(env, jstr);
+	char_out_arr = (char*) (*env)->GetStringUTFChars(env, jstr, 0);
 
 #define jni_releaseCharArr(env, jstr, char_out_arr) \
 	(*env)->ReleaseStringUTFChars(env, jstr, char_out_arr); \
