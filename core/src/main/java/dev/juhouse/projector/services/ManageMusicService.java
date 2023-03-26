@@ -197,12 +197,14 @@ public class ManageMusicService {
 
                 if (m != null) {
                     SQLiteJDBCDriverConnection.getConn().rollback();
+                    SQLiteJDBCDriverConnection.getConn().setAutoCommit(true);
                     throw new MusicAlreadyPresentException(m);
                 }
 
             } catch (SQLException ex) {
                 Logger.getLogger(ManageMusicService.class.getName()).log(Level.SEVERE, null, ex);
                 SQLiteJDBCDriverConnection.getConn().rollback();
+                SQLiteJDBCDriverConnection.getConn().setAutoCommit(true);
                 throw new PersistenceException(ex.getMessage(), ex);
             }
 
@@ -215,10 +217,12 @@ public class ManageMusicService {
             try {
                 musicRepo.create(m);
                 SQLiteJDBCDriverConnection.getConn().commit();
+                SQLiteJDBCDriverConnection.getConn().setAutoCommit(true);
                 return m.getId();
             } catch (SQLException ex) {
                 Logger.getLogger(ManageMusicService.class.getName()).log(Level.SEVERE, null, ex);
                 SQLiteJDBCDriverConnection.getConn().rollback();
+                SQLiteJDBCDriverConnection.getConn().setAutoCommit(true);
                 throw new PersistenceException(ex.getMessage(), ex);
             }
 
@@ -240,11 +244,13 @@ public class ManageMusicService {
                 
                 if (m == null) {
                     SQLiteJDBCDriverConnection.getConn().rollback();
+                    SQLiteJDBCDriverConnection.getConn().setAutoCommit(true);
                     throw new PersistenceException();
                 }
             } catch (SQLException ex) {
                 Logger.getLogger(ManageMusicService.class.getName()).log(Level.SEVERE, null, ex);
                 SQLiteJDBCDriverConnection.getConn().rollback();
+                SQLiteJDBCDriverConnection.getConn().setAutoCommit(true);
                 throw new PersistenceException(ex.getMessage(), ex);
             }
 
@@ -256,10 +262,12 @@ public class ManageMusicService {
             try {
                 musicRepo.update(m);
                 SQLiteJDBCDriverConnection.getConn().commit();
+                SQLiteJDBCDriverConnection.getConn().setAutoCommit(true);
                 closeMusic(id);
             } catch (SQLException ex) {
                 Logger.getLogger(ManageMusicService.class.getName()).log(Level.SEVERE, null, ex);
                 SQLiteJDBCDriverConnection.getConn().rollback();
+                SQLiteJDBCDriverConnection.getConn().setAutoCommit(true);
                 throw new PersistenceException(ex.getMessage(), ex);
             }
 
@@ -267,12 +275,6 @@ public class ManageMusicService {
             Logger.getLogger(ManageMusicService.class.getName()).log(Level.SEVERE, null, ex);
             throw new PersistenceException(ex.getMessage(), ex);
         }
-    }
-
-    public List<String> listArtists() {
-        return artistRepo.findAll().stream()
-                .map(a -> a.getNameProperty().getValue())
-                .collect(Collectors.toList());
     }
 
     public List<String> searchArtists(String term) {

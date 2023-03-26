@@ -41,6 +41,10 @@ void window_capture_init() {
 }
 
 BOOL window_capture_enum_windows_callback(HWND handle, LPARAM _) {
+    if (!handle) {
+        return TRUE;
+    }
+
     if (!IsWindow(handle)) {
         return TRUE;
     }
@@ -53,15 +57,6 @@ BOOL window_capture_enum_windows_callback(HWND handle, LPARAM _) {
         return TRUE;
     }
 
-    TITLEBARINFO ti;
-
-    ti.cbSize = sizeof(ti);
-    GetTitleBarInfo(handle, &ti);
-
-    if (ti.rgstate[0] & STATE_SYSTEM_INVISIBLE) {
-        return TRUE;
-    }
-
     DWORD pid;
 
     GetWindowThreadProcessId(handle, &pid);
@@ -70,9 +65,34 @@ BOOL window_capture_enum_windows_callback(HWND handle, LPARAM _) {
         return TRUE;
     }
 
-    char name[255];
+    char name[256];
+    name[255] = 0;
 
     GetWindowTextA(handle, name, sizeof(name) - 1);
+
+    if (strlen(name) == 0) {
+        return TRUE;
+    }
+
+    window_capture_node* navigate = window_capture_node_list;
+    int equal_count = 0;
+
+    char name_cmp[256];
+    name_cmp[255] = 0;
+
+    memcpy(name_cmp, name, sizeof(name_cmp) - 1);
+
+    while (navigate) {
+        if (strcmp(name_cmp, navigate->node.window_name) == 0) {
+            equal_count++;
+            _snprintf_s(name_cmp, sizeof(name_cmp) - 1, sizeof(name_cmp) - 1, "[%i] %s", equal_count, name);
+            navigate = window_capture_node_list;
+        }
+        else 
+        {
+            navigate = navigate->next;
+        }
+    }
 
     window_capture_node* node = (window_capture_node*)calloc(1, sizeof(window_capture_node));
 
@@ -80,13 +100,13 @@ BOOL window_capture_enum_windows_callback(HWND handle, LPARAM _) {
         return FALSE;
     }
 
-    node->node.window_name = calloc(1, sizeof(name));
+    node->node.window_name = calloc(1, sizeof(name_cmp));
 
     if (node->node.window_name == NULL) {
         return FALSE;
     }
 
-    memcpy(node->node.window_name, name, sizeof(name) - 1);
+    memcpy(node->node.window_name, name_cmp, sizeof(name_cmp) - 1);
 
     window_capture_extra_data* extra_data = (window_capture_extra_data*)calloc(1, sizeof(window_capture_extra_data));
 
@@ -101,6 +121,8 @@ BOOL window_capture_enum_windows_callback(HWND handle, LPARAM _) {
     node->next = window_capture_node_list;
     window_capture_node_list = node;
     window_capture_node_list_size++;
+
+    return TRUE;
 }
 
 window_node_list* window_capture_get_window_list() {
@@ -143,7 +165,6 @@ void window_capture_free_window_list(window_node_list* list) {
     free(list->list);
     free(list);
 }
-
 
 void* window_capture_get_handler(char* window_name) {
     window_node_list* node_list = window_capture_get_window_list();

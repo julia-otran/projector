@@ -3,8 +3,11 @@
     <option name="ALTERNATIVE_JRE_PATH" value="15" />
     <option name="MAIN_CLASS_NAME" value="dev.juhouse.projector.Main" />
     <module name="projector-windows" />
+    <selectedOptions>
+      <option name="environmentVariables" visible="false" />
+    </selectedOptions>
     <method v="2">
-      <option name="Maven.BeforeRunTask" enabled="true" file="$PROJECT_DIR$/pom.xml" goal="compile -pl core,windows" />
+      <option name="Maven.BeforeRunTask" enabled="true" file="$PROJECT_DIR$/pom.xml" goal="compile -pl core,windows -Ddebug=true" />
     </method>
   </configuration>
 </component>

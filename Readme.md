@@ -6,7 +6,7 @@ Software for media (lyrics, images, videos, countdown, window capture) projectio
 Contribute
 ==========
 
-Just open a PR or a Issue. If you notice any bug, please, let me know.
+Just open a PR or an issue. If you notice any bug, please, let me know.
 
 I18n
 =====
@@ -28,7 +28,7 @@ Build
    mklink /d src ..\..\..\..\core\native
    ```
     
-2. First, generate the librender JNI headers: (You may use the `Generate Headers` IntelliJ Run Config)
+2. First, generate the lib render JNI headers: (You may use the `Generate Headers` IntelliJ Run Config)
     ```
     mvn compile -pl core
     ```
@@ -52,7 +52,7 @@ mvn clean package -pl core,linux
 ```
 
 ## Building OSX
-There's no support to OSX right now. Feel free to setup a XCode project so building librender could be possible
+There's no support to OSX right now. Feel free to create a XCode project so building lib render could be possible
 
 Minimum Requirements
 ====================
@@ -76,7 +76,8 @@ Install
 ## Windows
 
 1. Install Java 19
-2. Install VLC Player (version 3.x)
+2. Install Microsoft Visual C++ Redistributable
+3. Install VLC Player (version 3.x)
    ### Beware
    - You must install VLC 64 bits. Pay attention that VLC website by default directs to the 32 bits version. Be sure to select the 64 bits distribution.
    - Install VLC Player on the default location. Other locations won't work with this software

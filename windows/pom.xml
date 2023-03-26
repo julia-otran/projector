@@ -14,6 +14,20 @@
         <classifier>win</classifier>
     </properties>
 
+    <profiles>
+        <profile>
+            <id>windows-debug</id>
+
+        </profile>
+
+        <profile>
+            <id>windows-release</id>
+            <properties>
+                <librender.buildDir>native/LibRender/x64/Release</librender.buildDir>
+            </properties>
+        </profile>
+    </profiles>
+
     <name>Projector Windows</name>
 
     <dependencies>
@@ -84,8 +98,9 @@
         <resources>
             <resource>
                 <directory>
-                    native/LibRender/x64/Debug
+                    ${librender.buildDir}
                 </directory>
+
                 <includes>
                     <include>glfw3.dll</include>
                     <include>LibRender.dll</include>

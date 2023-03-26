@@ -10,19 +10,75 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <fx.version>19.0.2.1</fx.version>
-        <revision>3.5</revision>
+        <revision>3.6</revision>
         <lib_name>render</lib_name>
         <maven.compiler.release>17</maven.compiler.release>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
-    <name>Projector</name>
+    <profiles>
+        <profile>
+            <id>windows-debug</id>
+            <activation>
+                <property>
+                    <name>debug</name>
+                    <value>true</value>
+                </property>
+                <os>
+                    <family>windows</family>
+                    <arch>amd64</arch>
+                </os>
+            </activation>
 
-    <modules>
-        <module>core</module>
-        <module>osx</module>
-        <module>linux</module>
-        <module>windows</module>
-    </modules>
+            <properties>
+                <librender.buildDir>native/LibRender/x64/Debug</librender.buildDir>
+            </properties>
+
+            <modules>
+                <module>core</module>
+                <module>windows</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>windows-release</id>
+            <activation>
+                <property>
+                    <name>debug</name>
+                    <value>!true</value>
+                </property>
+                <os>
+                    <family>windows</family>
+                    <arch>amd64</arch>
+                </os>
+            </activation>
+
+            <properties>
+                <librender.buildDir>native/LibRender/x64/Release</librender.buildDir>
+            </properties>
+
+            <modules>
+                <module>core</module>
+                <module>windows</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>linux</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <arch>amd64</arch>
+                </os>
+            </activation>
+
+            <modules>
+                <module>core</module>
+                <module>linux</module>
+            </modules>
+        </profile>
+    </profiles>
+
+    <name>Projector</name>
 </project>

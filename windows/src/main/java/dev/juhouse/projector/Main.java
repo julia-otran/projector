@@ -1,8 +1,5 @@
 package dev.juhouse.projector;
 
-import com.sun.jna.Native;
-import com.sun.jna.NativeLibrary;
-
 import java.io.File;
 
 import static dev.juhouse.projector.utils.ResourceManager.unpackResource;
@@ -14,8 +11,9 @@ public class Main {
         System.load(glfwLib.toString());
 
         unpackResource("/LibRender.exp", "LibRender.exp");
-        unpackResource("/LibRender.pdb", "LibRender.pdb");
         unpackResource("/LibRender.lib", "LibRender.lib");
+        unpackResource("/LibRender.pdb", "LibRender.pdb");
+        unpackResource("/LibRender.map", "LibRender.map");
 
         File libExportFile = unpackResource("/LibRender.dll", "LibRender.dll");
         System.load(libExportFile.toString());

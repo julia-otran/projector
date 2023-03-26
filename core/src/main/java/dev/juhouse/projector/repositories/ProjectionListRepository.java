@@ -168,6 +168,10 @@ public class ProjectionListRepository {
         SQLiteJDBCDriverConnection
                 .getConn()
                 .commit();
+
+        SQLiteJDBCDriverConnection
+                .getConn()
+                .setAutoCommit(true);
     }
 
     public void updateItemTitle(ProjectionListItem projectionListItem, String newTitle) throws SQLException {

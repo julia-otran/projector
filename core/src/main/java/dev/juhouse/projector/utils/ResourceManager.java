@@ -47,6 +47,8 @@ public class ResourceManager {
             }
         }
 
-        throw new RuntimeException("Resource not found: " + resouce);
+        System.out.println("Resource not found: " + resouce);
+
+        return null;
     }
 }

@@ -26,6 +26,45 @@ static projection_config *config;
     }\
 }
 
+#ifdef _WIN32
+
+#include <windows.h>
+#include <stringapiset.h>
+
+#define jni_jstringToCharArr(env, jstr, char_out_arr) \
+	const jchar *internal_jchar = (*env)->GetStringChars(env, jstr, 0); \
+	int internal_jlen = (*env)->GetStringLength(env, jstr); \
+	int internal_len = WideCharToMultiByte(1252, 0, internal_jchar, internal_jlen, NULL, 0, 0, 0); \
+	char_out_arr = malloc(internal_len + 1); \
+	WideCharToMultiByte(1252, 0, internal_jchar, internal_jlen, char_out_arr, internal_len, 0, 0); \
+	char_out_arr[internal_len] = 0; \
+	(*env)->ReleaseStringChars(env, jstr, internal_jchar);
+
+#define jni_releaseCharArr(env, jstr, char_out_arr) \
+	free(char_out_arr);
+
+#define jni_charArrToJString(env, jstring_out, char_arr_in) \
+    int wide_size = MultiByteToWideChar(1252, 0, char_arr_in, -1, ((void*)0), 0); \
+    LPWSTR internal_tmp_out = calloc(wide_size, sizeof(WCHAR)); \
+    MultiByteToWideChar(1252, 0, char_arr_in, -1, internal_tmp_out, wide_size); \
+    jstring_out = (*env)->NewString(env, internal_tmp_out, wide_size); \
+    free(internal_tmp_out);
+
+#endif
+
+#ifdef __gnu_linux__
+
+#define jni_jstringToCharArr(env, jstr, char_out_arr) \
+	char_out_arr = (*env)->GetStringUTFChars(env, jstr);
+
+#define jni_releaseCharArr(env, jstr, char_out_arr) \
+	(*env)->ReleaseStringUTFChars(env, jstr, char_out_arr); \
+
+#define jni_charArrToJString(env, jstring_out, char_arr_in) \
+    jstring_out = (*env)->NewStringUTF(env, char_arr_in); 
+
+#endif
+
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_loadShader(JNIEnv *env, jobject _, jstring shader_name, jstring shader_data) {
     char *name = (char*) (*env)->GetStringUTFChars(env, shader_name, 0);
     char *data = (char*) (*env)->GetStringUTFChars(env, shader_data, 0);
@@ -68,9 +107,12 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_loadConfig(
     projection_config *new_config;
 
     if (j_file_path != NULL) {
-        char *file_path = (char*) (*env)->GetStringUTFChars(env, j_file_path, 0);
+        char* file_path;
+        jni_jstringToCharArr(env, j_file_path, file_path);
+
         new_config = load_config(file_path);
-        (*env)->ReleaseStringUTFChars(env, j_file_path, file_path);
+        
+        jni_releaseCharArr(env, j_file_path, file_path);
     } else {
         new_config = load_config(NULL);
     }
@@ -112,9 +154,12 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_loadConfig(
 }
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_generateConfig(JNIEnv *env, jobject _, jstring j_path) {
-    char *file_path = (char*) (*env)->GetStringUTFChars(env, j_path, 0);
+    char* file_path;
+    jni_jstringToCharArr(env, j_path, file_path);
+
     generate_config(file_path);
-    (*env)->ReleaseStringUTFChars(env, j_path, file_path);
+    
+    jni_releaseCharArr(env, j_path, file_path);
 }
 
 JNIEXPORT jobjectArray JNICALL Java_dev_juhouse_projector_projection2_Bridge_getRenderSettings(JNIEnv *env, jobject _) {
@@ -145,7 +190,9 @@ JNIEXPORT jobjectArray JNICALL Java_dev_juhouse_projector_projection2_Bridge_get
         (*env)->SetIntField(env, render_object, render_id_field, render->render_id);
 
         if (render->render_name != NULL) {
-            (*env)->SetObjectField(env, render_object, render_name_field, (*env)->NewStringUTF(env, render->render_name));
+            jstring render_name;
+            jni_charArrToJString(env, render_name, render->render_name);
+            (*env)->SetObjectField(env, render_object, render_name_field, render_name);
         }
 
         (*env)->SetBooleanField(env, render_object, enable_render_background_assets_field, render->enable_render_background_assets);
@@ -286,9 +333,10 @@ JNIEXPORT jobjectArray JNICALL Java_dev_juhouse_projector_projection2_Bridge_get
 
     jclass string_class = (*env)->FindClass(env, "java/lang/String");
     jobjectArray result = (*env)->NewObjectArray(env, list->list_size, string_class, NULL);
+    jstring window_name;
 
     for (unsigned int i = 0; i < list->list_size; i++) {
-        jstring window_name = (*env)->NewStringUTF(env, list->list[i].window_name);
+        jni_charArrToJString(env, window_name, list->list[i].window_name);
         (*env)->SetObjectArrayElement(env, result, i, window_name);
     }
 
@@ -297,11 +345,13 @@ JNIEXPORT jobjectArray JNICALL Java_dev_juhouse_projector_projection2_Bridge_get
 }
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setWindowCaptureWindowName(JNIEnv *env, jobject _, jstring j_window_name) {
-    char *window_name = (char*) (*env)->GetStringUTFChars(env, j_window_name, 0);
+    char* window_name;
+    
+    jni_jstringToCharArr(env, j_window_name, window_name);
 
     render_window_capture_src_set_window_name(window_name);
 
-    (*env)->ReleaseStringUTFChars(env, j_window_name, window_name);
+    jni_releaseCharArr(env, j_window_name, window_name);
 }
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setWindowCaptureRender(JNIEnv *env, jobject _, jint render) {
