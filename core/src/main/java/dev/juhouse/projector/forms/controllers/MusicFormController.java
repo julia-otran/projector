@@ -39,7 +39,6 @@ import org.controlsfx.control.textfield.TextFields;
 public class MusicFormController implements Initializable {
     private ManageMusicService musicService;
     private BackCallback callback;
-    private String creatingArtist;
     private Music editingMusic;
     
     @FXML
@@ -233,9 +232,9 @@ public class MusicFormController implements Initializable {
     }
 
     public void init(ImportingMusicDTO music) {
-        creatingArtist = music.getArtist();
         init();
         titleTextField.setText(music.getName());
+        artistTextField.setText(music.getArtist());
         musicTextArea.setText(String.join("\n", music.getPhrases()));
     }
 }
