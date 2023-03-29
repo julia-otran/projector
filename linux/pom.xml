@@ -173,6 +173,7 @@
                         <linkerEndOption>-lGLEW</linkerEndOption>
                         <linkerEndOption>-lGL</linkerEndOption>
                         <linkerEndOption>-lX11</linkerEndOption>
+                        <linkerEndOption>-lvlc</linkerEndOption>
                         <linkerEndOption>
                             -L/usr/lib
                         </linkerEndOption>

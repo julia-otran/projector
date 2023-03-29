@@ -11,9 +11,17 @@
 #include "render-video.h"
 #include "render-pixel-unpack-buffer.h"
 
+#ifdef _WIN32
 #define ssize_t SSIZE_T
+#endif
+
+#ifdef __gnu_linux__
+#define ssize_t size_t
+#endif
 
 #include "vlc/vlc.h"
+
+#define BYTES_PER_PIXEL 4
 
 static int src_crop;
 static void *src_buffer;
@@ -75,14 +83,14 @@ unsigned render_video_format_callback_alloc(
 
     data->width = (*width);
     data->height = (*height);
-    data->buffer_size = ((data->width * data->height * 4) + 63) & ~63;
+    data->buffer_size = ((data->width * data->height * BYTES_PER_PIXEL) + 63) & ~63;
     
     data->raw_buffer = malloc(data->buffer_size + 63);
     data->buffer = ((unsigned long long)data->raw_buffer) & ~63;
 
-    VirtualLock(data->buffer, data->buffer_size);
+    // VirtualLock(data->buffer, data->buffer_size);
 
-    (*pitches) = (*width) * 4;
+    (*pitches) = (*width) * BYTES_PER_PIXEL;
     (*lines) = (*height);
 
     return 1;
@@ -92,7 +100,7 @@ void render_video_format_callback_dealoc(void* opaque) {
     render_video_opaque* data = (render_video_opaque*)opaque;
 
     if (data->raw_buffer) {
-        VirtualUnlock(data->buffer, data->buffer_size);
+        // VirtualUnlock(data->buffer, data->buffer_size);
         free(data->raw_buffer);
     }
 }
@@ -116,14 +124,12 @@ static void render_video_unlock(void* opaque, void* id, void* const* p_pixels)
     
     mtx_lock(&thread_mutex);
 
-    if (data->player != current_player) {
-        return;
+    if (data->player == current_player) {
+        src_buffer = data->buffer;
+        src_width = data->width;
+        src_height = data->height;
+        src_update_buffer = 1;
     }
-    
-    src_buffer = data->buffer;
-    src_width = data->width;
-    src_height = data->height;
-    src_update_buffer = 1;
 
     mtx_unlock(&thread_mutex);
 }
@@ -175,7 +181,7 @@ void render_video_update_buffers() {
             glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
 
             if (buffer->width != src_width || buffer->height != src_height) {
-                glBufferData(GL_PIXEL_UNPACK_BUFFER, src_width * src_height * 4, 0, GL_DYNAMIC_DRAW);
+                glBufferData(GL_PIXEL_UNPACK_BUFFER, src_width * src_height * BYTES_PER_PIXEL, 0, GL_DYNAMIC_DRAW);
                 buffer->width = src_width;
                 buffer->height = src_height;
             }
@@ -183,7 +189,7 @@ void render_video_update_buffers() {
             buffer_updated = 1;
 
             void *data = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
-            memcpy(data, src_buffer, src_width * src_height * 4);
+            memcpy(data, src_buffer, src_width * src_height * BYTES_PER_PIXEL);
             glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
             glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
@@ -207,15 +213,20 @@ void render_video_update_assets() {
     render_pixel_unpack_buffer_node* buffer = render_pixel_unpack_buffer_dequeue_for_read(buffer_instance);
 
     if (buffer) {
-        dst_width = buffer->width;
-        dst_height = buffer->height;
-
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
         glBindTexture(GL_TEXTURE_2D, texture_id);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dst_width, dst_height, 0, GL_BGRA, GL_UNSIGNED_BYTE, 0);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        if (dst_width != buffer->width || dst_height != buffer->height) {
+            dst_width = buffer->width;
+            dst_height = buffer->height;
+
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dst_width, dst_height, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, NULL);
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        } else {
+            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, dst_width, dst_height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, NULL);
+        }
 
         glBindTexture(GL_TEXTURE_2D, 0);
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);

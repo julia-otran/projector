@@ -1,5 +1,7 @@
 package dev.juhouse.projector;
 
+import dev.juhouse.projector.utils.VlcPlayerFactory;
+
 import java.io.File;
 import static dev.juhouse.projector.utils.ResourceManager.unpackResource;
 
@@ -10,6 +12,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
+        VlcPlayerFactory.init();
         loadNativeLib();
         Projector.main(args);
     }
