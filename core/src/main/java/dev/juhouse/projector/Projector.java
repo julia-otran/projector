@@ -47,8 +47,6 @@ public class Projector extends Application implements Runnable {
         ThemeFinder.loadThemes();
 
         Platform.runLater(() -> {
-            VlcPlayerFactory.init();
-
             graphicsHelper = new GraphicsDeviceHelper();
             graphicsHelper.start();
 

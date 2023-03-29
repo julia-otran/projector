@@ -269,24 +269,16 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setTextData
 }
 
 // Video render methods
-JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setVideoBuffer
-  (JNIEnv *env, jobject _, jobject j_buffer, jint width, jint height, jboolean crop) {
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_attachPlayerPtr
+(JNIEnv* env, jobject _, jlong player_addr) {
+    render_video_attach_player((void*)player_addr);
+}
 
-    jbyte *data = (jbyte*) (*env)->GetDirectBufferAddress(env, j_buffer);
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setVideoRenderFlagPtr
+(JNIEnv* env, jobject _, jlong player_addr, jboolean crop, jint render_flag) {
     render_video_src_set_crop_video(crop);
-    render_video_src_set_buffer((void*)data, width, height);
+    render_video_src_set_render((void*)player_addr, render_flag);
 }
-
-JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setVideoBufferRenderFlag(JNIEnv *env, jobject _, jint render) {
-    render_video_src_set_render(render);
-}
-
-JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_updateVideoBuffer
-  (JNIEnv *env, jobject _) {
-
-  render_video_src_buffer_update();
-
-  }
 
 // Image render methods
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setImageAsset

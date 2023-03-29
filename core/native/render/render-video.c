@@ -11,6 +11,10 @@
 #include "render-video.h"
 #include "render-pixel-unpack-buffer.h"
 
+#define ssize_t SSIZE_T
+
+#include "vlc/vlc.h"
+
 static int src_crop;
 static void *src_buffer;
 static int src_width;
@@ -28,9 +32,18 @@ static cnd_t thread_cond;
 static render_fader_instance *fader_instance;
 static render_pixel_unpack_buffer_instance *buffer_instance;
 
+static struct libvlc_media_player_t* current_player;
+
 static GLuint texture_id;
 static int texture_loaded;
 static int should_clear;
+
+typedef struct {
+    struct libvlc_media_player_t* player;
+    int width, height, buffer_size;
+    void* buffer;
+    void* raw_buffer;
+} render_video_opaque;
 
 void render_video_initialize() {
     src_crop = 0;
@@ -45,29 +58,98 @@ void render_video_initialize() {
     render_fader_init(&fader_instance);
 }
 
-void render_video_src_set_crop_video(int in_crop) {
-    src_crop = in_crop;
+unsigned render_video_format_callback_alloc(
+    void** opaque,
+    char* chroma,
+    unsigned* width,
+    unsigned* height,
+    unsigned* pitches,
+    unsigned* lines
+) {
+    render_video_opaque* data = (render_video_opaque*)(*opaque);
+
+    chroma[0] = (char)'R';
+    chroma[1] = (char)'V';
+    chroma[2] = (char)'3';
+    chroma[3] = (char)'2';
+
+    data->width = (*width);
+    data->height = (*height);
+    data->buffer_size = ((data->width * data->height * 4) + 63) & ~63;
+    
+    data->raw_buffer = malloc(data->buffer_size + 63);
+    data->buffer = ((unsigned long long)data->raw_buffer) & ~63;
+
+    VirtualLock(data->buffer, data->buffer_size);
+
+    (*pitches) = (*width) * 4;
+    (*lines) = (*height);
+
+    return 1;
 }
 
-void render_video_src_set_buffer(void *buffer, int width, int height) {
-    src_buffer = buffer;
-    src_width = width;
-    src_height = height;
+void render_video_format_callback_dealoc(void* opaque) {
+    render_video_opaque* data = (render_video_opaque*)opaque;
+
+    if (data->raw_buffer) {
+        VirtualUnlock(data->buffer, data->buffer_size);
+        free(data->raw_buffer);
+    }
 }
 
-void render_video_src_set_render(int render) {
-    src_render = render;
+static void* render_video_lock(void* opaque, void** p_pixels)
+{
+    render_video_opaque* data = (render_video_opaque*)opaque;
+
+    (*p_pixels) = data->buffer;
+    
+    mtx_lock(&thread_mutex);
+    src_update_buffer = 0;
+    mtx_unlock(&thread_mutex);
+
+    return NULL;
 }
 
-void render_video_src_buffer_update() {
+static void render_video_unlock(void* opaque, void* id, void* const* p_pixels)
+{
+    render_video_opaque* data = (render_video_opaque*)opaque;
+    
     mtx_lock(&thread_mutex);
 
-    if (src_update_buffer == 0) {
-        src_update_buffer = 1;
-        cnd_wait(&thread_cond, &thread_mutex);
+    if (data->player != current_player) {
+        return;
     }
+    
+    src_buffer = data->buffer;
+    src_width = data->width;
+    src_height = data->height;
+    src_update_buffer = 1;
 
     mtx_unlock(&thread_mutex);
+}
+
+static void render_video_display(void* opaque, void* id)
+{
+}
+
+void render_video_attach_player(void *player) {
+    render_video_opaque* data = (render_video_opaque*)calloc(1, sizeof(render_video_opaque));
+    data->player = player;
+    data->buffer = 0;
+
+    libvlc_video_set_callbacks(data->player, render_video_lock, render_video_unlock, render_video_display, (void*)data);
+    libvlc_video_set_format_callbacks(data->player, render_video_format_callback_alloc, render_video_format_callback_dealoc);
+}
+
+void render_video_src_set_render(void *player, int render) {
+    mtx_lock(&thread_mutex);
+    current_player = player;
+    src_render = render;
+    mtx_unlock(&thread_mutex);
+}
+
+void render_video_src_set_crop_video(int in_crop) {
+    src_crop = in_crop;
 }
 
 void render_video_create_buffers() {
@@ -106,8 +188,6 @@ void render_video_update_buffers() {
 
             glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
         }
-
-        cnd_signal(&thread_cond);
     }
 
     mtx_unlock(&thread_mutex);

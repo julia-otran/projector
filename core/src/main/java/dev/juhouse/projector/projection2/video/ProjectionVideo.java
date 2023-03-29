@@ -69,33 +69,32 @@ public class ProjectionVideo {
         bufferFormatCallback = new ProjectionVideo.MyBufferFormatCallback();
 
         this.player = VlcPlayerFactory.getFactory().mediaPlayers().newMediaPlayer();
-        videoSurface = VlcPlayerFactory.getFactory().videoSurfaces().newVideoSurface(bufferFormatCallback, renderCallback, true);
-        this.videoSurface.attach(this.player);
+
+        delegate.getBridge().attachPlayer(this.player);
+
         this.player.video().setAdjustVideo(false);
     }
 
     public void rebuild() {
-        updateBufferAddress();
         updateRender();
     }
 
     public void setRender(boolean render) {
         this.render.setValue(render);
-        updateBufferAddress();
         updateRender();
     }
 
     private void updateRender() {
         if (render.get()) {
-            this.delegate.getBridge().setVideoBufferRenderFlag(renderFlagProperty.get().getFlagValue());
+            this.delegate.getBridge().setVideoRenderFlag(this.player, this.cropVideo, renderFlagProperty.get().getFlagValue());
         } else {
-            this.delegate.getBridge().setVideoBufferRenderFlag(BridgeRenderFlag.NO_RENDER);
+            this.delegate.getBridge().setVideoRenderFlag(this.player, this.cropVideo, BridgeRenderFlag.NO_RENDER);
         }
     }
 
     public void setCropVideo(boolean cropVideo) {
         this.cropVideo = cropVideo;
-        updateBufferAddress();
+        updateRender();
     }
 
     protected void setBufferSize(int w, int h) {
@@ -145,9 +144,7 @@ public class ProjectionVideo {
     }
 
     private void updateBufferAddress() {
-        if (buffers != null && buffers[0] != null && render.get()) {
-            delegate.getBridge().setVideoBuffer(buffers[0], videoW, videoH, cropVideo);
-        }
+
     }
 
     private final class MyBufferFormatCallback implements BufferFormatCallback {

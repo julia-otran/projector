@@ -1,6 +1,9 @@
 package dev.juhouse.projector.projection2;
 
+import com.sun.jna.Pointer;
 import org.apache.commons.io.IOUtils;
+import uk.co.caprica.vlcj.binding.internal.libvlc_media_player_t;
+import uk.co.caprica.vlcj.player.base.MediaPlayer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -48,9 +51,25 @@ public class Bridge {
 
     public native void setTextData(BridgeTextData[] data);
 
-    public native void setVideoBuffer(ByteBuffer buffer, int width, int height, boolean crop);
+    public void attachPlayer(MediaPlayer player) {
+        attachPlayerPtr(Pointer.nativeValue(player.mediaPlayerInstance().getPointer()));
+    }
 
-    public native void setVideoBufferRenderFlag(int flag);
+    private native void attachPlayerPtr(long player);
+
+    public void setVideoRenderFlag(MediaPlayer player, boolean crop, int flag) {
+        if (player == null) {
+            setVideoRenderFlagPtr(0, crop, flag);
+        } else {
+            setVideoRenderFlagPtr(
+                    Pointer.nativeValue(player.mediaPlayerInstance().getPointer()),
+                    crop,
+                    flag
+            );
+        }
+    }
+
+    private native void setVideoRenderFlagPtr(long player, boolean crop, int flag);
 
     public native void updateVideoBuffer();
 
