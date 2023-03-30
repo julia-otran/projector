@@ -65,6 +65,8 @@ void shutdown_renders() {
     transfer_window_thread_run = 0;
     thrd_join(transfer_window_thread, NULL);
 
+    render_video_destroy_window();
+
     render_video_shutdown();
     render_text_shutdown();
     render_web_view_shutdown();
@@ -74,6 +76,8 @@ void shutdown_renders() {
 
     free(output);
     free(renders);
+
+    glfwDestroyWindow(transfer_window);
 }
 
 void render_init(render_layer *render) {
@@ -285,6 +289,8 @@ void activate_renders(GLFWwindow *shared_context, projection_config *config) {
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
     glfwWindowHint(GLFW_SAMPLES, 0);
     transfer_window = glfwCreateWindow(800, 600, "Projector Stream Window", NULL, shared_context);
+
+    render_video_create_window(shared_context);
 
     mtx_init(&transfer_window_thread_mutex, 0);
     cnd_init(&transfer_window_thread_cond);

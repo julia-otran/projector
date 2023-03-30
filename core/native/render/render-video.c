@@ -24,9 +24,6 @@
 #define BYTES_PER_PIXEL 4
 
 static int src_crop;
-static void *src_buffer;
-static int src_width;
-static int src_height;
 static int src_render;
 static int src_update_buffer;
 
@@ -35,7 +32,6 @@ static int dst_height = 0;
 static int dst_render = 0;
 
 static mtx_t thread_mutex;
-static cnd_t thread_cond;
 
 static render_fader_instance *fader_instance;
 static render_pixel_unpack_buffer_instance *buffer_instance;
@@ -53,15 +49,32 @@ typedef struct {
     void* raw_buffer;
 } render_video_opaque;
 
+static GLFWwindow* transfer_window;
+
+void render_video_create_window(GLFWwindow *shared_context) {
+    mtx_init(&thread_mutex, 0);
+
+    glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+    glfwWindowHint(GLFW_SAMPLES, 0);
+
+    transfer_window = glfwCreateWindow(800, 600, "Projector VLC4j", NULL, shared_context);
+}
+
+void render_video_destroy_window() {
+    mtx_lock(&thread_mutex);
+    glfwDestroyWindow(transfer_window);
+    transfer_window = NULL;
+    mtx_unlock(&thread_mutex);
+
+    mtx_destroy(&thread_mutex);
+}
+
 void render_video_initialize() {
     src_crop = 0;
     src_update_buffer = 0;
     src_render = 0;
     texture_loaded = 0;
     should_clear = 0;
-
-    mtx_init(&thread_mutex, 0);
-    cnd_init(&thread_cond);
 
     render_fader_init(&fader_instance);
 }
@@ -83,15 +96,19 @@ unsigned render_video_format_callback_alloc(
 
     data->width = (*width);
     data->height = (*height);
-    data->buffer_size = ((data->width * data->height * BYTES_PER_PIXEL) + 63) & ~63;
-    
-    data->raw_buffer = malloc(data->buffer_size + 63);
-    data->buffer = ((unsigned long long)data->raw_buffer) & ~63;
+    data->buffer_size = ((data->width * data->height * BYTES_PER_PIXEL) + 511) & ~255;
+
+    data->raw_buffer = malloc(data->buffer_size);
+    data->buffer = (void*) (((unsigned long long)data->raw_buffer + 255) & ~255);
 
     // VirtualLock(data->buffer, data->buffer_size);
 
     (*pitches) = (*width) * BYTES_PER_PIXEL;
     (*lines) = (*height);
+
+    glfwMakeContextCurrent(transfer_window);
+    glewInit();
+    glfwMakeContextCurrent(NULL);
 
     return 1;
 }
@@ -100,7 +117,6 @@ void render_video_format_callback_dealoc(void* opaque) {
     render_video_opaque* data = (render_video_opaque*)opaque;
 
     if (data->raw_buffer) {
-        // VirtualUnlock(data->buffer, data->buffer_size);
         free(data->raw_buffer);
     }
 }
@@ -109,29 +125,46 @@ static void* render_video_lock(void* opaque, void** p_pixels)
 {
     render_video_opaque* data = (render_video_opaque*)opaque;
 
-    (*p_pixels) = data->buffer;
-    
-    mtx_lock(&thread_mutex);
-    src_update_buffer = 0;
-    mtx_unlock(&thread_mutex);
+    render_pixel_unpack_buffer_node* buffer = render_pixel_unpack_buffer_dequeue_for_write(buffer_instance);
 
-    return NULL;
+    mtx_lock(&thread_mutex);
+
+    if (transfer_window == NULL || buffer == NULL || data->player != current_player) {
+        mtx_unlock(&thread_mutex);
+
+        (*p_pixels) = data->buffer;
+        render_pixel_unpack_buffer_enqueue_for_write(buffer_instance, buffer);
+
+        return NULL;
+    }
+
+    glfwMakeContextCurrent(transfer_window);
+
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
+
+    if (buffer->width != data->width || buffer->height != data->height) {
+        glBufferData(GL_PIXEL_UNPACK_BUFFER, data->width * data->height * BYTES_PER_PIXEL, 0, GL_DYNAMIC_DRAW);
+        buffer->width = data->width;
+        buffer->height = data->height;
+    }
+
+    void *pdata = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+    (*p_pixels) = pdata;
+
+    return (void*)buffer;
 }
 
 static void render_video_unlock(void* opaque, void* id, void* const* p_pixels)
 {
-    render_video_opaque* data = (render_video_opaque*)opaque;
-    
-    mtx_lock(&thread_mutex);
+    if (id != NULL) {
+        glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        glfwMakeContextCurrent(NULL);
 
-    if (data->player == current_player) {
-        src_buffer = data->buffer;
-        src_width = data->width;
-        src_height = data->height;
-        src_update_buffer = 1;
+        mtx_unlock(&thread_mutex);
+
+        render_pixel_unpack_buffer_enqueue_for_read(buffer_instance, id);
     }
-
-    mtx_unlock(&thread_mutex);
 }
 
 static void render_video_display(void* opaque, void* id)
@@ -149,8 +182,13 @@ void render_video_attach_player(void *player) {
 
 void render_video_src_set_render(void *player, int render) {
     mtx_lock(&thread_mutex);
-    current_player = player;
+
+    if (render) {
+        current_player = player;
+    }
+
     src_render = render;
+
     mtx_unlock(&thread_mutex);
 }
 
@@ -168,41 +206,7 @@ void render_video_deallocate_buffers() {
 }
 
 void render_video_update_buffers() {
-    int buffer_updated = 0;
 
-    render_pixel_unpack_buffer_node* buffer = render_pixel_unpack_buffer_dequeue_for_write(buffer_instance);
-
-    mtx_lock(&thread_mutex);
-
-    if (src_update_buffer) {
-        src_update_buffer = 0;
-
-        if (buffer) {
-            glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
-
-            if (buffer->width != src_width || buffer->height != src_height) {
-                glBufferData(GL_PIXEL_UNPACK_BUFFER, src_width * src_height * BYTES_PER_PIXEL, 0, GL_DYNAMIC_DRAW);
-                buffer->width = src_width;
-                buffer->height = src_height;
-            }
-
-            buffer_updated = 1;
-
-            void *data = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
-            memcpy(data, src_buffer, src_width * src_height * BYTES_PER_PIXEL);
-            glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-
-            glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-        }
-    }
-
-    mtx_unlock(&thread_mutex);
-
-    if (buffer_updated) {
-        render_pixel_unpack_buffer_enqueue_for_read(buffer_instance, buffer);
-    } else {
-        render_pixel_unpack_buffer_enqueue_for_write(buffer_instance, buffer);
-    }
 }
 
 void render_video_create_assets() {
@@ -247,6 +251,14 @@ void render_video_update_assets() {
             should_clear = 0;
             texture_loaded = 0;
             render_fader_fade_out(fader_instance, 1, RENDER_FADER_DEFAULT_TIME_MS);
+        }
+    }
+
+    if (texture_loaded == 0 && current_player != NULL) {
+        render_fader_for_each(fader_instance) {
+            if (render_fader_is_hidden(node)) {
+                current_player = NULL;
+            }
         }
     }
 }

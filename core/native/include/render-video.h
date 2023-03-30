@@ -6,6 +6,9 @@
 
 void render_video_initialize();
 
+void render_video_create_window(GLFWwindow *shared_context);
+void render_video_destroy_window();
+
 void render_video_attach_player(void* player);
 
 void render_video_src_set_render(void* player, int render);
