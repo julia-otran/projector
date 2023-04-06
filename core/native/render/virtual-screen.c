@@ -91,9 +91,9 @@ void virtual_screen_print(config_virtual_screen *config, void *data) {
 
     glColor4d(1.0, 1.0, 1.0, 1.0);
 
-    double tex_x, tex_y, dst_x, dst_y;
+    double tex_x, tex_y, dst_x, dst_y, dst_z;
 
-    glBegin(GL_QUADS);
+    glBegin(GL_TRIANGLES);
 
     for (int i = 0; i < config->monitor_position.count_points; i++) {
         tex_x = config->monitor_position.input_points[i].x / config->w;
@@ -101,9 +101,10 @@ void virtual_screen_print(config_virtual_screen *config, void *data) {
 
         dst_x = config->monitor_position.output_points[i].x;
         dst_y = config->monitor_position.output_points[i].y;
+        dst_z = config->monitor_position.output_points[i].z;
 
         glTexCoord2d(tex_x, tex_y);
-        glVertex2d(dst_x, dst_y);
+        glVertex3d(dst_x, dst_y, dst_z);
     }
 
     glEnd();

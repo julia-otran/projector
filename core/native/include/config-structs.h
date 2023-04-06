@@ -6,8 +6,12 @@ typedef struct {
 } config_point;
 
 typedef struct {
+    double x, y, z;
+} config_coordinate;
+
+typedef struct {
     config_point *input_points;
-    config_point *output_points;
+    config_coordinate *output_points;
     int count_points;
 } config_point_mapping;
 
