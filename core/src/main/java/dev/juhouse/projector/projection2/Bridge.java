@@ -18,6 +18,8 @@ public class Bridge {
                 "blend.vertex.shader",
                 "color-corrector.fragment.shader",
                 "color-corrector.vertex.shader",
+                "direct.fragment.shader",
+                "direct.vertex.shader",
         };
     }
 

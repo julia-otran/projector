@@ -212,7 +212,7 @@ void monitors_config_hot_reload(projection_config *config) {
                         config_virtual_screen *config_vs = &m->config->virtual_screens[k];
                         render_output *render = get_render_output_config(config_vs);
 
-                        virtual_screen_start(render, config_vs, &m->virtual_screen_data[k]);
+                        virtual_screen_start(dsp, render, config_vs, &m->virtual_screen_data[k]);
                     }
                 }
             }

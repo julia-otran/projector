@@ -97,11 +97,19 @@
                                 <fileName>tinycthread.c</fileName>
                             </fileNames>
                         </source>
+
                         <source>
                             <directory>../core/native/cJSON</directory>
                             <fileNames>
                                 <fileName>cJSON.c</fileName>
                                 <fileName>cJSON_Utils.c</fileName>
+                            </fileNames>
+                        </source>
+
+                        <source>
+                            <directory>../core/native/triangle</directory>
+                            <fileNames>
+                                <fileName>triangle.c</fileName>
                             </fileNames>
                         </source>
 
@@ -155,11 +163,14 @@
                         <compilerStartOption>-I${project.basedir}/../core/native/include</compilerStartOption>
                         <compilerStartOption>-I${project.basedir}/../core/native/cJSON</compilerStartOption>
                         <compilerStartOption>-I${project.basedir}/../core/native/tinycthread/source</compilerStartOption>
+                        <compilerStartOption>-I${project.basedir}/../core/native/triangle</compilerStartOption>
                         <compilerStartOption>-I/usr/include</compilerStartOption>
                         <compilerStartOption>-I${java.home}/include</compilerStartOption>
                         <compilerStartOption>-I${java.home}/include/linux</compilerStartOption>
                         <compilerStartOption>-fPIC</compilerStartOption>
                         <compilerStartOption>-DENABLE_LOCALES</compilerStartOption>
+                        <compilerStartOption>-DTRILIBRARY</compilerStartOption>
+                        <compilerStartOption>-DANSI_DECLARATORS</compilerStartOption>
                     </compilerStartOptions>
                     <linkerOutputDirectory>target</linkerOutputDirectory>
                     <linkerExecutable>gcc</linkerExecutable>

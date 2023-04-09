@@ -23,6 +23,8 @@
 
 #define BYTES_PER_PIXEL 4
 
+static int running;
+
 static int src_crop;
 static int src_render;
 static int src_update_buffer;
@@ -125,6 +127,18 @@ static void* render_video_lock(void* opaque, void** p_pixels)
 {
     render_video_opaque* data = (render_video_opaque*)opaque;
 
+    mtx_lock(&thread_mutex);
+
+    if (!running) {
+        (*p_pixels) = data->buffer;
+
+        mtx_unlock(&thread_mutex);
+
+        return NULL;
+    }
+
+    mtx_unlock(&thread_mutex);
+
     render_pixel_unpack_buffer_node* buffer = render_pixel_unpack_buffer_dequeue_for_write(buffer_instance);
 
     mtx_lock(&thread_mutex);
@@ -197,12 +211,18 @@ void render_video_src_set_crop_video(int in_crop) {
 }
 
 void render_video_create_buffers() {
+    mtx_lock(&thread_mutex);
     render_pixel_unpack_buffer_create(&buffer_instance);
+    running = 1;
+    mtx_unlock(&thread_mutex);
 }
 
 void render_video_deallocate_buffers() {
+    mtx_lock(&thread_mutex);
     render_pixel_unpack_buffer_deallocate(buffer_instance);
     buffer_instance = NULL;
+    running = 0;
+    mtx_unlock(&thread_mutex);
 }
 
 void render_video_update_buffers() {
