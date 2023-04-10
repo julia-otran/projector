@@ -154,6 +154,7 @@
   <ItemGroup>
     <ClInclude Include="src\cJSON\cJSON.h" />
     <ClInclude Include="src\cJSON\cJSON_Utils.h" />
+    <ClInclude Include="src\triangle\triangle.h" />
     <ClInclude Include="src\tinycthread\source\tinycthread.h" />
     <ClInclude Include="src\include\clock.h" />
     <ClInclude Include="src\include\config-debug.h" />
@@ -187,6 +188,7 @@
     <ClCompile Include="src\cJSON\cJSON.c" />
     <ClCompile Include="src\cJSON\cJSON_Utils.c" />
     <ClCompile Include="src\tinycthread\source\tinycthread.c" />
+    <ClCompile Include="src\triangle\triangle.c" />
     <ClCompile Include="src\render\windows\window-capture.c" />
     <ClCompile Include="src\render\clock.c" />
     <ClCompile Include="src\render\config-debug.c" />

@@ -40,8 +40,12 @@ public class ProjectionImage implements Projectable {
 
     @Override
     public void init() {
-        renderFlag.get().getFlagValueProperty().addListener((observableValue, number, t1) -> update());
         renderFlag.get().applyDefault(BridgeRender::getEnableRenderImage);
+        renderFlag.get().getFlagValueProperty().addListener((observableValue, number, t1) -> {
+            if (render) {
+                update();
+            }
+        });
     }
 
     @Override
@@ -56,8 +60,10 @@ public class ProjectionImage implements Projectable {
 
     @Override
     public void setRender(boolean render) {
-        this.render = render;
-        update();
+        if (this.render != render) {
+            this.render = render;
+            update();
+        }
     }
 
     @Override
@@ -76,7 +82,10 @@ public class ProjectionImage implements Projectable {
     public void setCropBackground(boolean cropBackground) {
         if (this.cropBackground != cropBackground) {
             this.cropBackground = cropBackground;
-            update();
+
+            if (this.render) {
+                update();
+            }
         }
     }
 
@@ -86,7 +95,10 @@ public class ProjectionImage implements Projectable {
 
     public void setModel(BackgroundProvide model) {
         this.model = model;
-        update();
+
+        if (this.render) {
+            update();
+        }
     }
 
     protected void setImageAsset(int[] buffer, int width, int height, boolean crop) {
