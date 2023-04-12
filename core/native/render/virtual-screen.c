@@ -3,6 +3,7 @@
 
 #define REAL double
 #define VOID void
+#define __UINT64 __uint64
 
 #include "triangle.h"
 #include "ogl-loader.h"

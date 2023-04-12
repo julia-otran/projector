@@ -71,11 +71,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)LibRender\src\tinycthread\source;$(SolutionDir)LibRender\src\include;$(SolutionDir)LibRender\src\cJSON;$(SolutionDir)packages\VideoLAN.LibVLC.Windows.3.0.18\build\x64\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)LibRender\src\include;$(SolutionDir)LibRender\src\tinycthread\source;$(SolutionDir)LibRender\src\cJSON;$(SolutionDir)LibRender\src\triangle;$(SolutionDir)packages\VideoLAN.LibVLC.Windows.3.0.18\build\x64\include;$(IncludePath)</IncludePath>
     <ExternalIncludePath>C:\Program Files\Java\jdk-19\include\win32;C:\Program Files\Java\jdk-19\include;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)\LibRender\src\cJSON;$(SolutionDir)\LibRender\src\tinycthread\source;$(SolutionDir)\LibRender\src\include;$(SolutionDir)packages\VideoLAN.LibVLC.Windows.3.0.18\build\x64\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)LibRender\src\include;$(SolutionDir)LibRender\src\tinycthread\source;$(SolutionDir)LibRender\src\cJSON;$(SolutionDir)LibRender\src\triangle;$(SolutionDir)packages\VideoLAN.LibVLC.Windows.3.0.18\build\x64\include;$(IncludePath)</IncludePath>
     <ExternalIncludePath>C:\Program Files\Java\jdk-19\include\win32;C:\Program Files\Java\jdk-19\include;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -115,7 +115,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_LIB;NO_TIMER;TRILIBRARY;ANSI_DECLARATORS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -136,7 +136,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_LIB;NO_TIMER;TRILIBRARY;ANSI_DECLARATORS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
