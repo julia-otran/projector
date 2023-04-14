@@ -295,7 +295,7 @@ void prepare_default_config(config_bounds *default_monitor_bounds, int no_displa
     default_config.display[0].virtual_screens[0].monitor_position.input_points[3].x = 0.0;
     default_config.display[0].virtual_screens[0].monitor_position.input_points[3].y = default_monitor_bounds->h;
 
-    default_config.display[0].virtual_screens[0].monitor_position.output_points = (config_coordinate*) calloc(4, sizeof(config_coordinate));
+    default_config.display[0].virtual_screens[0].monitor_position.output_points = (config_point*) calloc(4, sizeof(config_point));
 
     default_config.display[0].virtual_screens[0].monitor_position.output_points[0].x = 0.0;
     default_config.display[0].virtual_screens[0].monitor_position.output_points[0].y = 0.0;
@@ -308,6 +308,9 @@ void prepare_default_config(config_bounds *default_monitor_bounds, int no_displa
 
     default_config.display[0].virtual_screens[0].monitor_position.output_points[3].x = 0.0;
     default_config.display[0].virtual_screens[0].monitor_position.output_points[3].y = default_monitor_bounds->h;
+
+    default_config.display[0].virtual_screens[0].monitor_position.output_horizontal_adjust_factor = 1.0;
+    default_config.display[0].virtual_screens[0].monitor_position.output_vertical_adjust_factor = 1.0;
 
     default_config.display[0].virtual_screens[0].count_blends = 0;
     default_config.display[0].virtual_screens[0].count_help_lines = 0;

@@ -22,16 +22,6 @@ cJSON* serialize_config_point(config_point *in) {
     return config_point_json;
 }
 
-cJSON* serialize_config_coordinate(config_coordinate* in) {
-    cJSON* config_coordinate_json = cJSON_CreateObject();
-
-    cJSON_AddItemToObject(config_coordinate_json, "x", cJSON_CreateNumber(in->x));
-    cJSON_AddItemToObject(config_coordinate_json, "y", cJSON_CreateNumber(in->y));
-    cJSON_AddItemToObject(config_coordinate_json, "z", cJSON_CreateNumber(in->z));
-
-    return config_coordinate_json;
-}
-
 cJSON* serialize_config_point_mapping(config_point_mapping *in) {
     cJSON *config_point_mapping_json = cJSON_CreateObject();
 
@@ -40,11 +30,29 @@ cJSON* serialize_config_point_mapping(config_point_mapping *in) {
 
     for (int i = 0; i < in->count_points; i++) {
         cJSON_AddItemToArray(input_points_json, serialize_config_point(&in->input_points[i]));
-        cJSON_AddItemToArray(output_points_json, serialize_config_coordinate(&in->output_points[i]));
+        cJSON_AddItemToArray(output_points_json, serialize_config_point(&in->output_points[i]));
     }
 
     cJSON_AddItemToObject(config_point_mapping_json, "input_points", input_points_json);
     cJSON_AddItemToObject(config_point_mapping_json, "output_points", output_points_json);
+
+    cJSON_AddItemToObject(
+        config_point_mapping_json,
+        "output_horizontal_adjust_factor",
+        cJSON_CreateNumber(in->output_horizontal_adjust_factor)
+    );
+
+    cJSON_AddItemToObject(
+        config_point_mapping_json,
+        "output_horizontal_adjust_factor",
+        cJSON_CreateNumber(in->output_horizontal_adjust_factor)
+    );
+
+    cJSON_AddItemToObject(
+        config_point_mapping_json,
+        "output_vertical_adjust_factor",
+        cJSON_CreateNumber(in->output_vertical_adjust_factor)
+    );
 
     return config_point_mapping_json;
 }

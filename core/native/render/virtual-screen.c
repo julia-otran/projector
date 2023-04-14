@@ -19,6 +19,7 @@ static GLuint vertexshader;
 static GLuint fragmentshader;
 static GLuint program;
 static GLuint textureUniform;
+static GLuint adjustFactorUniform;
 
 void virtual_screen_initialize() {
     vs_color_corrector_init();
@@ -34,10 +35,11 @@ void virtual_screen_initialize() {
     glBindAttribLocation(program, 0, "in_Position");
     glBindAttribLocation(program, 1, "in_Uv");
 
-    textureUniform = glGetUniformLocation(program, "image");
-
     glLinkProgram(program);
     glValidateProgram(program);
+
+    textureUniform = glGetUniformLocation(program, "image");
+    adjustFactorUniform = glGetUniformLocation(program, "adjust_factor");
 }
 
 void virtual_screen_free_triangulateio(struct triangulateio *in) {
@@ -273,6 +275,11 @@ void virtual_screen_print(config_virtual_screen *config, void *data) {
 
     glActiveTexture(GL_TEXTURE0);
     glUniform1i(textureUniform, 0);
+
+    glUniform2f(
+        adjustFactorUniform,
+        config->monitor_position.output_horizontal_adjust_factor,
+        config->monitor_position.output_vertical_adjust_factor);
 
     glBindVertexArray(vs->vertexarray);
     glEnableVertexAttribArray(0);
