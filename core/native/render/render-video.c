@@ -51,6 +51,12 @@ typedef struct {
     void* raw_buffer;
 } render_video_opaque;
 
+typedef struct {
+    render_video_opaque *data;
+    void *next;
+} render_video_opaque_node;
+
+static render_video_opaque_node *opaque_list = NULL;
 static GLFWwindow* transfer_window;
 
 void render_video_create_window(GLFWwindow *shared_context) {
@@ -192,6 +198,41 @@ void render_video_attach_player(void *player) {
 
     libvlc_video_set_callbacks(data->player, render_video_lock, render_video_unlock, render_video_display, (void*)data);
     libvlc_video_set_format_callbacks(data->player, render_video_format_callback_alloc, render_video_format_callback_dealoc);
+
+    render_video_opaque_node *node = (render_video_opaque_node*) malloc(sizeof(render_video_opaque_node));
+    node->next = (void*) opaque_list;
+    node->data = data;
+
+    opaque_list = node;
+}
+
+void render_video_download_preview(void* player, void* data, long buffer_capacity, int *out_width, int *out_height) {
+    (*out_width) = 0;
+    (*out_height) = 0;
+
+    mtx_lock(&thread_mutex);
+
+    if (current_player == player) {
+        mtx_unlock(&thread_mutex);
+        return;
+    }
+
+    for (render_video_opaque_node *node = opaque_list; node; node = node->next) {
+        if (node->data->player == player) {
+            if (node->data->buffer && node->data->width && node->data->height) {
+                (*out_width) = node->data->width;
+                (*out_height) = node->data->height;
+
+                if (node->data->width * node->data->height * BYTES_PER_PIXEL <= buffer_capacity) {
+                    memcpy(data, node->data->buffer, node->data->width * node->data->height * BYTES_PER_PIXEL);
+                }
+            }
+
+            break;
+        }
+    }
+
+    mtx_unlock(&thread_mutex);
 }
 
 void render_video_src_set_render(void *player, int render) {
@@ -274,7 +315,7 @@ void render_video_update_assets() {
         }
     }
 
-    if (texture_loaded == 0 && current_player != NULL) {
+    if (current_player != NULL) {
         render_fader_for_each(fader_instance) {
             if (render_fader_is_hidden(node)) {
                 current_player = NULL;

@@ -1,11 +1,13 @@
 package dev.juhouse.projector.projection2;
 
 import com.sun.jna.Pointer;
+import lombok.Getter;
 import org.apache.commons.io.IOUtils;
 import uk.co.caprica.vlcj.binding.internal.libvlc_media_player_t;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 
 import java.io.IOException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -58,6 +60,23 @@ public class Bridge {
     }
 
     private native void attachPlayerPtr(long player);
+
+    public static class VideoPreviewOutputBufferTooSmall extends Exception {}
+
+    public BridgeVideoPreviewSize downloadPlayerPreview(MediaPlayer player, ByteBuffer buffer) throws VideoPreviewOutputBufferTooSmall {
+        BridgeVideoPreviewSize result = downloadPlayerPreviewPtr(
+                Pointer.nativeValue(player.mediaPlayerInstance().getPointer()),
+                buffer
+        );
+
+        if (result.getWidth() * result.getHeight() * 4 > buffer.capacity()) {
+            throw new VideoPreviewOutputBufferTooSmall();
+        }
+
+        return result;
+    }
+
+    private native BridgeVideoPreviewSize downloadPlayerPreviewPtr(long player, ByteBuffer buffer);
 
     public void setVideoRenderFlag(MediaPlayer player, boolean crop, int flag) {
         if (player == null) {
