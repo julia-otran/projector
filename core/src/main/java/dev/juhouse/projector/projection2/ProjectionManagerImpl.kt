@@ -154,7 +154,7 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
     }
 
     override fun createPlayer(): ProjectionPlayer {
-        val player = ProjectionPlayer(ProjectionVideo(delegate))
+        val player = ProjectionPlayer(ProjectionVideo(delegate), delegate)
 
         projectablesList.add(player)
 

@@ -14,12 +14,18 @@ typedef struct {
     GLuint texture_id;
     GLuint framebuffer_id;
 
+    GLuint vertexarray;
+    GLuint vertexbuffer;
+    GLuint uvbuffer;
+
+    unsigned int points_count;
+
     vs_color_corrector color_corrector;
     vs_blend blend;
 } virtual_screen;
 
 void virtual_screen_initialize();
-void virtual_screen_start(render_output *render, config_virtual_screen *config, void **data);
+void virtual_screen_start(config_display *display, render_output *render, config_virtual_screen *config, void **data);
 
 void virtual_screen_render(config_virtual_screen *config, void *data);
 void virtual_screen_print(config_virtual_screen *config, void *data);

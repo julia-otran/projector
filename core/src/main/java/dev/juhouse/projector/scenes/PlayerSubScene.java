@@ -24,6 +24,10 @@ public class PlayerSubScene extends ProjectionItemSubScene {
         Parent root = loader.load();
         PlayerSubScene scene = new PlayerSubScene(root, width, height);
         scene.setController(loader.getController());
+
+        scene.visibleProperty().set(false);
+        scene.visibleProperty().addListener((prop, oldVal, newVal) -> scene.getController().setVisible(newVal));
+
         return scene;
     }
 

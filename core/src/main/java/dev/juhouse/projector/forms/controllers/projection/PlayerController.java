@@ -128,8 +128,8 @@ public class PlayerController extends ProjectionController implements FileDragDr
         }
 
         playerContainer.setCenter(projectionPlayer.getPreviewPanel());
-        projectionPlayer.getPreviewPanel().fitWidthProperty().bind(playerBox.widthProperty());
-        projectionPlayer.getPreviewPanel().fitHeightProperty().bind(playerContainer.heightProperty());
+        projectionPlayer.getPreviewPanel().prefWidthProperty().bind(playerBox.widthProperty());
+        projectionPlayer.getPreviewPanel().prefHeightProperty().bind(playerContainer.heightProperty());
 
         playerBox.setVisible(false);
         chooseFileBox.setVisible(true);
@@ -176,7 +176,7 @@ public class PlayerController extends ProjectionController implements FileDragDr
         onEscapeKeyPressed();
         projectionPlayer.getPlayer().controls().stop();
         projectionManager.stop(projectionPlayer);
-
+        projectionPlayer.getPreviewPanel().stopPreview();
     }
 
     @FXML
@@ -259,6 +259,17 @@ public class PlayerController extends ProjectionController implements FileDragDr
     @FXML
     public void onFullScreenAction() {
         projectionPlayer.setCropVideo(fullScreenCheckBox.isSelected());
+    }
+
+    @Override
+    public void setVisible(Boolean visible) {
+        super.setVisible(visible);
+
+        if (visible) {
+            projectionPlayer.getPreviewPanel().startPreview();
+        } else {
+            projectionPlayer.getPreviewPanel().stopPreview();
+        }
     }
 
     private void openMedia(File file) {

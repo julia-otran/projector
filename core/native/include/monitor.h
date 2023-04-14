@@ -19,6 +19,10 @@ typedef struct {
     void **virtual_screen_data;
 } monitor;
 
+typedef struct {
+    int width, height;
+} monitor_info;
+
 void reload_monitors();
 void activate_monitors(projection_config *config);
 void monitors_config_hot_reload(projection_config *config);

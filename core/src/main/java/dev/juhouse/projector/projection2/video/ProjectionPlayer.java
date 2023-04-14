@@ -9,15 +9,17 @@ import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
-import dev.juhouse.projector.projection2.BridgeRender;
-import dev.juhouse.projector.projection2.BridgeRenderFlag;
-import dev.juhouse.projector.projection2.Projectable;
+import dev.juhouse.projector.projection2.*;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.geometry.Insets;
+import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelBuffer;
 import javafx.scene.image.PixelFormat;
 import javafx.scene.image.WritableImage;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 
 /**
@@ -28,12 +30,12 @@ public class ProjectionPlayer implements Projectable {
     private final PlayerPreview preview;
     private final ProjectionVideo video;
 
-    public ProjectionPlayer(ProjectionVideo video) {
+    public ProjectionPlayer(ProjectionVideo video, CanvasDelegate delegate) {
         this.video = video;
-        this.preview = new PlayerPreview();
+
+        this.preview = new PlayerPreview(video, delegate);
 
         video.setEnablePreview(true);
-        video.setPreviewBufferCallback(this.preview);
         video.getRenderFlagProperty().get().applyDefault(BridgeRender::getEnableRenderVideo);
     }
 
@@ -66,7 +68,6 @@ public class ProjectionPlayer implements Projectable {
     @Override
     public void finish() {
         video.finish();
-        video.setPreviewBufferCallback(null);
     }
 
     @Override
@@ -82,34 +83,111 @@ public class ProjectionPlayer implements Projectable {
         this.video.player.media().prepare(file.getAbsolutePath());
     }
 
-    public static class PlayerPreview extends ImageView implements ProjectionVideo.PreviewBufferCallback {
+    public static class PlayerPreview extends AnchorPane implements Runnable {
         private boolean running;
         private PixelBuffer<IntBuffer> previewImagePixelBuffer;
+        private final ByteBuffer previewImageBuffer;
+        private final ProjectionVideo video;
+        private final CanvasDelegate delegate;
+        private final ImageView previewImageView;
+        private final Label previewErrorLabel;
 
-        public PlayerPreview() {
-            setPreserveRatio(true);
+        private boolean updating;
+
+        public PlayerPreview(ProjectionVideo video, CanvasDelegate delegate) {
+            this.previewImageView = new ImageView();
+            this.previewImageView.setPreserveRatio(true);
+
+            this.widthProperty().addListener((prop, old, newVal) -> this.previewImageView.fitWidthProperty().set(newVal.doubleValue()));
+            this.heightProperty().addListener((prop, old, newVal) -> this.previewImageView.fitHeightProperty().set(newVal.doubleValue()));
+
+            this.previewErrorLabel = new Label();
+            previewErrorLabel.setTextFill(Color.color(1.0, 1.0, 1.0));
+            previewErrorLabel.setPadding(new Insets(10.0));
+
+            this.video = video;
+            this.delegate = delegate;
+            previewImageBuffer = ByteBuffer.allocateDirect(1920 * 1920 * 4);
         }
 
-        @Override
-        public void onPreviewBufferChange(ByteBuffer buffer, int w, int h) {
+        public void startPreview() {
+            running = true;
+            new Thread(this).start();
+        }
+
+        public void stopPreview() {
+            running = false;
+        }
+
+        private void showError(String message) {
             Platform.runLater(() -> {
-                previewImagePixelBuffer = new PixelBuffer<>(w, h, buffer.asIntBuffer(), PixelFormat.getIntArgbPreInstance());
-                setImage(new WritableImage(previewImagePixelBuffer));
+                previewErrorLabel.setText(message);
+                getChildren().clear();
+                getChildren().add(previewErrorLabel);
+                updating = false;
             });
         }
 
-        @Override
-        public void onPreviewBufferUpdated() {
-            if (running) {
+        private void updatePreview() {
+            if (updating) {
                 return;
             }
 
-            running = true;
+            if (video.getRender().get()) {
+                showError("[Preview Indisponível] Projetando Vídeo....");
+                return;
+            }
 
-            Platform.runLater(() -> {
-                setImage(new WritableImage(previewImagePixelBuffer));
-                running = false;
-            });
+            updating = true;
+
+            try {
+                BridgeVideoPreviewSize outputSize = delegate.getBridge().downloadPlayerPreview(video.player, previewImageBuffer);
+
+                if (outputSize.getWidth() == 0) {
+                    updating = false;
+                    return;
+                }
+
+                Platform.runLater(() -> {
+                    if (!running) {
+                        return;
+                    }
+
+                    previewImagePixelBuffer = new PixelBuffer<>(
+                            outputSize.getWidth(),
+                            outputSize.getHeight(),
+                            previewImageBuffer.asIntBuffer(),
+                            PixelFormat.getIntArgbPreInstance()
+                    );
+
+                    this.previewImageView.setImage(new WritableImage(previewImagePixelBuffer));
+
+                    if (getChildren().isEmpty() || getChildren().get(0) != previewImageView) {
+                        this.getChildren().clear();
+                        this.getChildren().add(this.previewImageView);
+                    }
+
+                    updating = false;
+                });
+
+            } catch (Bridge.VideoPreviewOutputBufferTooSmall e) {
+                showError("[Preview Indisponível] Resolução do video muito alta (max 1920x1080)....");
+            }
+        }
+
+        @Override
+        public void run() {
+            updating = false;
+
+            while (running) {
+                updatePreview();
+
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    running = false;
+                }
+            }
         }
     }
 }

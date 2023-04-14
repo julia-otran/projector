@@ -19,6 +19,19 @@ void parse_config_point(cJSON *config_point_json, config_point *out) {
     out->y = cJSON_GetObjectItemCaseSensitive(config_point_json, "y")->valuedouble;
 }
 
+void parse_config_coordinate(cJSON *config_coordinate_json, config_coordinate *out) {
+    out->x = cJSON_GetObjectItemCaseSensitive(config_coordinate_json, "x")->valuedouble;
+    out->y = cJSON_GetObjectItemCaseSensitive(config_coordinate_json, "y")->valuedouble;
+
+    cJSON* z_json = cJSON_GetObjectItemCaseSensitive(config_coordinate_json, "z");
+
+    if (cJSON_IsNumber(z_json)) {
+        out->z = z_json->valuedouble;
+    } else {
+        out->z = 0.0;
+    }
+}
+
 void parse_config_point_mapping(cJSON *config_point_mapping_json, config_point_mapping *out) {
     cJSON *input_points_json = cJSON_GetObjectItemCaseSensitive(config_point_mapping_json, "input_points");
     cJSON *output_points_json = cJSON_GetObjectItemCaseSensitive(config_point_mapping_json, "output_points");
@@ -33,11 +46,11 @@ void parse_config_point_mapping(cJSON *config_point_mapping_json, config_point_m
     int count_points = count_input_points < count_output_points ? count_input_points : count_output_points;
 
     config_point *input_points = (config_point*) calloc(count_points, sizeof(config_point));
-    config_point *output_points = (config_point*) calloc(count_points, sizeof(config_point));
+    config_coordinate *output_points = (config_coordinate*) calloc(count_points, sizeof(config_coordinate));
 
     for (int i = 0; i < count_points; i++) {
         parse_config_point(cJSON_GetArrayItem(input_points_json, i), &input_points[i]);
-        parse_config_point(cJSON_GetArrayItem(output_points_json, i), &output_points[i]);
+        parse_config_coordinate(cJSON_GetArrayItem(output_points_json, i), &output_points[i]);
     }
 
     out->input_points = input_points;

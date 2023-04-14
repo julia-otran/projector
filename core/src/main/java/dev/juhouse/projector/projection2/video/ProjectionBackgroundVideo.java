@@ -24,12 +24,12 @@ public class ProjectionBackgroundVideo implements Projectable {
 
     public ProjectionBackgroundVideo(ProjectionVideo videoProjector) {
         this.videoProjector = videoProjector;
-        videoProjector.setCropVideo(true);
     }
 
     @Override
     public void init() {
         videoProjector.init();
+        videoProjector.setCropVideo(true);
         videoProjector.getPlayer().audio().setMute(true);
         videoProjector.getRenderFlagProperty().get().applyDefault(BridgeRender::getEnableRenderBackgroundAssets);
         loadMedia();

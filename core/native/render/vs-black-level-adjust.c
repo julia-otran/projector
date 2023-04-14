@@ -2,7 +2,7 @@
 
 void vs_black_level_adjust_render(config_virtual_screen *config) {
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_COLOR_MATERIAL);
@@ -24,5 +24,4 @@ void vs_black_level_adjust_render(config_virtual_screen *config) {
 
     glDisable(GL_MULTISAMPLE);
     glDisable(GL_COLOR_MATERIAL);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }

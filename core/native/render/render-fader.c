@@ -151,8 +151,8 @@ int render_fader_is_hidden(fade_node *node) {
         struct timespec spec;
         get_time(&spec);
 
-        long current_ms = round(spec.tv_nsec / 1.0e6) + (spec.tv_sec * 1000);
-        long init_ms = round(node->start_time_spec.tv_nsec / 1.0e6) + (node->start_time_spec.tv_sec * 1000);
+        long current_ms = timespec_to_ms(&spec);
+        long init_ms = timespec_to_ms(&node->start_time_spec);
 
         long elapsed_time = current_ms - init_ms;
 

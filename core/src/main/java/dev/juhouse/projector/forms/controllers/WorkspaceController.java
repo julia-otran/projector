@@ -513,22 +513,27 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     }
 
     private void setProjectionView(ProjectionListItem item) {
-        if (item == null) {
+        if (
+                item != null &&
+                !targetPane.getChildren().isEmpty() &&
+                Objects.equals(targetPane.getChildren().get(0), itemSubScenes.get(item.getId()))
+        ) {
+            return;
+        }
+
+        if (!targetPane.getChildren().isEmpty()) {
+            ProjectionItemSubScene toHide = (ProjectionItemSubScene) targetPane.getChildren().get(0);
+            toHide.setVisible(false);
+
             targetPane.getChildren().clear();
-            return;
         }
 
-        if (targetPane.getChildren().size() <= 0) {
-            targetPane.getChildren().add(itemSubScenes.get(item.getId()));
-            return;
-        }
+        if (item != null) {
+            ProjectionItemSubScene toShow = itemSubScenes.get(item.getId());
+            toShow.setVisible(true);
 
-        if (Objects.equals(targetPane.getChildren().get(0), itemSubScenes.get(item.getId()))) {
-            return;
+            targetPane.getChildren().add(toShow);
         }
-
-        targetPane.getChildren().clear();
-        targetPane.getChildren().add(itemSubScenes.get(item.getId()));
     }
 
     @FXML

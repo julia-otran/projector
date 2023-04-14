@@ -141,7 +141,7 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_loadConfig(
             shutdown_renders();
             log_debug("Freeing configs...\n");
             free_projection_config(config);
-            log_debug("Reinitialize renders");
+            log_debug("Reinitialize renders...\n");
             initialize_renders();
         }
     }
@@ -269,24 +269,38 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setTextData
 }
 
 // Video render methods
-JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setVideoBuffer
-  (JNIEnv *env, jobject _, jobject j_buffer, jint width, jint height, jboolean crop) {
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_attachPlayerPtr
+(JNIEnv* env, jobject _, jlong player_addr) {
+    render_video_attach_player((void*)player_addr);
+}
+
+JNIEXPORT jobject JNICALL Java_dev_juhouse_projector_projection2_Bridge_downloadPlayerPreviewPtr
+  (JNIEnv *env, jobject _, jlong player_addr, jobject j_buffer) {
+
+    jint preview_w, preview_h;
+
+    jclass VideoPreviewSizeClass = (*env)->FindClass(env, "dev/juhouse/projector/projection2/BridgeVideoPreviewSize");
+    jfieldID width_field = (*env)->GetFieldID(env, VideoPreviewSizeClass, "width", "I");
+    jfieldID height_field = (*env)->GetFieldID(env, VideoPreviewSizeClass, "height", "I");
+
+    jobject video_preview_size_object = (*env)->AllocObject(env, VideoPreviewSizeClass);
 
     jbyte *data = (jbyte*) (*env)->GetDirectBufferAddress(env, j_buffer);
+    jlong capacity = (*env)->GetDirectBufferCapacity(env, j_buffer);
+
+    render_video_download_preview((void *) player_addr, data, capacity, &preview_w, &preview_h);
+
+    (*env)->SetIntField(env, video_preview_size_object, width_field, preview_w);
+    (*env)->SetIntField(env, video_preview_size_object, height_field, preview_h);
+
+    return video_preview_size_object;
+}
+
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setVideoRenderFlagPtr
+(JNIEnv* env, jobject _, jlong player_addr, jboolean crop, jint render_flag) {
     render_video_src_set_crop_video(crop);
-    render_video_src_set_buffer((void*)data, width, height);
+    render_video_src_set_render((void*)player_addr, render_flag);
 }
-
-JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setVideoBufferRenderFlag(JNIEnv *env, jobject _, jint render) {
-    render_video_src_set_render(render);
-}
-
-JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_updateVideoBuffer
-  (JNIEnv *env, jobject _) {
-
-  render_video_src_buffer_update();
-
-  }
 
 // Image render methods
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setImageAsset

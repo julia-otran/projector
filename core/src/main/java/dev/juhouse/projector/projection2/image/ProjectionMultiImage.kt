@@ -13,6 +13,7 @@ import kotlin.math.ceil
 class ProjectionMultiImage(private val delegate: CanvasDelegate): Projectable {
     private val imagesMap = HashMap<Int, Image>()
     private var render = false
+    private var cleared = true
     private var buffer: IntBuffer? = null
 
     override fun init() {
@@ -57,13 +58,18 @@ class ProjectionMultiImage(private val delegate: CanvasDelegate): Projectable {
                     buffer?.let { buffer ->
                         image.pixelReader.getPixels(0, 0, w, h, PixelFormat.getIntArgbPreInstance(), buffer.array(), 0, w)
                         delegate.bridge.setMultiImageAsset(buffer.array(), w, h, it.renderId)
+                        cleared = false
                         true
                     }
                 } ?: run {
                     delegate.bridge.setMultiImageAsset(null, 0, 0, it.renderId)
+                    cleared = true
                 }
             } else {
-                delegate.bridge.setMultiImageAsset(null, 0, 0, it.renderId)
+                if (!cleared) {
+                    cleared = true
+                    delegate.bridge.setMultiImageAsset(null, 0, 0, it.renderId)
+                }
             }
         }
 
