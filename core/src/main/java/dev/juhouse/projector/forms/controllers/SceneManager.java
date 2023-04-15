@@ -5,6 +5,7 @@
  */
 package dev.juhouse.projector.forms.controllers;
 
+import javafx.application.HostServices;
 import javafx.scene.Parent;
 import javafx.stage.Stage;
 
@@ -16,4 +17,5 @@ public interface SceneManager {
     void goToParent(Parent toor);
     void goToWorkspace();
     Stage getStage();
+    HostServices getHostServices();
 }

@@ -19,6 +19,7 @@ import dev.juhouse.projector.other.SQLiteJDBCDriverConnection;
 import dev.juhouse.projector.utils.ThemeFinder;
 import dev.juhouse.projector.utils.VlcPlayerFactory;
 import javafx.application.Application;
+import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -88,6 +89,10 @@ public class Projector extends Application implements Runnable {
                 return primaryStage;
             }
 
+            @Override
+            public HostServices getHostServices() {
+                return Projector.this.getHostServices();
+            }
         });
         
         workspaceScene.addEventFilter(KeyEvent.KEY_PRESSED, t -> {

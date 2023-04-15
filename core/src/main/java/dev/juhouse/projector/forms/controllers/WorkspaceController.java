@@ -5,7 +5,7 @@
  */
 package dev.juhouse.projector.forms.controllers;
 
-import java.awt.*;
+import java.awt.Font;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
@@ -13,8 +13,6 @@ import java.util.*;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
 import dev.juhouse.projector.forms.controllers.projection.BrowserController;
 import dev.juhouse.projector.forms.controllers.projection.MusicProjectionController;
 import dev.juhouse.projector.models.ProjectionListItem;
@@ -28,7 +26,7 @@ import dev.juhouse.projector.repositories.ProjectionListRepository;
 import dev.juhouse.projector.scenes.*;
 import dev.juhouse.projector.services.ManageMusicService;
 import dev.juhouse.projector.utils.FilePaths;
-import dev.juhouse.projector.utils.Patterns;
+import dev.juhouse.projector.utils.PropertiesHelper;
 import javafx.application.Platform;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -38,12 +36,14 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import dev.juhouse.projector.enums.ProjectionListItemType;
@@ -210,10 +210,20 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
 
     @FXML
     public void onHelpAbout() {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Sobre");
+        dialog.setHeaderText("Projector");
+        dialog.setContentText("v" + PropertiesHelper.Companion.getVersion());
+
+        Window window = dialog.getDialogPane().getScene().getWindow();
+        window.setOnCloseRequest(e -> dialog.hide());
+
+        dialog.showAndWait();
     }
 
     @FXML
     public void onHelpManual() {
+        sceneManager.getHostServices().showDocument("https://github.com/julia-otran/projector");
     }
 
     @FXML
