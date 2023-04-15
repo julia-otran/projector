@@ -140,29 +140,18 @@ void virtual_screen_load_vertexes(config_display *display, config_virtual_screen
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     free(vertexes);
-    virtual_screen_free_triangulateio(&out);
 
     data->vertexbuffer = vertexbuffer;
 
     // UV Buffer
 
-    for (int i = 0; i < count_points; i++) {
-        in.pointlist[i * 2] = config->monitor_position.input_points[i].x;
-        in.pointlist[(i * 2) + 1] = config->monitor_position.input_points[i].y;
-        in.pointmarkerlist[i] = i;
-    }
-
-    memset(&out, 0, sizeof(struct triangulateio));
-
-    triangulate("pcz", &in, &out, NULL);
-
     vertexes = (GLfloat*) calloc(out.numberoftriangles * 3 * 2, sizeof(GLfloat));
 
-    for (int i = 0; i < (out.numberoftriangles * 3); i++) {
+    for (int i = 0; i < out.numberoftriangles * 3; i++) {
         pindex = out.trianglelist[i];
 
-        x = (GLfloat) out.pointlist[pindex * 2];
-        y = (GLfloat) out.pointlist[(pindex * 2) + 1];
+        x = (GLfloat) config->monitor_position.input_points[pindex].x;
+        y = (GLfloat)config->monitor_position.input_points[pindex].y;
 
         x = x / (GLfloat) config->w;
         y = y / (GLfloat) config->h;
