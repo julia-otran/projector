@@ -62,7 +62,7 @@ void create_window(monitor *m) {
     glfwWindowHint(GLFW_CENTER_CURSOR, GLFW_FALSE);
     glfwWindowHint(GLFW_FOCUSED, GLFW_FALSE);
 
-    glfwWindowHint(GLFW_SAMPLES, 4);
+    glfwWindowHint(GLFW_SAMPLES, 6);
 
     m->window = glfwCreateWindow(mode->width, mode->height, "Projector", NULL, gl_share_context);
     glfwSetWindowMonitor(m->window, monitor, m->xpos, m->ypos, mode->width, mode->height, mode->refreshRate);
