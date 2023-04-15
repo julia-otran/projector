@@ -3,6 +3,7 @@ package dev.juhouse.projector.forms.controllers.projection
 import dev.juhouse.projector.projection2.ProjectionManager
 import dev.juhouse.projector.projection2.ProjectionWindowCapture
 import javafx.fxml.FXML
+import javafx.scene.control.CheckBox
 import javafx.scene.control.ChoiceBox
 import javafx.scene.layout.Pane
 import java.net.URL
@@ -20,6 +21,9 @@ class WindowCaptureController : ProjectionController(), ProjectionBarControlCall
 
     @FXML
     private lateinit var windowListChoiceBox: ChoiceBox<String>
+
+    @FXML
+    private lateinit var cropImageCheckBox: CheckBox
 
     override fun initialize(p0: URL?, p1: ResourceBundle?) {
     }
@@ -39,6 +43,10 @@ class WindowCaptureController : ProjectionController(), ProjectionBarControlCall
         windowListChoiceBox.selectionModel.selectedItemProperty().addListener { _, _, newValue ->
             controlBar.canProject = !newValue.isNullOrBlank()
             projectable.setWindowCaptureName(newValue)
+        }
+
+        cropImageCheckBox.selectedProperty().addListener { _, _, newValue ->
+            projectable.setCrop(newValue)
         }
 
         onRefreshWindowList()

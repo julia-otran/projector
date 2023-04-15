@@ -374,6 +374,10 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setWindowCa
     render_window_capture_src_set_render(render);
 }
 
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setWindowCaptureCrop(JNIEnv *env, jobject _, jboolean crop) {
+    render_window_capture_src_set_crop(crop);
+}
+
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_shutdown(JNIEnv *env, jobject _) {
     CHECK_INITIALIZE
 

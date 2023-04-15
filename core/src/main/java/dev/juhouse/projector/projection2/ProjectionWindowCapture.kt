@@ -46,4 +46,8 @@ class ProjectionWindowCapture(private val delegate: CanvasDelegate): Projectable
     fun getWindowList(): List<String> {
         return delegate.bridge.windowList.toList()
     }
+
+    fun setCrop(newVal: Boolean) {
+        delegate.bridge.setWindowCaptureCrop(newVal)
+    }
 }

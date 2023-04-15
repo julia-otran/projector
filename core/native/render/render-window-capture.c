@@ -16,6 +16,7 @@ static GLuint texture_id;
 static int texture_loaded;
 static int should_clear;
 
+static int src_crop;
 static int src_render;
 static int dst_render;
 
@@ -45,6 +46,10 @@ void render_window_capture_src_set_window_name(char *window_name) {
 
 void render_window_capture_src_set_render(int render) {
     src_render = render;
+}
+
+void render_window_capture_src_set_crop(int crop) {
+    src_crop = crop;
 }
 
 void render_window_capture_create_buffers() {
@@ -160,7 +165,7 @@ void render_window_capture_render(render_layer *layer) {
     float w_sz = layer->config.h * w_scale;
     float h_sz = layer->config.w * h_scale;
 
-    if (w_sz < layer->config.w) {
+    if ((w_sz <= layer->config.w) == (src_crop == 0)) {
         w = w_sz;
         h = h_scale * w;
     } else {

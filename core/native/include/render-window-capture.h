@@ -7,6 +7,7 @@ void render_window_capture_initialize();
 
 void render_window_capture_src_set_window_name(char *window_name);
 void render_window_capture_src_set_render(int render);
+void render_window_capture_src_set_crop(int crop);
 
 void render_window_capture_create_buffers();
 void render_window_capture_update_buffers();
