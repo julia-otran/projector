@@ -10,7 +10,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <fx.version>19.0.2.1</fx.version>
-        <revision>3.11</revision>
+        <revision>3.12</revision>
         <lib_name>render</lib_name>
         <maven.compiler.release>17</maven.compiler.release>
         <maven.compiler.source>17</maven.compiler.source>
