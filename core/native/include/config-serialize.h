@@ -9,7 +9,7 @@ cJSON* serialize_config_blend(config_blend *in);
 cJSON* serialize_config_help_line(config_help_line *in);
 cJSON* serialize_config_color_factor(config_color_factor *in);
 cJSON* serialize_config_color_balance(config_color_balance *in);
-cJSON* serialize_config_white_balance(config_white_balance *in);
+cJSON* serialize_config_color_matrix(config_color_matrix *in);
 cJSON* serialize_config_black_level_adjust(config_black_level_adjust *in);
 cJSON* serialize_config_virtual_screen(config_virtual_screen *in);
 cJSON* serialize_config_display(config_display *in);

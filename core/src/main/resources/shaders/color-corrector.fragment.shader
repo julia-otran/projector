@@ -1,12 +1,13 @@
 varying vec2 frag_Uv;
 uniform sampler2D image;
 
-uniform vec3 brightAdjust;
-uniform vec3 exposureAdjust;
-
 uniform vec4 lowAdjust;
 uniform vec4 midAdjust;
 uniform vec4 highAdjust;
+
+uniform vec4 redMatrix;
+uniform vec4 greenMatrix;
+uniform vec4 blueMatrix;
 
 vec3 rgbToHsl(vec3 rgbColor) {
     float minVal = min(rgbColor.r, min(rgbColor.g, rgbColor.b));
@@ -132,7 +133,10 @@ void main(void) {
 
     colorCorrected = hslToRgb(colorCorrectedHsl);
 
-    vec3 result = colorCorrected * exposureAdjust + brightAdjust;
+    vec3 result = colorCorrected.r * redMatrix.rgb +
+        colorCorrected.g * greenMatrix.rgb +
+        colorCorrected.b * blueMatrix.rgb +
+        vec3(redMatrix.a, greenMatrix.a, blueMatrix.a);
 
     gl_FragColor = vec4(result.rgb, texel.a);
 }

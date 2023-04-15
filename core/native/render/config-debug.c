@@ -32,8 +32,8 @@ void print_config_color_balance(config_color_balance *in) {
     print_json(serialize_config_color_balance(in));
 }
 
-void print_config_white_balance(config_white_balance *in) {
-    print_json(serialize_config_white_balance(in));
+void print_config_color_matrix(config_color_matrix *in) {
+    print_json(serialize_config_color_matrix(in));
 }
 
 void print_config_black_level_adjust(config_black_level_adjust *in) {

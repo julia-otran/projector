@@ -103,13 +103,25 @@ cJSON* serialize_config_color_balance(config_color_balance *in) {
     return config_color_balance_json;
 }
 
-cJSON* serialize_config_white_balance(config_white_balance *in) {
-    cJSON *config_white_balance_json = cJSON_CreateObject();
+cJSON* serialize_config_color_matrix(config_color_matrix* in) {
+    cJSON* config_color_matrix_json = cJSON_CreateObject();
 
-    cJSON_AddItemToObject(config_white_balance_json, "bright", serialize_config_color_factor(&in->bright));
-    cJSON_AddItemToObject(config_white_balance_json, "exposure", serialize_config_color_factor(&in->exposure));
+    cJSON_AddItemToObject(config_color_matrix_json, "r_to_r", cJSON_CreateNumber(in->r_to_r));
+    cJSON_AddItemToObject(config_color_matrix_json, "r_to_g", cJSON_CreateNumber(in->r_to_g));
+    cJSON_AddItemToObject(config_color_matrix_json, "r_to_b", cJSON_CreateNumber(in->r_to_b));
+    cJSON_AddItemToObject(config_color_matrix_json, "r_trim", cJSON_CreateNumber(in->r_trim));
 
-    return config_white_balance_json;
+    cJSON_AddItemToObject(config_color_matrix_json, "g_to_r", cJSON_CreateNumber(in->g_to_r));
+    cJSON_AddItemToObject(config_color_matrix_json, "g_to_g", cJSON_CreateNumber(in->g_to_g));
+    cJSON_AddItemToObject(config_color_matrix_json, "g_to_b", cJSON_CreateNumber(in->g_to_b));
+    cJSON_AddItemToObject(config_color_matrix_json, "g_trim", cJSON_CreateNumber(in->g_trim));
+
+    cJSON_AddItemToObject(config_color_matrix_json, "b_to_r", cJSON_CreateNumber(in->b_to_r));
+    cJSON_AddItemToObject(config_color_matrix_json, "b_to_g", cJSON_CreateNumber(in->b_to_g));
+    cJSON_AddItemToObject(config_color_matrix_json, "b_to_b", cJSON_CreateNumber(in->b_to_b));
+    cJSON_AddItemToObject(config_color_matrix_json, "b_trim", cJSON_CreateNumber(in->b_trim));
+
+    return config_color_matrix_json;
 }
 
 cJSON* serialize_config_black_level_adjust(config_black_level_adjust *in) {
@@ -144,7 +156,7 @@ cJSON* serialize_config_virtual_screen(config_virtual_screen *in) {
     cJSON_AddItemToObject(config_virtual_screen_json, "render_input_bounds", serialize_config_bounds(&in->render_input_bounds));
 
     cJSON_AddItemToObject(config_virtual_screen_json, "color_balance", serialize_config_color_balance(&in->color_balance));
-    cJSON_AddItemToObject(config_virtual_screen_json, "white_balance", serialize_config_white_balance(&in->white_balance));
+    cJSON_AddItemToObject(config_virtual_screen_json, "color_matrix", serialize_config_color_matrix(&in->color_matrix));
 
     cJSON_AddItemToObject(config_virtual_screen_json, "monitor_position", serialize_config_point_mapping(&in->monitor_position));
 

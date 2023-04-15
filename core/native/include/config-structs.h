@@ -44,9 +44,11 @@ typedef struct {
 } config_color_balance;
 
 typedef struct {
-    config_color_factor bright;
-    config_color_factor exposure;
-} config_white_balance;
+    double
+        r_to_r, r_to_g, r_to_b, r_trim,
+        g_to_r, g_to_g, g_to_b, g_trim,
+        b_to_r, b_to_g, b_to_b, b_trim;
+} config_color_matrix;
 
 typedef struct {
     int x1, x2, x3, x4, y1, y2, y3, y4;
@@ -62,7 +64,7 @@ typedef struct {
     config_bounds render_input_bounds;
 
     config_color_balance color_balance;
-    config_white_balance white_balance;
+    config_color_matrix color_matrix;
 
     config_point_mapping monitor_position;
 

@@ -10,11 +10,14 @@ static GLuint fragmentshader;
 static GLuint program;
 
 static GLuint textureUniform;
-static GLuint brightAdjustUniform;
-static GLuint exposureAdjustUniform;
+
 static GLuint lowAdjustUniform;
 static GLuint midAdjustUniform;
 static GLuint highAdjustUniform;
+
+static GLuint redMatrixUniform;
+static GLuint greenMatrixUniform;
+static GLuint blueMatrixUniform;
 
 void vs_color_corrector_init() {
     vertexshader = loadShader(GL_VERTEX_SHADER, "color-corrector.vertex.shader");
@@ -31,11 +34,14 @@ void vs_color_corrector_init() {
     glValidateProgram(program);
 
     textureUniform = glGetUniformLocation(program, "image");
-    brightAdjustUniform = glGetUniformLocation(program, "brightAdjust");
-    exposureAdjustUniform = glGetUniformLocation(program, "exposureAdjust");
+
     lowAdjustUniform = glGetUniformLocation(program, "lowAdjust");
     midAdjustUniform = glGetUniformLocation(program, "midAdjust");
     highAdjustUniform = glGetUniformLocation(program, "highAdjust");
+
+    redMatrixUniform = glGetUniformLocation(program, "redMatrix");
+    greenMatrixUniform = glGetUniformLocation(program, "greenMatrix");
+    blueMatrixUniform = glGetUniformLocation(program, "blueMatrix");
 
     glUseProgram(0);
 }
@@ -118,8 +124,29 @@ void vs_color_corrector_start(config_virtual_screen *config, render_output *rend
 }
 
 void vs_color_corrector_set_uniforms(config_virtual_screen *config) {
-    glUniform3f(brightAdjustUniform, config->white_balance.bright.r, config->white_balance.bright.g, config->white_balance.bright.b);
-    glUniform3f(exposureAdjustUniform, config->white_balance.exposure.r, config->white_balance.exposure.g, config->white_balance.exposure.b);
+    glUniform4f(
+        redMatrixUniform, 
+        config->color_matrix.r_to_r,
+        config->color_matrix.r_to_g,
+        config->color_matrix.r_to_b,
+        config->color_matrix.r_trim
+    );
+
+    glUniform4f(
+        greenMatrixUniform,
+        config->color_matrix.g_to_r,
+        config->color_matrix.g_to_g,
+        config->color_matrix.g_to_b,
+        config->color_matrix.g_trim
+    );
+
+    glUniform4f(
+        blueMatrixUniform,
+        config->color_matrix.b_to_r,
+        config->color_matrix.b_to_g,
+        config->color_matrix.b_to_b,
+        config->color_matrix.b_trim
+    );
 
     glUniform4f(
         lowAdjustUniform,
