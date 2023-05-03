@@ -154,11 +154,12 @@ void render_cycle(render_layer *render) {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0.0, width, height, 0.0, 0.0, 1.0);
+
     glClearColor(background_clear_color->r, background_clear_color->g, background_clear_color->b, background_clear_color->a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glPushMatrix();
-    glOrtho(0.0, width, height, 0.0, 0.0, 1.0);
 
     render_video_render(render);
     render_image_render(render);

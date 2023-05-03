@@ -80,6 +80,7 @@ void swap_monitor_buffers() {
         monitor *m = &monitors[i];
 
         if (m->window) {
+            glfwMakeContextCurrent(m->window);
             glfwSwapBuffers(m->window);
         }
     }
@@ -266,13 +267,8 @@ void monitors_terminate() {
 }
 
 void monitor_prepare_renders_context() {
-    for (int i=0; i<monitors_count; i++) {
-        monitor *m = &monitors[i];
-
-        if (m->window) {
-            glfwMakeContextCurrent(m->window);
-            break;
-        }
+    if (gl_share_context) {
+        glfwMakeContextCurrent(gl_share_context);
     }
 }
 
