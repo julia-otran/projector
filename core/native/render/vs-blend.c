@@ -134,6 +134,7 @@ void vs_blend_start(config_virtual_screen *virtual_screen, vs_blend *instance) {
 }
 
 void vs_blend_render(vs_blend *instance) {
+    glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     glColor4d(1.0, 1.0, 1.0, 1.0);
 
@@ -156,6 +157,7 @@ void vs_blend_render(vs_blend *instance) {
     glUseProgram(0);
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_BLEND);
 }
 
 void vs_blend_stop(vs_blend *instance) {

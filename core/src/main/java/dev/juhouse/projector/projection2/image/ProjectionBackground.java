@@ -26,6 +26,7 @@ public class ProjectionBackground extends ProjectionImage {
         super.init();
         this.setModel(getCanvasDelegate().getSettingsService().getLastBackground());
         this.setCropBackground(ProjectorPreferences.getCropBackground());
+        this.getRenderFlagProperty().get().applyDefault(BridgeRender::getEnableRenderBackgroundAssets);
         this.setRender(true);
     }
 

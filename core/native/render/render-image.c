@@ -16,6 +16,7 @@ typedef struct {
 
 static int initialized = 0;
 static int src_crop;
+static int src_render_flag;
 
 static mtx_t thread_mutex;
 
@@ -30,6 +31,7 @@ static render_pixel_unpack_buffer_instance **buffer_instances;
 void render_image_initialize() {
     mtx_init(&thread_mutex, 0);
     initialized = 1;
+    src_render_flag = 0;
 }
 
 void render_image_set_config(render_layer *in_renders, int count) {
@@ -47,10 +49,16 @@ void render_image_set_config(render_layer *in_renders, int count) {
 
 void render_image_set_image(void *pixel_data, int width_in, int height_in, int crop_in, int render_flag_in) {
     for (int i = 0; i < renders_count; i++) {
-        if (render_flag_in == 0 || (render_flag_in & (1 << input_images[i].render_id))) {
+        if ((render_flag_in >> input_images[i].render_id) & 1) {
             render_image_set_image_multi(pixel_data, width_in, height_in, crop_in, input_images[i].render_id);
         }
+
+        if (((render_flag_in >> input_images[i].render_id) & 1) == 0) {
+            render_image_set_image_multi(NULL, width_in, height_in, crop_in, input_images[i].render_id);
+        }
     }
+
+    src_render_flag = render_flag_in;
 }
 
 void render_image_set_image_multi(void *pixel_data, int width, int height, int crop, int render_id) {

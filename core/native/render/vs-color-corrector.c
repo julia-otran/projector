@@ -181,6 +181,9 @@ void vs_color_corrector_render(config_virtual_screen *config, render_output *ren
         return;
     }
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     glUseProgram(program);
 
     vs_color_corrector_set_uniforms(config);
@@ -201,6 +204,8 @@ void vs_color_corrector_render(config_virtual_screen *config, render_output *ren
     glBindVertexArray(0);
 
     glUseProgram(0);
+
+    glDisable(GL_BLEND);
 }
 
 void vs_color_corrector_stop(vs_color_corrector *data) {
