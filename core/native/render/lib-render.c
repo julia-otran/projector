@@ -18,6 +18,7 @@
 #include "window-capture.h"
 
 static int initialized = 0;
+static int configured = 0;
 static projection_config *config;
 
 #define CHECK_INITIALIZE {\
@@ -65,6 +66,35 @@ static projection_config *config;
 
 #endif
 
+void internal_lib_render_reload() {
+    log_debug("Engine Reload!!");
+
+    log_debug("Shutting down main loop...\n");
+    main_loop_terminate();
+
+    log_debug("Shutting down renders...\n");
+    shutdown_renders();
+
+    log_debug("Shutting down monitors...\n");
+    shutdown_monitors();
+
+    log_debug("Reload monitors");
+    reload_monitors();
+
+    log_debug("Will load config:\n");
+    print_projection_config(config);
+
+    log_debug("Reinitialize renders...\n");
+    initialize_renders();
+
+    log_debug("Staring engine...\n");
+
+    activate_monitors(config);
+    activate_renders(get_gl_share_context(), config);
+    main_loop_schedule_config_reload(config);
+    main_loop_start();
+}
+
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_loadShader(JNIEnv *env, jobject _, jstring shader_name, jstring shader_data) {
     char *name = (char*) (*env)->GetStringUTFChars(env, shader_name, 0);
     char *data = (char*) (*env)->GetStringUTFChars(env, shader_data, 0);
@@ -79,12 +109,17 @@ void glfwIntErrorCallback(GLint _, const GLchar *error_string) {
     log_debug("Catch GLFW error: %s\n", error_string);
 }
 
+void glfwIntMonitorCallback(GLFWmonitor* monitor, int event) {
+    internal_lib_render_reload();
+}
+
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_initialize(JNIEnv *env, jobject _) {
     if (!glfwInit()) {
         return;
     }
 
     glfwSetErrorCallback(glfwIntErrorCallback);
+    glfwSetMonitorCallback(glfwIntMonitorCallback);
 
     render_video_create_mtx();
 
@@ -105,6 +140,7 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_initialize(
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_loadConfig(JNIEnv *env, jobject _, jstring j_file_path) {
     CHECK_INITIALIZE
+    configured = 0;
 
     projection_config *new_config;
 
@@ -155,29 +191,11 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_loadConfig(
     activate_renders(get_gl_share_context(), config);
     main_loop_schedule_config_reload(config);
     main_loop_start();
+    configured = 1;
 }
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_reload(JNIEnv *env, jobject _) {
-    log_debug("Engine Reload!!");
-
-    log_debug("Shutting down main loop...\n");
-    main_loop_terminate();
-
-    log_debug("Shutting down renders...\n");
-    shutdown_renders();
-
-    log_debug("Will load config:\n");
-    print_projection_config(config);
-
-    log_debug("Reinitialize renders...\n");
-    initialize_renders();
-
-    log_debug("Staring engine...\n");
-
-    activate_monitors(config);
-    activate_renders(get_gl_share_context(), config);
-    main_loop_schedule_config_reload(config);
-    main_loop_start();
+    internal_lib_render_reload();
 }
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_generateConfig(JNIEnv *env, jobject _, jstring j_path) {
