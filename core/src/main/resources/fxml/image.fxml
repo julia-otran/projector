@@ -34,14 +34,12 @@
     </Pane>
     <VBox prefHeight="200.0" prefWidth="100.0">
       <HBox prefHeight="100.0" prefWidth="200.0" VBox.vgrow="NEVER">
-        <Label text="Trocar imagem a cada" />
-        <Label fx:id="timeLabel" text="X">
+        <Label fx:id="timeLabel" prefHeight="18.0" prefWidth="213.0" text="X">
           <HBox.margin>
             <Insets left="5.0" right="5.0" />
           </HBox.margin>
         </Label>
-        <Label text="segundos" />
-        <Slider fx:id="changeMsecSlider" blockIncrement="0.1" max="120.0" min="0.1" value="5.0" HBox.hgrow="ALWAYS" />
+        <Slider fx:id="changeMsecSlider" blockIncrement="0.1" max="181.0" min="0.1" value="5.0" HBox.hgrow="ALWAYS" />
       </HBox>
       <ListView fx:id="imagesList" orientation="HORIZONTAL" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
     </VBox>

@@ -87,6 +87,7 @@ public class ProjectionPlayer implements Projectable {
         private boolean running;
         private PixelBuffer<IntBuffer> previewImagePixelBuffer;
         private final ByteBuffer previewImageBuffer;
+        private final IntBuffer previewImageBufferInt;
         private final ProjectionVideo video;
         private final CanvasDelegate delegate;
         private final ImageView previewImageView;
@@ -107,7 +108,9 @@ public class ProjectionPlayer implements Projectable {
 
             this.video = video;
             this.delegate = delegate;
+
             previewImageBuffer = ByteBuffer.allocateDirect(1920 * 1920 * 4);
+            previewImageBufferInt = previewImageBuffer.asIntBuffer();
         }
 
         public void startPreview() {
@@ -141,6 +144,7 @@ public class ProjectionPlayer implements Projectable {
             updating = true;
 
             try {
+                previewImageBuffer.flip();
                 BridgeVideoPreviewSize outputSize = delegate.getBridge().downloadPlayerPreview(video.player, previewImageBuffer);
 
                 if (outputSize.getWidth() == 0) {
@@ -156,7 +160,7 @@ public class ProjectionPlayer implements Projectable {
                     previewImagePixelBuffer = new PixelBuffer<>(
                             outputSize.getWidth(),
                             outputSize.getHeight(),
-                            previewImageBuffer.asIntBuffer(),
+                            previewImageBufferInt,
                             PixelFormat.getIntArgbPreInstance()
                     );
 

@@ -302,7 +302,7 @@ public class ImageController extends ProjectionController implements Runnable, P
             long current = System.currentTimeMillis();
             double interval = changeMsecSlider.valueProperty().doubleValue() * 1000;
 
-            if (current - time < Math.round(interval)) {
+            if (current - time < Math.round(interval) || interval > 180.0) {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
@@ -335,8 +335,13 @@ public class ImageController extends ProjectionController implements Runnable, P
 
     private void formatTimeLabel() {
         double secs = changeMsecSlider.getValue();
-        String time = milisecondsFormatter.format(secs);
-        timeLabel.setText(time);
+
+        if (secs > 180.0) {
+            timeLabel.setText("Trocar imagens manualmente");
+        } else {
+            String time = milisecondsFormatter.format(secs);
+            timeLabel.setText("Trocar imagem a cada " + time + " segundos");
+        }
     }
 
     @FXML

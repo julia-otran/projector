@@ -277,7 +277,8 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_attachPlaye
 JNIEXPORT jobject JNICALL Java_dev_juhouse_projector_projection2_Bridge_downloadPlayerPreviewPtr
   (JNIEnv *env, jobject _, jlong player_addr, jobject j_buffer) {
 
-    jint preview_w, preview_h;
+    jint preview_w = 0;
+    jint preview_h = 0;
 
     jclass VideoPreviewSizeClass = (*env)->FindClass(env, "dev/juhouse/projector/projection2/BridgeVideoPreviewSize");
     jfieldID width_field = (*env)->GetFieldID(env, VideoPreviewSizeClass, "width", "I");

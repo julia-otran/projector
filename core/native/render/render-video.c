@@ -126,6 +126,10 @@ void render_video_format_callback_dealoc(void* opaque) {
 
     if (data->raw_buffer) {
         free(data->raw_buffer);
+
+        data->raw_buffer = NULL;
+        data->buffer = NULL;
+        data->buffer_size = 0;
     }
 }
 
