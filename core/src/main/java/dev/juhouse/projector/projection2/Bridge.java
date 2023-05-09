@@ -61,6 +61,8 @@ public class Bridge {
 
     private native void attachPlayerPtr(long player);
 
+    public native void reload();
+
     public static class VideoPreviewOutputBufferTooSmall extends Exception {}
 
     public BridgeVideoPreviewSize downloadPlayerPreview(MediaPlayer player, ByteBuffer buffer) throws VideoPreviewOutputBufferTooSmall {

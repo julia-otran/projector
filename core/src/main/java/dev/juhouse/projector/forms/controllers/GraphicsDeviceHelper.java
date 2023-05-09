@@ -34,8 +34,7 @@ public class GraphicsDeviceHelper {
     }
 
     public void reloadDevices() {
-        windowManager.stopEngine();
-        windowManager.startEngine();
+        windowManager.reloadDevices();
     }
 
     ImageView getPreviewPanel() {

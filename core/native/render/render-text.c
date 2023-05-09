@@ -64,6 +64,7 @@ void render_text_set_data(render_text_data *data, int count) {
         clear_text = 0;
         pixel_data_changed = count;
     } else {
+        pixel_data_changed = 0;
         clear_text = 1;
     }
 

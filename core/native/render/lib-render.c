@@ -86,6 +86,8 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_initialize(
 
     glfwSetErrorCallback(glfwIntErrorCallback);
 
+    render_video_create_mtx();
+
     reload_monitors();
 
     config_bounds default_monitor;
@@ -148,6 +150,29 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_loadConfig(
 
     log_debug("Staring engine...\n");
     config = new_config;
+
+    activate_monitors(config);
+    activate_renders(get_gl_share_context(), config);
+    main_loop_schedule_config_reload(config);
+    main_loop_start();
+}
+
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_reload(JNIEnv *env, jobject _) {
+    log_debug("Engine Reload!!");
+
+    log_debug("Shutting down main loop...\n");
+    main_loop_terminate();
+
+    log_debug("Shutting down renders...\n");
+    shutdown_renders();
+
+    log_debug("Will load config:\n");
+    print_projection_config(config);
+
+    log_debug("Reinitialize renders...\n");
+    initialize_renders();
+
+    log_debug("Staring engine...\n");
 
     activate_monitors(config);
     activate_renders(get_gl_share_context(), config);

@@ -24,7 +24,7 @@ typedef struct {
 } monitor_info;
 
 void reload_monitors();
-void activate_monitors(projection_config *config);
+int activate_monitors(projection_config *config);
 void monitors_config_hot_reload(projection_config *config);
 
 void shutdown_monitors();

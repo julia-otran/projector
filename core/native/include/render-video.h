@@ -4,6 +4,8 @@
 #ifndef _RENDER_VIDEO_H_
 #define _RENDER_VIDEO_H_
 
+void render_video_create_mtx();
+
 void render_video_initialize();
 
 void render_video_create_window(GLFWwindow *shared_context);

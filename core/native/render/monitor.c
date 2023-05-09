@@ -75,6 +75,38 @@ void create_window(monitor *m) {
     }
 }
 
+void create_non_fs_window(monitor* m) {
+    if (m->window) {
+        return;
+    }
+
+    GLFWmonitor* monitor = m->gl_monitor;
+    GLFWvidmode* mode = m->mode;
+
+    glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+    glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+    glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+    glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+
+    glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
+    glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_FALSE);
+    glfwWindowHint(GLFW_CENTER_CURSOR, GLFW_FALSE);
+    glfwWindowHint(GLFW_FOCUSED, GLFW_FALSE);
+
+    glfwWindowHint(GLFW_SAMPLES, 6);
+
+    m->window = glfwCreateWindow(mode->width / 2, mode->height / 2, "Projector", NULL, gl_share_context);
+
+    glfwSetInputMode(m->window, GLFW_STICKY_KEYS, GL_TRUE);
+    glfwSetInputMode(m->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+    if (gl_share_context == NULL) {
+        gl_share_context = m->window;
+    }
+}
+
 void swap_monitor_buffers() {
     for (int i=0; i<monitors_count; i++) {
         monitor *m = &monitors[i];
@@ -86,20 +118,23 @@ void swap_monitor_buffers() {
     }
 }
 
-void destroy_window(monitor *m) {
+int destroy_window(monitor *m) {
     if (!m->window) {
-        return;
+        return 0;
     }
 
+    int require_restart = 0;
+
     if (gl_share_context == m->window) {
-        // Hope this does not happen
-        // However in such case we will loose the ctx share, had to recreate all windows.
-        // I will just prevent this window destruction for now.
-        return;
+        // If this happens, restart entire engine.
+        require_restart = 1;
+        gl_share_context = NULL;
     }
 
     glfwDestroyWindow(m->window);
     m->window = NULL;
+
+    return require_restart;
 }
 
 void shutdown_monitors() {
@@ -118,7 +153,10 @@ void shutdown_monitors() {
     free(monitors);
 }
 
-void activate_monitors(projection_config *config) {
+int activate_monitors(projection_config *config) {
+    int any_found = 0;
+    int need_restart = 0;
+
     for (int i=0; i<monitors_count; i++) {
         int found = 0;
         monitor *m = &monitors[i];
@@ -128,16 +166,26 @@ void activate_monitors(projection_config *config) {
 
             if (monitor_match_bounds(&dsp->monitor_bounds, m) && dsp->projection_enabled) {
                 found = 1;
+                any_found = 1;
                 m->config = dsp;
                 create_window(m);
             }
         }
 
         if (!found) {
-            destroy_window(m);
+            if (destroy_window(m) && i != 0) {
+                need_restart = 1;
+            }
+
             m->config = NULL;
         }
     }
+
+    if (any_found == 0) {
+        create_non_fs_window(&monitors[0]);
+    }
+
+    return need_restart;
 }
 
 void get_default_projection_monitor_bounds(config_bounds *in, int *no_secondary_mon) {
@@ -157,8 +205,9 @@ void get_default_projection_monitor_bounds(config_bounds *in, int *no_secondary_
 
     log_debug("No secondary monitor found! Will use simulation mode\n");
 
-    in->w = 1280;
-    in->h = 720;
+    in->w = monitors[0].mode->width / 2;
+    in->h = monitors[0].mode->height / 2;
+
     (*no_secondary_mon) = 1;
 }
 
@@ -278,7 +327,7 @@ void monitors_cycle() {
     for (int i=0; i<monitors_count; i++) {
         monitor *m = &monitors[i];
 
-        if (m->window) {
+        if (m->window && m->config) {
             glfwMakeContextCurrent(m->window);
             glfwGetFramebufferSize(m->window, &width, &height);
 

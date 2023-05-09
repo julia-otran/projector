@@ -96,4 +96,16 @@ class WindowManager(private val settingsService: SettingsService) : CanvasDelega
 
         preview.start()
     }
+
+    fun reloadDevices() {
+        preview.stop()
+
+        bridge.reload()
+
+        if (running) {
+            manager.rebuild()
+        }
+
+        preview.start()
+    }
 }

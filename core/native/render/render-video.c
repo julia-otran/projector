@@ -58,14 +58,22 @@ typedef struct {
 
 static render_video_opaque_node *opaque_list = NULL;
 static GLFWwindow* transfer_window;
+static int glew_initialized;
+
+void render_video_create_mtx() {
+    // I rly don't care about this leak, it only leaks when program closes, so, it does not leaks
+    mtx_init(&thread_mutex, 0);
+}
 
 void render_video_create_window(GLFWwindow *shared_context) {
-    mtx_init(&thread_mutex, 0);
-
+    mtx_lock(&thread_mutex);
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
     glfwWindowHint(GLFW_SAMPLES, 0);
 
+    glew_initialized = 0;
     transfer_window = glfwCreateWindow(800, 600, "Projector VLC4j", NULL, shared_context);
+    
+    mtx_unlock(&thread_mutex);
 }
 
 void render_video_destroy_window() {
@@ -73,8 +81,6 @@ void render_video_destroy_window() {
     glfwDestroyWindow(transfer_window);
     transfer_window = NULL;
     mtx_unlock(&thread_mutex);
-
-    mtx_destroy(&thread_mutex);
 }
 
 void render_video_initialize() {
@@ -109,14 +115,8 @@ unsigned render_video_format_callback_alloc(
     data->raw_buffer = malloc(data->buffer_size);
     data->buffer = (void*) (((unsigned long long)data->raw_buffer + 255) & ~255);
 
-    // VirtualLock(data->buffer, data->buffer_size);
-
     (*pitches) = (*width) * BYTES_PER_PIXEL;
     (*lines) = (*height);
-
-    glfwMakeContextCurrent(transfer_window);
-    glewInit();
-    glfwMakeContextCurrent(NULL);
 
     return 1;
 }
@@ -163,6 +163,11 @@ static void* render_video_lock(void* opaque, void** p_pixels)
     }
 
     glfwMakeContextCurrent(transfer_window);
+
+    if (glew_initialized == 0) {
+        glewInit();
+        glew_initialized = 1;
+    }
 
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
 
