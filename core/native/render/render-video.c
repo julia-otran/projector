@@ -89,6 +89,8 @@ void render_video_initialize() {
     src_render = 0;
     texture_loaded = 0;
     should_clear = 0;
+    dst_width = 0;
+    dst_height = 0;
 
     render_fader_init(&fader_instance);
 }
@@ -147,11 +149,7 @@ static void* render_video_lock(void* opaque, void** p_pixels)
         return NULL;
     }
 
-    mtx_unlock(&thread_mutex);
-
     render_pixel_unpack_buffer_node* buffer = render_pixel_unpack_buffer_dequeue_for_write(buffer_instance);
-
-    mtx_lock(&thread_mutex);
 
     if (transfer_window == NULL || buffer == NULL || data->player != current_player) {
         mtx_unlock(&thread_mutex);
@@ -190,9 +188,9 @@ static void render_video_unlock(void* opaque, void* id, void* const* p_pixels)
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
         glfwMakeContextCurrent(NULL);
 
-        mtx_unlock(&thread_mutex);
-
         render_pixel_unpack_buffer_enqueue_for_read(buffer_instance, id);
+
+        mtx_unlock(&thread_mutex);
     }
 }
 
@@ -288,6 +286,7 @@ void render_video_update_assets() {
 
     if (buffer) {
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
+
         glBindTexture(GL_TEXTURE_2D, texture_id);
 
         if (dst_width != buffer->width || dst_height != buffer->height) {
