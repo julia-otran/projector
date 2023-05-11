@@ -141,7 +141,7 @@ static void* render_video_lock(void* opaque, void** p_pixels)
 
     mtx_lock(&thread_mutex);
 
-    if (!running) {
+    if (!running || transfer_window == NULL || data->player != current_player) {
         (*p_pixels) = data->buffer;
 
         mtx_unlock(&thread_mutex);
@@ -151,11 +151,10 @@ static void* render_video_lock(void* opaque, void** p_pixels)
 
     render_pixel_unpack_buffer_node* buffer = render_pixel_unpack_buffer_dequeue_for_write(buffer_instance);
 
-    if (transfer_window == NULL || buffer == NULL || data->player != current_player) {
-        mtx_unlock(&thread_mutex);
-
+    if (buffer == NULL) {
         (*p_pixels) = data->buffer;
-        render_pixel_unpack_buffer_enqueue_for_write(buffer_instance, buffer);
+
+        mtx_unlock(&thread_mutex);
 
         return NULL;
     }
