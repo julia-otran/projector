@@ -137,8 +137,6 @@ cJSON* serialize_config_black_level_adjust(config_black_level_adjust *in) {
     cJSON_AddItemToObject(config_black_level_adjust_json, "y3", cJSON_CreateNumber(in->y3));
     cJSON_AddItemToObject(config_black_level_adjust_json, "y4", cJSON_CreateNumber(in->y4));
 
-    cJSON_AddItemToObject(config_black_level_adjust_json, "alpha", cJSON_CreateNumber(in->alpha));
-
     cJSON_AddItemToObject(config_black_level_adjust_json, "color", serialize_config_color_factor(&in->color));
 
     return config_black_level_adjust_json;

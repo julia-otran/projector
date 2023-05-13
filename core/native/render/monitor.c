@@ -2,6 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef _WIN32
+#include <Windows.h>
+#include <WinUser.h>
+#endif
+
 #include "debug.h"
 #include "ogl-loader.h"
 #include "monitor.h"
@@ -42,6 +47,24 @@ int monitor_match_bounds(config_bounds *bounds, monitor *m) {
                        m->mode->height == bounds->h;
 }
 
+#ifdef _WIN32
+
+static WNDPROC prev_wndproc = NULL;
+
+LRESULT new_wndproc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
+    LRESULT cascade_result = prev_wndproc(hwnd, message, wparam, lparam);
+
+    if (message == WM_WINDOWPOSCHANGING && cascade_result != NULL) {
+        LPWINDOWPOS wpos = (LPWINDOWPOS)cascade_result;
+
+        wpos->flags |= SWP_NOMOVE | SWP_NOSIZE;
+    }
+
+    return cascade_result;
+}
+
+#endif
+
 void create_window(monitor *m) {
     if (m->window) {
         return;
@@ -69,6 +92,11 @@ void create_window(monitor *m) {
 
 	glfwSetInputMode(m->window, GLFW_STICKY_KEYS, GL_TRUE);
     glfwSetInputMode(m->window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+
+#ifdef _WIN32
+    HWND window_hwnd = glfwGetWin32Window(m->window);
+    prev_wndproc = SetWindowLongPtr(window_hwnd, GWLP_WNDPROC, (LONG_PTR)&new_wndproc);
+#endif
 
     if (gl_share_context == NULL) {
         gl_share_context = m->window;

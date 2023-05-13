@@ -113,8 +113,6 @@ void parse_config_black_level_adjust(cJSON *config_black_level_adjust_json, conf
     out->y3 = cJSON_GetObjectItemCaseSensitive(config_black_level_adjust_json, "y3")->valueint;
     out->y4 = cJSON_GetObjectItemCaseSensitive(config_black_level_adjust_json, "y4")->valueint;
 
-    out->alpha = cJSON_GetObjectItemCaseSensitive(config_black_level_adjust_json, "alpha")->valuedouble;
-
     parse_config_color_factor(cJSON_GetObjectItemCaseSensitive(config_black_level_adjust_json, "color"), &out->color);
 }
 

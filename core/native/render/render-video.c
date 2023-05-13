@@ -110,12 +110,16 @@ unsigned render_video_format_callback_alloc(
     chroma[2] = (char)'3';
     chroma[3] = (char)'2';
 
+    mtx_lock(&thread_mutex);
+
     data->width = (*width);
     data->height = (*height);
     data->buffer_size = ((data->width * data->height * BYTES_PER_PIXEL) + 511) & ~255;
 
     data->raw_buffer = malloc(data->buffer_size);
     data->buffer = (void*) (((unsigned long long)data->raw_buffer + 255) & ~255);
+
+    mtx_unlock(&thread_mutex);
 
     (*pitches) = (*width) * BYTES_PER_PIXEL;
     (*lines) = (*height);
@@ -127,11 +131,15 @@ void render_video_format_callback_dealoc(void* opaque) {
     render_video_opaque* data = (render_video_opaque*)opaque;
 
     if (data->raw_buffer) {
+        mtx_lock(&thread_mutex);
+
         free(data->raw_buffer);
 
         data->raw_buffer = NULL;
         data->buffer = NULL;
         data->buffer_size = 0;
+
+        mtx_unlock(&thread_mutex);
     }
 }
 

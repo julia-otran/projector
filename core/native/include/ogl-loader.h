@@ -1,6 +1,10 @@
 #ifndef _OGL_LOADER_H_
 #define _OGL_LOADER_H_
 
+#ifdef _WIN32
+#define GLFW_EXPOSE_NATIVE_WIN32
+#endif
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
