@@ -5,6 +5,7 @@
 #ifdef _WIN32
 #include <Windows.h>
 #include <WinUser.h>
+#include <dwmapi.h>
 #endif
 
 #include "debug.h"
@@ -47,24 +48,6 @@ int monitor_match_bounds(config_bounds *bounds, monitor *m) {
                        m->mode->height == bounds->h;
 }
 
-#ifdef _WIN32
-
-static WNDPROC prev_wndproc = NULL;
-
-LRESULT new_wndproc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
-    LRESULT cascade_result = prev_wndproc(hwnd, message, wparam, lparam);
-
-    if (message == WM_WINDOWPOSCHANGING && cascade_result != NULL) {
-        LPWINDOWPOS wpos = (LPWINDOWPOS)cascade_result;
-
-        wpos->flags |= SWP_NOMOVE | SWP_NOSIZE;
-    }
-
-    return cascade_result;
-}
-
-#endif
-
 void create_window(monitor *m) {
     if (m->window) {
         return;
@@ -94,8 +77,9 @@ void create_window(monitor *m) {
     glfwSetInputMode(m->window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
 #ifdef _WIN32
+    BOOL exclude = 1;
     HWND window_hwnd = glfwGetWin32Window(m->window);
-    prev_wndproc = SetWindowLongPtr(window_hwnd, GWLP_WNDPROC, (LONG_PTR)&new_wndproc);
+    DwmSetWindowAttribute(window_hwnd, DWMWA_EXCLUDED_FROM_PEEK, &exclude, sizeof(exclude));
 #endif
 
     if (gl_share_context == NULL) {
