@@ -3,6 +3,7 @@
 #include <string.h>
 
 #ifdef _WIN32
+#pragma comment (lib, "dwmapi.lib")
 #include <Windows.h>
 #include <WinUser.h>
 #include <dwmapi.h>
@@ -68,7 +69,7 @@ void create_window(monitor *m) {
     glfwWindowHint(GLFW_CENTER_CURSOR, GLFW_FALSE);
     glfwWindowHint(GLFW_FOCUSED, GLFW_FALSE);
 
-    glfwWindowHint(GLFW_SAMPLES, 6);
+    glfwWindowHint(GLFW_SAMPLES, 4);
 
     m->window = glfwCreateWindow(mode->width, mode->height, "Projector", NULL, gl_share_context);
     glfwSetWindowMonitor(m->window, monitor, m->xpos, m->ypos, mode->width, mode->height, mode->refreshRate);
@@ -107,7 +108,7 @@ void create_non_fs_window(monitor* m) {
     glfwWindowHint(GLFW_CENTER_CURSOR, GLFW_FALSE);
     glfwWindowHint(GLFW_FOCUSED, GLFW_FALSE);
 
-    glfwWindowHint(GLFW_SAMPLES, 6);
+    glfwWindowHint(GLFW_SAMPLES, 4);
 
     m->window = glfwCreateWindow(mode->width / 2, mode->height / 2, "Projector", NULL, gl_share_context);
 
@@ -351,7 +352,7 @@ void monitors_cycle() {
 
             glViewport(0, 0, width, height);
 
-            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             glPushMatrix();
