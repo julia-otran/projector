@@ -37,6 +37,7 @@ public class ProjectionPlayer implements Projectable {
 
         video.setEnablePreview(true);
         video.getRenderFlagProperty().get().applyDefault(BridgeRender::getEnableRenderVideo);
+        video.player.audio().setMute(true);
     }
 
     public boolean isCropVideo() {
