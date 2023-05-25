@@ -302,7 +302,7 @@ public class ImageController extends ProjectionController implements Runnable, P
             long current = System.currentTimeMillis();
             double interval = changeMsecSlider.valueProperty().doubleValue() * 1000;
 
-            if (current - time < Math.round(interval) || interval > 180.0) {
+            if (current - time < Math.round(interval) || interval > 180.0 * 1000) {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
