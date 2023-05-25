@@ -189,9 +189,9 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
     }
 
     override fun setMusicForBackground(musicId: Int?, preferred: File?) {
-        backgroundVideo.setRender(currentProjectable.get() == null)
-
         if (musicId != null) {
+            setProjectable(null)
+            backgroundVideo.setRender(true)
             backgroundVideo.startBackground(musicId, preferred)
             background.render = false
         } else {
