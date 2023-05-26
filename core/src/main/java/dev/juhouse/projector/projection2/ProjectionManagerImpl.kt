@@ -1,5 +1,6 @@
 package dev.juhouse.projector.projection2
 
+import dev.juhouse.projector.other.ProjectorPreferences
 import dev.juhouse.projector.projection2.countdown.ProjectionCountdown
 import dev.juhouse.projector.projection2.image.ProjectionBackground
 import dev.juhouse.projector.projection2.image.ProjectionImage
@@ -150,6 +151,7 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
     }
 
     override fun setCropBackground(selected: Boolean) {
+        ProjectorPreferences.setCropBackground(selected)
         background.cropBackground = selected
     }
 

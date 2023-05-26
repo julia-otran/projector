@@ -12,8 +12,6 @@ import dev.juhouse.projector.projection2.ProjectionManager;
 import dev.juhouse.projector.projection2.ProjectionWebView;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
-import javafx.scene.control.Button;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
@@ -46,7 +44,7 @@ public class BrowserController extends ProjectionController implements Projectio
     private ProjectionWebView projectionWebView;
 
     @FXML
-    private Pane proectionControlPane;
+    private Pane projectionControlPane;
 
     private final ProjectionBarControl controlBar = new ProjectionBarControl();
 
@@ -141,7 +139,7 @@ public class BrowserController extends ProjectionController implements Projectio
         controlBar.setProjectable(this.projectionWebView);
         controlBar.setCallback(this);
         controlBar.setManager(projectionManager);
-        controlBar.attach(proectionControlPane);
+        controlBar.attach(projectionControlPane);
     }
 
     @Override

@@ -36,6 +36,7 @@ public class ProjectionImage implements Projectable {
     public ProjectionImage(CanvasDelegate canvasDelegate) {
         this.renderFlag = new ReadOnlyObjectWrapper<>(new BridgeRenderFlag(canvasDelegate));
         this.canvasDelegate = canvasDelegate;
+        this.render = false;
     }
 
     @Override
