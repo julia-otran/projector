@@ -3,6 +3,11 @@ Projector
 
 Software for media (lyrics, images, videos, countdown, window capture) projection
 
+Usage Tutorials
+===============
+
+- PT-BR: https://drive.google.com/drive/folders/1nfW4n2-hX5BixKBA01zzeReR9PcODZPa?usp=share_link
+
 Contribute
 ==========
 
