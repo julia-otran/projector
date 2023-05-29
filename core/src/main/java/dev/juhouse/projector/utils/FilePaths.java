@@ -7,6 +7,8 @@ import java.util.regex.Pattern;
 public class FilePaths {
     public static final Path PROJECTOR_DATA_PATH = FileSystems.getDefault().getPath(System.getProperty("user.home"), "Projector");
 
+    public static final Path PROJECTOR_LOCK_FILE_PATH = FileSystems.getDefault().getPath(PROJECTOR_DATA_PATH.toString(), "projector.lock");
+
     public static final String PROJECTOR_WINDOW_CONFIG_DIR_NAME = "Window Configs";
     public static final Path PROJECTOR_WINDOW_CONFIG_PATH = FileSystems.getDefault().getPath(PROJECTOR_DATA_PATH.toString(), PROJECTOR_WINDOW_CONFIG_DIR_NAME);
     public static final Pattern ALLOWED_WINDOW_CONFIG_FILE_NAME_PATTERN = Pattern.compile("^[\\w\\- ]+$");
