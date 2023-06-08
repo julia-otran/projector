@@ -104,6 +104,8 @@ typedef struct {
     config_color_factor background_clear_color;
     config_color_factor text_color;
 
+    double text_scale;
+
     int enable_render_background_assets;
     int enable_render_image;
     int enable_render_video;

@@ -214,6 +214,7 @@ cJSON* serialize_config_render(config_render *in) {
     cJSON_AddItemToObject(config_render_json, "enable_render_image", cJSON_CreateNumber(in->enable_render_image));
     cJSON_AddItemToObject(config_render_json, "enable_render_video", cJSON_CreateNumber(in->enable_render_video));
     cJSON_AddItemToObject(config_render_json, "render_mode", cJSON_CreateNumber(in->render_mode));
+    cJSON_AddItemToObject(config_render_json, "text_scale", cJSON_CreateNumber(in->text_scale));
 
     cJSON_AddItemToObject(config_render_json, "background_clear_color", serialize_config_color_factor(&in->background_clear_color));
     cJSON_AddItemToObject(config_render_json, "text_color", serialize_config_color_factor(&in->text_color));

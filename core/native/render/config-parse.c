@@ -294,6 +294,14 @@ void parse_config_render(cJSON *config_render_json, config_render *out) {
     out->enable_render_image = cJSON_GetObjectItemCaseSensitive(config_render_json, "enable_render_image")->valueint;
     out->enable_render_video = cJSON_GetObjectItemCaseSensitive(config_render_json, "enable_render_video")->valueint;
     out->render_mode = cJSON_GetObjectItemCaseSensitive(config_render_json, "render_mode")->valueint;
+
+    cJSON *text_scale_json = cJSON_GetObjectItemCaseSensitive(config_render_json, "text_scale");
+
+    if (cJSON_IsNumber(text_scale_json)) {
+        out->text_scale = text_scale_json->valuedouble;
+    } else {
+        out->text_scale = 1.0;
+    }
 }
 
 void parse_projection_config(cJSON *projection_config_json, projection_config *out) {

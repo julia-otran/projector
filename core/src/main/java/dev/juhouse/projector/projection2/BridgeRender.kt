@@ -3,6 +3,7 @@ package dev.juhouse.projector.projection2
 data class BridgeRender(
     val renderId: Int,
     val renderName: String,
+    val textScale: Double,
     val width: Int,
     val height: Int,
     val textAreaX: Int,

@@ -50,10 +50,10 @@ data class TextWrapperMetrics(
      * @param start where to star looking
      */
     private fun findBreakBefore(line: String, start: Int): Int {
-        for (i in start downTo 0) {
+        for (i in start - 1 downTo 0) {
             val c = line[i]
             if (isSeparator(c)) {
-                return i
+                return i + 1
             }
         }
         return -1
@@ -73,7 +73,7 @@ data class TextWrapperMetrics(
         for (i in start until len) {
             val c = line[i]
             if (isSeparator(c)) {
-                return i
+                return i + 1
             }
         }
         return -1
@@ -93,8 +93,8 @@ data class TextWrapperMetrics(
                     break;
                 }
 
-                val guess = len * textAreaWidth / width;
-                val before = line.substring(0, guess).trim()
+                val guess = len * textAreaWidth / width
+                val before = currentLine.substring(0, guess).trim()
 
                 val guessWidth = fontMetrics.stringWidth(before);
 
@@ -111,13 +111,29 @@ data class TextWrapperMetrics(
                     }
                 }
 
-                currentLine = currentLine.substring(0, findBreakBefore(currentLine, guess)).trim()
+                val beforeBreak = findBreakBefore(currentLine, guess)
+
+                if (beforeBreak < 0) {
+                    break
+                }
+
+                val beforeBreakString = currentLine.substring(0, beforeBreak).trim()
+
+                if (beforeBreakString == currentLine) {
+                    break
+                }
+
+                currentLine = beforeBreakString
             } while (true)
 
             result.add(currentLine)
             currentPosition += currentLine.length
 
-            currentLine = line.substring(currentPosition)
+            while (currentPosition < line.length && Character.isWhitespace(line[currentPosition])) {
+                currentPosition += 1;
+            }
+
+            currentLine = line.substring(currentPosition).trim()
         } while (currentLine.isNotEmpty() && result.size <= maxLines)
 
         return TextWrapperMetricsFitInLine(renderId, result, currentPosition)

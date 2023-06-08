@@ -105,10 +105,7 @@ public class ProjectionLabel implements Projectable {
     public Font getFontFor(int renderId) {
         for (BridgeRender render : bridgeRenders) {
             if (render.getRenderId() == renderId) {
-                float scaleX = render.getTextAreaWidth() / (float) canvasDelegate.getTextWidth();
-                float scaleY = render.getTextAreaHeight() / (float) canvasDelegate.getTextHeight();
-                float newFontSize = canvasDelegate.getFontProperty().getValue().getSize() * Math.min(scaleX, scaleY);
-
+                float newFontSize = canvasDelegate.getFontProperty().getValue().getSize() * (float) render.getTextScale();
                 return canvasDelegate.getFontProperty().getValue().deriveFont(newFontSize);
             }
         }

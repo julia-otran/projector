@@ -237,6 +237,7 @@ void prepare_default_config(config_bounds *default_monitor_bounds, int no_displa
     default_config.renders[0].enable_render_image = 1;
     default_config.renders[0].enable_render_video = 1;
     default_config.renders[0].render_mode = CONFIG_RENDER_MODE_MAIN;
+    default_config.renders[0].text_scale = 1.0;
 
     default_config.renders[0].background_clear_color.r = 0.0;
     default_config.renders[0].background_clear_color.g = 0.0;
