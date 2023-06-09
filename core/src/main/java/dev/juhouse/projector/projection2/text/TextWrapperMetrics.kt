@@ -15,13 +15,17 @@ data class TextWrapperMetricsFitInLine(
             if (pos + it.length < position) {
                 result.add(it)
             } else if (pos <= position) {
-                result.add(it.substring(0, position - pos))
+                val str = it.substring(0, position - pos).trim()
+
+                if (str.isNotEmpty()) {
+                    result.add(str)
+                }
             }
 
-            pos += it.length
+            pos += it.length + 1
         }
 
-        return TextWrapperMetricsFitInLine(renderId, lines, position)
+        return TextWrapperMetricsFitInLine(renderId, result, position)
     }
 }
 

@@ -100,8 +100,10 @@ public class ProjectionPlayer implements Projectable {
             this.previewImageView = new ImageView();
             this.previewImageView.setPreserveRatio(true);
 
-            this.widthProperty().addListener((prop, old, newVal) -> this.previewImageView.fitWidthProperty().set(newVal.doubleValue()));
-            this.heightProperty().addListener((prop, old, newVal) -> this.previewImageView.fitHeightProperty().set(newVal.doubleValue()));
+            this.setMinSize(0, 0);
+
+            this.previewImageView.fitWidthProperty().bind(this.widthProperty().subtract(1));
+            this.previewImageView.fitHeightProperty().bind(this.heightProperty().subtract(1));
 
             this.previewErrorLabel = new Label();
             previewErrorLabel.setTextFill(Color.color(1.0, 1.0, 1.0));

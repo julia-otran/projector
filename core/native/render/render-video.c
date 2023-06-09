@@ -46,7 +46,7 @@ static int should_clear;
 
 typedef struct {
     struct libvlc_media_player_t* player;
-    int width, height, buffer_size;
+    int width, height, buffer_size, glew_initialized;
     void* buffer;
     void* raw_buffer;
 } render_video_opaque;
@@ -58,7 +58,6 @@ typedef struct {
 
 static render_video_opaque_node *opaque_list = NULL;
 static GLFWwindow* transfer_window;
-static int glew_initialized;
 
 void render_video_create_mtx() {
     // I rly don't care about this leak, it only leaks when program closes, so, it does not leaks
@@ -70,7 +69,6 @@ void render_video_create_window(GLFWwindow *shared_context) {
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
     glfwWindowHint(GLFW_SAMPLES, 0);
 
-    glew_initialized = 0;
     transfer_window = glfwCreateWindow(800, 600, "Projector VLC4j", NULL, shared_context);
     
     mtx_unlock(&thread_mutex);
@@ -80,6 +78,7 @@ void render_video_destroy_window() {
     mtx_lock(&thread_mutex);
     glfwDestroyWindow(transfer_window);
     transfer_window = NULL;
+
     mtx_unlock(&thread_mutex);
 }
 
@@ -118,6 +117,7 @@ unsigned render_video_format_callback_alloc(
 
     data->raw_buffer = malloc(data->buffer_size);
     data->buffer = (void*) (((unsigned long long)data->raw_buffer + 255) & ~255);
+    data->glew_initialized = 0;
 
     mtx_unlock(&thread_mutex);
 
@@ -168,11 +168,7 @@ static void* render_video_lock(void* opaque, void** p_pixels)
     }
 
     glfwMakeContextCurrent(transfer_window);
-
-    if (glew_initialized == 0) {
-        glewInit();
-        glew_initialized = 1;
-    }
+    glewInit();
 
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
 
@@ -256,9 +252,9 @@ void render_video_src_set_render(void *player, int render) {
         current_player = player;
     }
 
-    src_render = render;
-
     mtx_unlock(&thread_mutex);
+
+    src_render = render;
 }
 
 void render_video_src_set_crop_video(int in_crop) {
@@ -328,12 +324,12 @@ void render_video_update_assets() {
             texture_loaded = 0;
             render_fader_fade_out(fader_instance, 1, RENDER_FADER_DEFAULT_TIME_MS);
         }
-    }
 
-    if (current_player != NULL) {
-        render_fader_for_each(fader_instance) {
-            if (render_fader_is_hidden(node)) {
-                current_player = NULL;
+        if (current_player != NULL) {
+            render_fader_for_each(fader_instance) {
+                if (render_fader_is_hidden(node)) {
+                    current_player = NULL;
+                }
             }
         }
     }

@@ -188,8 +188,8 @@ void vs_color_corrector_render(config_virtual_screen *config, render_output *ren
 
     vs_color_corrector_set_uniforms(config);
 
-    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture_id);
+    glActiveTexture(GL_TEXTURE0);
     glUniform1i(textureUniform, 0);
 
     glBindVertexArray(data->vertexarray);

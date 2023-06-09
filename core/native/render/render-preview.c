@@ -6,7 +6,8 @@
 #include "render-pixel-unpack-buffer.h"
 
 static mtx_t thread_mutex;
-static void *data_buffer;
+static void* data_buffer;
+static void* data_buffer_aligned;
 static int width;
 static int height;
 static render_pixel_unpack_buffer_instance *buffer_instance;
@@ -25,14 +26,17 @@ void render_preview_set_size(int in_width, int in_height) {
     width = in_width;
     height = in_height;
 
-    data_buffer = calloc(width * height, 4);
+    int required_size = width * height * 4;
+
+    data_buffer = malloc((required_size + 511) & ~255);
+    data_buffer_aligned = (void*)(((unsigned long long)data_buffer + 255) & ~255);
 
     mtx_unlock(&thread_mutex);
 }
 
 void render_preview_download_buffer(void *buffer) {
     mtx_lock(&thread_mutex);
-    memcpy(buffer, data_buffer, width * height * 4);
+    memcpy(buffer, data_buffer_aligned, width * height * 4);
     mtx_unlock(&thread_mutex);
 }
 
@@ -58,7 +62,7 @@ void render_preview_update_buffers() {
         void *data = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
 
         mtx_lock(&thread_mutex);
-        memcpy(data_buffer, data, width * height * 4);
+        memcpy(data_buffer_aligned, data, width * height * 4);
         mtx_unlock(&thread_mutex);
 
         glUnmapBuffer(GL_PIXEL_PACK_BUFFER);

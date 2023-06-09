@@ -128,8 +128,13 @@ public class PlayerController extends ProjectionController implements FileDragDr
         }
 
         playerContainer.setCenter(projectionPlayer.getPreviewPanel());
-        projectionPlayer.getPreviewPanel().prefWidthProperty().bind(playerBox.widthProperty());
-        projectionPlayer.getPreviewPanel().prefHeightProperty().bind(playerContainer.heightProperty());
+        playerContainer.maxWidthProperty().bind(playerBox.widthProperty());
+
+        projectionPlayer.getPreviewPanel().maxWidthProperty().bind(playerContainer.widthProperty().subtract(1));
+        projectionPlayer.getPreviewPanel().prefWidthProperty().bind(playerContainer.widthProperty().subtract(1));
+        
+        projectionPlayer.getPreviewPanel().maxHeightProperty().bind(playerContainer.heightProperty().subtract(1));
+        projectionPlayer.getPreviewPanel().prefHeightProperty().bind(playerContainer.heightProperty().subtract(1));
 
         playerBox.setVisible(false);
         chooseFileBox.setVisible(true);

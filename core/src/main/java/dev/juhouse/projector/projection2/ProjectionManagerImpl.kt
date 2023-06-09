@@ -196,8 +196,8 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
                 setProjectable(null)
             }
 
-            backgroundVideo.setRender(true)
             backgroundVideo.startBackground(musicId, preferred)
+            backgroundVideo.setRender(true)
             background.render = false
         } else {
             backgroundVideo.stopBackground()

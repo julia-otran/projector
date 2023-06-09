@@ -60,8 +60,10 @@ public class ProjectionVideo {
     }
 
     public void setRender(boolean render) {
-        this.render.setValue(render);
-        updateRender();
+        if (this.render.get() != render) {
+            this.render.setValue(render);
+            updateRender();
+        }
     }
 
     private void updateRender() {
