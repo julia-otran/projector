@@ -6,6 +6,7 @@ void vs_black_level_adjust_render(config_virtual_screen *config) {
     glEnable(GL_COLOR_MATERIAL);
 
     glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);
+    glBlendEquation(GL_MAX);
 
     for (int i = 0; i < config->count_black_level_adjusts; i++) {
         config_black_level_adjust *bla = &config->black_level_adjusts[i];
@@ -27,6 +28,7 @@ void vs_black_level_adjust_render(config_virtual_screen *config) {
     }
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendEquation(GL_FUNC_ADD);
     glBlendColor(0.0, 0.0, 0.0, 0.0);
 
     glDisable(GL_MULTISAMPLE);
