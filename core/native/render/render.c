@@ -220,11 +220,8 @@ void renders_terminate() {
 }
 
 int transfer_window_loop(void *_) {
-    struct timespec sleep_interval;
-    sleep_interval.tv_nsec = 9 * 1000 * 1000;
-    sleep_interval.tv_sec = 0;
-
     glfwMakeContextCurrent(transfer_window);
+    glfwSwapInterval(2);
     glewInit();
 
     render_text_create_buffers();
@@ -243,7 +240,8 @@ int transfer_window_loop(void *_) {
         render_window_capture_update_buffers();
         render_image_update_buffers();
         render_preview_update_buffers();
-        thrd_sleep(&sleep_interval, NULL);
+        glfwSwapBuffers(transfer_window);
+        register_stream_frame();
     }
 
     render_video_deallocate_buffers();

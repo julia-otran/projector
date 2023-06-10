@@ -7,32 +7,31 @@
 #include "clock.h"
 #include "debug.h"
 
-#define LOG_FPS_INTERVAL_SECS 3
+#define LOG_FPS_INTERVAL_MS 1000
 
-static int render_frame_count = 0;
-static long render_last_time_ms = 0;
-static long render_last_time_sec = 0;
+static int stream_frame_count = 0;
+static long stream_last_time_ms = 0;
+static long stream_last_time_sec = 0;
 
-void register_render_frame() {
+void register_stream_frame() {
     struct timespec spec;
     get_time(&spec);
 
-    render_frame_count++;
+    stream_frame_count++;
 
-    long sec_delta = spec.tv_sec - render_last_time_sec;
+    long sec_delta = spec.tv_sec - stream_last_time_sec;
+    long new_ms = round(spec.tv_nsec / 1.0e6);
+    long ms_delta = (sec_delta * 1000) + (new_ms - stream_last_time_ms);
 
-    if (sec_delta > LOG_FPS_INTERVAL_SECS) {
-        long new_ms = round(spec.tv_nsec / 1.0e6);
-        long ms_delta = (sec_delta * 1000) + (new_ms - render_last_time_ms);
+    if (ms_delta > LOG_FPS_INTERVAL_MS) {
+        double fps = stream_frame_count / (ms_delta / 1000.0);
 
-        double fps = render_frame_count / (ms_delta / 1000.0);
+        log_debug("Stream FPS: %lf\n", fps);
 
-        log_debug("Main Render FPS: %lf\n", fps);
+        stream_last_time_ms = new_ms;
+        stream_last_time_sec = spec.tv_sec;
 
-        render_last_time_ms = new_ms;
-        render_last_time_sec = spec.tv_sec;
-
-        render_frame_count = 0;
+        stream_frame_count = 0;
     }
 }
 
@@ -47,11 +46,10 @@ void register_monitor_frame() {
     monitor_frame_count++;
 
     long sec_delta = spec.tv_sec - monitor_last_time_sec;
+    long new_ms = round(spec.tv_nsec / 1.0e6);
+    long ms_delta = (sec_delta * 1000) + (new_ms - monitor_last_time_ms);
 
-    if (sec_delta > LOG_FPS_INTERVAL_SECS) {
-        long new_ms = round(spec.tv_nsec / 1.0e6);
-        long ms_delta = (sec_delta * 1000) + (new_ms - monitor_last_time_ms);
-
+    if (ms_delta > LOG_FPS_INTERVAL_MS) {
         double fps = monitor_frame_count / (ms_delta / 1000.0);
 
         log_debug("Monitors FPS: %lf\n", fps);

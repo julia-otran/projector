@@ -79,6 +79,10 @@ void render_video_destroy_window() {
     glfwDestroyWindow(transfer_window);
     transfer_window = NULL;
 
+    for (render_video_opaque_node* node = opaque_list; node; node = node->next) {
+        node->data->glew_initialized = 0;
+    }
+
     mtx_unlock(&thread_mutex);
 }
 
@@ -118,6 +122,12 @@ unsigned render_video_format_callback_alloc(
     data->raw_buffer = malloc(data->buffer_size);
     data->buffer = (void*) (((unsigned long long)data->raw_buffer + 255) & ~255);
     data->glew_initialized = 0;
+
+    if (transfer_window != NULL) {
+        glfwMakeContextCurrent(transfer_window);
+        glewInit();
+        data->glew_initialized = 1;
+    }
 
     mtx_unlock(&thread_mutex);
 
@@ -168,7 +178,11 @@ static void* render_video_lock(void* opaque, void** p_pixels)
     }
 
     glfwMakeContextCurrent(transfer_window);
-    glewInit();
+
+    if (data->glew_initialized == 0) {
+        glewInit();
+        data->glew_initialized = 1;
+    }
 
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
 
@@ -190,15 +204,19 @@ static void render_video_unlock(void* opaque, void* id, void* const* p_pixels)
         glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
         glfwMakeContextCurrent(NULL);
-
-        render_pixel_unpack_buffer_enqueue_for_read(buffer_instance, id);
-
         mtx_unlock(&thread_mutex);
     }
 }
 
 static void render_video_display(void* opaque, void* id)
 {
+    if (id) {
+        mtx_lock(&thread_mutex);
+        if (buffer_instance) {
+            render_pixel_unpack_buffer_enqueue_for_read(buffer_instance, id);
+        }
+        mtx_unlock(&thread_mutex);
+    }
 }
 
 void render_video_attach_player(void *player) {
@@ -219,6 +237,10 @@ void render_video_attach_player(void *player) {
 void render_video_download_preview(void* player, void* data, long buffer_capacity, int *out_width, int *out_height) {
     (*out_width) = 0;
     (*out_height) = 0;
+
+    if (current_player != player) {
+        return;
+    }
 
     mtx_lock(&thread_mutex);
 
