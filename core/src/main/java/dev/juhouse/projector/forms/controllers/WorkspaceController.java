@@ -660,6 +660,16 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
             e.printStackTrace();
         }
     }
+    
+    @FXML
+    public void onAddDeviceCapture() {
+        try {
+            listRepository.createItem(projectionList, "Captura de Vídeo", ProjectionListItemType.DEVICE_CAPTURE);
+            reloadProjectables();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     @FXML
     public void onAddTimer() {

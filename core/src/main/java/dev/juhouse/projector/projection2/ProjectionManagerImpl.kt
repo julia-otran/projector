@@ -12,6 +12,7 @@ import dev.juhouse.projector.projection2.text.WrapperFactory
 import dev.juhouse.projector.projection2.video.ProjectionBackgroundVideo
 import dev.juhouse.projector.projection2.video.ProjectionPlayer
 import dev.juhouse.projector.projection2.video.ProjectionVideo
+import dev.juhouse.projector.projection2.video.ProjectionVideoCapture
 import javafx.application.Platform
 import javafx.beans.property.ReadOnlyObjectWrapper
 import javafx.beans.property.ReadOnlyProperty
@@ -121,6 +122,17 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
         multiImage.rebuild()
 
         return multiImage
+    }
+
+    override fun createVideoCapture(): ProjectionVideoCapture {
+        val videoCapturePlayer = ProjectionVideoCapture(ProjectionVideo(delegate), delegate)
+
+        projectablesList.add(videoCapturePlayer)
+
+        videoCapturePlayer.init()
+        videoCapturePlayer.rebuild()
+
+        return videoCapturePlayer
     }
 
     override fun setProjectable(projectable: Projectable?) {
