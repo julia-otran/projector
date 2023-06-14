@@ -30,7 +30,7 @@ static projection_config *config;
 
 #ifdef _WIN32
 
-#define VLC_DEVICE_PREFIX "dshow://"
+#define VLC_DEVICE_PREFIX "dshow://:dshow-vdev="
 
 #pragma comment(lib, "strmiids.lib")
 
@@ -499,6 +499,8 @@ JNIEXPORT jobjectArray JNICALL Java_dev_juhouse_projector_projection2_Bridge_get
 
         device_names[device_count] = calloc(total_device_name_size, sizeof(char));
         strcat_s(device_names[device_count], total_device_name_size, VLC_DEVICE_PREFIX);
+
+        // TODO: Escape colons
         strcat_s(device_names[device_count], total_device_name_size, device_name);
 
         free(device_name);
