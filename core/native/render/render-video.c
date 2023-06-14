@@ -7,19 +7,10 @@
 #include "tinycthread.h"
 #include "debug.h"
 #include "ogl-loader.h"
+#include "vlc-loader.h"
 #include "render-fader.h"
 #include "render-video.h"
 #include "render-pixel-unpack-buffer.h"
-
-#ifdef _WIN32
-#define ssize_t SSIZE_T
-#endif
-
-#ifdef __gnu_linux__
-#define ssize_t size_t
-#endif
-
-#include "vlc/vlc.h"
 
 #define BYTES_PER_PIXEL 4
 

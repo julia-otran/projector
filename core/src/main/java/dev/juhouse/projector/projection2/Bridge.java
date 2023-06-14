@@ -94,8 +94,6 @@ public class Bridge {
 
     private native void setVideoRenderFlagPtr(long player, boolean crop, int flag);
 
-    public native void updateVideoBuffer();
-
     public native void setImageAsset(int[] data, int width, int height, boolean crop, int renderFlag);
 
     public native void setMultiImageAsset(int[] data, int width, int height, int renderId);
@@ -129,4 +127,6 @@ public class Bridge {
     public int getTextAreaHeight() {
         return Arrays.stream(getRenderSettings()).filter(config -> config.getRenderMode() == 1).findFirst().map(BridgeRender::getTextAreaHeight).orElse(720);
     }
+
+    public native String[] getVideoCaptureDevices();
 }

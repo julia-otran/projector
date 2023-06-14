@@ -16,6 +16,7 @@
 #include "render-image.h"
 #include "render-preview.h"
 #include "window-capture.h"
+#include "vlc-loader.h"
 
 static int initialized = 0;
 static int configured = 0;
@@ -29,8 +30,21 @@ static projection_config *config;
 
 #ifdef _WIN32
 
+#define VLC_DEVICE_PREFIX "dshow://"
+
+#pragma comment(lib, "strmiids.lib")
+
 #include <windows.h>
 #include <stringapiset.h>
+#include <combaseapi.h>
+#include <dshow.h>
+#include <uuids.h>
+
+#define WideToCharArr(wide, char_out_arr) \
+    int internal_len = WideCharToMultiByte(1252, 0, wide, -1, NULL, 0, 0, 0); \
+	char_out_arr = malloc(internal_len + 1); \
+	WideCharToMultiByte(1252, 0, wide, -1, char_out_arr, internal_len, 0, 0); \
+	char_out_arr[internal_len] = 0; \
 
 #define jni_jstringToCharArr(env, jstr, char_out_arr) \
 	const jchar *internal_jchar = (*env)->GetStringChars(env, jstr, 0); \
@@ -422,6 +436,94 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setWindowCa
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setWindowCaptureCrop(JNIEnv *env, jobject _, jboolean crop) {
     render_window_capture_src_set_crop(crop);
+}
+
+JNIEXPORT jobjectArray JNICALL Java_dev_juhouse_projector_projection2_Bridge_getVideoCaptureDevices(JNIEnv* env, jobject _) {
+    int max_devices = 100;
+    int device_count = 0;
+    char** device_names = (char**)calloc(max_devices, sizeof(char*));
+
+#ifdef _WIN32
+    struct IEnumMoniker* p_class_enum;
+    struct ICreateDevEnum* p_dev_enum;
+
+    const IID rclsid1 = CLSID_SystemDeviceEnum;
+    const IID riid1 = IID_ICreateDevEnum;
+
+    HRESULT result = CoCreateInstance(&rclsid1, NULL, CLSCTX_INPROC, &riid1, &p_dev_enum);
+
+    if (!SUCCEEDED(result)) {
+        return NULL;
+    }
+
+    const IID rclsid2 = CLSID_VideoInputDeviceCategory;
+    result = p_dev_enum->lpVtbl->CreateClassEnumerator(p_dev_enum, &rclsid2, &p_class_enum, 0);
+    
+    if (!SUCCEEDED(result)) {
+        return NULL;
+    }
+
+    IMoniker* p_moniker;
+    IPropertyBag* p_bag;
+    ULONG i_fetched;
+
+    IID riid2 = IID_IPropertyBag;
+
+    while (true) {
+        result = p_class_enum->lpVtbl->Next(p_class_enum, 1, &p_moniker, &i_fetched);
+
+        if (result != S_OK) {
+            break;
+        }
+
+        result = p_moniker->lpVtbl->BindToStorage(p_moniker, 0, 0, &riid2, &p_bag);
+
+        if (!SUCCEEDED(result)) {
+            continue;
+        }
+
+        VARIANT var;
+        var.vt = VT_BSTR;
+
+        result = p_bag->lpVtbl->Read(p_bag, L"FriendlyName", &var, NULL);
+
+        if (!SUCCEEDED(result)) {
+            continue;
+        }
+
+        char* device_name;
+
+        WideToCharArr(var.bstrVal, device_name);
+
+        size_t total_device_name_size = strlen(device_name) + strlen(VLC_DEVICE_PREFIX) + 1;
+
+        device_names[device_count] = calloc(total_device_name_size, sizeof(char));
+        strcat_s(device_names[device_count], total_device_name_size, VLC_DEVICE_PREFIX);
+        strcat_s(device_names[device_count], total_device_name_size, device_name);
+
+        free(device_name);
+
+        device_count++;
+
+        if (device_count >= max_devices) {
+            break;
+        }
+    }
+#endif
+
+    jclass string_class = (*env)->FindClass(env, "java/lang/String");
+    jobjectArray result_arr = (*env)->NewObjectArray(env, device_count, string_class, NULL);
+    jstring temp_jstring;
+
+    for (unsigned int i = 0; i < device_count; i++) {
+        jni_charArrToJString(env, temp_jstring, device_names[i]);
+        (*env)->SetObjectArrayElement(env, result_arr, i, temp_jstring);
+        free(device_names[i]);
+    }
+
+    free(device_names);
+
+    return result_arr;
 }
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_shutdown(JNIEnv *env, jobject _) {

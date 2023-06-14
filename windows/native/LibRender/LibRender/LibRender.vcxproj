@@ -178,6 +178,7 @@
     <ClInclude Include="src\include\render-web-view.h" />
     <ClInclude Include="src\include\render.h" />
     <ClInclude Include="src\include\virtual-screen.h" />
+    <ClInclude Include="src\include\vlc-loader.h" />
     <ClInclude Include="src\include\vs-black-level-adjust.h" />
     <ClInclude Include="src\include\vs-blend.h" />
     <ClInclude Include="src\include\vs-color-corrector.h" />
