@@ -100,7 +100,7 @@ class DeviceCaptureController: ProjectionController(),
     fun onRefreshDevices() {
         devicesComboBox.selectionModel.clearSelection()
         devicesComboBox.items.clear()
-        devicesComboBox.items.addAll(projectionVideoCapture.getDevices())
+        devicesComboBox.items.addAll(projectionVideoCapture.getDevices().map { it.deviceName })
     }
 
     override fun setVisible(visible: Boolean) {

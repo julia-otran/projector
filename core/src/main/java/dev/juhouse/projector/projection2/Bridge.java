@@ -128,5 +128,5 @@ public class Bridge {
         return Arrays.stream(getRenderSettings()).filter(config -> config.getRenderMode() == 1).findFirst().map(BridgeRender::getTextAreaHeight).orElse(720);
     }
 
-    public native String[] getVideoCaptureDevices();
+    public native BridgeCaptureDevice[] getVideoCaptureDevices();
 }
