@@ -198,8 +198,8 @@ void virtual_screen_start(config_display *display, render_output *render, config
     glBindTexture(GL_TEXTURE_2D, renderedTexture);
 
     // Give an empty image to OpenGL ( the last "0" )
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0 ,GL_RGBA, GL_UNSIGNED_BYTE, 0);
-    glTexStorage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA8, width, height, GL_TRUE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0 , GL_RGBA, GL_UNSIGNED_BYTE, 0);
+    glTexStorage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA8UI, width, height, GL_TRUE);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -233,7 +233,7 @@ void virtual_screen_render(config_virtual_screen *config, void *data) {
     glViewport(0, 0, config->w, config->h);
 
     glClearColor(background_clear_color->r, background_clear_color->g, background_clear_color->b, background_clear_color->a);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT);
 
     glLoadIdentity();
     glOrtho(0.0, config->w, config->h, 0.0, 0.0, 1.0);

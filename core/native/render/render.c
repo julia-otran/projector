@@ -21,8 +21,6 @@ static int transfer_window_thread_run;
 static int transfer_window_initialized;
 static GLFWwindow *transfer_window;
 static thrd_t transfer_window_thread;
-static mtx_t transfer_window_thread_mutex;
-static cnd_t transfer_window_thread_cond;
 
 void get_main_output_size(render_output_size *output_size) {
     for (int i = 0; i < count_renders; i++) {
@@ -93,7 +91,8 @@ void render_init(render_layer *render) {
     glBindTexture(GL_TEXTURE_2D, renderedTexture);
 
     // Give an empty image to OpenGL ( the last "0" )
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,GL_RGBA, GL_UNSIGNED_BYTE, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, 0);
+    glTexStorage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA8UI, width, height, GL_TRUE);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -159,7 +158,7 @@ void render_cycle(render_layer *render) {
     glOrtho(0.0, width, height, 0.0, 0.0, 1.0);
 
     glClearColor(background_clear_color->r, background_clear_color->g, background_clear_color->b, background_clear_color->a);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT);
 
     render_video_render(render);
     render_image_render(render);
@@ -221,7 +220,7 @@ void renders_terminate() {
 
 int transfer_window_loop(void *_) {
     glfwMakeContextCurrent(transfer_window);
-    glfwSwapInterval(2);
+    glfwSwapInterval(1);
     glewInit();
 
     render_text_create_buffers();
@@ -233,13 +232,18 @@ int transfer_window_loop(void *_) {
 
     transfer_window_initialized = 1;
 
+    glClearColor(0, 0, 0, 1.0);
+
     while (transfer_window_thread_run) {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         render_video_update_buffers();
         render_text_update_buffers();
         render_web_view_update_buffers();
         render_window_capture_update_buffers();
         render_image_update_buffers();
         render_preview_update_buffers();
+
         glfwSwapBuffers(transfer_window);
         register_stream_frame();
     }
@@ -290,9 +294,6 @@ void activate_renders(GLFWwindow *shared_context, projection_config *config) {
     transfer_window = glfwCreateWindow(800, 600, "Projector Stream Window", NULL, shared_context);
 
     render_video_create_window(shared_context);
-
-    mtx_init(&transfer_window_thread_mutex, 0);
-    cnd_init(&transfer_window_thread_cond);
 
     transfer_window_thread_run = 1;
     transfer_window_initialized = 0;

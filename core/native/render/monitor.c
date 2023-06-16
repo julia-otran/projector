@@ -127,6 +127,7 @@ void swap_monitor_buffers() {
         if (m->window) {
             glfwMakeContextCurrent(m->window);
             glfwSwapBuffers(m->window);
+            glClear(GL_COLOR_BUFFER_BIT);
         }
     }
 }

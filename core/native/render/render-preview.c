@@ -85,7 +85,7 @@ void render_preview_cycle() {
 
     if (buffer) {
         glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer->gl_buffer);
-        glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, 0L);
+        glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, 0L);
         glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
     }
 
