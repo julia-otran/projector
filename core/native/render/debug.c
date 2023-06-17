@@ -7,7 +7,11 @@
 #include "clock.h"
 #include "debug.h"
 
+#ifdef _DEBUG
 #define LOG_FPS_INTERVAL_MS 1000
+#else
+#define LOG_FPS_INTERVAL_MS 5000
+#endif // _DEBUG
 
 static int stream_frame_count = 0;
 static struct timespec stream_last_time = {
