@@ -44,3 +44,17 @@ void get_time(struct timespec* ct) {
 }
 
 #endif // !_WIN32
+
+unsigned long long get_delta_time_ms(struct timespec* last, struct timespec* before) {
+    unsigned long sec_delta = last->tv_sec - before->tv_sec;
+    unsigned long new_ms = (unsigned long) (last->tv_nsec / 1.0e6);
+    unsigned long old_ms = (unsigned long) (before->tv_nsec / 1.0e6);
+    unsigned long long ms_delta = (sec_delta * 1000) + (new_ms - old_ms);
+
+    return ms_delta;
+}
+
+void copy_time(struct timespec* destination, struct timespec* source) {
+    destination->tv_sec = source->tv_sec;
+    destination->tv_nsec = source->tv_nsec;
+}

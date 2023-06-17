@@ -31,7 +31,12 @@
             </VBox.margin>
         </BorderPane>
         <HBox VBox.vgrow="NEVER">
-         <ComboBox fx:id="devicesComboBox" prefHeight="30.0" prefWidth="215.0">
+         <ComboBox fx:id="devicesComboBox" prefHeight="30.0" prefWidth="215.0" promptText="&lt;Dispositivo&gt;">
+            <HBox.margin>
+               <Insets right="8.0" />
+            </HBox.margin>
+         </ComboBox>
+         <ComboBox fx:id="resolutionsComboBox" prefHeight="30.0" prefWidth="150.0" promptText="&lt;Resolução&gt;">
             <HBox.margin>
                <Insets right="8.0" />
             </HBox.margin>
@@ -44,7 +49,11 @@
                   </image>
                </ImageView>
             </graphic>
+            <HBox.margin>
+               <Insets right="8.0" />
+            </HBox.margin>
          </Button>
+         <CheckBox fx:id="activateCheckBox" alignment="CENTER_RIGHT" contentDisplay="RIGHT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onChangeActivate" prefHeight="30.0" text="Ativar Reprodução" textAlignment="RIGHT" HBox.hgrow="ALWAYS" />
         </HBox>
     </VBox>
 </AnchorPane>

@@ -17,6 +17,7 @@
 #include "render-preview.h"
 #include "window-capture.h"
 #include "vlc-loader.h"
+#include "device-capture.h"
 
 static int initialized = 0;
 static int configured = 0;
@@ -30,21 +31,7 @@ static projection_config *config;
 
 #ifdef _WIN32
 
-#define VLC_DEVICE_PREFIX "dshow://:dshow-vdev="
-
-#pragma comment(lib, "strmiids.lib")
-
 #include <windows.h>
-#include <stringapiset.h>
-#include <combaseapi.h>
-#include <dshow.h>
-#include <uuids.h>
-
-#define WideToCharArr(wide, char_out_arr) \
-    int internal_len = WideCharToMultiByte(1252, 0, wide, -1, NULL, 0, 0, 0); \
-	char_out_arr = malloc(internal_len + 1); \
-	WideCharToMultiByte(1252, 0, wide, -1, char_out_arr, internal_len, 0, 0); \
-	char_out_arr[internal_len] = 0; \
 
 #define jni_jstringToCharArr(env, jstr, char_out_arr) \
 	const jchar *internal_jchar = (*env)->GetStringChars(env, jstr, 0); \
@@ -62,7 +49,7 @@ static projection_config *config;
     int wide_size = MultiByteToWideChar(1252, 0, char_arr_in, -1, ((void*)0), 0); \
     LPWSTR internal_tmp_out = calloc(wide_size, sizeof(WCHAR)); \
     MultiByteToWideChar(1252, 0, char_arr_in, -1, internal_tmp_out, wide_size); \
-    jstring_out = (*env)->NewString(env, internal_tmp_out, wide_size); \
+    jstring_out = (*env)->NewString(env, internal_tmp_out, wide_size - 1); \
     free(internal_tmp_out);
 
 #endif
@@ -439,159 +426,50 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setWindowCa
 }
 
 JNIEXPORT jobjectArray JNICALL Java_dev_juhouse_projector_projection2_Bridge_getVideoCaptureDevices(JNIEnv* env, jobject _) {
-    int max_devices = 100;
-    int device_count = 0;
-    char** device_names = (char**)calloc(max_devices, sizeof(char*));
-
-#ifdef _WIN32
-    struct IEnumMoniker* p_class_enum;
-    struct ICreateDevEnum* p_dev_enum;
-
-    const IID rclsid1 = CLSID_SystemDeviceEnum;
-    const IID riid1 = IID_ICreateDevEnum;
-
-    HRESULT result = CoCreateInstance(&rclsid1, NULL, CLSCTX_INPROC, &riid1, &p_dev_enum);
-
-    if (!SUCCEEDED(result)) {
-        return NULL;
-    }
-
-    const IID rclsid2 = CLSID_VideoInputDeviceCategory;
-    result = p_dev_enum->lpVtbl->CreateClassEnumerator(p_dev_enum, &rclsid2, &p_class_enum, 0);
-
-    if (!SUCCEEDED(result)) {
-        return NULL;
-    }
-
-    IGraphBuilder* pGraph = NULL;
-    result = CoCreateInstance(&CLSID_FilterGraph, 0, CLSCTX_INPROC_SERVER, &IID_IGraphBuilder, (void**)&pGraph);
-
-    if (!SUCCEEDED(result)) {
-        return NULL;
-    }
-
-    IMoniker* p_moniker;
-    IPropertyBag* p_bag;
-    ULONG i_fetched;
-
-    IID riid2 = IID_IPropertyBag;
-
-    IFilterGraph2* filter_graph;
-
-    while (true) {
-        result = p_class_enum->lpVtbl->Next(p_class_enum, 1, &p_moniker, &i_fetched);
-
-        if (result != S_OK) {
-            break;
-        }
-
-        result = p_moniker->lpVtbl->BindToStorage(p_moniker, 0, 0, &riid2, &p_bag);
-
-        if (!SUCCEEDED(result)) {
-            continue;
-        }
-
-        VARIANT var;
-        var.vt = VT_BSTR;
-
-        result = p_bag->lpVtbl->Read(p_bag, L"FriendlyName", &var, NULL);
-
-        if (!SUCCEEDED(result)) {
-            continue;
-        }
-
-        char* device_name;
-
-        WideToCharArr(var.bstrVal, device_name);
-
-        device_names[device_count] = device_name;
-
-        device_count++;
-
-        IBaseFilter* base_filter;
-
-        pGraph->lpVtbl->QueryInterface(pGraph, &IID_IFilterGraph2, &filter_graph);
-        filter_graph->lpVtbl->AddSourceFilterForMoniker(filter_graph, p_moniker, NULL, L"Source", &base_filter);
-
-        IEnumPins* enum_pins;
-
-        base_filter->lpVtbl->EnumPins(base_filter, &enum_pins);
-
-        while (true) {
-            IPin* pin;
-            long fetched;
-
-            result = enum_pins->lpVtbl->Next(enum_pins, 1, &pin, &fetched);
-
-            if (result != S_OK) {
-                break;
-            }
-
-            PIN_DIRECTION pin_dir = PINDIR_INPUT;
-            
-            pin->lpVtbl->QueryDirection(pin, &pin_dir);
-
-            if (pin_dir != PINDIR_OUTPUT) {
-                continue;
-            }
-
-            IEnumMediaTypes* media_types;
-
-            result = pin->lpVtbl->EnumMediaTypes(pin, &media_types);
-
-            if (!SUCCEEDED(result)) {
-                continue;
-            }
-
-            while (true) {
-                AM_MEDIA_TYPE* media_type;
-                long fetched;
-
-                result = media_types->lpVtbl->Next(media_types, 1, &media_type, &fetched);
-
-                if (result != S_OK) {
-                    break;
-                }
-
-                if (IsEqualGUID(&media_type->formattype, &FORMAT_VideoInfo)) {
-                    VIDEOINFOHEADER* info = (VIDEOINFOHEADER*)media_type->pbFormat;
-                    if (info->bmiHeader.biWidth > 0) {
-                        log_debug("Device: '%s' Resolution: %i %i\n", device_name, info->bmiHeader.biWidth, info->bmiHeader.biHeight);
-                    }
-                }
-            }
-        }
-        
-
-        if (device_count >= max_devices) {
-            break;
-        }
-    }
-#endif
-
     jclass BridgeCaptureDeviceClass = (*env)->FindClass(env, "dev/juhouse/projector/projection2/BridgeCaptureDevice");
-    jclass BridgeCaptureDeviceResolutionClass = (*env)->FindClass(env, "dev/juhouse/projector/projection2/BridgeCaptureDeviceResolution");
     jfieldID BridgeCaptureDevice_DeviceNameField = (*env)->GetFieldID(env, BridgeCaptureDeviceClass, "deviceName", "Ljava/lang/String;");
     jfieldID BridgeCaptureDevice_ResolutionsField = (*env)->GetFieldID(env, BridgeCaptureDeviceClass, "resolutions", "[Ldev/juhouse/projector/projection2/BridgeCaptureDeviceResolution;");
 
-    jobjectArray result_arr = (*env)->NewObjectArray(env, device_count, BridgeCaptureDeviceClass, NULL);
-    
-    jclass StringClass = (*env)->FindClass(env, "java/lang/String");
+    capture_device_enum* cap_enum = get_capture_devices();
 
-    for (unsigned int i = 0; i < device_count; i++) {
+    if (cap_enum == NULL) {
+        return (*env)->NewObjectArray(env, 0, BridgeCaptureDeviceClass, NULL);
+    }
+
+    jclass BridgeCaptureDeviceResolutionClass = (*env)->FindClass(env, "dev/juhouse/projector/projection2/BridgeCaptureDeviceResolution");
+    jfieldID BridgeCaptureDeviceResolution_Width = (*env)->GetFieldID(env, BridgeCaptureDeviceResolutionClass, "width", "I");
+    jfieldID BridgeCaptureDeviceResolution_Height = (*env)->GetFieldID(env, BridgeCaptureDeviceResolutionClass, "height", "I");
+
+    jobjectArray result_arr = (*env)->NewObjectArray(env, cap_enum->capture_device_count, BridgeCaptureDeviceClass, NULL);
+
+    capture_device_node* cap_dev_node = cap_enum->capture_device_list;
+
+    for (unsigned int i = 0; i < cap_enum->capture_device_count; i++) {
+        jobjectArray resolutions_arr = (*env)->NewObjectArray(env, cap_dev_node->data->count_resolutions, BridgeCaptureDeviceResolutionClass, NULL);
+        capture_device_resolution_node* resolution_node = cap_dev_node->data->resolutions;
+
+        for (int j = 0; j < cap_dev_node->data->count_resolutions; j++) {
+            jobject bridge_capture_device_resolution_obj = (*env)->AllocObject(env, BridgeCaptureDeviceResolutionClass);
+            (*env)->SetIntField(env, bridge_capture_device_resolution_obj, BridgeCaptureDeviceResolution_Width, resolution_node->data->width);
+            (*env)->SetIntField(env, bridge_capture_device_resolution_obj, BridgeCaptureDeviceResolution_Height, resolution_node->data->height);
+            (*env)->SetObjectArrayElement(env, resolutions_arr, j, bridge_capture_device_resolution_obj);
+            resolution_node = resolution_node->next;
+        }
+
         jobject bridge_capture_device_obj = (*env)->AllocObject(env, BridgeCaptureDeviceClass);
-        jobjectArray resolutions_arr = (*env)->NewObjectArray(env, 0, BridgeCaptureDeviceResolutionClass, NULL);
+        
         jstring temp_jstring;
 
-        jni_charArrToJString(env, temp_jstring, device_names[i]);
-        free(device_names[i]);
+        jni_charArrToJString(env, temp_jstring, cap_dev_node->data->name);
 
         (*env)->SetObjectField(env, bridge_capture_device_obj, BridgeCaptureDevice_DeviceNameField, temp_jstring);
         (*env)->SetObjectField(env, bridge_capture_device_obj, BridgeCaptureDevice_ResolutionsField, resolutions_arr);
         (*env)->SetObjectArrayElement(env, result_arr, i, bridge_capture_device_obj);
+
+        cap_dev_node = cap_dev_node->next;
     }
 
-    free(device_names);
+    free_capture_device_enum(cap_enum);
 
     return result_arr;
 }

@@ -371,3 +371,16 @@ void monitors_cycle() {
     swap_monitor_buffers();
     register_monitor_frame();
 }
+
+int monitors_get_minor_refresh_rate() {
+    int rate = monitors[0].mode->refreshRate;
+
+    for (int i = 0; i < monitors_count; i++) {
+        monitor* m = &monitors[i];
+        if (m->mode->refreshRate < rate) {
+            rate = m->mode->refreshRate;
+        }
+    }
+
+    return rate;
+}

@@ -38,4 +38,6 @@ void monitor_prepare_renders_context();
 void monitors_cycle();
 void monitors_terminate();
 
+int monitors_get_minor_refresh_rate();
+
 #endif

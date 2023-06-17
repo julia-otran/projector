@@ -114,12 +114,6 @@ unsigned render_video_format_callback_alloc(
     data->buffer = (void*) (((unsigned long long)data->raw_buffer + 255) & ~255);
     data->glew_initialized = 0;
 
-    if (transfer_window != NULL) {
-        glfwMakeContextCurrent(transfer_window);
-        glewInit();
-        data->glew_initialized = 1;
-    }
-
     mtx_unlock(&thread_mutex);
 
     (*pitches) = (*width) * BYTES_PER_PIXEL;
@@ -229,7 +223,7 @@ void render_video_download_preview(void* player, void* data, long buffer_capacit
     (*out_width) = 0;
     (*out_height) = 0;
 
-    if (current_player != player) {
+    if (current_player == player) {
         return;
     }
 

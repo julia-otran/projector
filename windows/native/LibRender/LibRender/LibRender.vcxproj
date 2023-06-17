@@ -164,6 +164,7 @@
     <ClInclude Include="src\include\config.h" />
     <ClInclude Include="src\include\debug.h" />
     <ClInclude Include="src\include\dev_juhouse_projector_projection2_Bridge.h" />
+    <ClInclude Include="src\include\device-capture.h" />
     <ClInclude Include="src\include\lib-render.h" />
     <ClInclude Include="src\include\loop.h" />
     <ClInclude Include="src\include\monitor.h" />
@@ -190,6 +191,7 @@
     <ClCompile Include="src\cJSON\cJSON_Utils.c" />
     <ClCompile Include="src\tinycthread\source\tinycthread.c" />
     <ClCompile Include="src\triangle\triangle.c" />
+    <ClCompile Include="src\render\windows\device-capture.c" />
     <ClCompile Include="src\render\windows\window-capture.c" />
     <ClCompile Include="src\render\clock.c" />
     <ClCompile Include="src\render\config-debug.c" />
