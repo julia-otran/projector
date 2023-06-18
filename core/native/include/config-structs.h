@@ -22,6 +22,7 @@ typedef struct {
 typedef struct {
     config_bounds position;
     int direction;
+    double curve_exponent;
 } config_blend;
 
 typedef struct {
@@ -34,20 +35,10 @@ typedef struct {
 } config_color_factor;
 
 typedef struct {
-    config_color_factor shadows;
-    config_color_factor midtones;
-    config_color_factor highlights;
-
-    double shadows_luminance;
-    double midtones_luminance;
-    double highlights_luminance;
-} config_color_balance;
-
-typedef struct {
     double
-        r_to_r, r_to_g, r_to_b, r_trim,
-        g_to_r, g_to_g, g_to_b, g_trim,
-        b_to_r, b_to_g, b_to_b, b_trim;
+        r_to_r, r_to_g, r_to_b, r_exposure, r_bright,
+        g_to_r, g_to_g, g_to_b, g_exposure, g_bright,
+        b_to_r, b_to_g, b_to_b, b_exposure, b_bright;
 } config_color_matrix;
 
 typedef struct {
@@ -62,7 +53,6 @@ typedef struct {
 
     config_bounds render_input_bounds;
 
-    config_color_balance color_balance;
     config_color_matrix color_matrix;
 
     config_point_mapping monitor_position;

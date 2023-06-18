@@ -28,10 +28,6 @@ void print_config_color_factor(config_color_factor *in) {
     print_json(serialize_config_color_factor(in));
 }
 
-void print_config_color_balance(config_color_balance *in) {
-    print_json(serialize_config_color_balance(in));
-}
-
 void print_config_color_matrix(config_color_matrix *in) {
     print_json(serialize_config_color_matrix(in));
 }

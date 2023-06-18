@@ -64,6 +64,16 @@ void parse_config_point_mapping(cJSON *config_point_mapping_json, config_point_m
 void parse_config_blend(cJSON *config_blend_json, config_blend *out) {
     parse_config_bounds(cJSON_GetObjectItemCaseSensitive(config_blend_json, "position"), &out->position);
     out->direction = cJSON_GetObjectItemCaseSensitive(config_blend_json, "direction")->valueint;
+
+    cJSON* curve_exponent_json = cJSON_GetObjectItemCaseSensitive(config_blend_json, "curve_exponent");
+
+    if (cJSON_IsNumber(curve_exponent_json)) {
+        out->curve_exponent = curve_exponent_json->valuedouble;
+    }
+    else 
+    {
+        out->curve_exponent = 2.0;
+    }
 }
 
 void parse_config_help_line(cJSON *config_help_line_json, config_help_line *out) {
@@ -92,16 +102,6 @@ void parse_config_color_factor(cJSON *config_color_factor_json, config_color_fac
     }
 }
 
-void parse_config_color_balance(cJSON *config_color_balance_json, config_color_balance *out) {
-    parse_config_color_factor(cJSON_GetObjectItemCaseSensitive(config_color_balance_json, "shadows"), &out->shadows);
-    parse_config_color_factor(cJSON_GetObjectItemCaseSensitive(config_color_balance_json, "midtones"), &out->midtones);
-    parse_config_color_factor(cJSON_GetObjectItemCaseSensitive(config_color_balance_json, "highlights"), &out->highlights);
-
-    out->shadows_luminance = cJSON_GetObjectItemCaseSensitive(config_color_balance_json, "shadows_luminance")->valuedouble;
-    out->midtones_luminance = cJSON_GetObjectItemCaseSensitive(config_color_balance_json, "midtones_luminance")->valuedouble;
-    out->highlights_luminance = cJSON_GetObjectItemCaseSensitive(config_color_balance_json, "highlights_luminance")->valuedouble;
-}
-
 void parse_config_black_level_adjust(cJSON *config_black_level_adjust_json, config_black_level_adjust *out) {
     out->x1 = cJSON_GetObjectItemCaseSensitive(config_black_level_adjust_json, "x1")->valueint;
     out->x2 = cJSON_GetObjectItemCaseSensitive(config_black_level_adjust_json, "x2")->valueint;
@@ -117,37 +117,45 @@ void parse_config_black_level_adjust(cJSON *config_black_level_adjust_json, conf
 }
 
 void parse_config_color_matrix(cJSON* config_color_matrix_json, config_color_matrix* out) {
+    out->r_to_r = 1.0;
+    out->r_to_g = 0.0;
+    out->r_to_b = 0.0;
+    out->r_exposure = 1.0;
+    out->r_bright = 0.0;
+
+    out->g_to_r = 0.0;
+    out->g_to_g = 1.0;
+    out->g_to_b = 0.0;
+    out->g_exposure = 1.0;
+    out->g_bright = 0.0;
+
+    out->b_to_r = 0.0;
+    out->b_to_g = 0.0;
+    out->b_to_b = 1.0;
+    out->b_exposure = 1.0;
+    out->b_bright = 0.0;
+
     if (!cJSON_IsObject(config_color_matrix_json)) {
-        out->r_to_r = 1.0;
-        out->r_to_g = 0.0;
-        out->r_to_b = 0.0;
-        out->r_trim = 0.0;
-
-        out->g_to_r = 0.0;
-        out->g_to_g = 1.0;
-        out->g_to_b = 0.0;
-        out->g_trim = 0.0;
-
-        out->b_to_r = 0.0;
-        out->b_to_g = 0.0;
-        out->b_to_b = 1.0;
-        out->b_trim = 0.0;
-
         return;
     }
 
     cJSON* r_to_r_json = cJSON_GetObjectItemCaseSensitive(config_color_matrix_json, "r_to_r");
-    cJSON *r_to_g_json = cJSON_GetObjectItemCaseSensitive(config_color_matrix_json, "r_to_g");
-    cJSON *r_to_b_json = cJSON_GetObjectItemCaseSensitive(config_color_matrix_json, "r_to_b");
-    cJSON *r_trim_json = cJSON_GetObjectItemCaseSensitive(config_color_matrix_json, "r_trim");
-    cJSON *g_to_r_json = cJSON_GetObjectItemCaseSensitive(config_color_matrix_json, "g_to_r");
-    cJSON *g_to_g_json = cJSON_GetObjectItemCaseSensitive(config_color_matrix_json, "g_to_g");
-    cJSON *g_to_b_json = cJSON_GetObjectItemCaseSensitive(config_color_matrix_json, "g_to_b");
-    cJSON *g_trim_json = cJSON_GetObjectItemCaseSensitive(config_color_matrix_json, "g_trim");
-    cJSON *b_to_r_json = cJSON_GetObjectItemCaseSensitive(config_color_matrix_json, "b_to_r");
-    cJSON *b_to_g_json = cJSON_GetObjectItemCaseSensitive(config_color_matrix_json, "b_to_g");
-    cJSON *b_to_b_json = cJSON_GetObjectItemCaseSensitive(config_color_matrix_json, "b_to_b");
-    cJSON *b_trim_json = cJSON_GetObjectItemCaseSensitive(config_color_matrix_json, "b_trim");
+    cJSON* r_to_g_json = cJSON_GetObjectItemCaseSensitive(config_color_matrix_json, "r_to_g");
+    cJSON* r_to_b_json = cJSON_GetObjectItemCaseSensitive(config_color_matrix_json, "r_to_b");
+    cJSON* r_exposure_json = cJSON_GetObjectItemCaseSensitive(config_color_matrix_json, "r_exposure");
+    cJSON* r_bright_json = cJSON_GetObjectItemCaseSensitive(config_color_matrix_json, "r_bright");
+
+    cJSON* g_to_r_json = cJSON_GetObjectItemCaseSensitive(config_color_matrix_json, "g_to_r");
+    cJSON* g_to_g_json = cJSON_GetObjectItemCaseSensitive(config_color_matrix_json, "g_to_g");
+    cJSON* g_to_b_json = cJSON_GetObjectItemCaseSensitive(config_color_matrix_json, "g_to_b");
+    cJSON* g_exposure_json = cJSON_GetObjectItemCaseSensitive(config_color_matrix_json, "g_exposure");
+    cJSON* g_bright_json = cJSON_GetObjectItemCaseSensitive(config_color_matrix_json, "g_bright");
+    
+    cJSON* b_to_r_json = cJSON_GetObjectItemCaseSensitive(config_color_matrix_json, "b_to_r");
+    cJSON* b_to_g_json = cJSON_GetObjectItemCaseSensitive(config_color_matrix_json, "b_to_g");
+    cJSON* b_to_b_json = cJSON_GetObjectItemCaseSensitive(config_color_matrix_json, "b_to_b");
+    cJSON* b_exposure_json = cJSON_GetObjectItemCaseSensitive(config_color_matrix_json, "b_exposure");
+    cJSON* b_bright_json = cJSON_GetObjectItemCaseSensitive(config_color_matrix_json, "b_bright");
 
     if (cJSON_IsNumber(r_to_r_json)) {
         out->r_to_r = r_to_r_json->valuedouble;
@@ -161,9 +169,14 @@ void parse_config_color_matrix(cJSON* config_color_matrix_json, config_color_mat
         out->r_to_b = r_to_b_json->valuedouble;
     }
 
-    if (cJSON_IsNumber(r_trim_json)) {
-        out->r_trim = r_trim_json->valuedouble;
+    if (cJSON_IsNumber(r_exposure_json)) {
+        out->r_exposure = r_exposure_json->valuedouble;
     }
+
+    if (cJSON_IsNumber(r_bright_json)) {
+        out->r_bright = r_bright_json->valuedouble;
+    }
+
 
     if (cJSON_IsNumber(g_to_r_json)) {
         out->g_to_r = g_to_r_json->valuedouble;
@@ -177,9 +190,14 @@ void parse_config_color_matrix(cJSON* config_color_matrix_json, config_color_mat
         out->g_to_b = g_to_b_json->valuedouble;
     }
 
-    if (cJSON_IsNumber(g_trim_json)) {
-        out->g_trim = g_trim_json->valuedouble;
+    if (cJSON_IsNumber(g_exposure_json)) {
+        out->g_exposure = g_exposure_json->valuedouble;
     }
+
+    if (cJSON_IsNumber(g_bright_json)) {
+        out->g_bright = g_bright_json->valuedouble;
+    }
+
 
     if (cJSON_IsNumber(b_to_r_json)) {
         out->b_to_r = b_to_r_json->valuedouble;
@@ -193,8 +211,12 @@ void parse_config_color_matrix(cJSON* config_color_matrix_json, config_color_mat
         out->b_to_b = b_to_b_json->valuedouble;
     }
 
-    if (cJSON_IsNumber(b_trim_json)) {
-        out->b_trim = b_trim_json->valuedouble;
+    if (cJSON_IsNumber(g_exposure_json)) {
+        out->g_exposure = g_exposure_json->valuedouble;
+    }
+
+    if (cJSON_IsNumber(b_bright_json)) {
+        out->b_bright = b_bright_json->valuedouble;
     }
 }
 
@@ -208,7 +230,6 @@ void parse_config_virtual_screen(cJSON *config_virtual_screen_json, config_virtu
 
     parse_config_bounds(cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "render_input_bounds"), &out->render_input_bounds);
 
-    parse_config_color_balance(cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "color_balance"), &out->color_balance);
     parse_config_color_matrix(cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "color_matrix"), &out->color_matrix);
 
     parse_config_point_mapping(cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "monitor_position"), &out->monitor_position);

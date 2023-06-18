@@ -62,6 +62,7 @@ cJSON* serialize_config_blend(config_blend *in) {
 
     cJSON_AddItemToObject(config_blend_json, "position", serialize_config_bounds(&in->position));
     cJSON_AddItemToObject(config_blend_json, "direction", cJSON_CreateNumber(in->direction));
+    cJSON_AddItemToObject(config_blend_json, "curve_exponent", cJSON_CreateNumber(in->curve_exponent));
 
     return config_blend_json;
 }
@@ -89,37 +90,26 @@ cJSON* serialize_config_color_factor(config_color_factor *in) {
     return config_color_factor_json;
 }
 
-cJSON* serialize_config_color_balance(config_color_balance *in) {
-    cJSON *config_color_balance_json = cJSON_CreateObject();
-
-    cJSON_AddItemToObject(config_color_balance_json, "shadows", serialize_config_color_factor(&in->shadows));
-    cJSON_AddItemToObject(config_color_balance_json, "midtones", serialize_config_color_factor(&in->midtones));
-    cJSON_AddItemToObject(config_color_balance_json, "highlights", serialize_config_color_factor(&in->highlights));
-
-    cJSON_AddItemToObject(config_color_balance_json, "shadows_luminance", cJSON_CreateNumber(in->shadows_luminance));
-    cJSON_AddItemToObject(config_color_balance_json, "midtones_luminance", cJSON_CreateNumber(in->shadows_luminance));
-    cJSON_AddItemToObject(config_color_balance_json, "highlights_luminance", cJSON_CreateNumber(in->shadows_luminance));
-
-    return config_color_balance_json;
-}
-
 cJSON* serialize_config_color_matrix(config_color_matrix* in) {
     cJSON* config_color_matrix_json = cJSON_CreateObject();
 
     cJSON_AddItemToObject(config_color_matrix_json, "r_to_r", cJSON_CreateNumber(in->r_to_r));
     cJSON_AddItemToObject(config_color_matrix_json, "r_to_g", cJSON_CreateNumber(in->r_to_g));
     cJSON_AddItemToObject(config_color_matrix_json, "r_to_b", cJSON_CreateNumber(in->r_to_b));
-    cJSON_AddItemToObject(config_color_matrix_json, "r_trim", cJSON_CreateNumber(in->r_trim));
+    cJSON_AddItemToObject(config_color_matrix_json, "r_exposure", cJSON_CreateNumber(in->r_exposure));
+    cJSON_AddItemToObject(config_color_matrix_json, "r_bright", cJSON_CreateNumber(in->r_bright));
 
     cJSON_AddItemToObject(config_color_matrix_json, "g_to_r", cJSON_CreateNumber(in->g_to_r));
     cJSON_AddItemToObject(config_color_matrix_json, "g_to_g", cJSON_CreateNumber(in->g_to_g));
     cJSON_AddItemToObject(config_color_matrix_json, "g_to_b", cJSON_CreateNumber(in->g_to_b));
-    cJSON_AddItemToObject(config_color_matrix_json, "g_trim", cJSON_CreateNumber(in->g_trim));
+    cJSON_AddItemToObject(config_color_matrix_json, "g_exposure", cJSON_CreateNumber(in->g_exposure));
+    cJSON_AddItemToObject(config_color_matrix_json, "g_bright", cJSON_CreateNumber(in->g_bright));
 
     cJSON_AddItemToObject(config_color_matrix_json, "b_to_r", cJSON_CreateNumber(in->b_to_r));
     cJSON_AddItemToObject(config_color_matrix_json, "b_to_g", cJSON_CreateNumber(in->b_to_g));
     cJSON_AddItemToObject(config_color_matrix_json, "b_to_b", cJSON_CreateNumber(in->b_to_b));
-    cJSON_AddItemToObject(config_color_matrix_json, "b_trim", cJSON_CreateNumber(in->b_trim));
+    cJSON_AddItemToObject(config_color_matrix_json, "b_exposure", cJSON_CreateNumber(in->b_exposure));
+    cJSON_AddItemToObject(config_color_matrix_json, "b_bright", cJSON_CreateNumber(in->b_bright));
 
     return config_color_matrix_json;
 }
@@ -153,7 +143,6 @@ cJSON* serialize_config_virtual_screen(config_virtual_screen *in) {
 
     cJSON_AddItemToObject(config_virtual_screen_json, "render_input_bounds", serialize_config_bounds(&in->render_input_bounds));
 
-    cJSON_AddItemToObject(config_virtual_screen_json, "color_balance", serialize_config_color_balance(&in->color_balance));
     cJSON_AddItemToObject(config_virtual_screen_json, "color_matrix", serialize_config_color_matrix(&in->color_matrix));
 
     cJSON_AddItemToObject(config_virtual_screen_json, "monitor_position", serialize_config_point_mapping(&in->monitor_position));

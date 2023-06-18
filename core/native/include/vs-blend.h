@@ -8,11 +8,12 @@ typedef struct {
     GLuint vertexarray;
     GLuint vertexbuffer;
     GLuint uvbuffer;
-} vs_blend_vertex;
+    double curve_exponent;
+} vs_blend_info;
 
 typedef struct {
-    vs_blend_vertex *vertexes;
-    int vertexes_count;
+    vs_blend_info* info;
+    int count_info;
 } vs_blend;
 
 void vs_blend_initialize();

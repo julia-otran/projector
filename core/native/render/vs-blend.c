@@ -40,6 +40,7 @@ static const GLfloat UV_VS_BLEND_MODE[4][8] = {
 static GLuint vertexshader;
 static GLuint fragmentshader;
 static GLuint program;
+static GLuint curveExponentUniform;
 
 void vs_blend_initialize() {
     vertexshader = loadShader(GL_VERTEX_SHADER, "blend.vertex.shader");
@@ -55,10 +56,12 @@ void vs_blend_initialize() {
     glLinkProgram(program);
     glValidateProgram(program);
 
+    curveExponentUniform = glGetUniformLocation(program, "curveExponent");
+
     glUseProgram(0);
 }
 
-void vs_blend_load_coordinates(config_virtual_screen *virtual_screen, config_blend *config, vs_blend_vertex *data) {
+void vs_blend_load_coordinates(config_virtual_screen *virtual_screen, config_blend *config, vs_blend_info* data) {
     GLuint vertexarray;
     glGenVertexArrays(1, &vertexarray);
     glBindVertexArray(vertexarray);
@@ -122,14 +125,16 @@ void vs_blend_load_coordinates(config_virtual_screen *virtual_screen, config_ble
     data->uvbuffer = uvbuffer;
 
     glBindVertexArray(0);
+
+    data->curve_exponent = config->curve_exponent;
 }
 
 void vs_blend_start(config_virtual_screen *virtual_screen, vs_blend *instance) {
-    instance->vertexes = (vs_blend_vertex*) calloc(virtual_screen->count_blends, sizeof(vs_blend_vertex));
-    instance->vertexes_count = virtual_screen->count_blends;
+    instance->info = (vs_blend_info*) calloc(virtual_screen->count_blends, sizeof(vs_blend_info));
+    instance->count_info = virtual_screen->count_blends;
 
     for (int i = 0; i < virtual_screen->count_blends; i++) {
-        vs_blend_load_coordinates(virtual_screen, &virtual_screen->blends[i], &instance->vertexes[i]);
+        vs_blend_load_coordinates(virtual_screen, &virtual_screen->blends[i], &instance->info[i]);
     }
 }
 
@@ -142,8 +147,10 @@ void vs_blend_render(vs_blend *instance) {
 
     glUseProgram(program);
 
-    for (int i = 0; i < instance->vertexes_count; i++) {
-        glBindVertexArray(instance->vertexes[i].vertexarray);
+    for (int i = 0; i < instance->count_info; i++) {
+        glUniform1f(curveExponentUniform, instance->info[i].curve_exponent);
+
+        glBindVertexArray(instance->info[i].vertexarray);
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
 
@@ -161,8 +168,8 @@ void vs_blend_render(vs_blend *instance) {
 }
 
 void vs_blend_stop(vs_blend *instance) {
-    for (int i = 0; i < instance->vertexes_count; i++) {
-        vs_blend_vertex *data = &instance->vertexes[i];
+    for (int i = 0; i < instance->count_info; i++) {
+        vs_blend_info *data = &instance->info[i];
 
         // Select the VAO
         glBindVertexArray(data->vertexarray);
@@ -184,7 +191,7 @@ void vs_blend_stop(vs_blend *instance) {
         glDeleteVertexArrays(1, &data->vertexarray);
     }
 
-    free(instance->vertexes);
+    free(instance->info);
 }
 
 void vs_blend_shutdown() {

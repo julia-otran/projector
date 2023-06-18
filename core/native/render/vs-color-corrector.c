@@ -11,13 +11,11 @@ static GLuint program;
 
 static GLuint textureUniform;
 
-static GLuint lowAdjustUniform;
-static GLuint midAdjustUniform;
-static GLuint highAdjustUniform;
-
 static GLuint redMatrixUniform;
 static GLuint greenMatrixUniform;
 static GLuint blueMatrixUniform;
+static GLuint exposureMatrixUniform;
+static GLuint brightMatrixUniform;
 
 void vs_color_corrector_init() {
     vertexshader = loadShader(GL_VERTEX_SHADER, "color-corrector.vertex.shader");
@@ -35,13 +33,11 @@ void vs_color_corrector_init() {
 
     textureUniform = glGetUniformLocation(program, "image");
 
-    lowAdjustUniform = glGetUniformLocation(program, "lowAdjust");
-    midAdjustUniform = glGetUniformLocation(program, "midAdjust");
-    highAdjustUniform = glGetUniformLocation(program, "highAdjust");
-
     redMatrixUniform = glGetUniformLocation(program, "redMatrix");
     greenMatrixUniform = glGetUniformLocation(program, "greenMatrix");
     blueMatrixUniform = glGetUniformLocation(program, "blueMatrix");
+    exposureMatrixUniform = glGetUniformLocation(program, "exposureMatrix");
+    brightMatrixUniform = glGetUniformLocation(program, "brightMatrix");
 
     glUseProgram(0);
 }
@@ -124,52 +120,39 @@ void vs_color_corrector_start(config_virtual_screen *config, render_output *rend
 }
 
 void vs_color_corrector_set_uniforms(config_virtual_screen *config) {
-    glUniform4f(
+    glUniform3f(
         redMatrixUniform, 
         config->color_matrix.r_to_r,
         config->color_matrix.r_to_g,
-        config->color_matrix.r_to_b,
-        config->color_matrix.r_trim
+        config->color_matrix.r_to_b
     );
 
-    glUniform4f(
+    glUniform3f(
         greenMatrixUniform,
         config->color_matrix.g_to_r,
         config->color_matrix.g_to_g,
-        config->color_matrix.g_to_b,
-        config->color_matrix.g_trim
+        config->color_matrix.g_to_b
     );
 
-    glUniform4f(
+    glUniform3f(
         blueMatrixUniform,
         config->color_matrix.b_to_r,
         config->color_matrix.b_to_g,
-        config->color_matrix.b_to_b,
-        config->color_matrix.b_trim
+        config->color_matrix.b_to_b
     );
 
-    glUniform4f(
-        lowAdjustUniform,
-        config->color_balance.shadows.r,
-        config->color_balance.shadows.g,
-        config->color_balance.shadows.b,
-        config->color_balance.shadows_luminance
+    glUniform3f(
+        exposureMatrixUniform,
+        config->color_matrix.r_exposure,
+        config->color_matrix.g_exposure,
+        config->color_matrix.b_exposure
     );
 
-    glUniform4f(
-        midAdjustUniform,
-        config->color_balance.midtones.r,
-        config->color_balance.midtones.g,
-        config->color_balance.midtones.b,
-        config->color_balance.midtones_luminance
-    );
-
-    glUniform4f(
-        highAdjustUniform,
-        config->color_balance.highlights.r,
-        config->color_balance.highlights.g,
-        config->color_balance.highlights.b,
-        config->color_balance.highlights_luminance
+    glUniform3f(
+        brightMatrixUniform,
+        config->color_matrix.r_bright,
+        config->color_matrix.g_bright,
+        config->color_matrix.b_bright
     );
 }
 

@@ -11,6 +11,7 @@ static void* data_buffer_aligned;
 static int width;
 static int height;
 static render_pixel_unpack_buffer_instance *buffer_instance;
+static int buffer_readed;
 
 void render_preview_initialize() {
     mtx_init(&thread_mutex, 0);
@@ -35,9 +36,12 @@ void render_preview_set_size(int in_width, int in_height) {
 }
 
 void render_preview_download_buffer(void *buffer) {
-    mtx_lock(&thread_mutex);
-    memcpy(buffer, data_buffer_aligned, width * height * 4);
-    mtx_unlock(&thread_mutex);
+    if (buffer_readed == 0) {
+        mtx_lock(&thread_mutex);
+        memcpy(buffer, data_buffer_aligned, width * height * 4);
+        buffer_readed = 1;
+        mtx_unlock(&thread_mutex);
+    }
 }
 
 void render_preview_create_buffers() {
@@ -57,13 +61,15 @@ void render_preview_create_buffers() {
 void render_preview_update_buffers() {
     render_pixel_unpack_buffer_node *buffer = render_pixel_unpack_buffer_dequeue_for_read(buffer_instance);
 
-    if (buffer) {
+    if (buffer && buffer_readed == 1) {
         glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer->gl_buffer);
         void *data = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
 
-        mtx_lock(&thread_mutex);
-        memcpy(data_buffer_aligned, data, width * height * 4);
-        mtx_unlock(&thread_mutex);
+        if (mtx_trylock(&thread_mutex) == thrd_success) {
+            memcpy(data_buffer_aligned, data, width * height * 4);
+            buffer_readed = 0;
+            mtx_unlock(&thread_mutex);
+        }
 
         glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
         glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
@@ -85,7 +91,7 @@ void render_preview_cycle() {
 
     if (buffer) {
         glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer->gl_buffer);
-        glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, 0L);
+        glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, 0L);
         glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
     }
 

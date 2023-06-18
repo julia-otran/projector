@@ -66,16 +66,6 @@ int loop(void *_) {
         if (window_should_close()) {
             run = 0;
         }
-
-        get_time(&current_time);
-        unsigned long long delta_time = get_delta_time_ms(&current_time, &last_frame_completed_at);
-
-        if (delta_time <= milisecs_per_frame) {
-            thrd_yield();
-        }
-
-        copy_time(&last_frame_completed_at, &current_time);
-
     }
 
     renders_terminate();

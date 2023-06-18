@@ -36,6 +36,9 @@ public class ProjectionPlayer implements Projectable {
         this.preview = new PlayerPreview(video, delegate);
 
         video.setEnablePreview(true);
+    }
+
+    public void applyRenderFlag() {
         video.getRenderFlagProperty().get().applyDefault(BridgeRender::getEnableRenderVideo);
     }
 
@@ -62,6 +65,7 @@ public class ProjectionPlayer implements Projectable {
 
     @Override
     public void init() {
+        applyRenderFlag();
         video.init();
         video.player.audio().setMute(true);
     }
@@ -74,6 +78,7 @@ public class ProjectionPlayer implements Projectable {
     @Override
     public void rebuild() {
         video.rebuild();
+        applyRenderFlag();
     }
 
     public PlayerPreview getPreviewPanel() {

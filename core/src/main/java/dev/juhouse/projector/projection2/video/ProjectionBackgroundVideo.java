@@ -47,6 +47,7 @@ public class ProjectionBackgroundVideo implements Projectable, MediaPlayerEventL
 
     @Override
     public void rebuild() {
+        videoProjector.getRenderFlagProperty().get().applyDefault(BridgeRender::getEnableRenderBackgroundAssets);
         videoProjector.rebuild();
     }
 
@@ -98,10 +99,6 @@ public class ProjectionBackgroundVideo implements Projectable, MediaPlayerEventL
     }
 
     private void playMedia(File toPlay) {
-        if (playing) {
-            stopBackground();
-        }
-
         currentMedia = toPlay;
         videoProjector.getPlayer().media().play(toPlay.getAbsolutePath());
         videoProjector.getPlayer().controls().setRepeat(true);
@@ -110,13 +107,16 @@ public class ProjectionBackgroundVideo implements Projectable, MediaPlayerEventL
     }
 
     public void stopBackground() {
+        internalRender = false;
+        updateRender();
         playing = false;
         videoProjector.getPlayer().controls().stop();
     }
 
     @Override
     public void mediaChanged(MediaPlayer mediaPlayer, MediaRef media) {
-
+        internalRender = false;
+        updateRender();
     }
 
     @Override
@@ -131,20 +131,15 @@ public class ProjectionBackgroundVideo implements Projectable, MediaPlayerEventL
 
     @Override
     public void playing(MediaPlayer mediaPlayer) {
-        internalRender = true;
-        updateRender();
+
     }
 
     @Override
     public void paused(MediaPlayer mediaPlayer) {
-        internalRender = false;
-        updateRender();
     }
 
     @Override
     public void stopped(MediaPlayer mediaPlayer) {
-        internalRender = false;
-        updateRender();
     }
 
     @Override
@@ -199,7 +194,8 @@ public class ProjectionBackgroundVideo implements Projectable, MediaPlayerEventL
 
     @Override
     public void videoOutput(MediaPlayer mediaPlayer, int newCount) {
-
+        internalRender = true;
+        updateRender();
     }
 
     @Override

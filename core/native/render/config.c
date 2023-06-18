@@ -317,23 +317,12 @@ void prepare_default_config(config_bounds *default_monitor_bounds, int no_displa
     default_config.display[0].virtual_screens[0].count_help_lines = 0;
     default_config.display[0].virtual_screens[0].count_black_level_adjusts = 0;
 
-    default_config.display[0].virtual_screens[0].color_balance.shadows.r = 0.0;
-    default_config.display[0].virtual_screens[0].color_balance.shadows.g = 0.0;
-    default_config.display[0].virtual_screens[0].color_balance.shadows.b = 0.0;
-
-    default_config.display[0].virtual_screens[0].color_balance.midtones.r = 0.0;
-    default_config.display[0].virtual_screens[0].color_balance.midtones.g = 0.0;
-    default_config.display[0].virtual_screens[0].color_balance.midtones.b = 0.0;
-
-    default_config.display[0].virtual_screens[0].color_balance.highlights.r = 0.0;
-    default_config.display[0].virtual_screens[0].color_balance.highlights.g = 0.0;
-    default_config.display[0].virtual_screens[0].color_balance.highlights.b = 0.0;
-
-    default_config.display[0].virtual_screens[0].color_balance.shadows_luminance = 0.0;
-    default_config.display[0].virtual_screens[0].color_balance.midtones_luminance = 0.0;
-    default_config.display[0].virtual_screens[0].color_balance.highlights_luminance = 0.0;
-
     default_config.display[0].virtual_screens[0].color_matrix.r_to_r = 1.0;
+    default_config.display[0].virtual_screens[0].color_matrix.r_exposure = 1.0;
+
     default_config.display[0].virtual_screens[0].color_matrix.g_to_g = 1.0;
+    default_config.display[0].virtual_screens[0].color_matrix.g_exposure = 1.0;
+
     default_config.display[0].virtual_screens[0].color_matrix.b_to_b = 1.0;
+    default_config.display[0].virtual_screens[0].color_matrix.b_exposure = 1.0;
 }
