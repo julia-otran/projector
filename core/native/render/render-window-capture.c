@@ -118,8 +118,7 @@ void render_window_capture_update_assets() {
         glBindTexture(GL_TEXTURE_2D, texture_id);
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dst_width, dst_height, 0, GL_BGRA, GL_UNSIGNED_BYTE, 0);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        tex_set_default_params();
 
         glBindTexture(GL_TEXTURE_2D, 0);
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
@@ -207,6 +206,7 @@ void render_window_capture_render(render_layer *layer) {
     }
 
     glPopMatrix();
+    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void render_window_capture_shutdown() {

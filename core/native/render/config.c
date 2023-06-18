@@ -233,6 +233,9 @@ void prepare_default_config(config_bounds *default_monitor_bounds, int no_displa
     default_config.renders[0].text_area.w = default_monitor_bounds->w - 60.0;
     default_config.renders[0].text_area.h = default_monitor_bounds->h - 60.0;
 
+    // Maybe we should have an easy way to set this blur config.
+    // However I guess many computers won't be capable
+    default_config.renders[0].enable_render_background_blur = 0;
     default_config.renders[0].enable_render_background_assets = 1;
     default_config.renders[0].enable_render_image = 1;
     default_config.renders[0].enable_render_video = 1;

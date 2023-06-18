@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #define REAL double
 #define VOID void
@@ -40,6 +41,8 @@ void virtual_screen_initialize() {
 
     textureUniform = glGetUniformLocation(program, "image");
     adjustFactorUniform = glGetUniformLocation(program, "adjust_factor");
+
+    glUseProgram(0);
 }
 
 void virtual_screen_free_triangulateio(struct triangulateio *in) {
@@ -134,7 +137,6 @@ void virtual_screen_load_vertexes(config_display *display, config_virtual_screen
     glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
     glBufferData(GL_ARRAY_BUFFER, out.numberoftriangles * 3 * 4 * sizeof(GLfloat), vertexes, GL_STATIC_DRAW);
 
-    glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -155,9 +157,9 @@ void virtual_screen_load_vertexes(config_display *display, config_virtual_screen
 
         x = x / (GLfloat) config->w;
         y = y / (GLfloat) config->h;
-
-        vertexes[i * 2] = x;
-        vertexes[(i * 2) + 1] = 1.0 - y;
+        
+        vertexes[i * 2] = min(max(x, 0), 1);
+        vertexes[(i * 2) + 1] = min(max(1.0 - y, 0), 1);
     }
 
     GLuint uvbuffer;
@@ -201,8 +203,7 @@ void virtual_screen_start(config_display *display, render_output *render, config
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0 , GL_RGBA, GL_UNSIGNED_BYTE, 0);
     glTexStorage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA8UI, width, height, GL_TRUE);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    tex_set_default_params();
 
     glBindTexture(GL_TEXTURE_2D, 0);
 

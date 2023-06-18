@@ -19,4 +19,6 @@ void add_shader_data(char *name, char *data);
 
 GLuint loadShader(GLuint type, char *name);
 
+void tex_set_default_params();
+
 #endif

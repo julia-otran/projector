@@ -176,8 +176,7 @@ void render_image_update_assets() {
                 glBindTexture(GL_TEXTURE_2D, texture_id);
 
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, buffer->width, buffer->height, 0, GL_BGRA, GL_UNSIGNED_BYTE, 0);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                tex_set_default_params();
 
                 glBindTexture(GL_TEXTURE_2D, 0);
                 glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
@@ -275,6 +274,7 @@ void render_image_render(render_layer *layer) {
         }
     }
 
+    glDisableClientState(GL_VERTEX_ARRAY);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 

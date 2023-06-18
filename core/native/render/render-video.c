@@ -11,6 +11,7 @@
 #include "render-fader.h"
 #include "render-video.h"
 #include "render-pixel-unpack-buffer.h"
+#include "render-tex-blur.h"
 
 #define BYTES_PER_PIXEL 4
 
@@ -28,6 +29,7 @@ static mtx_t thread_mutex;
 
 static render_fader_instance *fader_instance;
 static render_pixel_unpack_buffer_instance *buffer_instance;
+static render_tex_blur_instance* blur_instance;
 
 static struct libvlc_media_player_t* current_player;
 
@@ -289,6 +291,8 @@ void render_video_update_buffers() {
 
 void render_video_create_assets() {
     glGenTextures(1, &texture_id);
+    blur_instance = render_tex_blur_create();
+    render_tex_blur_set_uv(blur_instance, 0, 0, 1, 1);
 }
 
 void render_video_update_assets() {
@@ -304,9 +308,9 @@ void render_video_update_assets() {
             dst_height = buffer->height;
 
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dst_width, dst_height, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, NULL);
+            tex_set_default_params();
 
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            render_tex_blur_set_tex(blur_instance, texture_id, dst_width, dst_height);
         } else {
             glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, dst_width, dst_height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, NULL);
         }
@@ -354,7 +358,7 @@ void render_video_render(render_layer *layer) {
         return;
     }
 
-    double x, y, w, h;
+    double x, y, w, h, x_crop, y_crop, w_crop, h_crop;
 
     double w_scale = (dst_width / (double)dst_height);
     double h_scale = (dst_height / (double)dst_width);
@@ -362,52 +366,85 @@ void render_video_render(render_layer *layer) {
     double w_sz = layer->config.h * w_scale;
     double h_sz = layer->config.w * h_scale;
 
-    if (src_crop) {
-        if (w_sz > layer->config.w) {
-            w = w_sz;
-            h = h_scale * w;
-        } else {
-            h = h_sz;
-            w = w_scale * h;
-        }
+    if (w_sz > layer->config.w) {
+        h = h_sz;
+        w = layer->config.w;
+
+        w_crop = w_sz;
+        h_crop = layer->config.h;
     } else {
-        if (w_sz < layer->config.w) {
-            w = w_sz;
-            h = h_scale * w;
-        } else {
-            h = h_sz;
-            w = w_scale * h;
-        }
+        w = w_sz;
+        h = layer->config.h;
+
+        h_crop = h_sz;
+        w_crop = layer->config.w;
     }
 
     x = (layer->config.w - w) / 2;
     y = (layer->config.h - h) / 2;
+    x_crop = (layer->config.w - w_crop) / 2;
+    y_crop = (layer->config.h - h_crop) / 2;
 
-    glEnableClientState(GL_VERTEX_ARRAY);
+    int enable_blur = src_crop == 0 &&
+        ((w + 100 < layer->config.w) || (h + 100 < layer->config.h)) &&
+        layer->config.enable_render_background_blur == 1;
+
+    if (src_crop) {
+        x = x_crop;
+        y = y_crop;
+        w = w_crop;
+        h = h_crop;
+    }
+
+    if (enable_blur) {
+        render_tex_blur_set_position(
+            blur_instance,
+            (x_crop * 2 / layer->config.w) - 1.0,
+            (y_crop * 2 / layer->config.h) - 1.0,
+            (w_crop * 2 / layer->config.w),
+            (h_crop * 2 / layer->config.h)
+        );
+    }
+
     glEnable(GL_TEXTURE_2D);
 
     render_fader_for_each(fader_instance) {
         float alpha = render_fader_get_alpha(node);
-
         glColor4f(alpha, alpha, alpha, alpha);
 
-        glBindTexture(GL_TEXTURE_2D, texture_id);
+        if (enable_blur) {    
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+            render_tex_blur_render(blur_instance);
+
+            glBindTexture(GL_TEXTURE_2D, texture_id);
+            tex_set_default_params();
+        }
+        else {
+            glBindTexture(GL_TEXTURE_2D, texture_id);
+        }
+
+        glEnableClientState(GL_VERTEX_ARRAY);
 
         glBegin(GL_QUADS);
 
-        glTexCoord2d(0.0, 0.0); glVertex2d(x, y);
-        glTexCoord2d(0.0, 1.0); glVertex2d(x, y + h);
-        glTexCoord2d(1.0, 1.0); glVertex2d(x + w, y + h);
-        glTexCoord2d(1.0, 0.0); glVertex2d(x + w, y);
+        glTexCoord2f(0.0f, 0.0f); glVertex2d(x, y);
+        glTexCoord2f(0.0f, 1.0f); glVertex2d(x, y + h);
+        glTexCoord2f(1.0f, 1.0f); glVertex2d(x + w, y + h);
+        glTexCoord2f(1.0f, 0.0f); glVertex2d(x + w, y);
 
         glEnd();
 
         glBindTexture(GL_TEXTURE_2D, 0);
+        glDisableClientState(GL_VERTEX_ARRAY);
     }
 }
 
 void render_video_deallocate_assets() {
     glDeleteTextures(1, &texture_id);
+    render_tex_blur_destroy(blur_instance);
+    blur_instance = NULL;
 }
 
 void render_video_shutdown() {

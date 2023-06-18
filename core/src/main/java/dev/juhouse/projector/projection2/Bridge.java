@@ -18,6 +18,8 @@ public class Bridge {
         return new String[] {
                 "blend.fragment.shader",
                 "blend.vertex.shader",
+                "blur.fragment.shader",
+                "blur.vertex.shader",
                 "color-corrector.fragment.shader",
                 "color-corrector.vertex.shader",
                 "direct.fragment.shader",

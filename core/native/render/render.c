@@ -12,6 +12,7 @@
 #include "render-window-capture.h"
 #include "render-image.h"
 #include "render-preview.h"
+#include "render-tex-blur.h"
 
 static int count_renders;
 static render_layer *renders;
@@ -93,8 +94,7 @@ void render_init(render_layer *render) {
     // Give an empty image to OpenGL ( the last "0" )
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, 0);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    tex_set_default_params();
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -121,6 +121,7 @@ void render_init(render_layer *render) {
         render_window_capture_create_assets();
         render_image_create_assets();
         render_preview_create_assets();
+        render_tex_blur_create_assets();
     }
 
     render_text_start(render);
@@ -184,6 +185,7 @@ void render_terminate(render_layer *render) {
         render_window_capture_deallocate_assets();
         render_image_deallocate_assets();
         render_preview_deallocate_assets();
+        render_tex_blur_deallocate_assets();
     }
 
     for (int i=0; i < count_renders; i++) {

@@ -173,6 +173,7 @@
     <ClInclude Include="src\include\render-image.h" />
     <ClInclude Include="src\include\render-pixel-unpack-buffer.h" />
     <ClInclude Include="src\include\render-preview.h" />
+    <ClInclude Include="src\include\render-tex-blur.h" />
     <ClInclude Include="src\include\render-text.h" />
     <ClInclude Include="src\include\render-video.h" />
     <ClInclude Include="src\include\render-window-capture.h" />
@@ -207,6 +208,7 @@
     <ClCompile Include="src\render\render-image.c" />
     <ClCompile Include="src\render\render-pixel-unpack-buffer.c" />
     <ClCompile Include="src\render\render-preview.c" />
+    <ClCompile Include="src\render\render-tex-blur.c" />
     <ClCompile Include="src\render\render-text.c" />
     <ClCompile Include="src\render\render-video.c" />
     <ClCompile Include="src\render\render-window-capture.c" />
