@@ -8,7 +8,7 @@ package dev.juhouse.projector.projection2;
 import java.awt.Font;
 import java.io.File;
 
-import dev.juhouse.projector.projection2.countdown.ProjectionCountdown;
+import dev.juhouse.projector.projection2.time.ProjectionCountdown;
 import dev.juhouse.projector.projection2.image.ProjectionImage;
 import dev.juhouse.projector.projection2.image.ProjectionMultiImage;
 import dev.juhouse.projector.projection2.models.BackgroundModel;
@@ -50,7 +50,9 @@ public interface ProjectionManager {
 
     ProjectionVideoCapture createVideoCapture();
 
-    void setProjectable(Projectable webView);
+    void setConcurrentProjectable(Projectable projectable);
+
+    void setProjectable(Projectable projectable);
 
     WrapperFactory getWrapperFactory();
 

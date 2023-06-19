@@ -2,12 +2,11 @@ package dev.juhouse.projector.forms.controllers.projection
 
 import dev.juhouse.projector.projection2.ProjectionManager
 import javafx.fxml.FXML
-import javafx.scene.control.Button
 import javafx.scene.control.TextField
 import javafx.scene.control.ToggleButton
 import java.net.URL
 import java.util.*
-import dev.juhouse.projector.projection2.countdown.ProjectionCountdown
+import dev.juhouse.projector.projection2.time.ProjectionCountdown
 import javafx.application.Platform
 import javafx.scene.layout.Pane
 

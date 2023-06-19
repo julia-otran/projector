@@ -94,6 +94,8 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
         initProjectionList();
         updateProjectionList();
 
+        initClock();
+
         graphicsHelper.getWindowConfigsLoaderProperty().getConfigFiles().addListener((ListChangeListener<String>) c -> buildPresetsMenu());
 
         graphicsHelper.getWindowConfigsLoaderProperty().loadedConfigFileProperty().addListener((prop, oldValue, newValue) -> updateSelectedPreset(newValue));
@@ -112,6 +114,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     }
 
     public void stop() {
+        clockController.stop();
         graphicsHelper.stop();
     }
 
@@ -120,6 +123,23 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
                 .getSelectionModel()
                 .getSelectedItems()
                 .forEach(s -> itemSubScenes.get(s.getId()).onEscapeKeyPressed());
+    }
+
+    // ------------------------------
+    // Clock
+    // ------------------------------
+
+    @FXML
+    private Label clockLabel;
+
+    @FXML
+    private Pane clockControlBarPane;
+
+    private WorkspaceClockController clockController;
+
+    private void initClock() {
+        clockController = new WorkspaceClockController(graphicsHelper.getProjectionManager(), clockLabel, clockControlBarPane);
+        clockController.start();
     }
 
     // ------------------------------

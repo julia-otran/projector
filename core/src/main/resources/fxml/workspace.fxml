@@ -122,6 +122,20 @@
           </ListView>
         </VBox>
       </TitledPane>
+            <TitledPane prefHeight="200.0" prefWidth="200.0" text="Relógio">
+               <content>
+                  <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0">
+                     <children>
+                        <Label fx:id="clockLabel" prefHeight="27.0" prefWidth="45.0" text="23:23:23">
+                           <VBox.margin>
+                              <Insets bottom="8.0" />
+                           </VBox.margin>
+                        </Label>
+                        <Pane fx:id="clockControlBarPane" prefHeight="200.0" prefWidth="200.0" />
+                     </children>
+                  </VBox>
+               </content>
+            </TitledPane>
     </VBox>
     <AnchorPane>
       <Pane fx:id="targetPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />

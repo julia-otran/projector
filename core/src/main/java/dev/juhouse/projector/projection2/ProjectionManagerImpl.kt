@@ -1,7 +1,7 @@
 package dev.juhouse.projector.projection2
 
 import dev.juhouse.projector.other.ProjectorPreferences
-import dev.juhouse.projector.projection2.countdown.ProjectionCountdown
+import dev.juhouse.projector.projection2.time.ProjectionCountdown
 import dev.juhouse.projector.projection2.image.ProjectionBackground
 import dev.juhouse.projector.projection2.image.ProjectionImage
 import dev.juhouse.projector.projection2.image.ProjectionMultiImage
@@ -26,6 +26,7 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
     private val backgroundVideo = ProjectionBackgroundVideo(ProjectionVideo(delegate))
     private val background = ProjectionBackground(delegate)
     private val currentProjectable = ReadOnlyObjectWrapper<Projectable?>()
+    private val concurrentProjectable = ReadOnlyObjectWrapper<Projectable?>()
     private val projectablesList = ArrayList<Projectable>()
     private val callbackList = ArrayList<ProjectionManagerCallbacks>()
 
@@ -135,12 +136,25 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
         return videoCapturePlayer
     }
 
+    override fun setConcurrentProjectable(projectable: Projectable?) {
+        concurrentProjectable.get()?.setRender(false)
+
+        concurrentProjectable.set(projectable)
+
+        projectable?.setRender(true)
+    }
+
     override fun setProjectable(projectable: Projectable?) {
         currentProjectable.get()?.setRender(false)
 
         currentProjectable.set(projectable)
 
-        background.render = projectable == null
+        projectable?.let {
+            background.setExcludeRenderFlag(projectable.renderFlagProperty.get())
+        } ?: run {
+            background.setExcludeRenderFlag(null)
+        }
+
         backgroundVideo.setRender(projectable == null)
 
         projectable?.setRender(true)
@@ -213,7 +227,7 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
             background.render = false
         } else {
             backgroundVideo.stopBackground()
-            background.render = currentProjectable.get() == null
+            background.render = true
         }
     }
 

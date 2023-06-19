@@ -1,4 +1,4 @@
-package dev.juhouse.projector.projection2.countdown
+package dev.juhouse.projector.projection2.time
 
 import dev.juhouse.projector.projection2.BridgeRender
 import dev.juhouse.projector.projection2.BridgeRenderFlag

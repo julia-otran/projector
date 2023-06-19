@@ -43,6 +43,14 @@ class BridgeRenderFlag(private val delegate: CanvasDelegate?) {
         flagValueIntProperty.set(RENDER_ALL)
     }
 
+    fun renderToNone() {
+        flagValueIntProperty.set(NO_RENDER)
+    }
+
+    fun hasAnyRender(): Boolean {
+        return flagValueIntProperty.get() != NO_RENDER
+    }
+
     fun applyDefault(configMapper: (config: BridgeRender) -> Boolean) {
         delegate?.bridge?.renderSettings?.forEach {
             if (configMapper(it)) {
@@ -51,5 +59,9 @@ class BridgeRenderFlag(private val delegate: CanvasDelegate?) {
                 disableRenderId(it.renderId)
             }
         }
+    }
+
+    fun exclude(other: BridgeRenderFlag): Int {
+        return this.flagValue and (other.flagValue.inv())
     }
 }
