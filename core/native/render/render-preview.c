@@ -5,104 +5,159 @@
 #include "render-preview.h"
 #include "render-pixel-unpack-buffer.h"
 
+#define BYTES_PER_PIXEL 4
+
 static mtx_t thread_mutex;
-static void* data_buffer;
-static void* data_buffer_aligned;
-static int width;
-static int height;
-static render_pixel_unpack_buffer_instance *buffer_instance;
-static int buffer_readed;
+static render_preview* previews;
+static int count_previews;
+
+static render_preview_buffer* buffers;
+static int count_buffers;
 
 void render_preview_initialize() {
     mtx_init(&thread_mutex, 0);
+
+    previews = NULL;
+    count_previews = 0;
+
+    buffers = NULL;
+    count_buffers = 0;
 }
 
-void render_preview_set_size(int in_width, int in_height) {
-    mtx_lock(&thread_mutex);
-
-    if (data_buffer) {
-        free(data_buffer);
+void render_preview_free() {
+    for (int i = 0; i < count_previews; i++) {
+        render_preview* preview = &previews[i];
+        free(preview->data_buffer);
     }
 
-    width = in_width;
-    height = in_height;
+    free(previews);
+    count_previews = 0;
+}
 
-    int required_size = width * height * 4;
+void render_preview_set_renders(render_layer* renders, int count_renders) {
+    mtx_lock(&thread_mutex);
 
-    data_buffer = malloc((required_size + 511) & ~255);
-    data_buffer_aligned = (void*)(((unsigned long long)data_buffer + 255) & ~255);
+    if (previews) {
+        render_preview_free();
+    }
+
+    count_previews = count_renders;
+    previews = (render_preview*) calloc(count_previews, sizeof(render_preview));
+
+    for (int i = 0; i < count_previews; i++) {
+        render_preview* preview = &previews[i];
+        render_layer* render = &renders[i];
+
+        preview->render_id = render->config.render_id;
+        preview->width = render->config.w;
+        preview->height = render->config.h;
+
+        int required_size = render->config.w * render->config.h * BYTES_PER_PIXEL;
+        preview->data_buffer = malloc((required_size + 511) & ~255);
+        preview->data_buffer_aligned = (void*)(((unsigned long long)preview->data_buffer + 255) & ~255);
+    }
 
     mtx_unlock(&thread_mutex);
 }
 
-void render_preview_download_buffer(void *buffer) {
-    if (buffer_readed == 0) {
-        mtx_lock(&thread_mutex);
-        memcpy(buffer, data_buffer_aligned, width * height * 4);
-        buffer_readed = 1;
-        mtx_unlock(&thread_mutex);
+void render_preview_download_buffer(int render_id, void* buffer) {
+    mtx_lock(&thread_mutex);
+
+    for (int i = 0; i < count_previews; i++) {
+        render_preview* preview = &previews[i];
+
+        if (preview->render_id == render_id && preview->buffer_read == 0) {
+            memcpy(buffer, preview->data_buffer_aligned, preview->width * preview->height * BYTES_PER_PIXEL);
+            preview->buffer_read = 1;
+        }
     }
+    
+    mtx_unlock(&thread_mutex);
 }
 
 void render_preview_create_buffers() {
-    render_pixel_unpack_buffer_create(&buffer_instance);
+    count_buffers = count_previews;
+    
+    if (buffers) {
+        free(buffers);
+    }
 
-    render_pixel_unpack_buffer_node *buffers = render_pixel_unpack_buffer_get_all_buffers(buffer_instance);
+    buffers = (render_preview_buffer*) calloc(count_buffers, sizeof(render_preview_buffer));
 
-    for (int i = 0; i < RENDER_PIXEL_UNPACK_BUFFER_BUFFER_COUNT; i++) {
-        render_pixel_unpack_buffer_node *buffer = &buffers[i];
+    for (int i = 0; i < count_buffers; i++) {
+        render_preview_buffer* buffer = &buffers[i];
+        
+        buffer->render_id = previews[i].render_id;
+        buffer->readed = 0;
 
-        glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer->gl_buffer);
-        glBufferData(GL_PIXEL_PACK_BUFFER, width * height * 4, NULL, GL_STREAM_READ);
+        glGenBuffers(1, &buffer->buffer);
+        glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer->buffer);
+        glBufferData(GL_PIXEL_PACK_BUFFER, previews[i].width * previews[i].height * BYTES_PER_PIXEL, NULL, GL_STREAM_READ);
         glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
     }
 }
 
 void render_preview_update_buffers() {
-    render_pixel_unpack_buffer_node *buffer = render_pixel_unpack_buffer_dequeue_for_read(buffer_instance);
+    if (mtx_trylock(&thread_mutex) == thrd_success) {
 
-    if (buffer && buffer_readed == 1) {
-        glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer->gl_buffer);
-        void *data = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
+        for (int i = 0; i < count_previews; i++) {
+            render_preview* preview = &previews[i];
+            render_preview_buffer* buffer = &buffers[i];
 
-        if (mtx_trylock(&thread_mutex) == thrd_success) {
-            memcpy(data_buffer_aligned, data, width * height * 4);
-            buffer_readed = 0;
-            mtx_unlock(&thread_mutex);
+            if (preview->buffer_read == 0) {
+                continue;
+            }
+
+            glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer->buffer);
+            void* data = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
+            memcpy(preview->data_buffer_aligned, data, preview->width * preview->height * BYTES_PER_PIXEL);
+            glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+            glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+
+            buffer->readed = 1;
+            preview->buffer_read = 0;
         }
 
-        glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
-        glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+        mtx_unlock(&thread_mutex);
     }
-
-    render_pixel_unpack_buffer_enqueue_for_write(buffer_instance, buffer);
 }
 
 void render_preview_deallocate_buffers() {
-    render_pixel_unpack_buffer_deallocate(buffer_instance);
+    count_buffers = 0;
+
+    for (int i = 0; i < count_buffers; i++) {
+        glDeleteBuffers(1, &buffers[i].buffer);
+    };
+
+    free(buffers);
+    buffers = NULL;    
 }
 
 void render_preview_create_assets() {}
 void render_preview_update_assets() {}
 void render_preview_deallocate_assets() {}
 
-void render_preview_cycle() {
-    render_pixel_unpack_buffer_node *buffer = render_pixel_unpack_buffer_dequeue_for_write(buffer_instance);
+void render_preview_cycle(render_layer* render) {
+    for (int i = 0; i < count_buffers; i++) {
+        render_preview_buffer* buffer = &buffers[i];
 
-    if (buffer) {
-        glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer->gl_buffer);
-        glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, 0L);
+        if (buffer->render_id != render->config.render_id) {
+            continue;
+        }
+
+        if (buffer->readed == 0) {
+            break;
+        }
+
+        glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer->buffer);
+        glReadPixels(0, 0, render->config.w, render->config.h, GL_BGRA, GL_UNSIGNED_BYTE, 0L);
         glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-    }
 
-    render_pixel_unpack_buffer_enqueue_for_read(buffer_instance, buffer);
+        buffer->readed = 0;
+    }
 }
 
 void render_preview_shutdown() {
+    render_preview_free();
     mtx_destroy(&thread_mutex);
-
-    if (data_buffer) {
-        free(data_buffer);
-        data_buffer = NULL;
-    }
 }

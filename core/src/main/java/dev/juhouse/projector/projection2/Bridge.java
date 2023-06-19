@@ -104,7 +104,7 @@ public class Bridge {
 
     public native void setRenderWebViewBuffer(int renderFlag);
 
-    public native void downloadPreviewData(ByteBuffer buffer);
+    public native void downloadPreviewData(int renderId, ByteBuffer buffer);
 
     public native String[] getWindowList();
 

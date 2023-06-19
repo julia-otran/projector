@@ -13,7 +13,7 @@ class WindowManager(private val settingsService: SettingsService) : CanvasDelega
     private val fontProperty = SimpleObjectProperty<Font>()
 
     val configsObserver: WindowConfigsObserver = WindowConfigsObserver(this)
-    val preview: PreviewImageView = PreviewImageView(this)
+    val preview: MultiPreviewVBox = MultiPreviewVBox(this)
     val manager: ProjectionManager = ProjectionManagerImpl(this)
 
     private var running: Boolean = false

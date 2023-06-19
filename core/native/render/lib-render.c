@@ -386,9 +386,10 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setRenderWe
     render_web_view_src_set_render(render);
 }
 
-JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_downloadPreviewData(JNIEnv *env, jobject _, jobject j_buffer) {
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_downloadPreviewData
+(JNIEnv* env, jobject _, jint render_id, jobject j_buffer) {
     jbyte *data = (jbyte*) (*env)->GetDirectBufferAddress(env, j_buffer);
-    render_preview_download_buffer((void*) data);
+    render_preview_download_buffer(render_id, (void*) data);
 }
 
 JNIEXPORT jobjectArray JNICALL Java_dev_juhouse_projector_projection2_Bridge_getWindowList(JNIEnv *env, jobject _) {

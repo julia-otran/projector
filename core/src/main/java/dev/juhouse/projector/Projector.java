@@ -104,7 +104,7 @@ public class Projector extends Application implements Runnable {
         Parent workspaceRoot = loader.load();
         controller = loader.getController();
         
-        Scene workspaceScene = new Scene(workspaceRoot, 1000, 700);
+        Scene workspaceScene = new Scene(workspaceRoot, 1000, 600);
         
         controller.setSceneManager(new SceneManager() {
             @Override
@@ -135,6 +135,8 @@ public class Projector extends Application implements Runnable {
         });
         
         primaryStage.setScene(workspaceScene);
+
+        primaryStage.setMaximized(true);
 
         primaryStage.show();
         

@@ -17,13 +17,24 @@
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox id="RootBox" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dev.juhouse.projector.forms.controllers.WorkspaceController">
-  <MenuBar fx:id="menuBar" VBox.vgrow="NEVER">
+<AnchorPane id="RootBox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="1000.0" prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dev.juhouse.projector.forms.controllers.WorkspaceController">
+   <BorderPane fx:id="loadingPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <center>
+    <Label alignment="CENTER" contentDisplay="CENTER" text="Iniciando, por favor aguarde...." textAlignment="CENTER" BorderPane.alignment="CENTER">
+      <font>
+        <Font size="24.0" />
+      </font>
+    </Label>
+      </center>
+   </BorderPane>
+<VBox fx:id="workspaceVBox" prefHeight="600.0" prefWidth="1000.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+  <MenuBar VBox.vgrow="NEVER">
     <Menu mnemonicParsing="false" text="Gerenciar Letras">
       <MenuItem mnemonicParsing="false" onAction="#onOpenMusicList" text="Lista De Letras" />
       <MenuItem mnemonicParsing="false" onAction="#onShowStatistics" text="Estatísticas" />
@@ -63,17 +74,10 @@
       <MenuItem mnemonicParsing="false" onAction="#onHelpManual" text="Manual de Instruções" />
     </Menu>
   </MenuBar>
-  <Pane fx:id="loadingPane" prefHeight="41.0" prefWidth="900.0" VBox.vgrow="NEVER">
-    <Label prefHeight="29.0" prefWidth="900.0" text="Iniciando, por favor aguarde...." textAlignment="CENTER">
-      <font>
-        <Font size="24.0" />
-      </font>
-    </Label>
-  </Pane>
-  <SplitPane fx:id="mainPane" dividerPositions="0.3374164810690423" VBox.vgrow="ALWAYS">
-    <VBox>
+  <SplitPane dividerPositions="0.25, 0.75" VBox.vgrow="ALWAYS">
+    <VBox maxWidth="300.0">
       <TitledPane animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Lista de Projeção" VBox.vgrow="ALWAYS">
-        <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+        <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="265.0">
           <Label text="Selecione ou crie uma lista:" />
           <HBox prefHeight="24.0" prefWidth="271.0">
             <VBox.margin>
@@ -92,6 +96,9 @@
               <items>
                 <MenuItem mnemonicParsing="false" onAction="#onDeleteProjectionList" text="Excluir Lista de Projeção" />
               </items>
+                        <HBox.margin>
+                           <Insets left="8.0" />
+                        </HBox.margin>
             </MenuButton>
           </HBox>
           <MenuButton fx:id="addItemButtonGroup" mnemonicParsing="false" prefHeight="25.0" text="+ Incluir item">
@@ -115,10 +122,11 @@
           </ListView>
         </VBox>
       </TitledPane>
-      <TitledPane fx:id="previewPane" animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="300.0" minWidth="300.0" prefHeight="300.0" prefWidth="300.0" text="Pré Visualização" VBox.vgrow="SOMETIMES" />
     </VBox>
     <AnchorPane>
       <Pane fx:id="targetPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
     </AnchorPane>
+      <Pane fx:id="previewPane" prefHeight="200.0" prefWidth="200.0" />
   </SplitPane>
 </VBox>
+</AnchorPane>

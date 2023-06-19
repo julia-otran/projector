@@ -10,6 +10,7 @@ import dev.juhouse.projector.projection2.WindowManager;
 import dev.juhouse.projector.services.SettingsService;
 import dev.juhouse.projector.utils.WindowConfigsLoaderProperty;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.VBox;
 
 /**
  *
@@ -37,7 +38,7 @@ public class GraphicsDeviceHelper {
         windowManager.reloadDevices();
     }
 
-    ImageView getPreviewPanel() {
+    VBox getMultiPreviewVBox() {
         return windowManager.getPreview();
     }
 

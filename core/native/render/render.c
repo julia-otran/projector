@@ -166,9 +166,7 @@ void render_cycle(render_layer *render) {
     render_web_view_render(render);
     render_window_capture_render(render);
 
-    if (render->config.render_mode & CONFIG_RENDER_MODE_MAIN) {
-        render_preview_cycle();
-    }
+    render_preview_cycle(render);
 
     glPopMatrix();
 
@@ -259,18 +257,15 @@ int transfer_window_loop(void *_) {
     return 0;
 }
 
-void configure_render(config_render *render_conf, render_layer *render) {
-    memcpy(&render->config, render_conf, sizeof(config_render));
-
-    if (render->config.render_mode & CONFIG_RENDER_MODE_MAIN) {
-        render_preview_set_size(render->config.w, render->config.h);
-    }
-}
 
 void renders_config_hot_reload(projection_config *config) {
     for (int i=0; i < config->count_renders; i++) {
-        configure_render(&config->renders[i], &renders[i]);
+        config_render* render_conf = &config->renders[i];
+        render_layer* render = &renders[i];
+        memcpy(&render->config, render_conf, sizeof(config_render));
     }
+
+    render_preview_set_renders(renders, config->count_renders);
 }
 
 void activate_renders(GLFWwindow *shared_context, projection_config *config) {
@@ -283,9 +278,9 @@ void activate_renders(GLFWwindow *shared_context, projection_config *config) {
         output[i].render_id = config->renders[i].render_id;
         output[i].size.render_width = config->renders[i].w;
         output[i].size.render_height = config->renders[i].h;
-
-        configure_render(&config->renders[i], &renders[i]);
     }
+
+    renders_config_hot_reload(config);
 
     render_text_set_config(renders, count_renders);
     render_image_set_config(renders, count_renders);

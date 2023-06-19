@@ -311,7 +311,16 @@ void parse_config_render(cJSON *config_render_json, config_render *out) {
 
     parse_config_bounds(cJSON_GetObjectItemCaseSensitive(config_render_json, "text_area"), &out->text_area);
 
-    out->enable_render_background_blur = cJSON_GetObjectItemCaseSensitive(config_render_json, "enable_render_background_blur")->valueint;
+    cJSON* enable_render_background_blur_json = cJSON_GetObjectItemCaseSensitive(config_render_json, "enable_render_background_blur");
+
+    if (cJSON_IsNumber(enable_render_background_blur_json)) {
+        out->enable_render_background_blur = enable_render_background_blur_json->valueint;
+    }
+    else 
+    {
+        out->enable_render_background_blur = 0;
+    }
+
     out->enable_render_background_assets = cJSON_GetObjectItemCaseSensitive(config_render_json, "enable_render_background_assets")->valueint;
     out->enable_render_image = cJSON_GetObjectItemCaseSensitive(config_render_json, "enable_render_image")->valueint;
     out->enable_render_video = cJSON_GetObjectItemCaseSensitive(config_render_json, "enable_render_video")->valueint;

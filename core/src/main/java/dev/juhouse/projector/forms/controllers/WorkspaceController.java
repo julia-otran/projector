@@ -38,10 +38,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Callback;
@@ -66,10 +66,11 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     private WrapperFactory wrapperFactory;
 
     @FXML
-    private SplitPane mainPane;
+    private BorderPane loadingPane;
 
     @FXML
-    private Pane loadingPane;
+    private VBox workspaceVBox;
+
     private Scene listScene;
 
     /**
@@ -77,8 +78,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        menuBar.setVisible(false);
-        mainPane.setVisible(false);
+        workspaceVBox.setVisible(false);
         loadingPane.setVisible(true);
     }
 
@@ -107,8 +107,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
         darkenBackgroundMenuItem.setSelected(graphicsHelper.getProjectionManager().getDarkenBackground());
         cropBackgroundMenuItem.setSelected(graphicsHelper.getProjectionManager().getCropBackground());
 
-        menuBar.setVisible(true);
-        mainPane.setVisible(true);
+        workspaceVBox.setVisible(true);
         loadingPane.setVisible(false);
     }
 
@@ -126,9 +125,6 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     // ------------------------------
     // Menu
     // ------------------------------
-    @FXML
-    private MenuBar menuBar;
-
     @FXML
     private CheckMenuItem cropBackgroundMenuItem;
 
@@ -723,15 +719,12 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     // Preview
     // ------------------------------
     @FXML
-    private TitledPane previewPane;
+    private Pane previewPane;
 
     private void preparePreview() {
-        StackPane background = new StackPane();
-        background.setStyle("-fx-background-color: BLACK");
-        background.getChildren().add(graphicsHelper.getPreviewPanel());
-        previewPane.setContent(background);
-        graphicsHelper.getPreviewPanel().fitWidthProperty().bind(previewPane.widthProperty());
-        graphicsHelper.getPreviewPanel().fitHeightProperty().bind(previewPane.heightProperty());
+        previewPane.getChildren().add(graphicsHelper.getMultiPreviewVBox());
+        graphicsHelper.getMultiPreviewVBox().prefWidthProperty().bind(previewPane.widthProperty());
+        graphicsHelper.getMultiPreviewVBox().prefHeightProperty().bind(previewPane.heightProperty());
     }
 
     // ------------------------------
