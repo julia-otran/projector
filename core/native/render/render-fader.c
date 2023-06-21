@@ -149,7 +149,7 @@ float render_fader_get_alpha_with_time(fade_node* node, struct timespec* spec) {
 float render_fader_get_alpha(fade_node *node) {
     struct timespec spec;
     get_time(&spec);
-    render_fader_get_alpha_with_time(node, &spec);
+    return render_fader_get_alpha_with_time(node, &spec);
 }
 
 int render_fader_is_hidden(fade_node *node) {
