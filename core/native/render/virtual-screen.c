@@ -1,12 +1,13 @@
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 
 #define REAL double
 #define VOID void
 #define __UINT64 __uint64
 
 #include "triangle.h"
+
+#include "custom-math.h"
 #include "ogl-loader.h"
 #include "debug.h"
 #include "config-structs.h"
@@ -158,8 +159,8 @@ void virtual_screen_load_vertexes(config_display *display, config_virtual_screen
         x = x / (GLfloat) config->w;
         y = y / (GLfloat) config->h;
         
-        vertexes[i * 2] = min(max(x, 0), 1);
-        vertexes[(i * 2) + 1] = min(max(1.0 - y, 0), 1);
+        vertexes[i * 2] = CLAMP(x, 0.0, 1.0);
+        vertexes[(i * 2) + 1] = CLAMP(1.0 - y, 0, 1);
     }
 
     GLuint uvbuffer;

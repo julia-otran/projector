@@ -14,8 +14,7 @@ import java.net.URL
 import java.util.*
 import java.util.regex.Pattern
 
-const val WINDOWS_MEDIA_URL_PATTERN = "dshow:// :dshow-vdev=%s :dshow-adev= :dshow-size=%s"
-const val LINUX_MEDIA_URL_PATTERN = "v4l2://%s"
+const val LINUX_MEDIA_URL_PATTERN = "v4l2:///dev/%s"
 
 class DeviceCaptureController: ProjectionController(),
     ProjectionBarControlCallbacks {
@@ -130,18 +129,26 @@ class DeviceCaptureController: ProjectionController(),
         )
     }
 
+    private fun getMediaOptionsV4l2(resolution: BridgeCaptureDeviceResolution): Array<String> {
+        return arrayOf(
+            "width=" + resolution.width.toString(),
+            "height=" + resolution.height.toString()
+        )
+    }
+
     private fun activateReproduction() {
         val deviceName = devicesComboBox.selectionModel.selectedItem
-        val resolution = resolutionsComboBox.selectionModel.selectedItem.toString()
+        val resolution = resolutionsComboBox.selectionModel.selectedItem
         var mediaUrl = ""
         var options: Array<String> = arrayOf()
 
         if (OsCheck.getOperatingSystemType() == OSType.Windows) {
             mediaUrl = "dshow://"
-            options = getMediaOptionsWindows(deviceName, resolution)
+            options = getMediaOptionsWindows(deviceName, resolution.toString())
         }
 
         if (OsCheck.getOperatingSystemType() == OSType.Linux) {
+            options = getMediaOptionsV4l2(resolution)
             mediaUrl = String.format(LINUX_MEDIA_URL_PATTERN, deviceName)
         }
 

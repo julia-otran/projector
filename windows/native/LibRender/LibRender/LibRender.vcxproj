@@ -162,6 +162,7 @@
     <ClInclude Include="src\include\config-serialize.h" />
     <ClInclude Include="src\include\config-structs.h" />
     <ClInclude Include="src\include\config.h" />
+    <ClInclude Include="src\include\custom-math.h" />
     <ClInclude Include="src\include\debug.h" />
     <ClInclude Include="src\include\dev_juhouse_projector_projection2_Bridge.h" />
     <ClInclude Include="src\include\device-capture.h" />

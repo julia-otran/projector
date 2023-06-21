@@ -1,9 +1,9 @@
 #include <stdlib.h>
 #include <inttypes.h>
-#include <math.h>
 #include <stdio.h>
 #include <string.h>
 
+#include "custom-math.h"
 #include "clock.h"
 #include "debug.h"
 #include "render-fader.h"
@@ -72,7 +72,7 @@ void render_fader_fade_in_data(render_fader_instance *instance, int fade_id, int
 
     if (node->mode == RENDER_FADER_MODE_OUT) {
         node->mode = RENDER_FADER_MODE_IN;
-        node->duration_ms = min((current_ms - init_ms), duration_ms);
+        node->duration_ms = MIN((current_ms - init_ms), duration_ms);
         memcpy(&node->start_time_spec, &spec, sizeof(struct timespec));
     }
 

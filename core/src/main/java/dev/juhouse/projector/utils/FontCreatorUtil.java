@@ -57,12 +57,12 @@ public class FontCreatorUtil {
     }
 
     public static Font createFont(String name, int style, int size) {
-        if (MONTSERRAT_FONT.getFamily().equals(name)) {
-            return MONTSERRAT_FONT.deriveFont(style).deriveFont(size * 1.0f);
+        if (getMontserratFont().getFamily().equals(name)) {
+            return getMontserratFont().deriveFont(style).deriveFont(size * 1.0f);
         }
 
-        if (ROBOTO_MONO_FONT.getFamily().equals(name)) {
-            return ROBOTO_MONO_FONT.deriveFont(style).deriveFont(size * 1.0f);
+        if (getRobotoMonoFont().getFamily().equals(name)) {
+            return getRobotoMonoFont().deriveFont(style).deriveFont(size * 1.0f);
         }
 
         return new Font(name, style, size);

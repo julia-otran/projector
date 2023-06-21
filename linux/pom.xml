@@ -117,6 +117,7 @@
                             <directory>../core/native/render/linux</directory>
                             <fileNames>
                                 <fileName>window-capture.c</fileName>
+                                <fileName>device-capture.c</fileName>
                             </fileNames>
                         </source>
 
@@ -138,10 +139,11 @@
                                 <fileName>render-image.c</fileName>
                                 <fileName>render-pixel-unpack-buffer.c</fileName>
                                 <fileName>render-preview.c</fileName>
+                                <fileName>render-tex-blur.c</fileName>
                                 <fileName>render-text.c</fileName>
                                 <fileName>render-video.c</fileName>
-                                <fileName>render-window-capture.c</fileName>
                                 <fileName>render-web-view.c</fileName>
+                                <fileName>render-window-capture.c</fileName>
                                 <fileName>virtual-screen.c</fileName>
                                 <fileName>vs-black-level-adjust.c</fileName>
                                 <fileName>vs-blend.c</fileName>
