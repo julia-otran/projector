@@ -13,6 +13,7 @@ import dev.juhouse.projector.projection2.*;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.geometry.Insets;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelBuffer;
@@ -20,6 +21,7 @@ import javafx.scene.image.PixelFormat;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
+import javafx.util.Callback;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 
 /**
@@ -99,6 +101,11 @@ public class ProjectionPlayer implements Projectable {
         private final ImageView previewImageView;
         private final Label previewErrorLabel;
 
+        private final Callback<PixelBuffer<IntBuffer>, Rectangle2D> updateCallback = (image) -> {
+            updating = false;
+            return null;
+        };
+
         private boolean updating;
 
         public PlayerPreview(ProjectionVideo video, CanvasDelegate delegate) {
@@ -165,21 +172,27 @@ public class ProjectionPlayer implements Projectable {
                         return;
                     }
 
-                    previewImagePixelBuffer = new PixelBuffer<>(
-                            outputSize.getWidth(),
-                            outputSize.getHeight(),
-                            previewImageBufferInt,
-                            PixelFormat.getIntArgbPreInstance()
-                    );
+                    if (
+                            previewImagePixelBuffer == null ||
+                                    previewImagePixelBuffer.getWidth() != outputSize.getWidth() ||
+                                    previewImagePixelBuffer.getHeight() != outputSize.getHeight()
+                    ) {
+                        previewImagePixelBuffer = new PixelBuffer<>(
+                                outputSize.getWidth(),
+                                outputSize.getHeight(),
+                                previewImageBufferInt,
+                                PixelFormat.getIntArgbPreInstance()
+                        );
 
-                    this.previewImageView.setImage(new WritableImage(previewImagePixelBuffer));
+                        this.previewImageView.setImage(new WritableImage(previewImagePixelBuffer));
+                    } else {
+                        previewImagePixelBuffer.updateBuffer(updateCallback);
+                    }
 
                     if (getChildren().isEmpty() || getChildren().get(0) != previewImageView) {
                         this.getChildren().clear();
                         this.getChildren().add(this.previewImageView);
                     }
-
-                    updating = false;
                 });
 
             } catch (Bridge.VideoPreviewOutputBufferTooSmall e) {
