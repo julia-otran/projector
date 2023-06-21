@@ -159,16 +159,20 @@ public class ProjectionPlayer implements Projectable {
             updating = true;
 
             try {
-                previewImageBuffer.flip();
                 BridgeVideoPreviewSize outputSize = delegate.getBridge().downloadPlayerPreview(video.player, previewImageBuffer);
-
-                if (outputSize.getWidth() == 0) {
-                    updating = false;
-                    return;
-                }
 
                 Platform.runLater(() -> {
                     if (!running) {
+                        return;
+                    }
+
+                    if (getChildren().isEmpty() || getChildren().get(0) != previewImageView) {
+                        this.getChildren().clear();
+                        this.getChildren().add(this.previewImageView);
+                    }
+
+                    if (outputSize.getWidth() == 0) {
+                        updating = false;
                         return;
                     }
 
@@ -185,18 +189,15 @@ public class ProjectionPlayer implements Projectable {
                         );
 
                         this.previewImageView.setImage(new WritableImage(previewImagePixelBuffer));
+                        updating = false;
                     } else {
                         previewImagePixelBuffer.updateBuffer(updateCallback);
-                    }
-
-                    if (getChildren().isEmpty() || getChildren().get(0) != previewImageView) {
-                        this.getChildren().clear();
-                        this.getChildren().add(this.previewImageView);
                     }
                 });
 
             } catch (Bridge.VideoPreviewOutputBufferTooSmall e) {
                 showError("[Preview Indisponível] Resolução do video muito alta (max 1920x1080)....");
+                updating = false;
             }
         }
 

@@ -258,7 +258,10 @@ void render_video_download_preview(void* player, void* data, long buffer_capacit
 
 void render_video_src_set_render(void *player, int render) {
     src_render = render;
-    pending_current_player = player;
+
+    if (render) {
+        pending_current_player = player;
+    }
 }
 
 void render_video_src_set_crop_video(int in_crop) {
