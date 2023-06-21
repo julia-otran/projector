@@ -4,6 +4,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <time.h>
+#include <clock.h>
 
 #ifndef _RENDER_TEX_FADER_H_
 #define _RENDER_TEX_FADER_H_
@@ -45,6 +46,7 @@ void render_fader_cleanup(render_fader_instance *instance);
 
 void render_fader_terminate(render_fader_instance *instance);
 
+float render_fader_get_alpha_with_time(fade_node* node, struct timespec *spec);
 float render_fader_get_alpha(fade_node *node);
 
 #define render_fader_for_each(INSTANCE) \

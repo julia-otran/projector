@@ -160,8 +160,8 @@ void render_cycle(render_layer *render) {
     glClearColor(background_clear_color->r, background_clear_color->g, background_clear_color->b, background_clear_color->a);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    render_video_render(render);
     render_image_render(render);
+    render_video_render(render);
     render_text_render(render);
     render_web_view_render(render);
     render_window_capture_render(render);

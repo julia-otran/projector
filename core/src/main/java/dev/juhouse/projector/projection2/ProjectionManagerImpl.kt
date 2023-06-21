@@ -9,6 +9,7 @@ import dev.juhouse.projector.projection2.models.BackgroundModel
 import dev.juhouse.projector.projection2.text.ProjectionLabel
 import dev.juhouse.projector.projection2.text.WrappedText
 import dev.juhouse.projector.projection2.text.WrapperFactory
+import dev.juhouse.projector.projection2.time.ProjectionClock
 import dev.juhouse.projector.projection2.video.ProjectionBackgroundVideo
 import dev.juhouse.projector.projection2.video.ProjectionPlayer
 import dev.juhouse.projector.projection2.video.ProjectionVideo
@@ -56,6 +57,7 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
     }
 
     override fun setText(text: WrappedText?) {
+        concurrentProjectable.get()?.renderFlagProperty?.get()?.renderToNone()
         label.renderFlagProperty.get().renderToAll()
         label.setText(text)
     }
@@ -136,10 +138,31 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
         return videoCapturePlayer
     }
 
+    override fun createClock(): ProjectionClock {
+        val clock = ProjectionClock(delegate)
+
+        projectablesList.add(clock)
+
+        clock.init()
+        clock.rebuild()
+
+        return clock
+    }
+
+    private fun setBackgroundExcludeFlag() {
+        val renderFlagProperty =
+            currentProjectable.get()?.renderFlagProperty ?:
+            concurrentProjectable.get()?.renderFlagProperty
+
+        background.setExcludeRenderFlag(renderFlagProperty?.get())
+    }
+
     override fun setConcurrentProjectable(projectable: Projectable?) {
         concurrentProjectable.get()?.setRender(false)
 
         concurrentProjectable.set(projectable)
+
+        setBackgroundExcludeFlag()
 
         projectable?.setRender(true)
     }
@@ -149,11 +172,7 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
 
         currentProjectable.set(projectable)
 
-        projectable?.let {
-            background.setExcludeRenderFlag(projectable.renderFlagProperty.get())
-        } ?: run {
-            background.setExcludeRenderFlag(null)
-        }
+        setBackgroundExcludeFlag()
 
         backgroundVideo.setRender(projectable == null)
 

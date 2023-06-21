@@ -8,26 +8,28 @@ import dev.juhouse.projector.projection2.text.TextRenderer
 import dev.juhouse.projector.projection2.text.TextRendererBounds
 import dev.juhouse.projector.projection2.video.ProjectionBackgroundVideo
 import dev.juhouse.projector.projection2.video.ProjectionVideo
+import dev.juhouse.projector.utils.FontCreatorUtil
 import javafx.beans.property.ReadOnlyObjectProperty
 import javafx.beans.property.ReadOnlyObjectWrapper
+import java.awt.Color
 import java.awt.Font
 import java.util.*
 import kotlin.collections.ArrayList
 
 class ProjectionClock(private val delegate: CanvasDelegate): Projectable {
+    private var render: Boolean = false
     private val renderFlagProperty = ReadOnlyObjectWrapper<BridgeRenderFlag>()
     private val textRenders: ArrayList<TextRenderer> = ArrayList()
     private var currentText: String? = null
 
     private fun getFontFor(render: BridgeRender): Font {
-        val scaleX = render.width / delegate.mainWidth.toFloat()
-        val scaleY = render.height / delegate.mainHeight.toFloat()
-
-        val newSize = delegate.fontProperty.value.size * scaleX.coerceAtMost(scaleY)
-        return delegate.fontProperty.value.deriveFont(newSize)
+        val newSize = delegate.fontProperty.value.size * render.textScale.toFloat()
+        return FontCreatorUtil.getRobotoMonoFont().deriveFont(newSize)
     }
 
     override fun init() {
+        renderFlagProperty.value = BridgeRenderFlag(delegate)
+
         renderFlagProperty.get().flagValueProperty.addListener { _, _, _ ->
             var changed = false
 
@@ -63,6 +65,7 @@ class ProjectionClock(private val delegate: CanvasDelegate): Projectable {
 
             val render = TextRenderer(bounds, getFontFor(it))
 
+            render.clearColor = Color(0.0f, 0.0f, 0.0f, 0.5f)
             render.enabled = renderFlagProperty.get().isRenderEnabled(it.renderId)
 
             textRenders.add(render)
@@ -70,6 +73,11 @@ class ProjectionClock(private val delegate: CanvasDelegate): Projectable {
     }
 
     override fun setRender(render: Boolean) {
+        if (!render) {
+            setText(null)
+        }
+
+        this.render = render
     }
 
     override fun getRenderFlagProperty(): ReadOnlyObjectProperty<BridgeRenderFlag> {
@@ -77,6 +85,10 @@ class ProjectionClock(private val delegate: CanvasDelegate): Projectable {
     }
 
     fun setText(text: String?) {
+        if (!render) {
+            return
+        }
+
         if (!renderFlagProperty.get().hasAnyRender()) {
             return
         }

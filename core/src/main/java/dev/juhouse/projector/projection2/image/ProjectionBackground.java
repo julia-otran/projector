@@ -78,5 +78,7 @@ public class ProjectionBackground extends ProjectionImage {
         if (exclude != null) {
             this.exclusionFlag.getFlagValueProperty().addListener(exclusionFlagListener);
         }
+
+        updateRenderFlag();
     }
 }

@@ -8,6 +8,7 @@
 #include "ogl-loader.h"
 #include "render-fader.h"
 #include "render-pixel-unpack-buffer.h"
+#include "clock.h"
 
 static mtx_t thread_mutex;
 
@@ -208,10 +209,13 @@ void render_text_start(render_layer *layer) {
 }
 
 void render_text_render(render_layer *layer) {
+    struct timespec spec;
+    get_time(&spec);
+
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnable(GL_TEXTURE_2D);
 
-    glBlendFunc(GL_ONE_MINUS_CONSTANT_COLOR, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
 
     for (int i = 0; i < renders_count; i++) {
         if (renders[i].config.render_id == layer->config.render_id) {
@@ -228,14 +232,14 @@ void render_text_render(render_layer *layer) {
 
                     glBindTexture(GL_TEXTURE_2D, node->fade_id);
 
-                    float alpha = render_fader_get_alpha(node);
-
-                    alpha = (-1.0f * alpha * alpha) + 2.0f * alpha;
+                    float light_amount = render_fader_get_alpha_with_time(node, &spec);
+                    float text_multiply = (-1.0f * light_amount * light_amount) + 2.0f * light_amount;
+                    float alpha = (-0.35f * light_amount * light_amount) + 1.35f * light_amount;
 
                     glColor4f(
-                        layer->config.text_color.r * alpha,
-                        layer->config.text_color.g * alpha,
-                        layer->config.text_color.b * alpha,
+                        layer->config.text_color.r * text_multiply,
+                        layer->config.text_color.g * text_multiply,
+                        layer->config.text_color.b * text_multiply,
                         alpha
                     );
 

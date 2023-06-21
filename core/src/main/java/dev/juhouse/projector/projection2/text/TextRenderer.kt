@@ -14,7 +14,7 @@ data class TextRendererBounds(val renderId: Int, val x: Int, val y: Int, val w: 
 class TextRenderer(val bounds: TextRendererBounds, var font: Font) {
     private val image: BufferedImage = BufferedImage(bounds.w, bounds.h, BufferedImage.TYPE_INT_ARGB)
 
-    private val clearColor = Color(0, 0, 0,0)
+    var clearColor: Color? = null
     private val graphics2D: Graphics2D = image.createGraphics()
 
     var enabled: Boolean = true
@@ -67,9 +67,13 @@ class TextRenderer(val bounds: TextRendererBounds, var font: Font) {
 
         val oldComposite = g.composite
         g.composite = AlphaComposite.Clear
-        g.color = clearColor
         g.fillRect(0, 0, bounds.w, bounds.h)
         g.composite = oldComposite
+
+        if (clearColor != null && enabled) {
+            g.color = clearColor
+            g.fillRect(0, 0, bounds.w, bounds.h)
+        }
     }
 
     private fun printTextOnImage(drawLines: List<StringWithPosition>) {

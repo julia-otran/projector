@@ -7,6 +7,7 @@ import javafx.scene.control.ToggleButton
 import java.net.URL
 import java.util.*
 import dev.juhouse.projector.projection2.time.ProjectionCountdown
+import dev.juhouse.projector.utils.TimeFormatUtils.Companion.formatMsToTime
 import javafx.application.Platform
 import javafx.scene.layout.Pane
 
@@ -45,7 +46,7 @@ class CountdownController: ProjectionController(), Runnable, ProjectionBarContro
         projectionCountdown = getProjectionManager().createCountdown()
 
         intervalMs = observer.getProperty("INTERVAL_MS").map { i -> i.toLong() }.orElse(5 * 60 * 1000L)
-        countdownTextField.text = formatInterval(intervalMs)
+        countdownTextField.text = formatMsToTime(intervalMs)
 
         countdownTextField.textProperty().addListener { _, _, _ ->
             if (!countdownTextField.isDisable) {
@@ -101,7 +102,7 @@ class CountdownController: ProjectionController(), Runnable, ProjectionBarContro
             countdownPause.selectedProperty().value = false
             countdownTextField.disableProperty().value = false
 
-            val formattedText = formatInterval(intervalMs)
+            val formattedText = formatMsToTime(intervalMs)
             countdownTextField.text = formattedText
         }
     }
@@ -112,7 +113,7 @@ class CountdownController: ProjectionController(), Runnable, ProjectionBarContro
 
             val remainingTime = (endsAt - System.currentTimeMillis()).coerceAtLeast(0)
 
-            val formattedText = formatInterval(remainingTime)
+            val formattedText = formatMsToTime(remainingTime)
 
             Platform.runLater {
                 projectionCountdown.setText(formattedText)
@@ -128,7 +129,6 @@ class CountdownController: ProjectionController(), Runnable, ProjectionBarContro
             }
         }
     }
-
     private fun getIntervalMilis(): Long {
         val textSplit = countdownTextField.text.split(':').reversed()
 
@@ -137,14 +137,6 @@ class CountdownController: ProjectionController(), Runnable, ProjectionBarContro
         val hours = textSplit.getOrNull(2)?.ifEmpty { "0" }?.toInt() ?: 0
 
         return secs * 1000L + mins * 60 * 1000L + hours * 60 * 60 * 1000L
-    }
-
-    private fun formatInterval(ms: Long): String {
-        val secs = (ms % (60 * 1000)) / 1000
-        val mins = (ms % (60 * 60 * 1000)) / (60 * 1000)
-        val hours = ms / (60 * 60 * 1000)
-
-        return String.format("%02d:%02d:%02d", hours, mins, secs)
     }
 
     override fun onProjectionBegin() {

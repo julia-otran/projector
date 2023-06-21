@@ -118,11 +118,8 @@ void render_fader_fade_in_out(render_fader_instance *instance, int fade_id, int 
     render_fader_fade_in_out_data(instance, fade_id, duration_ms, NULL);
 }
 
-float render_fader_get_alpha(fade_node *node) {
-    struct timespec spec;
-    get_time(&spec);
-
-    long current_ms = timespec_to_ms(&spec);
+float render_fader_get_alpha_with_time(fade_node* node, struct timespec* spec) {
+    long current_ms = timespec_to_ms(spec);
     long init_ms = timespec_to_ms(&node->start_time_spec);
 
     long elapsed_time = current_ms - init_ms;
@@ -130,13 +127,16 @@ float render_fader_get_alpha(fade_node *node) {
     if (node->mode == RENDER_FADER_MODE_IN) {
         if (elapsed_time >= node->duration_ms) {
             return 1.0;
-        } else {
+        }
+        else {
             return elapsed_time / (float)node->duration_ms;
         }
-    } else if (node->mode == RENDER_FADER_MODE_OUT) {
+    }
+    else if (node->mode == RENDER_FADER_MODE_OUT) {
         if (elapsed_time >= node->duration_ms) {
             return 0.0;
-        } else {
+        }
+        else {
             long remaiming_time = node->duration_ms - elapsed_time;
             return remaiming_time / (float)node->duration_ms;
         }
@@ -144,6 +144,12 @@ float render_fader_get_alpha(fade_node *node) {
 
     // may never happen?
     return 1.0;
+}
+
+float render_fader_get_alpha(fade_node *node) {
+    struct timespec spec;
+    get_time(&spec);
+    render_fader_get_alpha_with_time(node, &spec);
 }
 
 int render_fader_is_hidden(fade_node *node) {

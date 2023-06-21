@@ -8,6 +8,7 @@ package dev.juhouse.projector.projection2;
 import java.awt.Font;
 import java.io.File;
 
+import dev.juhouse.projector.projection2.time.ProjectionClock;
 import dev.juhouse.projector.projection2.time.ProjectionCountdown;
 import dev.juhouse.projector.projection2.image.ProjectionImage;
 import dev.juhouse.projector.projection2.image.ProjectionMultiImage;
@@ -50,6 +51,8 @@ public interface ProjectionManager {
 
     ProjectionVideoCapture createVideoCapture();
 
+    ProjectionClock createClock();
+
     void setConcurrentProjectable(Projectable projectable);
 
     void setProjectable(Projectable projectable);
@@ -83,5 +86,4 @@ public interface ProjectionManager {
     void removeCallback(ProjectionManagerCallbacks callback);
 
     BridgeRenderFlag createRenderFlag();
-
 }

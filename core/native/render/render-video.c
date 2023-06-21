@@ -32,6 +32,7 @@ static render_pixel_unpack_buffer_instance *buffer_instance;
 static render_tex_blur_instance* blur_instance;
 
 static struct libvlc_media_player_t* current_player;
+static struct libvlc_media_player_t* pending_current_player;
 
 static GLuint texture_id;
 static int texture_loaded;
@@ -87,6 +88,7 @@ void render_video_initialize() {
     should_clear = 0;
     dst_width = 0;
     dst_height = 0;
+    pending_current_player = NULL;
 
     render_fader_init(&fader_instance);
 }
@@ -255,15 +257,8 @@ void render_video_download_preview(void* player, void* data, long buffer_capacit
 }
 
 void render_video_src_set_render(void *player, int render) {
-    mtx_lock(&thread_mutex);
-
-    if (render) {
-        current_player = player;
-    }
-
-    mtx_unlock(&thread_mutex);
-
     src_render = render;
+    pending_current_player = player;
 }
 
 void render_video_src_set_crop_video(int in_crop) {
@@ -324,11 +319,14 @@ void render_video_update_assets() {
     }
 
     render_pixel_unpack_buffer_enqueue_for_write(buffer_instance, buffer);
+ 
+    if (current_player != pending_current_player) {
+        current_player = pending_current_player;
+    }
 
     if (src_render) {
-        dst_render = src_render;
-
         if (texture_loaded) {
+            dst_render = src_render;
             should_clear = 1;
             render_fader_fade_in(fader_instance, 1, RENDER_FADER_DEFAULT_TIME_MS);
         }
@@ -407,10 +405,13 @@ void render_video_render(render_layer *layer) {
     }
 
     glEnable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
 
     render_fader_for_each(fader_instance) {
         float alpha = render_fader_get_alpha(node);
-        glColor4f(alpha, alpha, alpha, alpha);
+        
+        glBlendFunc(GL_CONSTANT_COLOR, GL_ONE_MINUS_CONSTANT_COLOR);
+        glBlendColor(alpha, alpha, alpha, alpha);
 
         if (enable_blur) {    
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -425,7 +426,11 @@ void render_video_render(render_layer *layer) {
             glBindTexture(GL_TEXTURE_2D, texture_id);
         }
 
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
         glEnableClientState(GL_VERTEX_ARRAY);
+        glColor4f(alpha, alpha, alpha, alpha);
+        glBlendColor(0.0, 0.0, 0.0, 0.0);
 
         glBegin(GL_QUADS);
 
