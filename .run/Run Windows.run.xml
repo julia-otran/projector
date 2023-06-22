@@ -6,6 +6,7 @@
     <selectedOptions>
       <option name="environmentVariables" visible="false" />
     </selectedOptions>
+    <option name="VM_PARAMETERS" value="-verbose:gc" />
     <method v="2">
       <option name="Maven.BeforeRunTask" enabled="true" file="$PROJECT_DIR$/pom.xml" goal="compile -pl core,windows -Ddebug=true" />
     </method>
