@@ -10,12 +10,22 @@ import dev.juhouse.projector.projection2.text.*;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 /**
  *
  * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
 public class ProjectionLabel implements Projectable {
+    @Data
+    @AllArgsConstructor
+    private static class MultipleWrappedText {
+        private WrappedText behind;
+        private WrappedText current;
+        private WrappedText ahead;
+    }
+
     private final CanvasDelegate canvasDelegate;
 
     private final List<TextWrapperFactoryChangeListener> factoryChangeListeners;
@@ -25,7 +35,7 @@ public class ProjectionLabel implements Projectable {
 
     private final ReadOnlyObjectWrapper<BridgeRenderFlag> renderFlagProperty = new ReadOnlyObjectWrapper<>();
 
-    private WrappedText currentText;
+    private MultipleWrappedText currentText;
 
     public ProjectionLabel(CanvasDelegate canvasDelegate) {
         renderFlagProperty.set(new BridgeRenderFlag(canvasDelegate));
@@ -73,7 +83,8 @@ public class ProjectionLabel implements Projectable {
                     render.getTextAreaX(),
                     render.getTextAreaY(),
                     render.getTextAreaWidth(),
-                    render.getTextAreaHeight());
+                    render.getTextAreaHeight(),
+                    render.getEnableRenderTextBehindAndAhead());
 
             TextRenderer textRender = new TextRenderer(bounds, getFontFor(render.getRenderId()));
 
@@ -123,29 +134,42 @@ public class ProjectionLabel implements Projectable {
         return 0;
     }
 
-    public void setText(WrappedText text) {
-        currentText = text;
+    public void setText(WrappedText behind, WrappedText current, WrappedText ahead) {
+        if (current == null || current.isEmpty()) {
+            currentText = null;
+        } else {
+            currentText = new MultipleWrappedText(
+                    behind == null ? WrappedText.blankText() : behind,
+                    current,
+                    ahead == null ? WrappedText.blankText() : ahead
+            );
+        }
+
         doRender();
     }
 
     private void doRender() {
-        if (currentText == null || currentText.isEmpty()) {
+        if (currentText == null) {
             canvasDelegate.getBridge().setTextData(null);
             return;
         }
 
         final BridgeTextData[] textData = new BridgeTextData[bridgeRenders.length];
 
-        final Set<Integer> srcRenderIds = Arrays.stream(bridgeRenders).map(BridgeRender::getRenderId).collect(Collectors.toSet());
-        final Set<Integer> txtRenderIds = currentText.renderLines().keySet();
+        textRenders.forEach((renderId, tr) -> {
+            List<String> currentLines = currentText.current.renderLines().get(renderId);
+            List<String> behindLines = currentText.behind.renderLines().get(renderId);
+            List<String> aheadLines = currentText.ahead.renderLines().get(renderId);
 
-        if (!srcRenderIds.containsAll(txtRenderIds) || !txtRenderIds.containsAll(srcRenderIds)) {
-            return;
-        }
+            if (behindLines == null) {
+                behindLines = Collections.emptyList();
+            }
 
-        currentText.renderLines().forEach((renderId, lines) -> {
-            TextRenderer tr = textRenders.get(renderId);
-            textData[getRenderIndex(renderId)] = tr.renderText(lines);
+            if (aheadLines == null) {
+                aheadLines = Collections.emptyList();
+            }
+
+            textData[getRenderIndex(renderId)] = tr.renderText(behindLines, currentLines, aheadLines);
         });
 
         canvasDelegate.getBridge().setTextData(textData);

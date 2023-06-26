@@ -10,6 +10,7 @@ data class BridgeRender(
     val textAreaY: Int,
     val textAreaWidth: Int,
     val textAreaHeight: Int,
+    val enableRenderTextBehindAndAhead: Boolean,
     val enableRenderBackgroundAssets: Boolean,
     val enableRenderImage: Boolean,
     val enableRenderVideo: Boolean,

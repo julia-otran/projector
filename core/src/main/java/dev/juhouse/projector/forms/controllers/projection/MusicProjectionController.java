@@ -217,12 +217,10 @@ public class MusicProjectionController extends ProjectionController {
             enableClear();
             clearMarker();
 
-            WrappedText text = data.get(pos).text;
-
             TableViewSkin<?> skin = (TableViewSkin<?>) phrasesTable.getSkin();
             VirtualFlow<?> flow = ((VirtualFlow<?>) skin.getChildren().get(1));
 
-            if (text.isEmpty()) {
+            if (data.get(pos).text.isEmpty()) {
                 if (oldValue != null) {
                     if (oldValue.intValue() < pos) {
                         pos++;
@@ -247,10 +245,8 @@ public class MusicProjectionController extends ProjectionController {
                     markedPosition = null;
                 }
 
-                currentPhraseNumber = text.sourcePhraseNumber();
                 projecting = true;
-                projectionManager.setText(text);
-                playTheme();
+                setText(pos);
 
                 if (flow != null) {
                     IndexedCell<?> firstVisibleCell = flow.getFirstVisibleCell();
@@ -277,6 +273,40 @@ public class MusicProjectionController extends ProjectionController {
         } else {
             setTheme(theme.getVideoFile());
         }
+    }
+
+    private void setText(int pos) {
+        WrappedText text = data.get(pos).text;
+        currentPhraseNumber = text.sourcePhraseNumber();
+
+        int behindPos = pos - 1;
+        WrappedText behind = null;
+
+        while (behindPos >= 0) {
+            behind = data.get(behindPos).text;
+
+            if (!behind.isEmpty()) {
+                break;
+            }
+
+            behindPos--;
+        }
+
+        int aheadPos = pos + 1;
+        WrappedText ahead = null;
+
+        while (aheadPos < data.size()) {
+            ahead = data.get(aheadPos).text;
+
+            if (!ahead.isEmpty()) {
+                break;
+            }
+
+            aheadPos++;
+        }
+
+        projectionManager.setText(behind, text, ahead);
+        playTheme();
     }
 
     private void setTheme(File theme) {

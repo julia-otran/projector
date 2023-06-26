@@ -216,6 +216,7 @@ JNIEXPORT jobjectArray JNICALL Java_dev_juhouse_projector_projection2_Bridge_get
 
     jfieldID text_scale_field = (*env)->GetFieldID(env, BridgeRenderClass, "textScale", "D");
     jfieldID enable_render_background_assets_field = (*env)->GetFieldID(env, BridgeRenderClass, "enableRenderBackgroundAssets", "Z");
+    jfieldID enable_render_text_behind_and_ahead_field = (*env)->GetFieldID(env, BridgeRenderClass, "enableRenderTextBehindAndAhead", "Z");
     jfieldID enable_render_image_field = (*env)->GetFieldID(env, BridgeRenderClass, "enableRenderImage", "Z");
     jfieldID enable_render_video_field = (*env)->GetFieldID(env, BridgeRenderClass, "enableRenderVideo", "Z");
     jfieldID render_mode_field = (*env)->GetFieldID(env, BridgeRenderClass, "renderMode", "I");
@@ -243,6 +244,7 @@ JNIEXPORT jobjectArray JNICALL Java_dev_juhouse_projector_projection2_Bridge_get
         }
 
         (*env)->SetDoubleField(env, render_object, text_scale_field, render->text_scale);
+        (*env)->SetBooleanField(env, render_object, enable_render_text_behind_and_ahead_field, render->enable_render_text_behind_and_ahead);
         (*env)->SetBooleanField(env, render_object, enable_render_background_assets_field, render->enable_render_background_assets);
         (*env)->SetBooleanField(env, render_object, enable_render_image_field, render->enable_render_image);
         (*env)->SetBooleanField(env, render_object, enable_render_video_field, render->enable_render_video);

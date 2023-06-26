@@ -60,7 +60,8 @@ class ProjectionCountdown(private val delegate: CanvasDelegate): Projectable {
                 0,
                 0,
                 it.width,
-                it.height
+                it.height,
+                false
             )
 
             val render = TextRenderer(bounds, getFontFor(it))

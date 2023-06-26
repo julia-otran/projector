@@ -9,7 +9,7 @@ import java.awt.image.BufferedImage
 import java.awt.image.DataBufferInt
 import java.util.function.Consumer
 
-data class TextRendererBounds(val renderId: Int, val x: Int, val y: Int, val w: Int, val h: Int)
+data class TextRendererBounds(val renderId: Int, val x: Int, val y: Int, val w: Int, val h: Int, val behindAndAhead: Boolean)
 
 class TextRenderer(val bounds: TextRendererBounds, var font: Font) {
     private val image: BufferedImage = BufferedImage(bounds.w, bounds.h, BufferedImage.TYPE_INT_ARGB)
@@ -24,10 +24,14 @@ class TextRenderer(val bounds: TextRendererBounds, var font: Font) {
     }
 
     val textWrapperMetrics: TextWrapperMetrics get() {
-        return TextWrapperMetrics(bounds.renderId, fontMetrics, bounds.w, bounds.h)
+        return TextWrapperMetrics(bounds.renderId, fontMetrics, bounds.w, bounds.h, bounds.behindAndAhead)
     }
 
     fun renderText(text: List<String>): BridgeTextData {
+        return renderText(emptyList(), text, emptyList())
+    }
+
+    fun renderText(behind: List<String>, text: List<String>, ahead: List<String>): BridgeTextData {
         clearImage()
 
         if (!enabled) {
@@ -45,7 +49,7 @@ class TextRenderer(val bounds: TextRendererBounds, var font: Font) {
             )
         }
 
-        val linePositions = generateLinePositions(text)
+        val linePositions = generateLinePositions(behind, text, ahead)
         printTextOnImage(linePositions)
 
         return BridgeTextData(
@@ -96,13 +100,31 @@ class TextRenderer(val bounds: TextRendererBounds, var font: Font) {
             val textShape = glyphVectorOutline.outline
             g.color = Color.black
             g.draw(textShape)
-            g.color = Color.white
+
+            if (pt.current) {
+                g.color = Color.white
+            } else {
+                g.color = Color.CYAN
+            }
+
             g.fill(textShape)
+
             g.transform = baseTransform
         })
     }
 
-    private fun generateLinePositions(lines: List<String>): List<StringWithPosition> {
+    private class TextWithCurrent(val text:String, val current: Boolean) {
+    }
+
+    private fun generateLinePositions(behind: List<String>, current: List<String>, ahead: List<String>): List<StringWithPosition> {
+        val lines =
+            if (bounds.behindAndAhead)
+                behind.map { TextWithCurrent(it, false) } +
+                current.map { TextWithCurrent(it, true) } +
+                ahead.map { TextWithCurrent(it, false) }
+            else
+                current.map { TextWithCurrent(it, true) }
+
         if (lines.isEmpty()) {
             return emptyList()
         }
@@ -112,7 +134,7 @@ class TextRenderer(val bounds: TextRendererBounds, var font: Font) {
         val fontHeight = fontMetrics.ascent
         val between = fontMetrics.leading + fontMetrics.descent
 
-        val totalHeight = fontHeight * lines.size + between * (lineCount - 1)
+        val totalHeight = fontHeight * lineCount + between * (lineCount - 1)
 
         val emptyHeight: Int = bounds.h  - totalHeight
 
@@ -122,7 +144,7 @@ class TextRenderer(val bounds: TextRendererBounds, var font: Font) {
         val pendingLines: MutableList<StringWithPosition> = ArrayList()
 
         for (line in lines) {
-            val lineWidth = fontMetrics.stringWidth(line)
+            val lineWidth = fontMetrics.stringWidth(line.text)
 
             val x = (width - lineWidth) / 2
             val y = translateY
@@ -135,7 +157,7 @@ class TextRenderer(val bounds: TextRendererBounds, var font: Font) {
                 translateY += between
             }
 
-            pendingLines.add(StringWithPosition(x, y, lineWidth, y - translateY, line))
+            pendingLines.add(StringWithPosition(x, y, lineWidth, y - translateY, line.text, line.current))
         }
 
         if (pendingLines.stream().allMatch { l: StringWithPosition ->

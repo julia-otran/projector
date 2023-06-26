@@ -8,5 +8,5 @@ package dev.juhouse.projector.projection2.models;
 /**
  * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
-public record StringWithPosition(int x, int y, int w, int h, String text) {
+public record StringWithPosition(int x, int y, int w, int h, String text, boolean current) {
 }
