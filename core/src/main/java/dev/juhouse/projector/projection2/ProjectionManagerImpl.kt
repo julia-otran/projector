@@ -66,6 +66,10 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
         label.setText(behind, current, ahead)
     }
 
+    override fun textClear() {
+        label.setClear(true);
+    }
+
     override fun getTextFont(): Font {
         return delegate.fontProperty.value
     }

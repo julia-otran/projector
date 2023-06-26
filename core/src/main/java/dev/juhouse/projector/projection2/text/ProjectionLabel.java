@@ -37,6 +37,8 @@ public class ProjectionLabel implements Projectable {
 
     private MultipleWrappedText currentText;
 
+    private boolean clear;
+
     public ProjectionLabel(CanvasDelegate canvasDelegate) {
         renderFlagProperty.set(new BridgeRenderFlag(canvasDelegate));
         renderFlagProperty.get().renderToAll();
@@ -88,11 +90,10 @@ public class ProjectionLabel implements Projectable {
 
             TextRenderer textRender = new TextRenderer(bounds, getFontFor(render.getRenderId()));
 
-            textRender.setEnabled(renderFlagProperty.get().isRenderEnabled(render.getRenderId()));
-
             this.textRenders.put(render.getRenderId(), textRender);
         }
 
+        setClear(clear);
         onFactoryChange();
         doRender();
     }
@@ -117,7 +118,8 @@ public class ProjectionLabel implements Projectable {
         for (BridgeRender render : bridgeRenders) {
             if (render.getRenderId() == renderId) {
                 float newFontSize = canvasDelegate.getFontProperty().getValue().getSize() * (float) render.getTextScale();
-                return canvasDelegate.getFontProperty().getValue().deriveFont(newFontSize);
+                int style = render.getEnableRenderTextBehindAndAhead() ? Font.BOLD : Font.PLAIN;
+                return canvasDelegate.getFontProperty().getValue().deriveFont(style, newFontSize);
             }
         }
 
@@ -134,10 +136,32 @@ public class ProjectionLabel implements Projectable {
         return 0;
     }
 
+    public void setClear(boolean clear) {
+        for (BridgeRender render : bridgeRenders) {
+            TextRenderer textRender = textRenders.get(render.getRenderId());
+
+            if (clear) {
+                if (render.getEnableRenderTextBehindAndAhead()) {
+                    textRender.setEnabled(renderFlagProperty.get().isRenderEnabled(render.getRenderId()));
+                } else {
+                    textRender.setEnabled(false);
+                }
+            } else {
+                textRender.setEnabled(renderFlagProperty.get().isRenderEnabled(render.getRenderId()));
+            }
+        }
+
+        if (this.clear != clear) {
+            this.clear = clear;
+            doRender();
+        }
+    }
+
     public void setText(WrappedText behind, WrappedText current, WrappedText ahead) {
         if (current == null || current.isEmpty()) {
             currentText = null;
         } else {
+            setClear(false);
             currentText = new MultipleWrappedText(
                     behind == null ? WrappedText.blankText() : behind,
                     current,

@@ -404,7 +404,7 @@ public class MusicProjectionController extends ProjectionController {
         projecting = false;
         clearScreenButton.setText(clearText);
         clearScreenButton.disableProperty().set(true);
-        projectionManager.setText(WrappedText.blankText());
+        projectionManager.textClear();
         miniPhrasesListView.getSelectionModel().clearSelection();
     }
 
@@ -422,10 +422,8 @@ public class MusicProjectionController extends ProjectionController {
 
     @FXML
     public void removeBackground() {
-        if (!clearScreenButton.isDisabled()) {
-            onClearScreen();
-        }
-
+        onClearScreen();
+        projectionManager.setText(WrappedText.blankText());
         projectionManager.setMusicForBackground(null, null);
         removeBackgroundMenuItem.disableProperty().set(true);
     }

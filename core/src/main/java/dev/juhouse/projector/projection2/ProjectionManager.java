@@ -35,6 +35,8 @@ public interface ProjectionManager {
 
     void setText(WrappedText behind, WrappedText current, WrappedText ahead);
 
+    void textClear();
+
     Font getTextFont();
 
     void setTextFont(Font font);
