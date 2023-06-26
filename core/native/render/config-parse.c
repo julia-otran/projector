@@ -211,8 +211,8 @@ void parse_config_color_matrix(cJSON* config_color_matrix_json, config_color_mat
         out->b_to_b = b_to_b_json->valuedouble;
     }
 
-    if (cJSON_IsNumber(g_exposure_json)) {
-        out->g_exposure = g_exposure_json->valuedouble;
+    if (cJSON_IsNumber(b_exposure_json)) {
+        out->b_exposure = b_exposure_json->valuedouble;
     }
 
     if (cJSON_IsNumber(b_bright_json)) {
