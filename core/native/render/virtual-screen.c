@@ -247,6 +247,7 @@ void virtual_screen_render(config_virtual_screen *config, void *data) {
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+    glFlush();
     glPopMatrix();
 }
 
@@ -255,7 +256,6 @@ void virtual_screen_print(config_virtual_screen *config, void *data) {
     glEnable(GL_COLOR_MATERIAL);
 
     glEnable(GL_TEXTURE_2D);
-    glEnable(GL_MULTISAMPLE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -287,7 +287,6 @@ void virtual_screen_print(config_virtual_screen *config, void *data) {
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    glDisable(GL_MULTISAMPLE);
 }
 
 void virtual_screen_stop(void *data) {

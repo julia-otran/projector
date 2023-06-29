@@ -36,6 +36,7 @@ int window_should_close();
 void monitors_init(render_output *data, int render_output_count);
 void monitor_prepare_renders_context();
 void monitors_cycle();
+void monitors_flip();
 void monitors_terminate();
 
 int monitors_get_minor_refresh_rate();

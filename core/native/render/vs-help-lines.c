@@ -3,7 +3,6 @@
 void vs_help_lines_render(config_virtual_screen *config) {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_MULTISAMPLE);
 
     glColor4f(1.0, 1.0, 1.0, 1.0);
 
@@ -17,6 +16,4 @@ void vs_help_lines_render(config_virtual_screen *config) {
         glVertex2d(line->x2, line->y2);
         glEnd();
     }
-
-    glDisable(GL_MULTISAMPLE);
 }

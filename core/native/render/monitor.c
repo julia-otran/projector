@@ -120,14 +120,13 @@ void create_non_fs_window(monitor* m) {
     }
 }
 
-void swap_monitor_buffers() {
+void monitors_flip() {
     for (int i=0; i<monitors_count; i++) {
         monitor *m = &monitors[i];
 
         if (m->window) {
             glfwMakeContextCurrent(m->window);
             glfwSwapBuffers(m->window);
-            glClear(GL_COLOR_BUFFER_BIT);
         }
     }
 }
@@ -295,12 +294,21 @@ void monitors_init(render_output *data, int render_output_count) {
 
         if (m->window) {
             glfwMakeContextCurrent(m->window);
-            glfwSwapInterval(1);
+
+            if (m->window == gl_share_context) 
+            {
+                glfwSwapInterval(1);
+            }
+            else 
+            {
+                glfwSwapInterval(0);
+            }
 
             glewInit();
 
             glfwGetFramebufferSize(m->window, &width, &height);
             glViewport(0, 0, width, height);
+            glEnable(GL_MULTISAMPLE);
         }
     }
 
@@ -365,11 +373,9 @@ void monitors_cycle() {
             }
 
             glPopMatrix();
+            glFlush();
         }
     }
-
-    swap_monitor_buffers();
-    register_monitor_frame();
 }
 
 int monitors_get_minor_refresh_rate() {

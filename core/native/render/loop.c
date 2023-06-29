@@ -22,10 +22,9 @@ static struct timespec last_frame_completed_at = {
 };
 
 int loop(void *_) {
-    struct timespec current_time;
-    struct timespec sleep_interval = {
-        .tv_sec = 0
-    };
+    time_measure* tm1 = create_measure("Renders Cycle");
+    time_measure* tm2 = create_measure("Monitors Cycle");
+    time_measure* tm3 = create_measure("Monitors Flip");
 
     render_output *output;
     int render_output_count;
@@ -58,14 +57,26 @@ int loop(void *_) {
         mtx_unlock(&thread_mutex);
 
         monitor_prepare_renders_context();
+
+        begin_measure(tm1);
         renders_cycle();
+        end_measure(tm1);
+
+        begin_measure(tm2);
         monitors_cycle();
+        end_measure(tm2);
+
+        begin_measure(tm3);
+        monitors_flip();
+        end_measure(tm3);
 
         glfwPollEvents();
 
         if (window_should_close()) {
             run = 0;
         }
+
+        register_monitor_frame();
     }
 
     renders_terminate();

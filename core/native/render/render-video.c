@@ -25,7 +25,9 @@ static int dst_width = 0;
 static int dst_height = 0;
 static int dst_render = 0;
 
-static mtx_t thread_mutex;
+static mtx_t window_thread_mutex;
+static mtx_t buffer_thread_mutex;
+static mtx_t opaque_thread_mutex;
 
 static render_fader_instance *fader_instance;
 static render_pixel_unpack_buffer_instance *buffer_instance;
@@ -55,21 +57,23 @@ static GLFWwindow* transfer_window;
 
 void render_video_create_mtx() {
     // I rly don't care about this leak, it only leaks when program closes, so, it does not leaks
-    mtx_init(&thread_mutex, 0);
+    mtx_init(&window_thread_mutex, 0);
+    mtx_init(&buffer_thread_mutex, 0);
+    mtx_init(&opaque_thread_mutex, 0);
 }
 
 void render_video_create_window(GLFWwindow *shared_context) {
-    mtx_lock(&thread_mutex);
+    mtx_lock(&window_thread_mutex);
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
     glfwWindowHint(GLFW_SAMPLES, 0);
 
     transfer_window = glfwCreateWindow(800, 600, "Projector VLC4j", NULL, shared_context);
     
-    mtx_unlock(&thread_mutex);
+    mtx_unlock(&window_thread_mutex);
 }
 
 void render_video_destroy_window() {
-    mtx_lock(&thread_mutex);
+    mtx_lock(&window_thread_mutex);
     glfwDestroyWindow(transfer_window);
     transfer_window = NULL;
 
@@ -77,7 +81,7 @@ void render_video_destroy_window() {
         node->data->glew_initialized = 0;
     }
 
-    mtx_unlock(&thread_mutex);
+    mtx_unlock(&window_thread_mutex);
 }
 
 void render_video_initialize() {
@@ -108,7 +112,7 @@ unsigned render_video_format_callback_alloc(
     chroma[2] = (char)'3';
     chroma[3] = (char)'2';
 
-    mtx_lock(&thread_mutex);
+    mtx_lock(&opaque_thread_mutex);
 
     data->width = (*width);
     data->height = (*height);
@@ -118,7 +122,7 @@ unsigned render_video_format_callback_alloc(
     data->buffer = (void*) (((unsigned long long)data->raw_buffer + 255) & ~255);
     data->glew_initialized = 0;
 
-    mtx_unlock(&thread_mutex);
+    mtx_unlock(&opaque_thread_mutex);
 
     (*pitches) = (*width) * BYTES_PER_PIXEL;
     (*lines) = (*height);
@@ -130,7 +134,7 @@ void render_video_format_callback_dealoc(void* opaque) {
     render_video_opaque* data = (render_video_opaque*)opaque;
 
     if (data->raw_buffer) {
-        mtx_lock(&thread_mutex);
+        mtx_lock(&opaque_thread_mutex);
 
         free(data->raw_buffer);
 
@@ -138,7 +142,7 @@ void render_video_format_callback_dealoc(void* opaque) {
         data->buffer = NULL;
         data->buffer_size = 0;
 
-        mtx_unlock(&thread_mutex);
+        mtx_unlock(&opaque_thread_mutex);
     }
 }
 
@@ -146,12 +150,12 @@ static void* render_video_lock(void* opaque, void** p_pixels)
 {
     render_video_opaque* data = (render_video_opaque*)opaque;
 
-    mtx_lock(&thread_mutex);
+    mtx_lock(&window_thread_mutex);
 
     if (!running || transfer_window == NULL || data->player != current_player) {
         (*p_pixels) = data->buffer;
 
-        mtx_unlock(&thread_mutex);
+        mtx_unlock(&window_thread_mutex);
 
         return NULL;
     }
@@ -161,7 +165,7 @@ static void* render_video_lock(void* opaque, void** p_pixels)
     if (buffer == NULL) {
         (*p_pixels) = data->buffer;
 
-        mtx_unlock(&thread_mutex);
+        mtx_unlock(&window_thread_mutex);
 
         return NULL;
     }
@@ -182,6 +186,17 @@ static void* render_video_lock(void* opaque, void** p_pixels)
     }
 
     void *pdata = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+
+    if (pdata == NULL) {
+        (*p_pixels) = data->buffer;
+
+        render_pixel_unpack_buffer_enqueue_for_write(buffer_instance, buffer);
+
+        mtx_unlock(&window_thread_mutex);
+
+        return NULL;
+    }
+
     (*p_pixels) = pdata;
 
     return (void*)buffer;
@@ -193,18 +208,18 @@ static void render_video_unlock(void* opaque, void* id, void* const* p_pixels)
         glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
         glfwMakeContextCurrent(NULL);
-        mtx_unlock(&thread_mutex);
+        mtx_unlock(&window_thread_mutex);
     }
 }
 
 static void render_video_display(void* opaque, void* id)
 {
     if (id) {
-        mtx_lock(&thread_mutex);
+        mtx_lock(&buffer_thread_mutex);
         if (buffer_instance) {
             render_pixel_unpack_buffer_enqueue_for_read(buffer_instance, id);
         }
-        mtx_unlock(&thread_mutex);
+        mtx_unlock(&buffer_thread_mutex);
     }
 }
 
@@ -220,7 +235,9 @@ void render_video_attach_player(void *player) {
     node->next = (void*) opaque_list;
     node->data = data;
 
+    mtx_lock(&opaque_thread_mutex);
     opaque_list = node;
+    mtx_unlock(&opaque_thread_mutex);
 }
 
 void render_video_download_preview(void* player, void* data, long buffer_capacity, int *out_width, int *out_height) {
@@ -231,10 +248,10 @@ void render_video_download_preview(void* player, void* data, long buffer_capacit
         return;
     }
 
-    mtx_lock(&thread_mutex);
+    mtx_lock(&opaque_thread_mutex);
 
     if (current_player == player) {
-        mtx_unlock(&thread_mutex);
+        mtx_unlock(&opaque_thread_mutex);
         return;
     }
 
@@ -253,7 +270,7 @@ void render_video_download_preview(void* player, void* data, long buffer_capacit
         }
     }
 
-    mtx_unlock(&thread_mutex);
+    mtx_unlock(&opaque_thread_mutex);
 }
 
 void render_video_src_set_render(void *player, int render) {
@@ -269,18 +286,26 @@ void render_video_src_set_crop_video(int in_crop) {
 }
 
 void render_video_create_buffers() {
-    mtx_lock(&thread_mutex);
+    mtx_lock(&window_thread_mutex);
+    mtx_lock(&buffer_thread_mutex);
+
     render_pixel_unpack_buffer_create(&buffer_instance);
     running = 1;
-    mtx_unlock(&thread_mutex);
+    
+    mtx_lock(&buffer_thread_mutex);
+    mtx_unlock(&window_thread_mutex);
 }
 
 void render_video_deallocate_buffers() {
-    mtx_lock(&thread_mutex);
+    mtx_lock(&window_thread_mutex);
+    mtx_lock(&buffer_thread_mutex);
+
     render_pixel_unpack_buffer_deallocate(buffer_instance);
     buffer_instance = NULL;
     running = 0;
-    mtx_unlock(&thread_mutex);
+
+    mtx_unlock(&buffer_thread_mutex);
+    mtx_unlock(&window_thread_mutex);
 }
 
 void render_video_update_buffers() {
