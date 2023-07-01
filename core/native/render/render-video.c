@@ -150,6 +150,11 @@ static void* render_video_lock(void* opaque, void** p_pixels)
 {
     render_video_opaque* data = (render_video_opaque*)opaque;
 
+    if (data->player != current_player) {
+        (*p_pixels) = data->buffer;
+        return NULL;
+    }
+
     mtx_lock(&window_thread_mutex);
 
     if (!running || transfer_window == NULL || data->player != current_player) {
