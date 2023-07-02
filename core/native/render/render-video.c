@@ -217,6 +217,7 @@ static void render_video_unlock(void* opaque, void* id, void* const* p_pixels)
     if (id != NULL) {
         glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        glFlush();
         glfwMakeContextCurrent(NULL);
         mtx_unlock(&window_thread_mutex);
     }
@@ -354,6 +355,8 @@ void render_video_update_assets() {
         if (src_render) {
             texture_loaded = 1;
         }
+
+        glFlush();
     }
 
     render_pixel_unpack_buffer_enqueue_for_write(buffer_instance, buffer);

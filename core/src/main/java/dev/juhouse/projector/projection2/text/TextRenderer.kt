@@ -15,6 +15,7 @@ class TextRenderer(val bounds: TextRendererBounds, var font: Font) {
     private val image: BufferedImage = BufferedImage(bounds.w, bounds.h, BufferedImage.TYPE_INT_ARGB)
 
     var clearColor: Color? = null
+    private var secondColor: Color = Color(255, 210, 0, 255)
     private val graphics2D: Graphics2D = image.createGraphics()
 
     var enabled: Boolean = true
@@ -102,9 +103,13 @@ class TextRenderer(val bounds: TextRendererBounds, var font: Font) {
             g.draw(textShape)
 
             if (pt.current) {
-                g.color = Color.white
+                if (bounds.behindAndAhead) {
+                    g.color = Color.YELLOW
+                } else {
+                    g.color = Color.WHITE
+                }
             } else {
-                g.color = Color.CYAN
+                g.color = secondColor
             }
 
             g.fill(textShape)

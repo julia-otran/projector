@@ -279,19 +279,6 @@ public class MusicProjectionController extends ProjectionController {
         WrappedText text = data.get(pos).text;
         currentPhraseNumber = text.sourcePhraseNumber();
 
-        int behindPos = pos - 1;
-        WrappedText behind = null;
-
-        while (behindPos >= 0) {
-            behind = data.get(behindPos).text;
-
-            if (!behind.isEmpty()) {
-                break;
-            }
-
-            behindPos--;
-        }
-
         int aheadPos = pos + 1;
         WrappedText ahead = null;
 
@@ -305,7 +292,7 @@ public class MusicProjectionController extends ProjectionController {
             aheadPos++;
         }
 
-        projectionManager.setText(behind, text, ahead);
+        projectionManager.setText(WrappedText.blankText(), text, ahead);
         playTheme();
     }
 
