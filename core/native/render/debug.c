@@ -40,7 +40,9 @@ void end_measure(time_measure* tm) {
     unsigned long long average_ms = tm->total_ms / tm->count;
 
     if (current_ms > average_ms + 15) {
+#ifdef _DEBUG
         log_debug("Measure %s greater than avg. avg=%llu took=%llu\n", tm->name, average_ms, current_ms);
+#endif
     }
 }
 
