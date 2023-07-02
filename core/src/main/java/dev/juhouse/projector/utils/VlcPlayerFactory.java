@@ -21,6 +21,11 @@ public class VlcPlayerFactory {
             NativeLibrary.getInstance("vlccore");
         }
 
+        vlcArgs.add("--no-autoscale");
+        vlcArgs.add("--swscale-mode=4");
+        vlcArgs.add("--avcodec-fast");
+        vlcArgs.add("--avcodec-hurry-up");
+
         factory = new MediaPlayerFactory(vlcArgs);
     }
 
