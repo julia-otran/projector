@@ -34,7 +34,7 @@ GLFWwindow* get_gl_share_context();
 int window_should_close();
 
 void monitors_init(render_output *data, int render_output_count);
-void monitor_prepare_renders_context();
+void monitor_set_share_context();
 void monitors_cycle();
 void monitors_flip();
 void monitors_terminate();

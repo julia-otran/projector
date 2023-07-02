@@ -36,7 +36,7 @@ int loop(void *_) {
     int milisecs_per_frame = 1000.0 / (monitors_get_minor_refresh_rate() - 10.0);
     pending_config_reload = NULL;
 
-    monitor_prepare_renders_context();
+    monitor_set_share_context();
     renders_init();
 
     get_time(&last_frame_completed_at);
@@ -56,7 +56,7 @@ int loop(void *_) {
 
         mtx_unlock(&thread_mutex);
 
-        monitor_prepare_renders_context();
+        monitor_set_share_context();
 
         begin_measure(tm1);
         renders_cycle();

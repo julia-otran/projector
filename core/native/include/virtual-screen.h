@@ -24,13 +24,19 @@ typedef struct {
     vs_blend blend;
 } virtual_screen;
 
-void virtual_screen_initialize();
-void virtual_screen_start(config_display *display, render_output *render, config_virtual_screen *config, void **data);
+void virtual_screen_shared_initialize();
+void virtual_screen_monitor_initialize();
 
-void virtual_screen_render(config_virtual_screen *config, void *data);
-void virtual_screen_print(config_virtual_screen *config, void *data);
+void virtual_screen_shared_start(config_display *display, render_output *render, config_virtual_screen *config, void **data);
+void virtual_screen_monitor_start(config_display* display, render_output* render, config_virtual_screen* config, void* data);
 
-void virtual_screen_stop(void *data);
-void virtual_screen_shutdown();
+void virtual_screen_shared_render(config_virtual_screen *config, void *data);
+void virtual_screen_monitor_print(config_virtual_screen *config, void *data);
+
+void virtual_screen_shared_stop(void *data);
+void virtual_screen_monitor_stop(void* data);
+
+void virtual_screen_shared_shutdown();
+void virtual_screen_monitor_shutdown();
 
 #endif

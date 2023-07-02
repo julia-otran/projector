@@ -297,7 +297,7 @@ void render_video_create_buffers() {
     render_pixel_unpack_buffer_create(&buffer_instance);
     running = 1;
     
-    mtx_lock(&buffer_thread_mutex);
+    mtx_unlock(&buffer_thread_mutex);
     mtx_unlock(&window_thread_mutex);
 }
 

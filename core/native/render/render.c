@@ -171,7 +171,6 @@ void render_cycle(render_layer *render) {
     glPopMatrix();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glFlush();
 }
 
 void render_terminate(render_layer *render) {

@@ -23,10 +23,12 @@ static GLuint program;
 static GLuint textureUniform;
 static GLuint adjustFactorUniform;
 
-void virtual_screen_initialize() {
+void virtual_screen_shared_initialize() {
     vs_color_corrector_init();
     vs_blend_initialize();
+}
 
+void virtual_screen_monitor_initialize() {
     vertexshader = loadShader(GL_VERTEX_SHADER, "direct.vertex.shader");
     fragmentshader = loadShader(GL_FRAGMENT_SHADER, "direct.fragment.shader");
 
@@ -82,7 +84,7 @@ void virtual_screen_free_triangulateio(struct triangulateio *in) {
     }
 }
 
-void virtual_screen_load_vertexes(config_display *display, config_virtual_screen *config, virtual_screen *data) {
+void virtual_screen_monitor_load_vertexes(config_display *display, config_virtual_screen *config, virtual_screen *data) {
     struct triangulateio in, out;
     int pindex;
     GLfloat x, y;
@@ -183,7 +185,12 @@ void virtual_screen_load_vertexes(config_display *display, config_virtual_screen
     glBindVertexArray(0);
 }
 
-void virtual_screen_start(config_display *display, render_output *render, config_virtual_screen *config, void **data) {
+void virtual_screen_monitor_start(config_display* display, render_output* render, config_virtual_screen* config, void* data) {
+    virtual_screen* vs = (virtual_screen*)data;
+    virtual_screen_monitor_load_vertexes(display, config, vs);
+}
+
+void virtual_screen_shared_start(config_display *display, render_output *render, config_virtual_screen *config, void **data) {
     virtual_screen *vs = (virtual_screen*) calloc(1, sizeof(virtual_screen));
     (*data) = (void*) vs;
 
@@ -202,7 +209,6 @@ void virtual_screen_start(config_display *display, render_output *render, config
 
     // Give an empty image to OpenGL ( the last "0" )
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0 , GL_RGBA, GL_UNSIGNED_BYTE, 0);
-    glTexStorage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA8UI, width, height, GL_TRUE);
 
     tex_set_default_params();
 
@@ -220,23 +226,21 @@ void virtual_screen_start(config_display *display, render_output *render, config
 
     vs_color_corrector_start(config, vs->render_output, &vs->color_corrector);
     vs_blend_start(config, &vs->blend);
-
-    virtual_screen_load_vertexes(display, config, vs);
 }
 
-void virtual_screen_render(config_virtual_screen *config, void *data) {
+void virtual_screen_shared_render(config_virtual_screen *config, void *data) {
     virtual_screen *vs = (virtual_screen*) data;
     config_color_factor *background_clear_color = &config->background_clear_color;
-
-    glPushMatrix();
 
     glBindFramebuffer(GL_FRAMEBUFFER, vs->framebuffer_id);
 
     glViewport(0, 0, config->w, config->h);
+    glEnable(GL_MULTISAMPLE);
 
     glClearColor(background_clear_color->r, background_clear_color->g, background_clear_color->b, background_clear_color->a);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    glPushMatrix();
     glLoadIdentity();
     glOrtho(0.0, config->w, config->h, 0.0, 0.0, 1.0);
 
@@ -245,13 +249,12 @@ void virtual_screen_render(config_virtual_screen *config, void *data) {
     vs_help_lines_render(config);
     vs_black_level_adjust_render(config);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    glFlush();
     glPopMatrix();
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void virtual_screen_print(config_virtual_screen *config, void *data) {
+void virtual_screen_monitor_print(config_virtual_screen *config, void *data) {
     virtual_screen *vs = (virtual_screen*) data;
     glEnable(GL_COLOR_MATERIAL);
 
@@ -289,7 +292,7 @@ void virtual_screen_print(config_virtual_screen *config, void *data) {
 
 }
 
-void virtual_screen_stop(void *data) {
+void virtual_screen_shared_stop(void *data) {
     virtual_screen *vs = (virtual_screen*) data;
 
     vs_color_corrector_stop(&vs->color_corrector);
@@ -297,6 +300,10 @@ void virtual_screen_stop(void *data) {
 
     glDeleteFramebuffers(1, &vs->framebuffer_id);
     glDeleteTextures(1, &vs->texture_id);
+}
+
+void virtual_screen_monitor_stop(void* data) {
+    virtual_screen* vs = (virtual_screen*)data;
 
     // Select the VAO
     glBindVertexArray(vs->vertexarray);
@@ -320,10 +327,12 @@ void virtual_screen_stop(void *data) {
     free(data);
 }
 
-void virtual_screen_shutdown() {
+void virtual_screen_shared_shutdown() {
     vs_color_corrector_shutdown();
     vs_blend_shutdown();
+}
 
+void virtual_screen_monitor_shutdown() {
     glUseProgram(0);
 
     glDetachShader(program, vertexshader);
