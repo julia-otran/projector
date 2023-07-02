@@ -235,7 +235,6 @@ void virtual_screen_shared_render(config_virtual_screen *config, void *data) {
     glBindFramebuffer(GL_FRAMEBUFFER, vs->framebuffer_id);
 
     glViewport(0, 0, config->w, config->h);
-    glEnable(GL_MULTISAMPLE);
 
     glClearColor(background_clear_color->r, background_clear_color->g, background_clear_color->b, background_clear_color->a);
     glClear(GL_COLOR_BUFFER_BIT);
