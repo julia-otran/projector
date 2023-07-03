@@ -34,14 +34,17 @@ data class TextWrapperMetrics(
     val fontMetrics: FontMetrics,
     val textAreaWidth: Int,
     val textAreaHeight: Int,
-    val renderBehindAndAhead: Boolean
+    val renderTextAhead: Boolean
 ) {
-    private val maxLinesDivisor: Int get() = if (renderBehindAndAhead) 3 else 1
+    private val maxLinesDivisor: Int get() = if (renderTextAhead) 2 else 1
+    private val extraSpaceLines: Int get() = if (renderTextAhead) 1 else 0
+    private val lineHeight: Int get() = fontMetrics.height + fontMetrics.leading + fontMetrics.descent
+    private val totalLineCount: Int get() = textAreaHeight / lineHeight
 
     // This may occur with gigant font sizes.
     // TODO: Fix this workaround
     // Beware! zero lines may bugs lot of things!
-    private val maxLines: Int get() = (textAreaHeight / ((fontMetrics.height + fontMetrics.leading + fontMetrics.descent) * maxLinesDivisor)).coerceAtLeast(maxLinesDivisor)
+    private val maxLines: Int get() = ((totalLineCount - extraSpaceLines) / maxLinesDivisor).coerceAtLeast(maxLinesDivisor)
 
     private fun isSeparator(c: Char): Boolean {
         return Character.isWhitespace(c) || c == ','

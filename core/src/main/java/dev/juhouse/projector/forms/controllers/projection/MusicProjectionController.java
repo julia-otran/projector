@@ -292,7 +292,7 @@ public class MusicProjectionController extends ProjectionController {
             aheadPos++;
         }
 
-        projectionManager.setText(WrappedText.blankText(), text, ahead);
+        projectionManager.setText(text, ahead);
         playTheme();
     }
 

@@ -21,7 +21,6 @@ public class ProjectionLabel implements Projectable {
     @Data
     @AllArgsConstructor
     private static class MultipleWrappedText {
-        private WrappedText behind;
         private WrappedText current;
         private WrappedText ahead;
     }
@@ -157,13 +156,12 @@ public class ProjectionLabel implements Projectable {
         }
     }
 
-    public void setText(WrappedText behind, WrappedText current, WrappedText ahead) {
+    public void setText(WrappedText current, WrappedText ahead) {
         if (current == null || current.isEmpty()) {
             currentText = null;
         } else {
             setClear(false);
             currentText = new MultipleWrappedText(
-                    behind == null ? WrappedText.blankText() : behind,
                     current,
                     ahead == null ? WrappedText.blankText() : ahead
             );
@@ -182,18 +180,13 @@ public class ProjectionLabel implements Projectable {
 
         textRenders.forEach((renderId, tr) -> {
             List<String> currentLines = currentText.current.renderLines().get(renderId);
-            List<String> behindLines = currentText.behind.renderLines().get(renderId);
             List<String> aheadLines = currentText.ahead.renderLines().get(renderId);
-
-            if (behindLines == null) {
-                behindLines = Collections.emptyList();
-            }
 
             if (aheadLines == null) {
                 aheadLines = Collections.emptyList();
             }
 
-            textData[getRenderIndex(renderId)] = tr.renderText(behindLines, currentLines, aheadLines);
+            textData[getRenderIndex(renderId)] = tr.renderText(currentLines, aheadLines);
         });
 
         canvasDelegate.getBridge().setTextData(textData);

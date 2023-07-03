@@ -57,13 +57,13 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
     }
 
     override fun setText(text: WrappedText?) {
-        setText(null, text, null)
+        setText(text, null)
     }
 
-    override fun setText(behind: WrappedText?, current: WrappedText?, ahead: WrappedText?) {
+    override fun setText(current: WrappedText?, ahead: WrappedText?) {
         concurrentProjectable.get()?.renderFlagProperty?.get()?.renderToNone()
         label.renderFlagProperty.get().renderToAll()
-        label.setText(behind, current, ahead)
+        label.setText(current, ahead)
     }
 
     override fun textClear() {

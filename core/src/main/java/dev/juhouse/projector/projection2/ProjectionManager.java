@@ -33,7 +33,7 @@ public interface ProjectionManager {
 
     void setText(WrappedText text);
 
-    void setText(WrappedText behind, WrappedText current, WrappedText ahead);
+    void setText(WrappedText current, WrappedText ahead);
 
     void textClear();
 

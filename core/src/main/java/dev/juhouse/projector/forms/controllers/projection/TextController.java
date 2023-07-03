@@ -87,12 +87,12 @@ public class TextController extends ProjectionController implements TextWrapperF
         
         List<WrappedText> text = tw.fitGroups(Collections.singletonList(projectionText.getText()));
         
-        if (text.size() <= 0) {
+        if (text.size() == 0) {
             return;
         }
         
         // TODO: Warn a error. Too much text to fit on screen if text.size() > 1
-        projectable.setText(null, text.get(0), null);
+        projectable.setText(text.get(0), null);
     }
 
     @Override
@@ -120,7 +120,7 @@ public class TextController extends ProjectionController implements TextWrapperF
     public void onProjectionEnd() {
         projectionManager.setProjectable(null);
         projectionText.disableProperty().set(false);
-        projectable.setText(null, null, null);
+        projectable.setText(null, null);
         projecting = false;
     }
 }

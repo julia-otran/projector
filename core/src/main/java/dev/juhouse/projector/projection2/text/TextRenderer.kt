@@ -1,6 +1,5 @@
 package dev.juhouse.projector.projection2.text
 
-import dev.juhouse.projector.projection2.BridgeRender
 import dev.juhouse.projector.projection2.BridgeTextData
 import dev.juhouse.projector.projection2.models.StringWithPosition
 import java.awt.*
@@ -9,13 +8,12 @@ import java.awt.image.BufferedImage
 import java.awt.image.DataBufferInt
 import java.util.function.Consumer
 
-data class TextRendererBounds(val renderId: Int, val x: Int, val y: Int, val w: Int, val h: Int, val behindAndAhead: Boolean)
+data class TextRendererBounds(val renderId: Int, val x: Int, val y: Int, val w: Int, val h: Int, val ahead: Boolean)
 
 class TextRenderer(val bounds: TextRendererBounds, var font: Font) {
     private val image: BufferedImage = BufferedImage(bounds.w, bounds.h, BufferedImage.TYPE_INT_ARGB)
 
     var clearColor: Color? = null
-    private var secondColor: Color = Color(255, 210, 0, 255)
     private val graphics2D: Graphics2D = image.createGraphics()
 
     var enabled: Boolean = true
@@ -25,14 +23,14 @@ class TextRenderer(val bounds: TextRendererBounds, var font: Font) {
     }
 
     val textWrapperMetrics: TextWrapperMetrics get() {
-        return TextWrapperMetrics(bounds.renderId, fontMetrics, bounds.w, bounds.h, bounds.behindAndAhead)
+        return TextWrapperMetrics(bounds.renderId, fontMetrics, bounds.w, bounds.h, bounds.ahead)
     }
 
     fun renderText(text: List<String>): BridgeTextData {
-        return renderText(emptyList(), text, emptyList())
+        return renderText(text, emptyList())
     }
 
-    fun renderText(behind: List<String>, text: List<String>, ahead: List<String>): BridgeTextData {
+    fun renderText(text: List<String>, ahead: List<String>): BridgeTextData {
         clearImage()
 
         if (!enabled) {
@@ -50,7 +48,7 @@ class TextRenderer(val bounds: TextRendererBounds, var font: Font) {
             )
         }
 
-        val linePositions = generateLinePositions(behind, text, ahead)
+        val linePositions = generateLinePositions(text, ahead)
         printTextOnImage(linePositions)
 
         return BridgeTextData(
@@ -102,15 +100,7 @@ class TextRenderer(val bounds: TextRendererBounds, var font: Font) {
             g.color = Color.black
             g.draw(textShape)
 
-            if (pt.current) {
-                if (bounds.behindAndAhead) {
-                    g.color = Color.YELLOW
-                } else {
-                    g.color = Color.WHITE
-                }
-            } else {
-                g.color = secondColor
-            }
+            g.color = Color.WHITE
 
             g.fill(textShape)
 
@@ -121,11 +111,11 @@ class TextRenderer(val bounds: TextRendererBounds, var font: Font) {
     private class TextWithCurrent(val text:String, val current: Boolean) {
     }
 
-    private fun generateLinePositions(behind: List<String>, current: List<String>, ahead: List<String>): List<StringWithPosition> {
+    private fun generateLinePositions(current: List<String>, ahead: List<String>): List<StringWithPosition> {
         val lines =
-            if (bounds.behindAndAhead)
-                behind.map { TextWithCurrent(it, false) } +
+            if (bounds.ahead)
                 current.map { TextWithCurrent(it, true) } +
+                listOf(TextWithCurrent("", false)) +
                 ahead.map { TextWithCurrent(it, false) }
             else
                 current.map { TextWithCurrent(it, true) }
