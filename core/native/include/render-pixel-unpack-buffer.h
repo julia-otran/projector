@@ -26,6 +26,9 @@ typedef struct {
 void render_pixel_unpack_buffer_create(render_pixel_unpack_buffer_instance **instance_ptr);
 void render_pixel_unpack_buffer_deallocate(render_pixel_unpack_buffer_instance *instance);
 
+void render_pixel_unpack_buffer_allocate_extra_data(render_pixel_unpack_buffer_instance *instance, int size);
+void render_pixel_unpack_buffer_free_extra_data(render_pixel_unpack_buffer_instance *instance);
+
 render_pixel_unpack_buffer_node* render_pixel_unpack_buffer_get_all_buffers(render_pixel_unpack_buffer_instance *instance);
 
 render_pixel_unpack_buffer_node* render_pixel_unpack_buffer_dequeue_for_read(render_pixel_unpack_buffer_instance *instance);

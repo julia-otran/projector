@@ -28,6 +28,18 @@ void render_pixel_unpack_buffer_deallocate(render_pixel_unpack_buffer_instance *
     free(instance);
 }
 
+void render_pixel_unpack_buffer_allocate_extra_data(render_pixel_unpack_buffer_instance *instance, int size) {
+    instance->buffers[0].extra_data = malloc(size);
+    instance->buffers[1].extra_data = malloc(size);
+    instance->buffers[2].extra_data = malloc(size);
+}
+
+void render_pixel_unpack_buffer_free_extra_data(render_pixel_unpack_buffer_instance *instance) {
+    free(instance->buffers[0].extra_data);
+    free(instance->buffers[1].extra_data);
+    free(instance->buffers[2].extra_data);
+}
+
 render_pixel_unpack_buffer_node* render_pixel_unpack_buffer_get_all_buffers(render_pixel_unpack_buffer_instance *instance) {
     return (render_pixel_unpack_buffer_node*) &instance->buffers;
 }

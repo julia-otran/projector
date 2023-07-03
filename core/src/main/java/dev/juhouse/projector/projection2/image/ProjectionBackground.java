@@ -54,9 +54,8 @@ public class ProjectionBackground extends ProjectionImage {
 
     @Override
     public void rebuild() {
-        super.rebuild();
-
         availableFlag.applyDefault(BridgeRender::getEnableRenderBackgroundAssets);
+        super.rebuild();
     }
 
     private CanvasDelegate getCanvasDelegate() {

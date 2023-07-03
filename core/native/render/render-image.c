@@ -10,13 +10,16 @@
 #include "render-pixel-unpack-buffer.h"
 
 typedef struct {
-    int render_id, width, height, updated, cleared, buffer_size;
+    int render_id, width, height, updated, cleared, buffer_size, crop;
     void *pixel_data;
 } image_info;
 
+typedef struct {
+    int width, height, crop;
+} simple_image_info;
+
 static int initialized = 0;
 static int src_crop;
-static int src_render_flag;
 
 static mtx_t thread_mutex;
 
@@ -31,7 +34,6 @@ static render_pixel_unpack_buffer_instance **buffer_instances;
 void render_image_initialize() {
     mtx_init(&thread_mutex, 0);
     initialized = 1;
-    src_render_flag = 0;
 }
 
 void render_image_set_config(render_layer *in_renders, int count) {
@@ -47,24 +49,8 @@ void render_image_set_config(render_layer *in_renders, int count) {
     }
 }
 
-void render_image_set_image(void *pixel_data, int width_in, int height_in, int crop_in, int render_flag_in) {
-    for (int i = 0; i < renders_count; i++) {
-        if ((render_flag_in >> input_images[i].render_id) & 1) {
-            render_image_set_image_multi(pixel_data, width_in, height_in, crop_in, input_images[i].render_id);
-        }
-
-        if (((render_flag_in >> input_images[i].render_id) & 1) == 0) {
-            render_image_set_image_multi(NULL, width_in, height_in, crop_in, input_images[i].render_id);
-        }
-    }
-
-    src_render_flag = render_flag_in;
-}
-
-void render_image_set_image_multi(void *pixel_data, int width, int height, int crop, int render_id) {
+void render_image_set_image_multi(void *pixel_data, int width, int height, int render_id, int crop) {
     mtx_lock(&thread_mutex);
-
-    src_crop = crop;
 
     for (int i = 0; i < renders_count; i++) {
         if (input_images[i].render_id == render_id) {
@@ -80,6 +66,7 @@ void render_image_set_image_multi(void *pixel_data, int width, int height, int c
 
             input_images[i].width = width;
             input_images[i].height = height;
+            input_images[i].crop = crop;
 
             if (pixel_data != NULL) {
                 memcpy(input_images[i].pixel_data, pixel_data, min_size);
@@ -100,11 +87,13 @@ void render_image_create_buffers() {
 
     for (int i = 0; i < renders_count; i++) {
         render_pixel_unpack_buffer_create(&buffer_instances[i]);
+        render_pixel_unpack_buffer_allocate_extra_data(buffer_instances[i], sizeof(simple_image_info));
     }
 }
 
 void render_image_deallocate_buffers() {
     for (int i = 0; i < renders_count; i++) {
+        render_pixel_unpack_buffer_free_extra_data(buffer_instances[i]);
         render_pixel_unpack_buffer_deallocate(buffer_instances[i]);
     }
 
@@ -142,6 +131,12 @@ void render_image_update_buffers() {
             glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
             glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+            simple_image_info *simple_info = (simple_image_info*) buffer->extra_data;
+
+            simple_info->width = width;
+            simple_info->height = height;
+            simple_info->crop = info->crop;
 
             buffer_updated = 1;
             info->updated = 0;
@@ -181,13 +176,14 @@ void render_image_update_assets() {
                 glBindTexture(GL_TEXTURE_2D, 0);
                 glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-                input_images[i].updated = 0;
-
-                void* size = (void*) ((buffer->width << 16) | (buffer->height & 0xFFFF));
+                simple_image_info *info = (simple_image_info*) malloc(sizeof(simple_image_info));
+                info->width = buffer->width;
+                info->height = buffer->height;
+                info->crop = ((simple_image_info*)buffer->extra_data)->crop;
 
                 glFlush();
 
-                render_fader_fade_in_out_data(fader_instances[i], texture_id, RENDER_FADER_DEFAULT_TIME_MS, size);
+                render_fader_fade_in_out_data(fader_instances[i], texture_id, RENDER_FADER_DEFAULT_TIME_MS, (void*)info);
             }
 
             render_pixel_unpack_buffer_enqueue_for_write(buffer_instances[i], buffer);
@@ -201,6 +197,11 @@ void render_image_update_assets() {
 
                 if (tex_id) {
                     glDeleteTextures(1, &tex_id);
+                }
+
+                if (node->extra_data) {
+                    free(node->extra_data);
+                    node->extra_data = NULL;
                 }
 
                 node->mode = RENDER_FADER_MODE_DELETE;
@@ -224,10 +225,10 @@ void render_image_render(render_layer *layer) {
         if (renders[i].config.render_id == layer->config.render_id) {
             render_fader_for_each(fader_instances[i]) {
                 if (node->fade_id) {
-                    int size = (int) node->extra_data;
+                    simple_image_info *info = (simple_image_info*) node->extra_data;
 
-                    int dst_width = size >> 16;
-                    int dst_height = size & 0xFFFF;
+                    int dst_width = info->width;
+                    int dst_height = info->height;
 
                     float w_scale = (dst_width / (float)dst_height);
                     float h_scale = (dst_height / (float)dst_width);
@@ -235,7 +236,7 @@ void render_image_render(render_layer *layer) {
                     float w_sz = layer->config.h * w_scale;
                     float h_sz = layer->config.w * h_scale;
 
-                    if (src_crop) {
+                    if (info->crop) {
                         if (w_sz > layer->config.w) {
                             w = w_sz;
                             h = h_scale * w;

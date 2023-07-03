@@ -1,6 +1,8 @@
 package dev.juhouse.projector.projection2;
 
 import com.sun.jna.Pointer;
+import javafx.beans.value.ChangeListener;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
 import uk.co.caprica.vlcj.binding.internal.libvlc_media_player_t;
@@ -11,6 +13,8 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Bridge {
     private boolean shadersLoaded = false;
@@ -96,9 +100,7 @@ public class Bridge {
 
     private native void setVideoRenderFlagPtr(long player, boolean crop, int flag);
 
-    public native void setImageAsset(int[] data, int width, int height, boolean crop, int renderFlag);
-
-    public native void setMultiImageAsset(int[] data, int width, int height, int renderId);
+    public native void setMultiImageAsset(int[] data, int width, int height, int renderId, boolean crop);
 
     public native void setWebViewBuffer(ByteBuffer buffer, int width, int height);
 

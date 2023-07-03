@@ -5,10 +5,7 @@
  */
 package dev.juhouse.projector.projection2.image;
 
-import dev.juhouse.projector.projection2.BridgeRender;
-import dev.juhouse.projector.projection2.BridgeRenderFlag;
-import dev.juhouse.projector.projection2.CanvasDelegate;
-import dev.juhouse.projector.projection2.Projectable;
+import dev.juhouse.projector.projection2.*;
 import dev.juhouse.projector.projection2.models.BackgroundProvide;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -33,6 +30,8 @@ public class ProjectionImage implements Projectable {
     private boolean render;
     private BackgroundProvide model;
 
+    private PresentMultipleImage presentImage;
+
     public ProjectionImage(CanvasDelegate canvasDelegate) {
         this.renderFlag = new ReadOnlyObjectWrapper<>(new BridgeRenderFlag(canvasDelegate));
         this.canvasDelegate = canvasDelegate;
@@ -42,11 +41,7 @@ public class ProjectionImage implements Projectable {
     @Override
     public void init() {
         renderFlag.get().applyDefault(BridgeRender::getEnableRenderImage);
-        renderFlag.get().getFlagValueProperty().addListener((observableValue, number, t1) -> {
-            if (render) {
-                update();
-            }
-        });
+        presentImage = new PresentMultipleImage(renderFlag.get(), canvasDelegate.getBridge());
     }
 
     @Override
@@ -56,7 +51,9 @@ public class ProjectionImage implements Projectable {
 
     @Override
     public void rebuild() {
-
+        presentImage = new PresentMultipleImage(renderFlag.get(), canvasDelegate.getBridge());
+        updateModel();
+        update();
     }
 
     @Override
@@ -84,8 +81,8 @@ public class ProjectionImage implements Projectable {
         if (this.cropBackground != cropBackground) {
             this.cropBackground = cropBackground;
 
-            if (this.render) {
-                update();
+            if (presentImage != null) {
+                presentImage.setCrop(cropBackground);
             }
         }
     }
@@ -96,37 +93,35 @@ public class ProjectionImage implements Projectable {
 
     public void setModel(BackgroundProvide model) {
         this.model = model;
-
-        if (this.render) {
-            update();
-        }
+        updateModel();
+        update();
     }
 
-    protected void setImageAsset(int[] buffer, int width, int height, boolean crop) {
-        if (buffer != null) {
-            canvasDelegate.getBridge().setImageAsset(buffer, width, height, crop, renderFlag.get().getFlagValue());
-        } else {
-            canvasDelegate.getBridge().setImageAsset(null, width, height, crop, BridgeRenderFlag.NO_RENDER);
+    private void updateModel() {
+        BackgroundProvide model = getModel();
+
+        if (model == null) {
+            presentImage.update(null, 0, 0, cropBackground);
+            return;
         }
+
+        Image image = model.getStaticBackground();
+
+        if (image == null) {
+            presentImage.update(null, 0, 0, cropBackground);
+            return;
+        }
+
+        int w = (int) Math.round(image.getWidth());
+        int h = (int) Math.round(image.getHeight());
+
+        IntBuffer buffer = IntBuffer.allocate(w * h);
+        image.getPixelReader().getPixels(0, 0, w, h, WritablePixelFormat.getIntArgbInstance(), buffer.array(), 0, w);
+
+        presentImage.update(buffer.array(), w, h, cropBackground);
     }
 
     private void update() {
-        if (render) {
-            Image image = getModel().getStaticBackground();
-
-            if (image == null) {
-                setImageAsset(null, 0, 0, cropBackground);
-            } else {
-                int w = (int) Math.round(image.getWidth());
-                int h = (int) Math.round(image.getHeight());
-
-                IntBuffer buffer = IntBuffer.allocate(w * h);
-                image.getPixelReader().getPixels(0, 0, w, h, WritablePixelFormat.getIntArgbInstance(), buffer.array(), 0, w);
-
-                setImageAsset(buffer.array(), w, h, cropBackground);
-            }
-        } else {
-            setImageAsset(null, 0, 0, cropBackground);
-        }
+        presentImage.setRender(render);
     }
 }

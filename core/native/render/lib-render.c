@@ -351,26 +351,14 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setVideoRen
     render_video_src_set_render((void*)player_addr, render_flag);
 }
 
-// Image render methods
-JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setImageAsset
-  (JNIEnv *env, jobject _, jintArray arr, jint width, jint height, jboolean crop, jint renderFlag) {
-    if (arr) {
-        jint *data = (*env)->GetIntArrayElements(env, arr, 0);
-        render_image_set_image((void*) data, width, height, crop, renderFlag);
-        (*env)->ReleaseIntArrayElements(env, arr, data, 0);
-    } else {
-        render_image_set_image(NULL, 0, 0, 0, 0);
-    }
-  }
-
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setMultiImageAsset
-  (JNIEnv *env, jobject _, jintArray arr, jint width, jint height, jint render_id) {
+  (JNIEnv *env, jobject _, jintArray arr, jint width, jint height, jint render_id, jboolean crop) {
     if (arr) {
         jint *data = (*env)->GetIntArrayElements(env, arr, 0);
-        render_image_set_image_multi(data, width, height, 0, render_id);
+        render_image_set_image_multi(data, width, height, render_id, crop);
         (*env)->ReleaseIntArrayElements(env, arr, data, 0);
     } else {
-        render_image_set_image_multi(NULL, 0, 0, 0, render_id);
+        render_image_set_image_multi(NULL, 0, 0, render_id, crop);
     }
 }
 

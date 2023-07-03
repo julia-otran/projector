@@ -4,6 +4,7 @@ import dev.juhouse.projector.projection2.BridgeRenderFlag
 import dev.juhouse.projector.projection2.CanvasDelegate
 import dev.juhouse.projector.projection2.Projectable
 import javafx.beans.property.ReadOnlyObjectProperty
+import javafx.beans.property.ReadOnlyObjectWrapper
 import javafx.scene.image.Image
 import javafx.scene.image.PixelFormat
 import java.lang.RuntimeException
@@ -12,12 +13,17 @@ import kotlin.math.ceil
 
 class ProjectionMultiImage(private val delegate: CanvasDelegate): Projectable {
     private val imagesMap = HashMap<Int, Image>()
+    private val presentUniqueImageMap = HashMap<Int, PresentUniqueImage>()
+
     private var render = false
-    private var cleared = true
-    private var buffer: IntBuffer? = null
+    private val renderFlagProperty = ReadOnlyObjectWrapper<BridgeRenderFlag>()
 
     override fun init() {
+        renderFlagProperty.set(BridgeRenderFlag(delegate))
 
+        delegate.bridge.renderSettings.forEach {
+            presentUniqueImageMap[it.renderId] = PresentUniqueImage(it.renderId, delegate.bridge)
+        }
     }
 
     override fun finish() {
@@ -25,7 +31,12 @@ class ProjectionMultiImage(private val delegate: CanvasDelegate): Projectable {
     }
 
     override fun rebuild() {
-
+        presentUniqueImageMap.clear()
+        delegate.bridge.renderSettings.forEach {
+            presentUniqueImageMap[it.renderId] = PresentUniqueImage(it.renderId, delegate.bridge)
+        }
+        updateImages()
+        updateBridge()
     }
 
     override fun setRender(render: Boolean) {
@@ -34,44 +45,47 @@ class ProjectionMultiImage(private val delegate: CanvasDelegate): Projectable {
     }
 
     override fun getRenderFlagProperty(): ReadOnlyObjectProperty<BridgeRenderFlag> {
-        throw RuntimeException("MultiImage does not have render flag")
+        return renderFlagProperty.readOnlyProperty
     }
 
     fun setImages(imagesMap: Map<Int, Image>) {
         this.imagesMap.clear()
         this.imagesMap.putAll(imagesMap)
 
-        imagesMap.values.maxOfOrNull { it.width * it.height }?.let {
-            buffer = IntBuffer.allocate(ceil(it).toInt())
-        }
-
+        updateImages()
         updateBridge()
     }
 
-    private fun updateBridge() {
-        delegate.bridge.renderSettings.forEach {
-            if (render) {
-                imagesMap[it.renderId]?.let { image ->
-                    val w = image.width.toInt()
-                    val h = image.height.toInt()
+    private fun updateImages() {
+        val buffer = imagesMap.values.maxOfOrNull { it.width * it.height }?.let { IntBuffer.allocate(ceil(it).toInt()) }
 
-                    buffer?.let { buffer ->
-                        image.pixelReader.getPixels(0, 0, w, h, PixelFormat.getIntArgbPreInstance(), buffer.array(), 0, w)
-                        delegate.bridge.setMultiImageAsset(buffer.array(), w, h, it.renderId)
-                        cleared = false
-                        true
-                    }
-                } ?: run {
-                    delegate.bridge.setMultiImageAsset(null, 0, 0, it.renderId)
-                    cleared = true
+        presentUniqueImageMap.forEach { (renderId, presentImage) ->
+            imagesMap[renderId]?.let { image ->
+                val w = image.width.toInt()
+                val h = image.height.toInt()
+
+                renderFlagProperty.get().enableRenderId(renderId)
+
+                buffer?.let { buffer ->
+                    image.pixelReader.getPixels(0, 0, w, h, PixelFormat.getIntArgbPreInstance(), buffer.array(), 0, w)
+                    presentImage.update(buffer.array(), w, h)
                 }
-            } else {
-                if (!cleared) {
-                    cleared = true
-                    delegate.bridge.setMultiImageAsset(null, 0, 0, it.renderId)
-                }
+
+                true
+            } ?: kotlin.run {
+                presentImage.update(null, 0, 0)
+                renderFlagProperty.get().disableRenderId(renderId)
             }
         }
+    }
 
+    private fun updateBridge() {
+        presentUniqueImageMap.forEach { (renderId, presentImage) ->
+            if (imagesMap[renderId] != null && render) {
+                presentImage.present()
+            } else {
+                presentImage.hide()
+            }
+        }
     }
 }
