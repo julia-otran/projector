@@ -113,7 +113,7 @@ void render_preview_update_buffers() {
             memcpy(preview->data_buffer_aligned, data, preview->width * preview->height * BYTES_PER_PIXEL);
             glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
             glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-
+            
             buffer->readed = 1;
             preview->buffer_read = 0;
         }

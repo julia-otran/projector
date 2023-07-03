@@ -185,6 +185,8 @@ void render_image_update_assets() {
 
                 void* size = (void*) ((buffer->width << 16) | (buffer->height & 0xFFFF));
 
+                glFlush();
+
                 render_fader_fade_in_out_data(fader_instances[i], texture_id, RENDER_FADER_DEFAULT_TIME_MS, size);
             }
 

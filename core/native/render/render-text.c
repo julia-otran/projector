@@ -181,6 +181,8 @@ void render_text_update_assets() {
                 glBindTexture(GL_TEXTURE_2D, 0);
                 glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
+                glFlush();
+
                 render_fader_fade_in_out_data(fader_instances[i], texture_id, RENDER_FADER_DEFAULT_TIME_MS, buffer->extra_data);
             }
 

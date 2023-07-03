@@ -132,6 +132,9 @@ void render_web_view_update_assets() {
 
         glBindTexture(GL_TEXTURE_2D, 0);
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+        glFlush();
+
         texture_loaded = 1;
     }
 

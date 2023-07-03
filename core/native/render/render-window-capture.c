@@ -123,6 +123,8 @@ void render_window_capture_update_assets() {
         glBindTexture(GL_TEXTURE_2D, 0);
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
         texture_loaded = 1;
+
+        glFlush();
     }
 
     render_pixel_unpack_buffer_enqueue_for_write(buffer_instance, buffer);
