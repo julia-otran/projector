@@ -36,13 +36,13 @@ class PresentMultipleImage(val renderFlag: BridgeRenderFlag, val bridge: Bridge)
     }
 
     fun setCrop(crop: Boolean) {
-        currentImages.forEach { (renderId, image) ->
+        currentImages.forEach { (_, image) ->
             image.crop = crop
         }
     }
 
     fun update(data: IntArray?, width: Int, height: Int, crop: Boolean) {
-        currentImages.forEach { (renderId, image) ->
+        currentImages.forEach { (_, image) ->
             image.update(data, width, height, crop)
         }
     }
