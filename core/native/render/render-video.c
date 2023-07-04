@@ -12,6 +12,7 @@
 #include "render-video.h"
 #include "render-pixel-unpack-buffer.h"
 #include "render-tex-blur.h"
+#include "math.h"
 
 #define BYTES_PER_PIXEL 4
 
@@ -200,6 +201,9 @@ static void* render_video_lock(void* opaque, void** p_pixels)
     if (pdata == NULL) {
         (*p_pixels) = data->buffer;
 
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        glfwMakeContextCurrent(NULL);
+
         render_pixel_unpack_buffer_enqueue_for_write(buffer_instance, buffer);
 
         mtx_unlock(&window_thread_mutex);
@@ -217,7 +221,7 @@ static void render_video_unlock(void* opaque, void* id, void* const* p_pixels)
     if (id != NULL) {
         glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-        glFlush();
+        glFinish();
         glfwMakeContextCurrent(NULL);
         mtx_unlock(&window_thread_mutex);
     }
@@ -323,6 +327,10 @@ void render_video_update_buffers() {
 
 }
 
+void render_video_flush_buffers() {
+    render_pixel_unpack_buffer_flush(buffer_instance);
+}
+
 void render_video_create_assets() {
     glGenTextures(1, &texture_id);
     blur_instance = render_tex_blur_create();
@@ -355,11 +363,9 @@ void render_video_update_assets() {
         if (src_render) {
             texture_loaded = 1;
         }
-
-        glFlush();
     }
 
-    render_pixel_unpack_buffer_enqueue_for_write(buffer_instance, buffer);
+    render_pixel_unpack_buffer_enqueue_for_flush(buffer_instance, buffer);
  
     if (current_player != pending_current_player) {
         current_player = pending_current_player;
@@ -411,7 +417,8 @@ void render_video_render(render_layer *layer) {
 
         w_crop = w_sz;
         h_crop = layer->config.h;
-    } else {
+    }
+    else {
         w = w_sz;
         h = layer->config.h;
 
@@ -450,11 +457,11 @@ void render_video_render(render_layer *layer) {
 
     render_fader_for_each(fader_instance) {
         float alpha = render_fader_get_alpha(node);
-        
+
         glBlendFunc(GL_CONSTANT_COLOR, GL_ONE_MINUS_CONSTANT_COLOR);
         glBlendColor(alpha, alpha, alpha, alpha);
 
-        if (enable_blur) {    
+        if (enable_blur) {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 

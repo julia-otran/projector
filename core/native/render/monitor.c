@@ -71,8 +71,8 @@ void create_window(monitor *m) {
 
     glfwWindowHint(GLFW_SAMPLES, 4);
 
-    m->window = glfwCreateWindow(mode->width, mode->height, "Projector", monitor, gl_share_context);
-    // glfwSetWindowMonitor(m->window, monitor, m->xpos, m->ypos, mode->width, mode->height, mode->refreshRate);
+    m->window = glfwCreateWindow(mode->width, mode->height, "Projector", NULL, gl_share_context);
+    glfwSetWindowMonitor(m->window, monitor, m->xpos, m->ypos, mode->width, mode->height, mode->refreshRate);
 
 	glfwSetInputMode(m->window, GLFW_STICKY_KEYS, GL_TRUE);
     glfwSetInputMode(m->window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
@@ -296,8 +296,6 @@ void monitors_config_hot_reload(projection_config *config) {
 }
 
 void monitors_init(render_output *data, int render_output_count) {
-    int width, height;
-
     render_output_config = data;
     render_output_config_count = render_output_count;
 
@@ -317,10 +315,7 @@ void monitors_init(render_output *data, int render_output_count) {
             }
 
             glewInit();
-
-            glfwGetFramebufferSize(m->window, &width, &height);
-            glViewport(0, 0, width, height);
-            glEnable(GL_MULTISAMPLE);
+            glEnable(GL_BLEND);
         }
     }
 
@@ -357,8 +352,6 @@ void monitors_terminate() {
 }
 
 void monitors_cycle() {
-    int width, height;
-
     for (int i = 0; i < monitors_count; i++) {
         monitor* m = &monitors[i];
 
@@ -370,23 +363,21 @@ void monitors_cycle() {
         }
     }
 
-    glFlush();
-
     for (int i=0; i<monitors_count; i++) {
         monitor *m = &monitors[i];
 
         if (m->window && m->config) {
             glfwMakeContextCurrent(m->window);
-            glfwGetFramebufferSize(m->window, &width, &height);
+            glEnable(GL_TEXTURE_2D);
 
-            glViewport(0, 0, width, height);
+            glViewport(0, 0, m->config->monitor_bounds.w, m->config->monitor_bounds.h);
 
             glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glClear(GL_COLOR_BUFFER_BIT);
 
             glPushMatrix();
             glLoadIdentity();
-            glOrtho(0.0, width, height, 0.0, 0.0, 1.0);
+            glOrtho(0.0, m->config->monitor_bounds.w, m->config->monitor_bounds.h, 0.0, 0.0, 1.0);
 
             for (int j=0; j < m->config->count_virtual_screen; j++) {
                 void *vs_data = m->virtual_screen_data[j];
@@ -394,6 +385,8 @@ void monitors_cycle() {
             }
 
             glPopMatrix();
+   
+            glDisable(GL_TEXTURE_2D);
         }
     }
 }

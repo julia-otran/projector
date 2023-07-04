@@ -255,10 +255,7 @@ void virtual_screen_shared_render(config_virtual_screen *config, void *data) {
 
 void virtual_screen_monitor_print(config_virtual_screen *config, void *data) {
     virtual_screen *vs = (virtual_screen*) data;
-    glEnable(GL_COLOR_MATERIAL);
 
-    glEnable(GL_TEXTURE_2D);
-    glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glColor4d(1.0, 1.0, 1.0, 1.0);

@@ -131,6 +131,8 @@ void render_cycle(render_layer *render) {
     if (!transfer_window_initialized) {
         return;
     }
+    
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     if (render->config.render_mode & CONFIG_RENDER_MODE_MAIN) {
         render_text_update_assets();
@@ -150,9 +152,6 @@ void render_cycle(render_layer *render) {
 
     glViewport(0, 0, width, height);
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     glPushMatrix();
     glLoadIdentity();
     glOrtho(0.0, width, height, 0.0, 0.0, 1.0);
@@ -171,6 +170,20 @@ void render_cycle(render_layer *render) {
     glPopMatrix();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void render_flush_buffers(render_layer* render) {
+    if (!transfer_window_initialized) {
+        return;
+    }
+
+    if (render->config.render_mode & CONFIG_RENDER_MODE_MAIN) {
+        render_text_flush_buffers();
+        render_video_flush_buffers();
+        render_web_view_flush_buffers();
+        render_window_capture_flush_buffers();
+        render_image_flush_buffers();
+    }
 }
 
 void render_terminate(render_layer *render) {
@@ -204,9 +217,20 @@ void renders_init() {
 }
 
 void renders_cycle() {
+    glEnable(GL_TEXTURE_2D);
+    
     for (int i=0; i<count_renders; i++) {
         render_layer *render = (render_layer*) &renders[i];
         render_cycle(render);
+    }
+
+    glDisable(GL_TEXTURE_2D);
+}
+
+void renders_flush_buffers() {
+    for (int i = 0; i < count_renders; i++) {
+        render_layer* render = (render_layer*)&renders[i];
+        render_flush_buffers(render);
     }
 }
 

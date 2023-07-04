@@ -1,7 +1,6 @@
 #include "vs-black-level-adjust.h"
 
 void vs_black_level_adjust_render(config_virtual_screen *config) {
-    glEnable(GL_BLEND);
     glEnable(GL_COLOR_MATERIAL);
 
     glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);

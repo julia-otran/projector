@@ -98,6 +98,10 @@ void render_window_capture_update_buffers() {
     }
 }
 
+void render_window_capture_flush_buffers() {
+    render_pixel_unpack_buffer_flush(buffer_instance);
+}
+
 void render_window_capture_deallocate_buffers() {
     render_pixel_unpack_buffer_deallocate(buffer_instance);
     buffer_instance = NULL;
@@ -123,11 +127,9 @@ void render_window_capture_update_assets() {
         glBindTexture(GL_TEXTURE_2D, 0);
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
         texture_loaded = 1;
-
-        glFlush();
     }
 
-    render_pixel_unpack_buffer_enqueue_for_write(buffer_instance, buffer);
+    render_pixel_unpack_buffer_enqueue_for_flush(buffer_instance, buffer);
 
     if (src_render) {
         dst_render = src_render;
@@ -178,7 +180,6 @@ void render_window_capture_render(render_layer *layer) {
     y = (layer->config.h - h) / 2;
 
     glEnableClientState(GL_VERTEX_ARRAY);
-    glEnable(GL_TEXTURE_2D);
 
     glPushMatrix();
 

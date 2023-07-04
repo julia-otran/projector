@@ -57,21 +57,21 @@ render_pixel_unpack_buffer_node* render_pixel_unpack_buffer_dequeue_for_read(ren
     return free_buffer;
 }
 
-void render_pixel_unpack_buffer_enqueue_for_write(render_pixel_unpack_buffer_instance *instance, render_pixel_unpack_buffer_node* buffer_node) {
+void render_pixel_unpack_buffer_enqueue_for_flush(render_pixel_unpack_buffer_instance *instance, render_pixel_unpack_buffer_node* buffer_node) {
     if (buffer_node == NULL) {
         return;
     }
 
     mtx_lock(&instance->thread_mutex);
 
-    if (instance->write_buffers[0] == NULL) {
-        instance->write_buffers[0] = buffer_node;
-    } else if (instance->write_buffers[1] == NULL) {
-        instance->write_buffers[1] = buffer_node;
-    } else if (instance->write_buffers[2] == NULL) {
-        instance->write_buffers[2] = buffer_node;
+    if (instance->flush_buffers[0] == NULL) {
+        instance->flush_buffers[0] = buffer_node;
+    } else if (instance->flush_buffers[1] == NULL) {
+        instance->flush_buffers[1] = buffer_node;
+    } else if (instance->flush_buffers[2] == NULL) {
+        instance->flush_buffers[2] = buffer_node;
     } else {
-        log_debug("Pixel pack write buffer is full. This is not expected. Check for duplicated enqueue calls.\n");
+        log_debug("Pixel pack flush buffers is full. This is not expected. Check for duplicated enqueue for flush calls.\n");
     }
 
     mtx_unlock(&instance->thread_mutex);
@@ -106,6 +106,50 @@ void render_pixel_unpack_buffer_enqueue_for_read(render_pixel_unpack_buffer_inst
     } else {
         log_debug("Pixel pack read buffer is full. This is not expected. Check for duplicated enqueue calls.\n");
     }
+
+    mtx_unlock(&instance->thread_mutex);
+}
+
+void render_pixel_unpack_buffer_enqueue_for_write_int(render_pixel_unpack_buffer_instance* instance, render_pixel_unpack_buffer_node* buffer_node) {
+    if (buffer_node == NULL) {
+        return;
+    }
+
+    if (instance->write_buffers[0] == NULL) {
+        instance->write_buffers[0] = buffer_node;
+    }
+    else if (instance->write_buffers[1] == NULL) {
+        instance->write_buffers[1] = buffer_node;
+    }
+    else if (instance->write_buffers[2] == NULL) {
+        instance->write_buffers[2] = buffer_node;
+    }
+    else {
+        log_debug("Pixel pack flush buffers is full. This is not expected. Check for duplicated enqueue for flush calls.\n");
+    }
+}
+
+void render_pixel_unpack_buffer_enqueue_for_write(render_pixel_unpack_buffer_instance* instance, render_pixel_unpack_buffer_node* buffer_node) {
+    if (buffer_node == NULL) {
+        return;
+    }
+
+    mtx_lock(&instance->thread_mutex);
+    render_pixel_unpack_buffer_enqueue_for_write_int(instance, buffer_node);
+    mtx_unlock(&instance->thread_mutex);
+}
+
+void render_pixel_unpack_buffer_flush(render_pixel_unpack_buffer_instance* instance) {
+    mtx_lock(&instance->thread_mutex);
+
+    render_pixel_unpack_buffer_enqueue_for_write_int(instance, instance->flush_buffers[0]);
+    instance->flush_buffers[0] = NULL;
+
+    render_pixel_unpack_buffer_enqueue_for_write_int(instance, instance->flush_buffers[1]);
+    instance->flush_buffers[1] = NULL;
+
+    render_pixel_unpack_buffer_enqueue_for_write_int(instance, instance->flush_buffers[2]);
+    instance->flush_buffers[2] = NULL;
 
     mtx_unlock(&instance->thread_mutex);
 }

@@ -20,6 +20,7 @@ void render_text_set_data(render_text_data *data, int count);
 
 void render_text_create_buffers();
 void render_text_update_buffers();
+void render_text_flush_buffers();
 void render_text_deallocate_buffers();
 
 void render_text_create_assets();

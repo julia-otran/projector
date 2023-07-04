@@ -56,8 +56,6 @@ int loop(void *_) {
 
         mtx_unlock(&thread_mutex);
 
-        monitor_set_share_context();
-
         begin_measure(tm1);
         renders_cycle();
         end_measure(tm1);
@@ -69,6 +67,9 @@ int loop(void *_) {
         begin_measure(tm3);
         monitors_flip();
         end_measure(tm3);
+
+        monitor_set_share_context();
+        renders_flush_buffers();
 
         glfwPollEvents();
 

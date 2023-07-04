@@ -34,6 +34,7 @@ void unlock_renders();
 
 void renders_init();
 void renders_cycle();
+void renders_flush_buffers();
 void renders_terminate();
 
 void get_render_output(render_output **out, int *render_output_count);

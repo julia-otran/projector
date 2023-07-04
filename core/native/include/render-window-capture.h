@@ -11,6 +11,7 @@ void render_window_capture_src_set_crop(int crop);
 
 void render_window_capture_create_buffers();
 void render_window_capture_update_buffers();
+void render_window_capture_flush_buffers();
 void render_window_capture_deallocate_buffers();
 
 void render_window_capture_create_assets();

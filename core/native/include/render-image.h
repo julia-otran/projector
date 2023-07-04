@@ -11,6 +11,7 @@ void render_image_set_image_multi(void *pixel_data, int width, int height, int r
 
 void render_image_create_buffers();
 void render_image_update_buffers();
+void render_image_flush_buffers();
 void render_image_deallocate_buffers();
 
 void render_image_create_assets();

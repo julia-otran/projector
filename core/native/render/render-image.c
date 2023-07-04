@@ -91,6 +91,12 @@ void render_image_create_buffers() {
     }
 }
 
+void render_image_flush_buffers() {
+    for (int i = 0; i < renders_count; i++) {
+        render_pixel_unpack_buffer_flush(buffer_instances[i]);
+    }
+}
+
 void render_image_deallocate_buffers() {
     for (int i = 0; i < renders_count; i++) {
         render_pixel_unpack_buffer_free_extra_data(buffer_instances[i]);
@@ -181,12 +187,10 @@ void render_image_update_assets() {
                 info->height = buffer->height;
                 info->crop = ((simple_image_info*)buffer->extra_data)->crop;
 
-                glFlush();
-
                 render_fader_fade_in_out_data(fader_instances[i], texture_id, RENDER_FADER_DEFAULT_TIME_MS, (void*)info);
             }
 
-            render_pixel_unpack_buffer_enqueue_for_write(buffer_instances[i], buffer);
+            render_pixel_unpack_buffer_enqueue_for_flush(buffer_instances[i], buffer);
         }
     }
 
@@ -216,8 +220,6 @@ void render_image_render(render_layer *layer) {
     float x, y, w, h;
 
     glEnableClientState(GL_VERTEX_ARRAY);
-    glEnable(GL_TEXTURE_2D);
-    glEnable(GL_BLEND);
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 

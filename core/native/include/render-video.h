@@ -19,6 +19,7 @@ void render_video_src_set_crop_video(int crop);
 
 void render_video_create_buffers();
 void render_video_update_buffers();
+void render_video_flush_buffers();
 void render_video_deallocate_buffers();
 
 void render_video_create_assets();

@@ -163,7 +163,8 @@ void vs_color_corrector_render(config_virtual_screen *config, render_output *ren
         return;
     }
 
-    glEnable(GL_BLEND);
+    glEnable(GL_TEXTURE_2D);
+
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glColor4f(1.0, 1.0, 1.0, 1.0);
 
@@ -188,7 +189,8 @@ void vs_color_corrector_render(config_virtual_screen *config, render_output *ren
 
     glUseProgram(0);
 
-    glDisable(GL_BLEND);
+    glDisable(GL_TEXTURE_2D);
+
 }
 
 void vs_color_corrector_stop(vs_color_corrector *data) {

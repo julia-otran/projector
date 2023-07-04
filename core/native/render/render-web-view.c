@@ -113,6 +113,10 @@ void render_web_view_update_buffers() {
     }
 }
 
+void render_web_view_flush_buffers() {
+    render_pixel_unpack_buffer_flush(buffer_instance);
+}
+
 void render_web_view_create_assets() {
     glGenTextures(1, &texture_id);
 }
@@ -133,12 +137,10 @@ void render_web_view_update_assets() {
         glBindTexture(GL_TEXTURE_2D, 0);
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-        glFlush();
-
         texture_loaded = 1;
     }
 
-    render_pixel_unpack_buffer_enqueue_for_write(buffer_instance, buffer);
+    render_pixel_unpack_buffer_enqueue_for_flush(buffer_instance, buffer);
 
     if (src_render) {
         if (texture_loaded) {
@@ -184,7 +186,8 @@ void render_web_view_render(render_layer *layer) {
     y = (layer->config.h - h) / 2;
 
     glEnableClientState(GL_VERTEX_ARRAY);
-    glEnable(GL_TEXTURE_2D);
+
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     render_fader_for_each(fader_instance) {
         float alpha = render_fader_get_alpha(node);

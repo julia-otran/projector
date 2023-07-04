@@ -12,6 +12,7 @@ void render_web_view_src_buffer_update();
 
 void render_web_view_create_buffers();
 void render_web_view_update_buffers();
+void render_web_view_flush_buffers();
 void render_web_view_deallocate_buffers();
 
 void render_web_view_create_assets();
