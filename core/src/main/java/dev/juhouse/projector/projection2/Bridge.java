@@ -1,20 +1,13 @@
 package dev.juhouse.projector.projection2;
 
 import com.sun.jna.Pointer;
-import javafx.beans.value.ChangeListener;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.apache.commons.io.IOUtils;
-import uk.co.caprica.vlcj.binding.internal.libvlc_media_player_t;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 
 import java.io.IOException;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Bridge {
     private boolean shadersLoaded = false;
@@ -52,6 +45,8 @@ public class Bridge {
     public native void initialize();
 
     public native void shutdown();
+
+    public native void pollEvents();
 
     public native void loadConfig(String fileName);
 
@@ -133,4 +128,12 @@ public class Bridge {
     }
 
     public native BridgeCaptureDevice[] getVideoCaptureDevices();
+
+    public native void setVideoCaptureDevice(String deviceName, int width, int height);
+
+    public native void downloadVideoCapturePreview(ByteBuffer buffer);
+
+    public native void setVideoCaptureEnabled(int enabled);
+
+    public native void setVideoCaptureRender(int render);
 }

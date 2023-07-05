@@ -18,6 +18,8 @@
 #include "window-capture.h"
 #include "vlc-loader.h"
 #include "device-capture.h"
+#include "video-capture.h"
+#include "render-video-capture.h"
 
 static int initialized = 0;
 static int configured = 0;
@@ -135,8 +137,13 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_initialize(
     initialize_renders();
 
     window_capture_init();
+    video_capture_init();
 
     initialized = 1;
+}
+
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_pollEvents(JNIEnv* env, jobject _) {
+    glfwPollEvents();
 }
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_loadConfig(JNIEnv *env, jobject _, jstring j_file_path) {
@@ -192,6 +199,12 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_loadConfig(
     activate_renders(get_gl_share_context(), config);
     main_loop_schedule_config_reload(config);
     main_loop_start();
+
+    // Just for test
+    render_video_capture_set_device("Blackmagic Design", 1920, 1080);
+    render_video_capture_set_enabled(1);
+    render_video_capture_set_render(3);
+
     configured = 1;
 }
 
@@ -472,6 +485,7 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_shutdown(JN
     shutdown_renders();
     shutdown_monitors();
     window_capture_terminate();
+    video_capture_terminate();
 
     glfwTerminate();
 }

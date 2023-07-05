@@ -71,8 +71,6 @@ int loop(void *_) {
         monitor_set_share_context();
         renders_flush_buffers();
 
-        glfwPollEvents();
-
         if (window_should_close()) {
             run = 0;
         }

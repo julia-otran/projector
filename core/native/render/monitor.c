@@ -71,10 +71,9 @@ void create_window(monitor *m) {
 
     glfwWindowHint(GLFW_SAMPLES, 4);
 
-    m->window = glfwCreateWindow(mode->width, mode->height, "Projector", NULL, gl_share_context);
-    glfwSetWindowMonitor(m->window, monitor, m->xpos, m->ypos, mode->width, mode->height, mode->refreshRate);
+    m->window = glfwCreateWindow(mode->width, mode->height, "Projector", monitor, gl_share_context);
+    // glfwSetWindowMonitor(m->window, monitor, m->xpos, m->ypos, mode->width, mode->height, mode->refreshRate);
 
-	glfwSetInputMode(m->window, GLFW_STICKY_KEYS, GL_TRUE);
     glfwSetInputMode(m->window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
 #ifdef _WIN32

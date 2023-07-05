@@ -22,6 +22,7 @@ public class VlcPlayerFactory {
         }
 
         vlcArgs.add("--no-autoscale");
+        vlcArgs.add("--no-avcodec-dr");
         vlcArgs.add("--swscale-mode=4");
         vlcArgs.add("--avcodec-fast");
         vlcArgs.add("--avcodec-hurry-up");

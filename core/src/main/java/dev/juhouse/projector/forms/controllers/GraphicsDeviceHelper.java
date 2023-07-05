@@ -9,8 +9,10 @@ import dev.juhouse.projector.projection2.ProjectionManager;
 import dev.juhouse.projector.projection2.WindowManager;
 import dev.juhouse.projector.services.SettingsService;
 import dev.juhouse.projector.utils.WindowConfigsLoaderProperty;
-import javafx.scene.image.ImageView;
+import javafx.concurrent.ScheduledService;
+import javafx.concurrent.Task;
 import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 
 /**
  *
@@ -18,19 +20,39 @@ import javafx.scene.layout.VBox;
  */
 public class GraphicsDeviceHelper {
     private final WindowManager windowManager;
+    private final ScheduledService<Void> pollEventsService;
 
     public GraphicsDeviceHelper() {
         SettingsService settingsService = new SettingsService();
         windowManager = new WindowManager(settingsService);
+
+        pollEventsService = new ScheduledService<Void>() {
+            @Override
+            protected Task<Void> createTask() {
+                return new Task<Void>() {
+                    @Override
+                    protected Void call() {
+                        windowManager.getBridge().pollEvents();
+
+                        return null;
+                    }
+                };
+            }
+        };
     }
 
     ProjectionManager getProjectionManager() {
         return windowManager.getManager();
     }
 
-    public void start() { windowManager.startEngine(); }
+    public void start() {
+        windowManager.startEngine();
+        pollEventsService.setPeriod(Duration.millis(100));
+        pollEventsService.start();
+    }
 
     void stop() {
+        pollEventsService.cancel();
         windowManager.stopEngine();
     }
 

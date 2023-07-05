@@ -63,7 +63,7 @@ void register_stream_frame() {
     if (ms_delta > LOG_FPS_INTERVAL_MS) {
         double fps = stream_frame_count / (ms_delta / 1000.0);
 
-        //log_debug("Stream FPS: %lf\n", fps);
+        log_debug("Stream FPS: %lf\n", fps);
         copy_time(&stream_last_time, &spec);
 
         stream_frame_count = 0;

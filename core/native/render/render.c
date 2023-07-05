@@ -13,6 +13,7 @@
 #include "render-image.h"
 #include "render-preview.h"
 #include "render-tex-blur.h"
+#include "render-video-capture.h"
 
 static int count_renders;
 static render_layer *renders;
@@ -58,6 +59,7 @@ void initialize_renders() {
     render_window_capture_initialize();
     render_image_initialize();
     render_preview_initialize();
+    render_video_capture_initialize();
 }
 
 void shutdown_renders() {
@@ -72,6 +74,7 @@ void shutdown_renders() {
     render_window_capture_shutdown();
     render_image_shutdown();
     render_preview_shutdown();
+    render_video_capture_shutdown();
 
     free(output);
     free(renders);
@@ -122,6 +125,7 @@ void render_init(render_layer *render) {
         render_image_create_assets();
         render_preview_create_assets();
         render_tex_blur_create_assets();
+        render_video_capture_create_assets();
     }
 
     render_text_start(render);
@@ -141,6 +145,7 @@ void render_cycle(render_layer *render) {
         render_window_capture_update_assets();
         render_image_update_assets();
         render_preview_update_assets();
+        render_video_capture_update_assets();
     }
 
     config_color_factor *background_clear_color = &render->config.background_clear_color;
@@ -164,6 +169,7 @@ void render_cycle(render_layer *render) {
     render_text_render(render);
     render_web_view_render(render);
     render_window_capture_render(render);
+    render_video_capture_render(render);
 
     render_preview_cycle(render);
 
@@ -183,6 +189,7 @@ void render_flush_buffers(render_layer* render) {
         render_web_view_flush_buffers();
         render_window_capture_flush_buffers();
         render_image_flush_buffers();
+        render_video_capture_flush_buffers();
     }
 }
 
@@ -197,6 +204,7 @@ void render_terminate(render_layer *render) {
         render_image_deallocate_assets();
         render_preview_deallocate_assets();
         render_tex_blur_deallocate_assets();
+        render_video_capture_deallocate_assets();
     }
 
     for (int i=0; i < count_renders; i++) {
@@ -243,7 +251,7 @@ void renders_terminate() {
 
 int transfer_window_loop(void *_) {
     glfwMakeContextCurrent(transfer_window);
-    glfwSwapInterval(2);
+    glfwSwapInterval(1);
     glewInit();
 
     render_text_create_buffers();
@@ -252,6 +260,7 @@ int transfer_window_loop(void *_) {
     render_window_capture_create_buffers();
     render_image_create_buffers();
     render_preview_create_buffers();
+    render_video_capture_create_buffers();
 
     transfer_window_initialized = 1;
 
@@ -266,6 +275,7 @@ int transfer_window_loop(void *_) {
         render_window_capture_update_buffers();
         render_image_update_buffers();
         render_preview_update_buffers();
+        render_video_capture_update_buffers();
 
         glfwSwapBuffers(transfer_window);
         register_stream_frame();
@@ -277,6 +287,7 @@ int transfer_window_loop(void *_) {
     render_window_capture_deallocate_buffers();
     render_image_deallocate_buffers();
     render_preview_deallocate_buffers();
+    render_video_capture_deallocate_buffers();
 
     return 0;
 }
