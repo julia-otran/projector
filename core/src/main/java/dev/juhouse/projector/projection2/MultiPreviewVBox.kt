@@ -46,34 +46,36 @@ class MultiPreviewVBox(val delegate: CanvasDelegate): Runnable, VBox() {
     }
 
     fun start() {
-        previewPanes.clear()
-        children.clear()
+        Platform.runLater {
+            previewPanes.clear()
+            children.clear()
 
-        var renderSettings = delegate.bridge.renderSettings
+            var renderSettings = delegate.bridge.renderSettings
 
-        listOf(*renderSettings).forEach {
-            val pane = PreviewPane(delegate)
-            pane.setBridgeRender(it)
+            listOf(*renderSettings).forEach {
+                val pane = PreviewPane(delegate)
+                pane.setBridgeRender(it)
 
-            pane.minWidth = 0.0
-            pane.minHeight = 0.0
+                pane.minWidth = 0.0
+                pane.minHeight = 0.0
 
-            pane.prefWidthProperty().bind(widthProperty())
-            pane.prefHeightProperty().bind(heightProperty().divide(renderSettings.size))
+                pane.prefWidthProperty().bind(widthProperty())
+                pane.prefHeightProperty().bind(heightProperty().divide(renderSettings.size))
 
-            pane.maxWidthProperty().bind(widthProperty())
-            pane.maxHeightProperty().bind(heightProperty().divide(renderSettings.size))
+                pane.maxWidthProperty().bind(widthProperty())
+                pane.maxHeightProperty().bind(heightProperty().divide(renderSettings.size))
 
-            setVgrow(pane, Priority.SOMETIMES)
+                setVgrow(pane, Priority.SOMETIMES)
 
-            previewPanes.add(pane)
-            children.add(pane)
-        }
+                previewPanes.add(pane)
+                children.add(pane)
+            }
 
-        if (!running) {
-            running = true
-            updateThread = Thread(this)
-            updateThread?.start()
+            if (!running) {
+                running = true
+                updateThread = Thread(this)
+                updateThread?.start()
+            }
         }
     }
 }
