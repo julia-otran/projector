@@ -230,13 +230,13 @@ void render_video_capture_render(render_layer* layer)
 
     if (w_sz > layer->config.w == src_crop)
     {
-        h = h_sz;
-        w = layer->config.w;
+        w = w_sz;
+        h = layer->config.h;
     }
     else 
     {
-        w = w_sz;
-        h = layer->config.h;
+        h = h_sz;
+        w = layer->config.w;
     }
 
     x = (layer->config.w - w) / 2;

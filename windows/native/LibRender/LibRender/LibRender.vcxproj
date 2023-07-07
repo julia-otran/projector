@@ -86,8 +86,9 @@
     <VcpkgInstalledDir>$(SolutionDir)vcpkg</VcpkgInstalledDir>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <VcpkgTriplet>64-windows-static</VcpkgTriplet>
-    <VcpkgHostTriplet>64-windows-static</VcpkgHostTriplet>
+    <VcpkgTriplet>x64-windows-static</VcpkgTriplet>
+    <VcpkgHostTriplet>x64-windows-static</VcpkgHostTriplet>
+    <VcpkgInstalledDir>$(SolutionDir)vcpkg</VcpkgInstalledDir>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnableManifest>true</VcpkgEnableManifest>

@@ -5,7 +5,7 @@ import dev.juhouse.projector.projection2.BridgeRenderFlag
 import javafx.beans.value.ChangeListener
 import kotlin.collections.HashMap
 
-class PresentMultipleImage(val renderFlag: BridgeRenderFlag, val bridge: Bridge) {
+class PresentMultipleImage(private val renderFlag: BridgeRenderFlag, val bridge: Bridge) {
     private val currentImages = HashMap<Int, PresentUniqueImage>()
     var render = false
         set(value) {
