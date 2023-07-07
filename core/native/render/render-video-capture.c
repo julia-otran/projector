@@ -100,7 +100,7 @@ void render_video_capture_update_assets()
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
         glBindTexture(GL_TEXTURE_2D, texture_id);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dst_width, dst_height, 0, GL_BGRA, GL_UNSIGNED_BYTE, 0);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dst_width, dst_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
         tex_set_default_params();
 
         glBindTexture(GL_TEXTURE_2D, 0);

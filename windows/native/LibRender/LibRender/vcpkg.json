@@ -1,0 +1,6 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "lib-render",
+  "version": "3.46.1",
+  "dependencies": [ "libjpeg-turbo" ]
+}

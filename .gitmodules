@@ -4,3 +4,6 @@
 [submodule "core/native/tinycthread"]
 	path = core/native/tinycthread
 	url = https://github.com/tinycthread/tinycthread.git
+[submodule "windows/native/LibRender/vcpkg"]
+	path = windows/native/LibRender/vcpkg
+	url = https://github.com/microsoft/vcpkg.git

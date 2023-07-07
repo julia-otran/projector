@@ -18,6 +18,7 @@
 #include <CameraUIControl.h>
 #include <mftransform.h>
 
+#include "turbojpeg.h"
 #include "debug.h"
 #include "video-capture.h"
 
@@ -28,13 +29,11 @@
 	char_out_arr[internal_len] = 0; \
 
 static IMFSourceReader* source_reader;
-static IMFMediaBuffer* media_buffer;
 static IMFMediaSource* media_source;
 static IMFMediaType* media_type;
-static IMFTransform* transform;
-static DWORD inputStreamID, outputStreamID, streamIndex;
-static MFT_OUTPUT_DATA_BUFFER output;
-static IMFMediaBuffer* outputBuffer;
+static DWORD streamIndex;
+
+static tjhandle turbo_jpeg;
 
 static char* device_name;
 static int width, height;
@@ -181,22 +180,33 @@ HRESULT EnumerateTypesForStream(IMFSourceReader* pReader, DWORD dwStreamIndex, I
         else if (SUCCEEDED(hr))
         {
             AM_MEDIA_TYPE* amMediaType;
+            GUID subType;
 
-            pType->lpVtbl->GetRepresentation(pType, FORMAT_VideoInfo, &amMediaType);
+            pType->lpVtbl->GetGUID(pType, &MF_MT_SUBTYPE, &subType);
 
-            VIDEOINFOHEADER* info_header = (VIDEOINFOHEADER*)amMediaType->pbFormat;
-
-            if (info_header->bmiHeader.biWidth == width && info_header->bmiHeader.biHeight == height) {
-                (*ppMediaType) = pType;
-
-                pType->lpVtbl->FreeRepresentation(pType, FORMAT_VideoInfo, amMediaType);
-
-                return S_OK;
+            if (IsEqualGUID(&subType, &MFVideoFormat_MJPG) == 0) 
+            {
+                pType->lpVtbl->Release(pType);
             }
             else
             {
-                pType->lpVtbl->FreeRepresentation(pType, FORMAT_VideoInfo, amMediaType);
-                pType->lpVtbl->Release(pType);
+
+                pType->lpVtbl->GetRepresentation(pType, FORMAT_VideoInfo, &amMediaType);
+
+                VIDEOINFOHEADER* info_header = (VIDEOINFOHEADER*)amMediaType->pbFormat;
+
+                if (info_header->bmiHeader.biWidth == width && info_header->bmiHeader.biHeight == height) {
+                    (*ppMediaType) = pType;
+
+                    pType->lpVtbl->FreeRepresentation(pType, FORMAT_VideoInfo, amMediaType);
+
+                    return S_OK;
+                }
+                else
+                {
+                    pType->lpVtbl->FreeRepresentation(pType, FORMAT_VideoInfo, amMediaType);
+                    pType->lpVtbl->Release(pType);
+                }
             }
         }
 
@@ -234,7 +244,7 @@ HRESULT EnumerateMediaTypes(IMFSourceReader* pReader, DWORD* pdwStreamIndex, IMF
 
 void SetCaptureDeviceOutputFormat(IMFSourceReader* pReader, DWORD dwStreamIndex, IMFMediaType* pMediaType)
 {
-    HRESULT hr = pReader->lpVtbl->SetCurrentMediaType(pReader, 1, NULL, pMediaType);
+    HRESULT hr = pReader->lpVtbl->SetCurrentMediaType(pReader, dwStreamIndex, NULL, pMediaType);
 
     if (FAILED(hr)) {
         log_debug("Failed to set media type\n");
@@ -243,12 +253,7 @@ void SetCaptureDeviceOutputFormat(IMFSourceReader* pReader, DWORD dwStreamIndex,
 
 void video_capture_init() {
     MFStartup(MF_VERSION, 0);
-
-    CoCreateInstance(&CLSID_VideoProcessorMFT, 0, CLSCTX_INPROC_SERVER, &IID_IMFTransform, &transform);
-    transform->lpVtbl->AddInputStreams(transform, 1, &inputStreamID);
-    transform->lpVtbl->GetStreamIDs(transform, 1, &inputStreamID, 1, &outputStreamID);
-    MFCreateSample(&output.pSample);
-    output.dwStreamID = outputStreamID;
+    turbo_jpeg = tjInitDecompress();
 }
 
 void video_capture_set_device(char* name, int in_width, int in_height) {
@@ -258,41 +263,22 @@ void video_capture_set_device(char* name, int in_width, int in_height) {
 }
 
 void video_capture_open_device() {
-    MFCreateAlignedMemoryBuffer(width * height * 4, MF_256_BYTE_ALIGNMENT, &media_buffer);
     CreateVideoDeviceSource(&media_source, device_name);
     CreateSourceReader(media_source, &source_reader);
 
-    
     HRESULT hr = EnumerateMediaTypes(source_reader, &streamIndex, &media_type, width, height);
 
     if (SUCCEEDED(hr) && hr != S_FALSE)
     {
         SetCaptureDeviceOutputFormat(source_reader, streamIndex, media_type);
-        transform->lpVtbl->SetInputType(transform, inputStreamID, media_type, 0);
-
-        IMFMediaType* output_type;
-        MFCreateMediaType(&output_type);
-        media_type->lpVtbl->CopyAllItems(media_type, output_type);
-
-        output_type->lpVtbl->SetGUID(output_type, &MF_MT_SUBTYPE, &MFVideoFormat_RGB32);
-
-        transform->lpVtbl->SetOutputType(transform, outputStreamID, output_type, 0);
-
-        output_type->lpVtbl->Release(output_type);
     }
     else
     {
         log_debug("No media type found!\n");
     }
-
-    MFCreateAlignedMemoryBuffer(width * height * 4, MF_256_BYTE_ALIGNMENT, &outputBuffer);
-
-    IMFSample* outputSample = output.pSample;
-    outputSample->lpVtbl->RemoveAllBuffers(outputSample);
-    outputSample->lpVtbl->AddBuffer(outputSample, outputBuffer);
 }
 
-void video_capture_print_frame(void* buffer) {
+void video_capture_print_frame(void* dstBuffer) {
     DWORD stream_index;
     DWORD stream_flags;
     LONGLONG timestamp;
@@ -305,36 +291,32 @@ void video_capture_print_frame(void* buffer) {
         return;
     }
 
-    DWORD status;
+    IMFMediaBuffer* srcBuffer;
 
-    transform->lpVtbl->ProcessMessage(transform, MFT_MESSAGE_COMMAND_FLUSH, 0);
-    transform->lpVtbl->ProcessInput(transform, inputStreamID, sample, 0);
-    transform->lpVtbl->ProcessOutput(transform, 0, 1, &output, &status);
+    sample->lpVtbl->ConvertToContiguousBuffer(sample, &srcBuffer);
 
-    BYTE* outputData;
+    BYTE* jpegData;
     DWORD maxLenght;
     DWORD currentLenght;
 
-    outputBuffer->lpVtbl->Lock(outputBuffer, &outputData, &maxLenght, &currentLenght);
-    memcpy(buffer, outputData, currentLenght);
-    outputBuffer->lpVtbl->Unlock(outputBuffer);
+    srcBuffer->lpVtbl->Lock(srcBuffer, &jpegData, &maxLenght, &currentLenght);
+    
+    tjDecompress2(turbo_jpeg, jpegData, currentLenght, dstBuffer, width, width * 4, height, TJPF_RGBA, 0);
 
+    srcBuffer->lpVtbl->Unlock(srcBuffer);
+
+    srcBuffer->lpVtbl->Release(srcBuffer);
     sample->lpVtbl->Release(sample);
     
 }
 
 void video_capture_close() {
-    transform->lpVtbl->Release(transform);
     source_reader->lpVtbl->Release(source_reader);
     media_source->lpVtbl->Release(media_source);
-    media_buffer->lpVtbl->Release(media_buffer);
-    IMFSample* outputSample = output.pSample;
-    outputSample->lpVtbl->RemoveAllBuffers(outputSample);
-    outputSample->lpVtbl->Release(outputSample);
-    outputBuffer->lpVtbl->Release(outputBuffer);
+    media_type->lpVtbl->Release(media_type);
 }
 
 void video_capture_terminate() {
-    transform->lpVtbl->Release(transform);
     MFShutdown();
+    tjDestroy(turbo_jpeg);
 }

@@ -251,7 +251,7 @@ void renders_terminate() {
 
 int transfer_window_loop(void *_) {
     glfwMakeContextCurrent(transfer_window);
-    glfwSwapInterval(1);
+    glfwSwapInterval(0);
     glewInit();
 
     render_text_create_buffers();
