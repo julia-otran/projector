@@ -46,4 +46,14 @@ class PresentMultipleImage(private val renderFlag: BridgeRenderFlag, val bridge:
             image.update(data, width, height, crop)
         }
     }
+
+    fun rebuild() {
+        bridge.renderSettings.forEach {
+            if (currentImages[it.renderId] == null) {
+                currentImages[it.renderId] = PresentUniqueImage(it.renderId, bridge)
+            }
+        }
+
+        updateImages()
+    }
 }

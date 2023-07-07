@@ -51,9 +51,7 @@ public class ProjectionImage implements Projectable {
 
     @Override
     public void rebuild() {
-        presentImage = new PresentMultipleImage(renderFlag.get(), canvasDelegate.getBridge());
-        updateModel();
-        update();
+        presentImage.rebuild();
     }
 
     @Override
