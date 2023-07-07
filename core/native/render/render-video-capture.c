@@ -65,17 +65,21 @@ void render_video_capture_set_render(int render) {
 
 void render_video_capture_download_preview(int* data)
 {
-    if (dst_render != 0 || dst_enabled == 0)
+    if (dst_render != 0 || dst_enabled == 0 || src_enabled == 0)
     {
         return;
     }
 
     mtx_lock(&thread_mutex);
 
-    if (dst_render != 0 || dst_enabled == 0)
+    if (dst_render != 0 || dst_enabled == 0 || src_enabled == 0)
     {
         mtx_unlock(&thread_mutex);
         return;
+    }
+
+    if (src_enabled == 0) {
+
     }
 
     video_capture_preview_frame(data);
@@ -100,7 +104,10 @@ void render_video_capture_update_buffers()
 
     if (src_enabled != dst_enabled || src_render != dst_render) {
         dst_enabled = src_enabled;
-        dst_render = src_render;
+
+        if (src_render != 0) {
+            dst_render = src_render;
+        }
 
         if (dst_enabled && dst_render) 
         {
@@ -178,13 +185,23 @@ void render_video_capture_update_assets()
 
     render_pixel_unpack_buffer_enqueue_for_flush(buffer_instance, buffer);
 
-    if (dst_enabled && dst_render)
+    if (dst_enabled && dst_render && src_render)
     {
         render_fader_fade_in(fader_instance, texture_id, RENDER_FADER_DEFAULT_TIME_MS);
     }
     else
     {
         render_fader_fade_out(fader_instance, texture_id, RENDER_FADER_DEFAULT_TIME_MS);
+    }
+
+    if (src_render == 0 && dst_render != 0)
+    {
+        render_fader_for_each(fader_instance) {
+            if (render_fader_is_hidden(node))
+            {
+                dst_render = 0;
+            }
+        }
     }
 }
 

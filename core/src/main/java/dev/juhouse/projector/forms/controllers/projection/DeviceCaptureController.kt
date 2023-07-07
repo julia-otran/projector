@@ -100,6 +100,22 @@ class DeviceCaptureController: ProjectionController(),
         }
 
         onRefreshDevices()
+
+        val deviceName = observer.getProperty("VIDEO_DEVICE")
+        val deviceWidth = observer.getProperty("VIDEO_DEVICE_WIDTH").map { it.toInt() }.orElse(null)
+        val deviceHeight = observer.getProperty("VIDEO_DEVICE_HEIGHT").map { it.toInt() }.orElse(null)
+
+        deviceName.ifPresent {
+            if (devicesComboBox.items.contains(it)) {
+                devicesComboBox.selectionModel.select(it)
+
+                val resolution = resolutionsComboBox.items.find { r -> r.width == deviceWidth && r.height == deviceHeight }
+
+                resolution?.let {
+                    resolutionsComboBox.selectionModel.select(resolution)
+                }
+            }
+        }
     }
 
     override fun onEscapeKeyPressed() {
@@ -115,24 +131,13 @@ class DeviceCaptureController: ProjectionController(),
         projectionVideoCapture.previewPanel.stopPreview()
     }
 
-    private fun getMediaOptionsWindows(device: String, resolution: String): Array<String> {
-        return arrayOf(
-            "dshow-vdev=" + device.replace(":", "\\:"),
-            "dshow-adev=none",
-            "dshow-size=$resolution"
-        )
-    }
-
-    private fun getMediaOptionsV4l2(resolution: BridgeCaptureDeviceResolution): Array<String> {
-        return arrayOf(
-            "width=" + resolution.width.toString(),
-            "height=" + resolution.height.toString()
-        )
-    }
-
     private fun activateReproduction() {
         val deviceName = devicesComboBox.selectionModel.selectedItem
         val resolution = resolutionsComboBox.selectionModel.selectedItem
+
+        observer.updateProperty("VIDEO_DEVICE", deviceName)
+        observer.updateProperty("VIDEO_DEVICE_WIDTH", resolution.width.toString())
+        observer.updateProperty("VIDEO_DEVICE_HEIGHT", resolution.height.toString())
 
         projectionVideoCapture.setDevice(deviceName, resolution.width, resolution.height)
         projectionVideoCapture.enabled = true
