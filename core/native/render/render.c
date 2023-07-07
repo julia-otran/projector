@@ -166,10 +166,10 @@ void render_cycle(render_layer *render) {
 
     render_image_render(render);
     render_video_render(render);
-    render_text_render(render);
     render_web_view_render(render);
     render_window_capture_render(render);
     render_video_capture_render(render);
+    render_text_render(render);
 
     render_preview_cycle(render);
 
@@ -251,7 +251,7 @@ void renders_terminate() {
 
 int transfer_window_loop(void *_) {
     glfwMakeContextCurrent(transfer_window);
-    glfwSwapInterval(0);
+    glfwSwapInterval(2);
     glewInit();
 
     render_text_create_buffers();

@@ -278,7 +278,7 @@ void video_capture_open_device() {
     }
 }
 
-void video_capture_print_frame(void* dstBuffer) {
+void video_capture_print_frame_int(void* dstBuffer, enum TJPF color) {
     DWORD stream_index;
     DWORD stream_flags;
     LONGLONG timestamp;
@@ -301,13 +301,21 @@ void video_capture_print_frame(void* dstBuffer) {
 
     srcBuffer->lpVtbl->Lock(srcBuffer, &jpegData, &maxLenght, &currentLenght);
     
-    tjDecompress2(turbo_jpeg, jpegData, currentLenght, dstBuffer, width, width * 4, height, TJPF_RGBA, 0);
+    tjDecompress2(turbo_jpeg, jpegData, currentLenght, dstBuffer, width, width * 4, height, color, TJFLAG_FASTDCT | TJFLAG_FASTUPSAMPLE | TJFLAG_NOREALLOC);
 
     srcBuffer->lpVtbl->Unlock(srcBuffer);
 
     srcBuffer->lpVtbl->Release(srcBuffer);
     sample->lpVtbl->Release(sample);
     
+}
+
+void video_capture_preview_frame(void* buffer) {
+    video_capture_print_frame_int(buffer, TJPF_BGRA);
+}
+
+void video_capture_print_frame(void* buffer) {
+    video_capture_print_frame_int(buffer, TJPF_RGBA);
 }
 
 void video_capture_close() {

@@ -22,6 +22,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
+import org.jetbrains.annotations.NotNull;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 
 /**
@@ -35,7 +36,19 @@ public class ProjectionPlayer implements Projectable {
     public ProjectionPlayer(ProjectionVideo video, CanvasDelegate delegate) {
         this.video = video;
 
-        this.preview = new PlayerPreview(video, delegate);
+        this.preview = new PlayerPreview(new PlayerPreviewCallback() {
+            @Override
+            public boolean isRender() {
+                return video.getRender().get();
+            }
+
+            @NotNull
+            @Override
+            public PlayerPreviewCallbackFrameSize getFrame(@NotNull ByteBuffer buffer) throws Bridge.VideoPreviewOutputBufferTooSmall {
+                BridgeVideoPreviewSize previewSize = delegate.getBridge().downloadPlayerPreview(getPlayer(), buffer);
+                return new PlayerPreviewCallbackFrameSize(previewSize.getWidth(), previewSize.getHeight());
+            }
+        }, delegate);
 
         video.setEnablePreview(true);
     }
@@ -89,131 +102,5 @@ public class ProjectionPlayer implements Projectable {
 
     public void loadMedia(File file) {
         this.video.player.media().prepare(file.getAbsolutePath());
-    }
-
-    public static class PlayerPreview extends AnchorPane implements Runnable {
-        private boolean running;
-        private PixelBuffer<IntBuffer> previewImagePixelBuffer;
-        private final ByteBuffer previewImageBuffer;
-        private final IntBuffer previewImageBufferInt;
-        private final ProjectionVideo video;
-        private final CanvasDelegate delegate;
-        private final ImageView previewImageView;
-        private final Label previewErrorLabel;
-
-        private final Callback<PixelBuffer<IntBuffer>, Rectangle2D> updateCallback = (image) -> {
-            updating = false;
-            return null;
-        };
-
-        private boolean updating;
-
-        public PlayerPreview(ProjectionVideo video, CanvasDelegate delegate) {
-            this.previewImageView = new ImageView();
-            this.previewImageView.setPreserveRatio(true);
-
-            this.setMinSize(0, 0);
-
-            this.previewImageView.fitWidthProperty().bind(this.widthProperty().subtract(1));
-            this.previewImageView.fitHeightProperty().bind(this.heightProperty().subtract(1));
-
-            this.previewErrorLabel = new Label();
-            previewErrorLabel.setTextFill(Color.color(1.0, 1.0, 1.0));
-            previewErrorLabel.setPadding(new Insets(10.0));
-
-            this.video = video;
-            this.delegate = delegate;
-
-            previewImageBuffer = ByteBuffer.allocateDirect(1920 * 1920 * 4);
-            previewImageBufferInt = previewImageBuffer.asIntBuffer();
-        }
-
-        public void startPreview() {
-            running = true;
-            new Thread(this).start();
-        }
-
-        public void stopPreview() {
-            running = false;
-        }
-
-        private void showError(String message) {
-            Platform.runLater(() -> {
-                previewErrorLabel.setText(message);
-                getChildren().clear();
-                getChildren().add(previewErrorLabel);
-                updating = false;
-            });
-        }
-
-        private void updatePreview() {
-            if (updating) {
-                return;
-            }
-
-            if (video.getRender().get()) {
-                showError("[Preview Indisponível] Projetando Vídeo....");
-                return;
-            }
-
-            updating = true;
-
-            try {
-                BridgeVideoPreviewSize outputSize = delegate.getBridge().downloadPlayerPreview(video.player, previewImageBuffer);
-
-                Platform.runLater(() -> {
-                    if (!running) {
-                        return;
-                    }
-
-                    if (getChildren().isEmpty() || getChildren().get(0) != previewImageView) {
-                        this.getChildren().clear();
-                        this.getChildren().add(this.previewImageView);
-                    }
-
-                    if (outputSize.getWidth() == 0) {
-                        updating = false;
-                        return;
-                    }
-
-                    if (
-                            previewImagePixelBuffer == null ||
-                                    previewImagePixelBuffer.getWidth() != outputSize.getWidth() ||
-                                    previewImagePixelBuffer.getHeight() != outputSize.getHeight()
-                    ) {
-                        previewImagePixelBuffer = new PixelBuffer<>(
-                                outputSize.getWidth(),
-                                outputSize.getHeight(),
-                                previewImageBufferInt,
-                                PixelFormat.getIntArgbPreInstance()
-                        );
-
-                        this.previewImageView.setImage(new WritableImage(previewImagePixelBuffer));
-                        updating = false;
-                    } else {
-                        previewImagePixelBuffer.updateBuffer(updateCallback);
-                    }
-                });
-
-            } catch (Bridge.VideoPreviewOutputBufferTooSmall e) {
-                showError("[Preview Indisponível] Resolução do video muito alta (max 1920x1080)....");
-                updating = false;
-            }
-        }
-
-        @Override
-        public void run() {
-            updating = false;
-
-            while (running) {
-                updatePreview();
-
-                try {
-                    Thread.sleep(50);
-                } catch (InterruptedException e) {
-                    running = false;
-                }
-            }
-        }
     }
 }

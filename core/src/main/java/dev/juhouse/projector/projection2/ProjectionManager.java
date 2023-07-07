@@ -17,7 +17,7 @@ import dev.juhouse.projector.projection2.text.ProjectionLabel;
 import dev.juhouse.projector.projection2.text.WrappedText;
 import dev.juhouse.projector.projection2.text.WrapperFactory;
 import dev.juhouse.projector.projection2.video.ProjectionPlayer;
-import dev.juhouse.projector.projection2.video.ProjectionVideoCapture;
+import dev.juhouse.projector.projection2.ProjectionVideoCapture;
 import javafx.beans.property.ReadOnlyProperty;
 
 /**

@@ -1,20 +1,14 @@
 package dev.juhouse.projector.forms.controllers.projection
 
-import dev.juhouse.projector.other.OsCheck
-import dev.juhouse.projector.other.OsCheck.OSType
 import dev.juhouse.projector.projection2.BridgeCaptureDevice
 import dev.juhouse.projector.projection2.BridgeCaptureDeviceResolution
 import dev.juhouse.projector.projection2.ProjectionManager
-import dev.juhouse.projector.projection2.video.ProjectionVideoCapture
-import javafx.application.Platform
+import dev.juhouse.projector.projection2.ProjectionVideoCapture
 import javafx.fxml.FXML
 import javafx.scene.control.*
 import javafx.scene.layout.*
 import java.net.URL
 import java.util.*
-import java.util.regex.Pattern
-
-const val LINUX_MEDIA_URL_PATTERN = "v4l2:///dev/%s"
 
 class DeviceCaptureController: ProjectionController(),
     ProjectionBarControlCallbacks {
@@ -85,7 +79,7 @@ class DeviceCaptureController: ProjectionController(),
         projectionVideoCapture.previewPanel.maxHeightProperty().bind(playerContainer.heightProperty().subtract(1))
         projectionVideoCapture.previewPanel.prefHeightProperty().bind(playerContainer.heightProperty().subtract(1))
 
-        fullScreenCheckBox.isSelected = projectionVideoCapture.isCropVideo
+        fullScreenCheckBox.isSelected = projectionVideoCapture.cropVideo
         controlBar.projectable = projectionVideoCapture
         controlBar.callback = this
         controlBar.manager = projectionManager
@@ -116,7 +110,7 @@ class DeviceCaptureController: ProjectionController(),
 
     override fun stop() {
         onEscapeKeyPressed()
-        projectionVideoCapture.player.controls().stop()
+        projectionVideoCapture.enabled = false
         projectionManager.stop(projectionVideoCapture)
         projectionVideoCapture.previewPanel.stopPreview()
     }
@@ -139,27 +133,14 @@ class DeviceCaptureController: ProjectionController(),
     private fun activateReproduction() {
         val deviceName = devicesComboBox.selectionModel.selectedItem
         val resolution = resolutionsComboBox.selectionModel.selectedItem
-        var mediaUrl = ""
-        var options: Array<String> = arrayOf()
 
-        if (OsCheck.getOperatingSystemType() == OSType.Windows) {
-            mediaUrl = "dshow://"
-            options = getMediaOptionsWindows(deviceName, resolution.toString())
-        }
-
-        if (OsCheck.getOperatingSystemType() == OSType.Linux) {
-            options = getMediaOptionsV4l2(resolution)
-            mediaUrl = String.format(LINUX_MEDIA_URL_PATTERN, deviceName)
-        }
-
-        if (mediaUrl.isNotBlank()) {
-            projectionVideoCapture.player.media().play(mediaUrl, *options)
-        }
+        projectionVideoCapture.setDevice(deviceName, resolution.width, resolution.height)
+        projectionVideoCapture.enabled = true
     }
 
     @FXML
     fun onFullScreenAction() {
-        projectionVideoCapture.isCropVideo = fullScreenCheckBox.isSelected
+        projectionVideoCapture.cropVideo = fullScreenCheckBox.isSelected
     }
 
     @FXML
@@ -182,15 +163,15 @@ class DeviceCaptureController: ProjectionController(),
         if (activateCheckBox.isSelected) {
             if (devicesComboBox.selectionModel.selectedItem.isNullOrBlank()) {
                 activateCheckBox.isSelected = false
-                projectionVideoCapture.player.controls().stop()
+                projectionVideoCapture.enabled = false
             } else if (resolutionsComboBox.selectionModel.selectedItem == null) {
                 activateCheckBox.isSelected = false
-                projectionVideoCapture.player.controls().stop()
+                projectionVideoCapture.enabled = false
             } else {
                 activateReproduction()
             }
         } else {
-            projectionVideoCapture.player.controls().stop()
+            projectionVideoCapture.enabled = false
         }
     }
 

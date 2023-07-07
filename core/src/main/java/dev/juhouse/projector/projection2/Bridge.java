@@ -133,7 +133,9 @@ public class Bridge {
 
     public native void downloadVideoCapturePreview(ByteBuffer buffer);
 
-    public native void setVideoCaptureEnabled(int enabled);
+    public native void setVideoCaptureEnabled(boolean enabled);
 
     public native void setVideoCaptureRender(int render);
+
+    public native void setVideoCaptureCrop(boolean crop);
 }

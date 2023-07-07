@@ -200,11 +200,6 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_loadConfig(
     main_loop_schedule_config_reload(config);
     main_loop_start();
 
-    // Just for test
-    render_video_capture_set_device("Blackmagic Design", 1920, 1080);
-    render_video_capture_set_enabled(1);
-    render_video_capture_set_render(3);
-
     configured = 1;
 }
 
@@ -476,6 +471,43 @@ JNIEXPORT jobjectArray JNICALL Java_dev_juhouse_projector_projection2_Bridge_get
     free_capture_device_enum(cap_enum);
 
     return result_arr;
+}
+
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setVideoCaptureDevice
+(JNIEnv* env, jobject _, jstring jdevice_name, jint width, jint height)
+{
+    char* device_name;
+
+    jni_jstringToCharArr(env, jdevice_name, device_name);
+
+    render_video_capture_set_device(device_name, width, height);
+
+    jni_releaseCharArr(env, jdevice_name, device_name);
+}
+
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_downloadVideoCapturePreview
+(JNIEnv* env, jobject _, jobject j_buffer)
+{
+    jbyte* data = (jbyte*)(*env)->GetDirectBufferAddress(env, j_buffer);
+    render_video_capture_download_preview(data);
+}
+
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setVideoCaptureEnabled
+(JNIEnv* env, jobject _, jboolean enabled)
+{
+    render_video_capture_set_enabled(enabled);
+}
+
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setVideoCaptureRender
+(JNIEnv* env, jobject _, jint render_flag)
+{
+    render_video_capture_set_render(render_flag);
+}
+
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setVideoCaptureCrop
+(JNIEnv* env, jobject _, jboolean crop)
+{
+    render_video_capture_set_crop(crop);
 }
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_shutdown(JNIEnv *env, jobject _) {
