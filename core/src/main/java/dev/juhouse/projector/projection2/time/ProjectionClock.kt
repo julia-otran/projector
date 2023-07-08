@@ -23,7 +23,7 @@ class ProjectionClock(private val delegate: CanvasDelegate): Projectable {
     private var currentText: String? = null
 
     private fun getFontFor(render: BridgeRender): Font {
-        val newSize = delegate.fontProperty.value.size * render.textScale.toFloat()
+        val newSize = render.width * 0.12f
         return FontCreatorUtil.getRobotoMonoFont().deriveFont(newSize)
     }
 
