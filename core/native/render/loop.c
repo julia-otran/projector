@@ -1,6 +1,6 @@
-#include "tinycthread.h"
 #include <stdlib.h>
 
+#include "tinycthread.h"
 #include "debug.h"
 #include "loop.h"
 #include "ogl-loader.h"
