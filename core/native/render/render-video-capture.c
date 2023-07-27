@@ -108,15 +108,6 @@ void render_video_capture_update_buffers()
         if (src_render != 0) {
             dst_render = src_render;
         }
-
-        if (dst_enabled && dst_render) 
-        {
-            glfwSwapInterval(0);
-        }
-        else 
-        {
-            glfwSwapInterval(2);
-        }
     }
 
     if (src_enabled == 0 || src_render == 0) {

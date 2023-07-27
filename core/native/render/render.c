@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "clock.h"
 #include "tinycthread.h"
 #include "debug.h"
 #include "ogl-loader.h"
@@ -135,18 +136,6 @@ void render_cycle(render_layer *render) {
     if (!transfer_window_initialized) {
         return;
     }
-    
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    if (render->config.render_mode & CONFIG_RENDER_MODE_MAIN) {
-        render_text_update_assets();
-        render_video_update_assets();
-        render_web_view_update_assets();
-        render_window_capture_update_assets();
-        render_image_update_assets();
-        render_preview_update_assets();
-        render_video_capture_update_assets();
-    }
 
     config_color_factor *background_clear_color = &render->config.background_clear_color;
 
@@ -164,6 +153,8 @@ void render_cycle(render_layer *render) {
     glClearColor(background_clear_color->r, background_clear_color->g, background_clear_color->b, background_clear_color->a);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     render_image_render(render);
     render_video_render(render);
     render_web_view_render(render);
@@ -176,21 +167,6 @@ void render_cycle(render_layer *render) {
     glPopMatrix();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-void render_flush_buffers(render_layer* render) {
-    if (!transfer_window_initialized) {
-        return;
-    }
-
-    if (render->config.render_mode & CONFIG_RENDER_MODE_MAIN) {
-        render_text_flush_buffers();
-        render_video_flush_buffers();
-        render_web_view_flush_buffers();
-        render_window_capture_flush_buffers();
-        render_image_flush_buffers();
-        render_video_capture_flush_buffers();
-    }
 }
 
 void render_terminate(render_layer *render) {
@@ -224,6 +200,21 @@ void renders_init() {
     }
 }
 
+void renders_update_assets()
+{
+    if (!transfer_window_initialized) {
+        return;
+    }
+
+    render_text_update_assets();
+    render_video_update_assets();
+    render_web_view_update_assets();
+    render_window_capture_update_assets();
+    render_image_update_assets();
+    render_preview_update_assets();
+    render_video_capture_update_assets();
+}
+
 void renders_cycle() {
     glEnable(GL_TEXTURE_2D);
     
@@ -236,10 +227,16 @@ void renders_cycle() {
 }
 
 void renders_flush_buffers() {
-    for (int i = 0; i < count_renders; i++) {
-        render_layer* render = (render_layer*)&renders[i];
-        render_flush_buffers(render);
+    if (!transfer_window_initialized) {
+        return;
     }
+
+    render_text_flush_buffers();
+    render_video_flush_buffers();
+    render_web_view_flush_buffers();
+    render_window_capture_flush_buffers();
+    render_image_flush_buffers();
+    render_video_capture_flush_buffers();
 }
 
 void renders_terminate() {
@@ -250,8 +247,13 @@ void renders_terminate() {
 }
 
 int transfer_window_loop(void *_) {
+    struct timespec ts_prev, ts_curr;
+    struct timespec sleep_time = {
+        .tv_sec = 0,
+        .tv_nsec = 5 * 1000 * 1000
+    };
+
     glfwMakeContextCurrent(transfer_window);
-    glfwSwapInterval(2);
     glewInit();
 
     render_text_create_buffers();
@@ -266,6 +268,8 @@ int transfer_window_loop(void *_) {
 
     glClearColor(0, 0, 0, 1.0);
 
+    get_time(&ts_prev);
+
     while (transfer_window_thread_run) {
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -277,7 +281,18 @@ int transfer_window_loop(void *_) {
         render_preview_update_buffers();
         render_video_capture_update_buffers();
 
-        glfwSwapBuffers(transfer_window);
+        glFinish();
+        
+        get_time(&ts_curr);
+
+        while (get_delta_time_ms(&ts_curr, &ts_prev) < 15)
+        {
+            thrd_sleep(&sleep_time, NULL);
+            get_time(&ts_curr);
+        }
+
+        copy_time(&ts_prev, &ts_curr);
+
         register_stream_frame();
     }
 

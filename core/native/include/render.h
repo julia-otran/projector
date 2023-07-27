@@ -33,6 +33,7 @@ void lock_renders();
 void unlock_renders();
 
 void renders_init();
+void renders_update_assets();
 void renders_cycle();
 void renders_flush_buffers();
 void renders_terminate();

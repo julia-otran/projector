@@ -119,17 +119,6 @@ void create_non_fs_window(monitor* m) {
     }
 }
 
-void monitors_flip() {
-    for (int i=0; i<monitors_count; i++) {
-        monitor *m = &monitors[i];
-
-        if (m->window) {
-            glfwMakeContextCurrent(m->window);
-            glfwSwapBuffers(m->window);
-        }
-    }
-}
-
 int destroy_window(monitor *m) {
     if (!m->window) {
         return 0;
@@ -247,9 +236,17 @@ render_output* get_render_output_config(config_virtual_screen *vs_config) {
     return 0;
 }
 
+void monitor_set_context_if_need(GLFWwindow* context)
+{
+    if (glfwGetCurrentContext() != context)
+    {
+        glfwMakeContextCurrent(context);
+    }
+}
+
 void monitor_set_share_context() {
     if (gl_share_context) {
-        glfwMakeContextCurrent(gl_share_context);
+        monitor_set_context_if_need(gl_share_context);
     }
 }
 
@@ -263,7 +260,7 @@ void monitors_config_hot_reload(projection_config *config) {
                     monitor_set_share_context();
                     virtual_screen_shared_stop(m->virtual_screen_data[j]);
 
-                    glfwMakeContextCurrent(m->window);
+                    monitor_set_context_if_need(m->window);
                     virtual_screen_monitor_stop(m->virtual_screen_data[j]);
                 }
 
@@ -285,7 +282,7 @@ void monitors_config_hot_reload(projection_config *config) {
                         monitor_set_share_context();
                         virtual_screen_shared_start(dsp, render, config_vs, &m->virtual_screen_data[k]);
 
-                        glfwMakeContextCurrent(m->window);
+                        monitor_set_context_if_need(m->window);
                         virtual_screen_monitor_start(dsp, render, config_vs, m->virtual_screen_data[k]);
                     }
                 }
@@ -302,7 +299,7 @@ void monitors_init(render_output *data, int render_output_count) {
         monitor *m = &monitors[i];
 
         if (m->window) {
-            glfwMakeContextCurrent(m->window);
+            monitor_set_context_if_need(m->window);
 
             if (m->window == gl_share_context) 
             {
@@ -333,7 +330,7 @@ void monitors_terminate() {
                     monitor_set_share_context();
                     virtual_screen_shared_stop(m->virtual_screen_data[j]);
                     
-                    glfwMakeContextCurrent(m->window);
+                    monitor_set_context_if_need(m->window);
                     virtual_screen_monitor_stop(m->virtual_screen_data[j]);
 
                     m->virtual_screen_data[j] = NULL;
@@ -366,7 +363,7 @@ void monitors_cycle() {
         monitor *m = &monitors[i];
 
         if (m->window && m->config) {
-            glfwMakeContextCurrent(m->window);
+            monitor_set_context_if_need(m->window);
             glEnable(GL_TEXTURE_2D);
 
             glViewport(0, 0, m->config->monitor_bounds.w, m->config->monitor_bounds.h);
@@ -390,15 +387,13 @@ void monitors_cycle() {
     }
 }
 
-int monitors_get_minor_refresh_rate() {
-    int rate = monitors[0].mode->refreshRate;
-
+void monitors_flip() {
     for (int i = 0; i < monitors_count; i++) {
         monitor* m = &monitors[i];
-        if (m->mode->refreshRate < rate) {
-            rate = m->mode->refreshRate;
+
+        if (m->window) {
+            monitor_set_context_if_need(m->window);
+            glfwSwapBuffers(m->window);
         }
     }
-
-    return rate;
 }

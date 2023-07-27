@@ -39,6 +39,4 @@ void monitors_cycle();
 void monitors_flip();
 void monitors_terminate();
 
-int monitors_get_minor_refresh_rate();
-
 #endif

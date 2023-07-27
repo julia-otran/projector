@@ -16,12 +16,8 @@ static cnd_t thread_cond;
 
 static projection_config *pending_config_reload;
 
-static struct timespec last_frame_completed_at = {
-    .tv_nsec = 0,
-    .tv_sec = 0
-};
-
 int loop(void *_) {
+    time_measure* tm0 = create_measure("Renders Update Assets");
     time_measure* tm1 = create_measure("Renders Cycle");
     time_measure* tm2 = create_measure("Monitors Cycle");
     time_measure* tm3 = create_measure("Monitors Flip");
@@ -33,20 +29,16 @@ int loop(void *_) {
     monitors_init(output, render_output_count);
 
     monitors_config_hot_reload(pending_config_reload);
-    int milisecs_per_frame = 1000.0 / (monitors_get_minor_refresh_rate() - 10.0);
     pending_config_reload = NULL;
 
     monitor_set_share_context();
     renders_init();
-
-    get_time(&last_frame_completed_at);
 
     while (run) {
         mtx_lock(&thread_mutex);
 
         if (pending_config_reload) {
             monitors_config_hot_reload(pending_config_reload);
-            milisecs_per_frame = 1000.0 / (monitors_get_minor_refresh_rate() - 2.0);
             pending_config_reload = NULL;
         }
 
@@ -55,6 +47,10 @@ int loop(void *_) {
         }
 
         mtx_unlock(&thread_mutex);
+
+        begin_measure(tm0);
+        renders_update_assets();
+        end_measure(tm0);
 
         begin_measure(tm1);
         renders_cycle();
