@@ -42,6 +42,11 @@ typedef struct {
 } config_color_matrix;
 
 typedef struct {
+    double
+        hue_shift, saturation_mult, luminance_trim;
+} config_color_corrector;
+
+typedef struct {
     int x1, x2, x3, x4, y1, y2, y3, y4;
     config_color_factor color;
 } config_black_level_adjust;
@@ -54,6 +59,7 @@ typedef struct {
     config_bounds render_input_bounds;
 
     config_color_matrix color_matrix;
+    config_color_corrector color_corrector;
 
     config_point_mapping monitor_position;
 

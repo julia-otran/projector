@@ -114,6 +114,16 @@ cJSON* serialize_config_color_matrix(config_color_matrix* in) {
     return config_color_matrix_json;
 }
 
+cJSON* serialize_config_color_corrector(config_color_corrector* in) {
+    cJSON* config_color_corrector_json = cJSON_CreateObject();
+
+    cJSON_AddItemToObject(config_color_corrector_json, "hue_shift", cJSON_CreateNumber(in->hue_shift));
+    cJSON_AddItemToObject(config_color_corrector_json, "saturation_mult", cJSON_CreateNumber(in->saturation_mult));
+    cJSON_AddItemToObject(config_color_corrector_json, "luminance_trim", cJSON_CreateNumber(in->luminance_trim));
+
+    return config_color_corrector_json;
+}
+
 cJSON* serialize_config_black_level_adjust(config_black_level_adjust *in) {
     cJSON *config_black_level_adjust_json = cJSON_CreateObject();
 
@@ -144,7 +154,8 @@ cJSON* serialize_config_virtual_screen(config_virtual_screen *in) {
     cJSON_AddItemToObject(config_virtual_screen_json, "render_input_bounds", serialize_config_bounds(&in->render_input_bounds));
 
     cJSON_AddItemToObject(config_virtual_screen_json, "color_matrix", serialize_config_color_matrix(&in->color_matrix));
-
+    cJSON_AddItemToObject(config_virtual_screen_json, "color_corrector", serialize_config_color_corrector(&in->color_corrector));
+    
     cJSON_AddItemToObject(config_virtual_screen_json, "monitor_position", serialize_config_point_mapping(&in->monitor_position));
 
     cJSON *blends_json = cJSON_CreateArray();

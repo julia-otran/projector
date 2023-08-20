@@ -220,6 +220,31 @@ void parse_config_color_matrix(cJSON* config_color_matrix_json, config_color_mat
     }
 }
 
+void parse_config_color_corrector(cJSON* config_color_corrector_json, config_color_corrector* out) {
+    out->hue_shift = 0.0;
+    out->saturation_mult = 1.0;
+    out->luminance_trim = 0.0;
+
+    if (!cJSON_IsObject(config_color_corrector_json)) {
+        return;
+    }
+
+    cJSON* hue_shift_json = cJSON_GetObjectItemCaseSensitive(config_color_corrector_json, "hue_shift");
+    cJSON* saturation_mult_json = cJSON_GetObjectItemCaseSensitive(config_color_corrector_json, "saturation_mult");
+    cJSON* luminance_trim_json = cJSON_GetObjectItemCaseSensitive(config_color_corrector_json, "luminance_trim");
+
+    if (cJSON_IsNumber(hue_shift_json)) {
+        out->hue_shift = hue_shift_json->valuedouble;
+    }
+
+    if (cJSON_IsNumber(saturation_mult_json)) {
+        out->saturation_mult = saturation_mult_json->valuedouble;
+    }
+    if (cJSON_IsNumber(luminance_trim_json)) {
+        out->luminance_trim = luminance_trim_json->valuedouble;
+    }
+}
+
 void parse_config_virtual_screen(cJSON *config_virtual_screen_json, config_virtual_screen *out) {
     out->source_render_id = cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "source_render_id")->valueint;
 
@@ -231,6 +256,7 @@ void parse_config_virtual_screen(cJSON *config_virtual_screen_json, config_virtu
     parse_config_bounds(cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "render_input_bounds"), &out->render_input_bounds);
 
     parse_config_color_matrix(cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "color_matrix"), &out->color_matrix);
+    parse_config_color_corrector(cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "color_corrector"), &out->color_corrector);
 
     parse_config_point_mapping(cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "monitor_position"), &out->monitor_position);
 
