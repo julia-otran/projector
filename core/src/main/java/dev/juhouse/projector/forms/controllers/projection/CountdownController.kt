@@ -7,6 +7,7 @@ import javafx.scene.control.ToggleButton
 import java.net.URL
 import java.util.*
 import dev.juhouse.projector.projection2.time.ProjectionCountdown
+import dev.juhouse.projector.utils.TimeFormatUtils
 import dev.juhouse.projector.utils.TimeFormatUtils.Companion.formatMsToTime
 import javafx.application.Platform
 import javafx.scene.layout.Pane
@@ -130,13 +131,7 @@ class CountdownController: ProjectionController(), Runnable, ProjectionBarContro
         }
     }
     private fun getIntervalMilis(): Long {
-        val textSplit = countdownTextField.text.split(':').reversed()
-
-        val secs = textSplit[0].ifEmpty { "0" }.toInt()
-        val mins = textSplit.getOrNull(1)?.ifEmpty { "0" }?.toInt() ?: 0
-        val hours = textSplit.getOrNull(2)?.ifEmpty { "0" }?.toInt() ?: 0
-
-        return secs * 1000L + mins * 60 * 1000L + hours * 60 * 60 * 1000L
+        return TimeFormatUtils.formatTimeStringToMs(countdownTextField.text)
     }
 
     override fun onProjectionBegin() {

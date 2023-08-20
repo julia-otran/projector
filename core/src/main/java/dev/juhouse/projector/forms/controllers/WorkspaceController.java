@@ -95,6 +95,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
         updateProjectionList();
 
         initClock();
+        initChronometer();
 
         graphicsHelper.getWindowConfigsLoaderProperty().getConfigFiles().addListener((ListChangeListener<String>) c -> buildPresetsMenu());
 
@@ -115,6 +116,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
 
     public void stop() {
         clockController.stop();
+        chronometerController.stop();
         graphicsHelper.stop();
     }
 
@@ -140,6 +142,31 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     private void initClock() {
         clockController = new WorkspaceClockController(graphicsHelper.getProjectionManager(), clockLabel, clockControlBarPane);
         clockController.start();
+    }
+
+    // ------------------------------
+    // Chronometer
+    // ------------------------------
+
+    @FXML
+    private TextField chronometerTextField;
+
+    @FXML
+    private Button chronometerEnableButton;
+
+    @FXML
+    private Pane chronometerControlPane;
+
+    private WorkspaceChronometerController chronometerController;
+
+    private void initChronometer() {
+        chronometerController = new WorkspaceChronometerController(
+                graphicsHelper.getProjectionManager(),
+                chronometerTextField,
+                chronometerEnableButton,
+                chronometerControlPane);
+
+        chronometerController.start();
     }
 
     // ------------------------------
