@@ -8,7 +8,8 @@ uniform vec3 blueMatrix;
 uniform vec3 exposureMatrix;
 uniform vec3 brightMatrix;
 
-uniform vec3 colorCorrector;
+uniform vec2 hueSrcMap1;
+uniform vec3 hueDstMap1;
 
 vec3 hsl2rgb(in vec3 c) {
     vec3 rgb = clamp( abs(mod(c.x*6.0+vec3(0.0,4.0,2.0),6.0)-3.0)-1.0, 0.0, 1.0 );
@@ -49,23 +50,30 @@ vec3 rgb2hsl(in vec3 c) {
 	return vec3( h, s, l );
 }
 
+// -1.0 * q * (|targetHue - 0.18 - x| - 0.5)^2 + 1.0
+float hueMultiplier(in float srcHue, in float tgtHue, in float q) {
+    float targetHue = tgtHue + 0.7;
+
+    if (targetHue > 1.0) {
+        targetHue = targetHue - 1.0;
+    }
+
+    float result = (-1.0 * q * pow(abs(targetHue - 0.18 - srcHue) - 0.5, 2)) + 1.0;
+    return clamp(result, 0.0, 1.0);
+}
+
 void main(void) {
     vec4 texel = texture2D(image, frag_Uv);
 
     vec3 hsl = rgb2hsl(texel.rgb);
 
-    hsl.r = hsl.r + colorCorrector.r;
+    float mult = hueMultiplier(hsl.r, hueSrcMap1.r, hueSrcMap1.g);
 
-    if (hsl.r > 1.0) {
-        hsl.r = hsl.r - 1.0;
-    } else if (hsl.r < 0.0) {
-        hsl.r = hsl.r + 1.0;
-    }
+    hsl.r = hsl.r + (hueDstMap1.r * mult);
+    hsl.g = hsl.g * (hueDstMap1.g + ((1.0 - hueDstMap1.g) * (1.0 - mult)));
+    hsl.b = hsl.b * (hueDstMap1.b + ((1.0 - hueDstMap1.b) * (1.0 - mult)));
 
-    hsl.g = hsl.g * colorCorrector.g;
-    hsl.b = clamp(hsl.b + colorCorrector.b, 0.0, 1.0);
-
-    vec3 correctedRGB = hsl2rgb(hsl);
+    vec3 correctedRGB = hsl2rgb(clamp(hsl, 0.0, 1.0));
 
     vec3 maxLevels = 1.0 / (redMatrix + greenMatrix + blueMatrix);
 

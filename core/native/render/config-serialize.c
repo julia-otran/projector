@@ -117,9 +117,11 @@ cJSON* serialize_config_color_matrix(config_color_matrix* in) {
 cJSON* serialize_config_color_corrector(config_color_corrector* in) {
     cJSON* config_color_corrector_json = cJSON_CreateObject();
 
-    cJSON_AddItemToObject(config_color_corrector_json, "hue_shift", cJSON_CreateNumber(in->hue_shift));
-    cJSON_AddItemToObject(config_color_corrector_json, "saturation_mult", cJSON_CreateNumber(in->saturation_mult));
-    cJSON_AddItemToObject(config_color_corrector_json, "luminance_trim", cJSON_CreateNumber(in->luminance_trim));
+    cJSON_AddItemToObject(config_color_corrector_json, "src_hue", cJSON_CreateNumber(in->src_hue));
+    cJSON_AddItemToObject(config_color_corrector_json, "src_q", cJSON_CreateNumber(in->src_q));
+    cJSON_AddItemToObject(config_color_corrector_json, "dst_hue", cJSON_CreateNumber(in->dst_hue));
+    cJSON_AddItemToObject(config_color_corrector_json, "dst_sat", cJSON_CreateNumber(in->dst_sat));
+    cJSON_AddItemToObject(config_color_corrector_json, "dst_lum", cJSON_CreateNumber(in->dst_lum));
 
     return config_color_corrector_json;
 }

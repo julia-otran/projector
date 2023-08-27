@@ -43,7 +43,7 @@ typedef struct {
 
 typedef struct {
     double
-        hue_shift, saturation_mult, luminance_trim;
+        src_hue, src_q, dst_hue, dst_sat, dst_lum;
 } config_color_corrector;
 
 typedef struct {

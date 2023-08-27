@@ -221,27 +221,36 @@ void parse_config_color_matrix(cJSON* config_color_matrix_json, config_color_mat
 }
 
 void parse_config_color_corrector(cJSON* config_color_corrector_json, config_color_corrector* out) {
-    out->hue_shift = 0.0;
-    out->saturation_mult = 1.0;
-    out->luminance_trim = 0.0;
+    out->src_hue = 0.0;
+    out->src_q = 1.0;
+    out->dst_hue = 0.0;
+    out->dst_sat = 1.0;
+    out->dst_lum = 1.0;
 
     if (!cJSON_IsObject(config_color_corrector_json)) {
         return;
     }
 
-    cJSON* hue_shift_json = cJSON_GetObjectItemCaseSensitive(config_color_corrector_json, "hue_shift");
-    cJSON* saturation_mult_json = cJSON_GetObjectItemCaseSensitive(config_color_corrector_json, "saturation_mult");
-    cJSON* luminance_trim_json = cJSON_GetObjectItemCaseSensitive(config_color_corrector_json, "luminance_trim");
+    cJSON* src_hue_json = cJSON_GetObjectItemCaseSensitive(config_color_corrector_json, "src_hue");
+    cJSON* src_q_json = cJSON_GetObjectItemCaseSensitive(config_color_corrector_json, "src_q");
+    cJSON* dst_hue_json = cJSON_GetObjectItemCaseSensitive(config_color_corrector_json, "dst_hue");
+    cJSON* dst_sat_json = cJSON_GetObjectItemCaseSensitive(config_color_corrector_json, "dst_sat");
+    cJSON* dst_lum_json = cJSON_GetObjectItemCaseSensitive(config_color_corrector_json, "dst_lum");
 
-    if (cJSON_IsNumber(hue_shift_json)) {
-        out->hue_shift = hue_shift_json->valuedouble;
+    if (cJSON_IsNumber(src_hue_json)) {
+        out->src_hue = src_hue_json->valuedouble;
     }
-
-    if (cJSON_IsNumber(saturation_mult_json)) {
-        out->saturation_mult = saturation_mult_json->valuedouble;
+    if (cJSON_IsNumber(src_q_json)) {
+        out->src_q = src_q_json->valuedouble;
     }
-    if (cJSON_IsNumber(luminance_trim_json)) {
-        out->luminance_trim = luminance_trim_json->valuedouble;
+    if (cJSON_IsNumber(dst_hue_json)) {
+        out->dst_hue = dst_hue_json->valuedouble;
+    }
+    if (cJSON_IsNumber(dst_sat_json)) {
+        out->dst_sat= dst_sat_json->valuedouble;
+    }
+    if (cJSON_IsNumber(dst_lum_json)) {
+        out->dst_lum = dst_lum_json->valuedouble;
     }
 }
 

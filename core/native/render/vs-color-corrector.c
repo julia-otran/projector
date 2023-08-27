@@ -16,7 +16,9 @@ static GLuint greenMatrixUniform;
 static GLuint blueMatrixUniform;
 static GLuint exposureMatrixUniform;
 static GLuint brightMatrixUniform;
-static GLuint colorCorrectorUniform;
+
+static GLuint hueSrcMap1Uniform;
+static GLuint hueDstMap1Uniform;
 
 void vs_color_corrector_init() {
     vertexshader = loadShader(GL_VERTEX_SHADER, "color-corrector.vertex.shader");
@@ -39,7 +41,9 @@ void vs_color_corrector_init() {
     blueMatrixUniform = glGetUniformLocation(program, "blueMatrix");
     exposureMatrixUniform = glGetUniformLocation(program, "exposureMatrix");
     brightMatrixUniform = glGetUniformLocation(program, "brightMatrix");
-    colorCorrectorUniform = glGetUniformLocation(program, "colorCorrector");
+
+    hueSrcMap1Uniform = glGetUniformLocation(program, "hueSrcMap1");
+    hueDstMap1Uniform = glGetUniformLocation(program, "hueDstMap1");
 
     glUseProgram(0);
 }
@@ -156,11 +160,17 @@ void vs_color_corrector_set_uniforms(config_virtual_screen *config) {
         config->color_matrix.b_bright
     );
 
+    glUniform2f(
+        hueSrcMap1Uniform,
+        config->color_corrector.src_hue,
+        config->color_corrector.src_q
+    );
+
     glUniform3f(
-        colorCorrectorUniform,
-        config->color_corrector.hue_shift,
-        config->color_corrector.saturation_mult,
-        config->color_corrector.luminance_trim
+        hueDstMap1Uniform,
+        config->color_corrector.dst_hue,
+        config->color_corrector.dst_sat,
+        config->color_corrector.dst_lum
     );
 }
 
