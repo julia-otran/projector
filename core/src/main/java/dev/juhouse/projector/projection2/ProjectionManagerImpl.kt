@@ -194,6 +194,10 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
         return background.model as BackgroundModel
     }
 
+    override fun concurrentProjectableProperty(): ReadOnlyProperty<Projectable?> {
+        return concurrentProjectable.readOnlyProperty
+    }
+
     override fun projectableProperty(): ReadOnlyProperty<Projectable?> {
         return currentProjectable.readOnlyProperty
     }

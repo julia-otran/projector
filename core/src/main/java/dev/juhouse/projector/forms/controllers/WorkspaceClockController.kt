@@ -23,7 +23,23 @@ class WorkspaceClockController(val projectionManager: ProjectionManager, private
         renderFlagBox.renderFlag = projectable.renderFlagProperty.get()
         clockControlBarPane.children.add(renderFlagBox)
         timeUpdateThread.start()
-        projectionManager.setConcurrentProjectable(projectable)
+
+        projectionManager.concurrentProjectableProperty().addListener { _, _, newProjectable ->
+            if (newProjectable != projectable) {
+                projectable.renderFlagProperty.get().renderToNone()
+            }
+        }
+
+        projectable.renderFlagProperty.get().flagValueProperty.addListener { _ ->
+            if (projectable.renderFlagProperty.get().hasAnyRender()) {
+                projectionManager.setConcurrentProjectable(projectable)
+            } else {
+                if (projectionManager.concurrentProjectableProperty().value == projectable) {
+                    projectionManager.setConcurrentProjectable(null)
+                }
+            }
+        }
+
     }
 
     fun stop() {

@@ -32,9 +32,10 @@ class WorkspaceChronometerController(val projectionManager: ProjectionManager, p
     fun start() {
         projectable = projectionManager.createClock()
         projectionManager.addCallback(renderFlagBox)
+
         renderFlagBox.renderFlag = projectable.renderFlagProperty.get()
+
         controlBarPane.children.add(renderFlagBox)
-        projectionManager.setConcurrentProjectable(projectable)
 
         countdownButton.onAction = EventHandler { _ ->
             if (run) {
@@ -48,9 +49,25 @@ class WorkspaceChronometerController(val projectionManager: ProjectionManager, p
             }
         }
 
+        projectionManager.concurrentProjectableProperty().addListener { _, _, newProjectable ->
+            if (newProjectable != projectable) {
+                projectable.renderFlagProperty.get().renderToNone()
+            }
+        }
+
         projectable.renderFlagProperty.get().flagValueProperty.addListener { _ ->
-            if (projectable.renderFlagProperty.get().hasAnyRender() && !run) {
-                beginCountdown()
+            if (projectable.renderFlagProperty.get().hasAnyRender()) {
+                projectionManager.setConcurrentProjectable(projectable)
+
+                if (!run) {
+                    beginCountdown()
+                }
+            }
+
+            if (!projectable.renderFlagProperty.get().hasAnyRender()) {
+                if (projectionManager.concurrentProjectableProperty().value == projectable) {
+                    projectionManager.setConcurrentProjectable(null)
+                }
             }
         }
     }

@@ -65,6 +65,8 @@ public interface ProjectionManager {
 
     BackgroundModel getBackgroundModel();
 
+    ReadOnlyProperty<Projectable> concurrentProjectableProperty();
+
     ReadOnlyProperty<Projectable> projectableProperty();
 
     void setBackgroundModel(BackgroundModel background);
