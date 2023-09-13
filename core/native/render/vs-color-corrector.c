@@ -17,8 +17,13 @@ static GLuint blueMatrixUniform;
 static GLuint exposureMatrixUniform;
 static GLuint brightMatrixUniform;
 
-static GLuint hueSrcMap1Uniform;
-static GLuint hueDstMap1Uniform;
+static GLuint hueSrcMapUniform;
+static GLuint hueQSrcMapUniform;
+static GLuint hueDstMapUniform;
+static GLuint satDstMapUniform;
+static GLuint lumDstMapUniform;
+
+static GLfloat* colorMapData;
 
 void vs_color_corrector_init() {
     vertexshader = loadShader(GL_VERTEX_SHADER, "color-corrector.vertex.shader");
@@ -42,8 +47,13 @@ void vs_color_corrector_init() {
     exposureMatrixUniform = glGetUniformLocation(program, "exposureMatrix");
     brightMatrixUniform = glGetUniformLocation(program, "brightMatrix");
 
-    hueSrcMap1Uniform = glGetUniformLocation(program, "hueSrcMap1");
-    hueDstMap1Uniform = glGetUniformLocation(program, "hueDstMap1");
+    hueSrcMapUniform = glGetUniformLocation(program, "srcHueMap");
+    hueQSrcMapUniform = glGetUniformLocation(program, "srcHueQMap");
+    hueDstMapUniform = glGetUniformLocation(program, "dstHueMap");
+    satDstMapUniform = glGetUniformLocation(program, "dstSatMap");
+    lumDstMapUniform = glGetUniformLocation(program, "dstLumMap");
+
+    colorMapData = calloc(CONFIG_COLOR_CORRECTOR_LENGTH, sizeof(GLfloat));
 
     glUseProgram(0);
 }
@@ -160,18 +170,36 @@ void vs_color_corrector_set_uniforms(config_virtual_screen *config) {
         config->color_matrix.b_bright
     );
 
-    glUniform2f(
-        hueSrcMap1Uniform,
-        config->color_corrector.src_hue,
-        config->color_corrector.src_q
-    );
 
-    glUniform3f(
-        hueDstMap1Uniform,
-        config->color_corrector.dst_hue,
-        config->color_corrector.dst_sat,
-        config->color_corrector.dst_lum
-    );
+    for (int i = 0; i < CONFIG_COLOR_CORRECTOR_LENGTH; i++) {
+        colorMapData[i] = config->color_corrector[i].src_hue;
+    }
+
+    glUniform1fv(hueSrcMapUniform, CONFIG_COLOR_CORRECTOR_LENGTH, colorMapData);
+
+    for (int i = 0; i < CONFIG_COLOR_CORRECTOR_LENGTH; i++) {
+        colorMapData[i] = config->color_corrector[i].src_q;
+    }
+
+    glUniform1fv(hueQSrcMapUniform, CONFIG_COLOR_CORRECTOR_LENGTH, colorMapData);
+    
+    for (int i = 0; i < CONFIG_COLOR_CORRECTOR_LENGTH; i++) {
+        colorMapData[i] = config->color_corrector[i].dst_hue;
+    }
+    
+    glUniform1fv(hueDstMapUniform, CONFIG_COLOR_CORRECTOR_LENGTH, colorMapData);
+
+    for (int i = 0; i < CONFIG_COLOR_CORRECTOR_LENGTH; i++) {
+        colorMapData[i] = config->color_corrector[i].dst_sat;
+    }
+
+    glUniform1fv(satDstMapUniform, CONFIG_COLOR_CORRECTOR_LENGTH, colorMapData);
+    
+    for (int i = 0; i < CONFIG_COLOR_CORRECTOR_LENGTH; i++) {
+        colorMapData[i] = config->color_corrector[i].dst_lum;
+    }
+
+    glUniform1fv(lumDstMapUniform, CONFIG_COLOR_CORRECTOR_LENGTH, colorMapData);
 }
 
 
@@ -241,4 +269,6 @@ void vs_color_corrector_shutdown() {
     glDeleteShader(vertexshader);
     glDeleteShader(fragmentshader);
     glDeleteProgram(program);
+
+    free(colorMapData);
 }

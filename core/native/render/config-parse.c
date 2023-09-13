@@ -220,12 +220,16 @@ void parse_config_color_matrix(cJSON* config_color_matrix_json, config_color_mat
     }
 }
 
-void parse_config_color_corrector(cJSON* config_color_corrector_json, config_color_corrector* out) {
+void parse_config_color_corrector_single(cJSON* config_color_corrector_json, config_color_corrector* out) {
     out->src_hue = 0.0;
     out->src_q = 1.0;
     out->dst_hue = 0.0;
     out->dst_sat = 1.0;
     out->dst_lum = 1.0;
+
+    if (config_color_corrector_json == NULL) {
+        return;
+    }
 
     if (!cJSON_IsObject(config_color_corrector_json)) {
         return;
@@ -247,10 +251,35 @@ void parse_config_color_corrector(cJSON* config_color_corrector_json, config_col
         out->dst_hue = dst_hue_json->valuedouble;
     }
     if (cJSON_IsNumber(dst_sat_json)) {
-        out->dst_sat= dst_sat_json->valuedouble;
+        out->dst_sat = dst_sat_json->valuedouble;
     }
     if (cJSON_IsNumber(dst_lum_json)) {
         out->dst_lum = dst_lum_json->valuedouble;
+    }
+}
+
+void parse_config_color_corrector(cJSON* config_color_corrector_multi_json, config_color_corrector* out) {
+    if (cJSON_IsObject(config_color_corrector_multi_json)) {
+        parse_config_color_corrector_single(config_color_corrector_multi_json, out);
+
+        for (int i = 1; i < CONFIG_COLOR_CORRECTOR_LENGTH; i++) {
+            parse_config_color_corrector_single(NULL, &out[i]);
+        }
+
+        return;
+    }
+
+    if (cJSON_IsArray(config_color_corrector_multi_json)) {
+        int count = cJSON_GetArraySize(config_color_corrector_multi_json);
+
+        for (int i = 0; i < CONFIG_COLOR_CORRECTOR_LENGTH; i++) {
+            cJSON* config_color_corrector_single_json = NULL;
+
+            if (i < count) {
+                config_color_corrector_single_json = cJSON_GetArrayItem(config_color_corrector_multi_json, i);
+                parse_config_color_corrector_single(config_color_corrector_single_json, &out[i]);
+            }
+        }
     }
 }
 
@@ -265,7 +294,7 @@ void parse_config_virtual_screen(cJSON *config_virtual_screen_json, config_virtu
     parse_config_bounds(cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "render_input_bounds"), &out->render_input_bounds);
 
     parse_config_color_matrix(cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "color_matrix"), &out->color_matrix);
-    parse_config_color_corrector(cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "color_corrector"), &out->color_corrector);
+    parse_config_color_corrector(cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "color_corrector"), &out->color_corrector[0]);
 
     parse_config_point_mapping(cJSON_GetObjectItemCaseSensitive(config_virtual_screen_json, "monitor_position"), &out->monitor_position);
 

@@ -51,6 +51,8 @@ typedef struct {
     config_color_factor color;
 } config_black_level_adjust;
 
+#define CONFIG_COLOR_CORRECTOR_LENGTH 16
+
 typedef struct {
     int source_render_id, w, h;
 
@@ -59,7 +61,7 @@ typedef struct {
     config_bounds render_input_bounds;
 
     config_color_matrix color_matrix;
-    config_color_corrector color_corrector;
+    config_color_corrector color_corrector[CONFIG_COLOR_CORRECTOR_LENGTH];
 
     config_point_mapping monitor_position;
 

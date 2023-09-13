@@ -8,8 +8,11 @@ uniform vec3 blueMatrix;
 uniform vec3 exposureMatrix;
 uniform vec3 brightMatrix;
 
-uniform vec2 hueSrcMap1;
-uniform vec3 hueDstMap1;
+uniform float srcHueMap[16];
+uniform float srcHueQMap[16];
+uniform float dstHueMap[16];
+uniform float dstSatMap[16];
+uniform float dstLumMap[16];
 
 vec3 hsl2rgb(in vec3 c) {
     vec3 rgb = clamp( abs(mod(c.x*6.0+vec3(0.0,4.0,2.0),6.0)-3.0)-1.0, 0.0, 1.0 );
@@ -66,12 +69,21 @@ void main(void) {
     vec4 texel = texture2D(image, frag_Uv);
 
     vec3 hsl = rgb2hsl(texel.rgb);
+    vec3 hslResult = vec3(hsl);
 
-    float mult = hueMultiplier(hsl.r, hueSrcMap1.r, hueSrcMap1.g);
+    float hueMult = 0.0;
+    float satMult = 0.0;
+    float lumaMult = 0.0;
 
-    hsl.r = hsl.r + (hueDstMap1.r * mult);
-    hsl.g = hsl.g * (hueDstMap1.g + ((1.0 - hueDstMap1.g) * (1.0 - mult)));
-    hsl.b = hsl.b * (hueDstMap1.b + ((1.0 - hueDstMap1.b) * (1.0 - mult)));
+    for (int i = 0; i < 16; i++) {
+        hueMult = hueMultiplier(hsl.r, srcHueMap[i], srcHueQMap[i]);
+        satMult = hsl.g * hueMult;
+        lumaMult = (1.0 - (abs(hsl.b - 0.5) * 2.0)) * hueMult;
+
+        hslResult.r = hslResult.r + (dstHueMap[i] * hueMult);
+        hslResult.g = hslResult.g * (dstSatMap[i] + ((1.0 - dstSatMap[i]) * (1.0 - satMult)));
+        hslResult.b = hslResult.b * (dstLumMap[i] + ((1.0 - dstLumMap[i]) * (1.0 - lumaMult)));
+    }
 
     vec3 correctedRGB = hsl2rgb(clamp(hsl, 0.0, 1.0));
 

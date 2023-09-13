@@ -114,7 +114,7 @@ cJSON* serialize_config_color_matrix(config_color_matrix* in) {
     return config_color_matrix_json;
 }
 
-cJSON* serialize_config_color_corrector(config_color_corrector* in) {
+cJSON* serialize_config_color_corrector_single(config_color_corrector* in) {
     cJSON* config_color_corrector_json = cJSON_CreateObject();
 
     cJSON_AddItemToObject(config_color_corrector_json, "src_hue", cJSON_CreateNumber(in->src_hue));
@@ -124,6 +124,17 @@ cJSON* serialize_config_color_corrector(config_color_corrector* in) {
     cJSON_AddItemToObject(config_color_corrector_json, "dst_lum", cJSON_CreateNumber(in->dst_lum));
 
     return config_color_corrector_json;
+}
+
+cJSON* serialize_config_color_corrector_multiple(config_color_corrector* in) {
+    cJSON* config_color_corrector_array_json = cJSON_CreateArray();
+
+    for (int i = 0; i < CONFIG_COLOR_CORRECTOR_LENGTH; i++) {
+        cJSON* item = serialize_config_color_corrector_single(&in[i]);
+        cJSON_AddItemToArray(config_color_corrector_array_json, item);
+    }
+
+    return config_color_corrector_array_json;
 }
 
 cJSON* serialize_config_black_level_adjust(config_black_level_adjust *in) {
@@ -156,7 +167,7 @@ cJSON* serialize_config_virtual_screen(config_virtual_screen *in) {
     cJSON_AddItemToObject(config_virtual_screen_json, "render_input_bounds", serialize_config_bounds(&in->render_input_bounds));
 
     cJSON_AddItemToObject(config_virtual_screen_json, "color_matrix", serialize_config_color_matrix(&in->color_matrix));
-    cJSON_AddItemToObject(config_virtual_screen_json, "color_corrector", serialize_config_color_corrector(&in->color_corrector));
+    cJSON_AddItemToObject(config_virtual_screen_json, "color_corrector", serialize_config_color_corrector_multiple(&in->color_corrector));
     
     cJSON_AddItemToObject(config_virtual_screen_json, "monitor_position", serialize_config_point_mapping(&in->monitor_position));
 
