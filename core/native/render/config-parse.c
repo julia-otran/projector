@@ -280,6 +280,12 @@ void parse_config_color_corrector(cJSON* config_color_corrector_multi_json, conf
                 parse_config_color_corrector_single(config_color_corrector_single_json, &out[i]);
             }
         }
+
+        return;
+    }
+
+    for (int i = 0; i < CONFIG_COLOR_CORRECTOR_LENGTH; i++) {
+        parse_config_color_corrector_single(NULL, &out[i]);
     }
 }
 
