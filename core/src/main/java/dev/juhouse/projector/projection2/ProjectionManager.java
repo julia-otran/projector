@@ -8,6 +8,7 @@ package dev.juhouse.projector.projection2;
 import java.awt.Font;
 import java.io.File;
 
+import dev.juhouse.projector.projection2.image.ProjectionSolidColor;
 import dev.juhouse.projector.projection2.time.ProjectionClock;
 import dev.juhouse.projector.projection2.time.ProjectionCountdown;
 import dev.juhouse.projector.projection2.image.ProjectionImage;
@@ -76,6 +77,8 @@ public interface ProjectionManager {
     ProjectionPlayer createPlayer();
 
     ProjectionCountdown createCountdown();
+
+    ProjectionSolidColor createSolidColor();
 
     boolean getDarkenBackground();
 

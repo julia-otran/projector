@@ -5,6 +5,7 @@ import dev.juhouse.projector.projection2.time.ProjectionCountdown
 import dev.juhouse.projector.projection2.image.ProjectionBackground
 import dev.juhouse.projector.projection2.image.ProjectionImage
 import dev.juhouse.projector.projection2.image.ProjectionMultiImage
+import dev.juhouse.projector.projection2.image.ProjectionSolidColor
 import dev.juhouse.projector.projection2.models.BackgroundModel
 import dev.juhouse.projector.projection2.text.ProjectionLabel
 import dev.juhouse.projector.projection2.text.WrappedText
@@ -231,6 +232,17 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
         countdown.rebuild()
 
         return countdown
+    }
+
+    override fun createSolidColor(): ProjectionSolidColor {
+        val solidColor = ProjectionSolidColor(delegate)
+
+        projectablesList.add(solidColor)
+
+        solidColor.init()
+        solidColor.rebuild()
+
+        return solidColor
     }
 
     override fun getDarkenBackground(): Boolean {

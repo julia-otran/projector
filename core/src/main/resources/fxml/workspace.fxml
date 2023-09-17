@@ -115,6 +115,7 @@
               <MenuItem mnemonicParsing="false" onAction="#onAddYouTube" text="YouTube" />
               <MenuItem mnemonicParsing="false" onAction="#onAddBrowser" text="Site WEB" />
                      <MenuItem mnemonicParsing="false" onAction="#onAddDeviceCapture" text="Captura de Vídeo" />
+                        <MenuItem mnemonicParsing="false" onAction="#onAddSolidColor" text="Cor Sólida" />
             </items>
           </MenuButton>
           <ListView fx:id="projectablesListView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="322.0" prefWidth="268.0" VBox.vgrow="ALWAYS">
