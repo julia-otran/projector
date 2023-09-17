@@ -9,12 +9,14 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
 
-
 <AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dev.juhouse.projector.forms.controllers.projection.SolidColorController">
    <children>
       <VBox alignment="CENTER" prefHeight="400.0" prefWidth="600.0">
          <children>
-            <Pane fx:id="projectionControlPane" VBox.vgrow="NEVER" />
+            <Pane fx:id="projectionControlPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="100.0" VBox.vgrow="NEVER">
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin></Pane>
             <HBox prefHeight="222.0" prefWidth="600.0">
                <children>
                   <VBox prefHeight="200.0" prefWidth="100.0" HBox.hgrow="ALWAYS">
@@ -62,7 +64,7 @@
                            </VBox.margin>
                         </Slider>
                         <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Luminância" />
-                        <TextField fx:id="lumTextField" />
+                        <TextField fx:id="lumaTextField" />
                         <Slider fx:id="lumaSlider" blockIncrement="0.01" max="1.0">
                            <VBox.margin>
                               <Insets bottom="8.0" top="8.0" />
@@ -74,13 +76,19 @@
                      </HBox.margin>
                   </VBox>
                </children>
+               <padding>
+                  <Insets top="16.0" />
+               </padding>
             </HBox>
             <Pane maxHeight="100.0" maxWidth="200.0" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="NEVER">
                <VBox.margin>
-                  <Insets bottom="20.0" top="20.0" />
+                  <Insets top="12.0" />
                </VBox.margin>
             </Pane>
          </children>
+         <padding>
+            <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
+         </padding>
       </VBox>
    </children>
 </AnchorPane>

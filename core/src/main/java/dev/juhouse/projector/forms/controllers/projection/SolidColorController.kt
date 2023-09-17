@@ -7,11 +7,9 @@ import javafx.fxml.FXML
 import javafx.scene.control.Slider
 import javafx.scene.control.TextField
 import javafx.scene.layout.Pane
-import java.awt.Color
 import java.net.URL
 import java.util.*
 import kotlin.math.abs
-import kotlin.math.roundToInt
 
 class SolidColorController : ProjectionController(), ProjectionBarControlCallbacks {
 
@@ -47,6 +45,14 @@ class SolidColorController : ProjectionController(), ProjectionBarControlCallbac
     private val controlBar = ProjectionBarControl()
 
     private lateinit var projectable: ProjectionSolidColor
+
+    private var currentR = -1.0
+    private var currentG = -1.0
+    private var currentB = -1.0
+    private var currentH = -1.0
+    private var currentS = -1.0
+    private var currentL = -1.0
+    private var changing = false
 
     private val rgbTextChangeListener: ChangeListener<String> = ChangeListener { observableValue, t, t2 ->
         val r = redTextField.text.toDouble()
@@ -103,54 +109,104 @@ class SolidColorController : ProjectionController(), ProjectionBarControlCallbac
         hueSlider.valueProperty().addListener(hslSliderChangeListener)
         satSlider.valueProperty().addListener(hslSliderChangeListener)
         lumaSlider.valueProperty().addListener(hslSliderChangeListener)
+
+        setRGB(doubleArrayOf(0.0, 0.0, 0.0))
     }
 
     private fun setRGB(rgb: DoubleArray) {
+        if (changing) return
+
+        changing = true
+
         val hsl = RGBtoHSL(rgb)
 
-        redTextField.text = rgb[0].toString()
-        redSlider.value = rgb[0]
+        if (currentR != rgb[0]) {
+            currentR = rgb[0]
+            redTextField.text = rgb[0].toString()
+            redSlider.value = rgb[0]
+        }
 
-        greenTextField.text = rgb[1].toString()
-        greenSlider.value = rgb[1]
+        if (currentG != rgb[1]) {
+            currentG = rgb[1]
+            greenTextField.text = rgb[1].toString()
+            greenSlider.value = rgb[1]
+        }
 
-        blueTextField.text = rgb[2].toString()
-        blueSlider.value = rgb[2]
+        if (currentB != rgb[2]) {
+            currentB = rgb[2]
+            blueTextField.text = rgb[2].toString()
+            blueSlider.value = rgb[2]
+        }
 
-        hueTextField.text = hsl[0].toString()
-        hueSlider.value = hsl[0]
+        if (currentH != hsl[0]) {
+            currentH = hsl[0]
+            hueTextField.text = hsl[0].toString()
+            hueSlider.value = hsl[0]
+        }
 
-        satTextField.text = hsl[1].toString()
-        satSlider.value = hsl[1]
+        if (currentS != hsl[1]) {
+            currentS = hsl[1]
+            satTextField.text = hsl[1].toString()
+            satSlider.value = hsl[1]
+        }
 
-        lumaTextField.text = hsl[2].toString()
-        lumaSlider.value = hsl[2]
+        if (currentL != hsl[2]) {
+            currentL = hsl[2]
+            lumaTextField.text = hsl[2].toString()
+            lumaSlider.value = hsl[2]
+        }
+
+        changing = false
 
         projectable.setColor(rgb)
     }
 
     private fun setHSL(hsl: DoubleArray) {
+        if (changing) return
+
+        changing = true
+
         val rgb = HSLtoRGB(hsl)
 
-        redTextField.text = rgb[0].toString()
-        redSlider.value = rgb[0]
+        if (currentR != rgb[0]) {
+            currentR = rgb[0]
+            redTextField.text = rgb[0].toString()
+            redSlider.value = rgb[0]
+        }
 
-        greenTextField.text = rgb[1].toString()
-        greenSlider.value = rgb[1]
+        if (currentG != rgb[1]) {
+            currentG = rgb[1]
+            greenTextField.text = rgb[1].toString()
+            greenSlider.value = rgb[1]
+        }
 
-        blueTextField.text = rgb[2].toString()
-        blueSlider.value = rgb[2]
+        if (currentB != rgb[2]) {
+            currentB = rgb[2]
+            blueTextField.text = rgb[2].toString()
+            blueSlider.value = rgb[2]
+        }
 
-        hueTextField.text = hsl[0].toString()
-        hueSlider.value = hsl[0]
+        if (currentH != hsl[0]) {
+            currentH = hsl[0]
+            hueTextField.text = hsl[0].toString()
+            hueSlider.value = hsl[0]
+        }
 
-        satTextField.text = hsl[1].toString()
-        satSlider.value = hsl[1]
+        if (currentS != hsl[1]) {
+            currentS = hsl[1]
+            satTextField.text = hsl[1].toString()
+            satSlider.value = hsl[1]
+        }
 
-        lumaTextField.text = hsl[2].toString()
-        lumaSlider.value = hsl[2]
+        if (currentL != hsl[2]) {
+            currentL = hsl[2]
+            lumaTextField.text = hsl[2].toString()
+            lumaSlider.value = hsl[2]
+        }
 
         projectable.setColor(rgb)
+
+        changing = false
     }
 
     private fun clamp(v: Double): Double {
@@ -176,7 +232,7 @@ class SolidColorController : ProjectionController(), ProjectionBarControlCallbac
 	    if (cMax > cMin) {
 		    val cDelta = cMax - cMin
 
-		    s = if (l > 0.0) cDelta / (1.0 - abs((2.0 * l) - 1.0)) else 0.0
+            s = if (l < .0) cDelta / (cMax + cMin) else cDelta / (2.0 - (cMax + cMin))
 
             h = if (r == cMax) {
                 (g - b) / cDelta
@@ -201,11 +257,11 @@ class SolidColorController : ProjectionController(), ProjectionBarControlCallbac
 
         rgb[0] = clamp(abs((((hsl[0] * 6.0f) + 0.0f) % 6.0f) - 3.0f) - 1.0)
         rgb[1] = clamp(abs((((hsl[0] * 6.0f) + 4.0f) % 6.0f) - 3.0f) - 1.0)
-        rgb[2] = clamp(abs((((hsl[0] * 6.0f) + 4.0f) % 6.0f) - 3.0f) - 1.0)
+        rgb[2] = clamp(abs((((hsl[0] * 6.0f) + 2.0f) % 6.0f) - 3.0f) - 1.0)
 
-        rgb[0] = (hsl[1] + hsl[2]) * (rgb[0] - 0.5f) * (1f - Math.abs((2f * hsl[2]) - 1f))
-        rgb[1] = (hsl[1] + hsl[2]) * (rgb[1] - 0.5f) * (1f - Math.abs((2f * hsl[2]) - 1f))
-        rgb[2] = (hsl[1] + hsl[2]) * (rgb[2] - 0.5f) * (1f - Math.abs((2f * hsl[2]) - 1f))
+        rgb[0] = hsl[2] + (hsl[1] * (rgb[0] - 0.5f) * (1f - Math.abs((2f * hsl[2]) - 1f)))
+        rgb[1] = hsl[2] + (hsl[1] * (rgb[1] - 0.5f) * (1f - Math.abs((2f * hsl[2]) - 1f)))
+        rgb[2] = hsl[2] + (hsl[1] * (rgb[2] - 0.5f) * (1f - Math.abs((2f * hsl[2]) - 1f)))
 
         return rgb
     }
