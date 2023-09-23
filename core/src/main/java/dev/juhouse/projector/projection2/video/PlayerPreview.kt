@@ -34,7 +34,7 @@ class PlayerPreview(private val previewCallback: PlayerPreviewCallback, delegate
     private val previewImageView: ImageView = ImageView()
     private val previewErrorLabel: Label
     private val updateCallback =
-        Callback<PixelBuffer<IntBuffer?>, Rectangle2D?> { image: PixelBuffer<IntBuffer?>? ->
+        Callback<PixelBuffer<IntBuffer?>, Rectangle2D?> { _: PixelBuffer<IntBuffer?>? ->
             updating = false
             null
         }

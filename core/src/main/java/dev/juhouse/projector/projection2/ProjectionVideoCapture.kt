@@ -55,7 +55,7 @@ class ProjectionVideoCapture(private val delegate: CanvasDelegate): Projectable 
 
     init {
         renderFlagProperty.set(BridgeRenderFlag(delegate))
-        renderFlagProperty.get().flagValueProperty.addListener { observable: Observable? -> updateRender() }
+        renderFlagProperty.get().flagValueProperty.addListener { _: Observable? -> updateRender() }
     }
 
     override fun getRenderFlagProperty(): ReadOnlyObjectProperty<BridgeRenderFlag> {

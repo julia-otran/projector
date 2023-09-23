@@ -54,28 +54,28 @@ class SolidColorController : ProjectionController(), ProjectionBarControlCallbac
     private var currentL = -1.0
     private var changing = false
 
-    private val rgbTextChangeListener: ChangeListener<String> = ChangeListener { observableValue, t, t2 ->
+    private val rgbTextChangeListener: ChangeListener<String> = ChangeListener { _, _, _ ->
         val r = redTextField.text.toDouble()
         val g = greenTextField.text.toDouble()
         val b = blueTextField.text.toDouble()
         setRGB(doubleArrayOf(r, g, b))
     }
 
-    private val rgbSliderChangeListener: ChangeListener<Number> = ChangeListener { observableValue, t, t2 ->
+    private val rgbSliderChangeListener: ChangeListener<Number> = ChangeListener { _, _, _ ->
         val r = redSlider.value
         val g = greenSlider.value
         val b = blueSlider.value
         setRGB(doubleArrayOf(r, g, b))
     }
 
-    private val hslTextChangeListener: ChangeListener<String> = ChangeListener { observableValue, t, t2 ->
+    private val hslTextChangeListener: ChangeListener<String> = ChangeListener { _, _, _ ->
         val h = hueTextField.text.toDouble()
         val s = satTextField.text.toDouble()
         val l = lumaTextField.text.toDouble()
         setHSL(doubleArrayOf(h, s, l))
     }
 
-    private val hslSliderChangeListener: ChangeListener<Number> = ChangeListener { observableValue, t, t2 ->
+    private val hslSliderChangeListener: ChangeListener<Number> = ChangeListener { _, _, _ ->
         val h = hueSlider.value
         val s = satSlider.value
         val l = lumaSlider.value
@@ -118,7 +118,7 @@ class SolidColorController : ProjectionController(), ProjectionBarControlCallbac
 
         changing = true
 
-        val hsl = RGBtoHSL(rgb)
+        val hsl = rgbToHsl(rgb)
 
         if (currentR != rgb[0]) {
             currentR = rgb[0]
@@ -166,7 +166,7 @@ class SolidColorController : ProjectionController(), ProjectionBarControlCallbac
 
         changing = true
 
-        val rgb = HSLtoRGB(hsl)
+        val rgb = hslToRgb(hsl)
 
         if (currentR != rgb[0]) {
             currentR = rgb[0]
@@ -217,7 +217,7 @@ class SolidColorController : ProjectionController(), ProjectionBarControlCallbac
         } else v
     }
 
-    private fun RGBtoHSL(rgb: DoubleArray): DoubleArray {
+    private fun rgbToHsl(rgb: DoubleArray): DoubleArray {
         val r = rgb[0]
 	    val g = rgb[1]
 	    val b = rgb[2]
@@ -252,7 +252,7 @@ class SolidColorController : ProjectionController(), ProjectionBarControlCallbac
 	    return doubleArrayOf(h, s, l)
     }
 
-    private fun HSLtoRGB(hsl: DoubleArray): DoubleArray {
+    private fun hslToRgb(hsl: DoubleArray): DoubleArray {
         val rgb = DoubleArray(3)
 
         rgb[0] = clamp(abs((((hsl[0] * 6.0f) + 0.0f) % 6.0f) - 3.0f) - 1.0)

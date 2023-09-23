@@ -167,7 +167,7 @@ cJSON* serialize_config_virtual_screen(config_virtual_screen *in) {
     cJSON_AddItemToObject(config_virtual_screen_json, "render_input_bounds", serialize_config_bounds(&in->render_input_bounds));
 
     cJSON_AddItemToObject(config_virtual_screen_json, "color_matrix", serialize_config_color_matrix(&in->color_matrix));
-    cJSON_AddItemToObject(config_virtual_screen_json, "color_corrector", serialize_config_color_corrector_multiple(&in->color_corrector));
+    cJSON_AddItemToObject(config_virtual_screen_json, "color_corrector", serialize_config_color_corrector_multiple(&in->color_corrector[0]));
     
     cJSON_AddItemToObject(config_virtual_screen_json, "monitor_position", serialize_config_point_mapping(&in->monitor_position));
 
