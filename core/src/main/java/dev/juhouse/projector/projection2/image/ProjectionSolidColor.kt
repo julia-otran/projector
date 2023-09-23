@@ -64,12 +64,11 @@ class ProjectionSolidColor(private val delegate: CanvasDelegate): Projectable {
         return renderFlagProperty.readOnlyProperty
     }
 
-    @OptIn(ExperimentalUnsignedTypes::class)
     fun setColor(rgb: DoubleArray) {
-        colorRGBA = (((rgb[0] * 255.0).roundToInt().toUInt() shl 24) and 0xFF000000u) or
-                    (((rgb[1] * 255.0).roundToInt().toUInt() shl 16) and 0x00FF0000u) or
-                    (((rgb[2] * 255.0).roundToInt().toUInt() shl 8) and 0x0000FF00u) or
-                    0xFFu
+        colorRGBA = (((rgb[0] * 255.0).roundToInt().toUInt() shl 16) and 0x00FF0000u) or
+                    (((rgb[1] * 255.0).roundToInt().toUInt() shl 8) and 0x0000FF00u) or
+                    (((rgb[2] * 255.0).roundToInt().toUInt() shl 0) and 0x000000FFu) or
+                    0xFF000000u
 
         updateImages()
         updateBridge()
@@ -79,7 +78,7 @@ class ProjectionSolidColor(private val delegate: CanvasDelegate): Projectable {
         val arr = buffer?.array()
 
         arr?.let { data ->
-            for (i in 0..data.size) {
+            for (i in data.indices) {
                 arr[i] = colorRGBA.toInt()
             }
         }
@@ -87,8 +86,12 @@ class ProjectionSolidColor(private val delegate: CanvasDelegate): Projectable {
         presentUniqueImageMap.forEach { (renderId, presentImage) ->
             arr?.let { data ->
                 renderSettings.find { it.renderId == renderId }?.let {
-                    presentImage.update(data, it.width, it.height)
-                    true
+                    if (renderFlagProperty.get().isRenderEnabled(renderId)) {
+                        presentImage.update(data, it.width, it.height)
+                        true
+                    } else {
+                        false
+                    }
                 }
             } ?: kotlin.run {
                 presentImage.update(null, 0, 0)

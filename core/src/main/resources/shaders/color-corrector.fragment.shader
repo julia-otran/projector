@@ -36,8 +36,7 @@ vec3 rgb2hsl(in vec3 c) {
 		float cDelta = cMax - cMin;
 
         // s = l < .05 ? cDelta / ( cMax + cMin ) : cDelta / ( 2.0 - ( cMax + cMin ) ); Original
-		// s = l < .0 ? cDelta / ( cMax + cMin ) : cDelta / ( 2.0 - ( cMax + cMin ) );
-		s = l > 0.0 ? cDelta / (1.0 - abs((2.0 * l) - 1.0)) : 0.0;
+		s = l < .0 ? cDelta / ( cMax + cMin ) : cDelta / ( 2.0 - ( cMax + cMin ) );
 
 		if ( r == cMax ) {
 			h = ( g - b ) / cDelta;
