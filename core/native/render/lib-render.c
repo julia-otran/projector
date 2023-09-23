@@ -79,10 +79,10 @@ void internal_lib_render_reload() {
     shutdown_renders();
 
     log_debug("Shutting down monitors...\n");
-    shutdown_monitors();
+    monitors_shutdown();
 
     log_debug("Reload monitors");
-    reload_monitors();
+    monitors_reload();
 
     log_debug("Will load config:\n");
     print_projection_config(config);
@@ -92,7 +92,7 @@ void internal_lib_render_reload() {
 
     log_debug("Staring engine...\n");
 
-    activate_monitors(config);
+    monitors_create_windows(config);
     activate_renders(get_gl_share_context(), config);
     main_loop_schedule_config_reload(config);
     main_loop_start();
@@ -126,7 +126,7 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_initialize(
 
     render_video_create_mtx();
 
-    reload_monitors();
+    monitors_reload();
 
     config_bounds default_monitor;
     int no_display;
@@ -195,7 +195,7 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_loadConfig(
     log_debug("Staring engine...\n");
     config = new_config;
 
-    activate_monitors(config);
+    monitors_create_windows(config);
     activate_renders(get_gl_share_context(), config);
     main_loop_schedule_config_reload(config);
     main_loop_start();
@@ -443,7 +443,7 @@ JNIEXPORT jobjectArray JNICALL Java_dev_juhouse_projector_projection2_Bridge_get
 
     capture_device_node* cap_dev_node = cap_enum->capture_device_list;
 
-    for (unsigned int i = 0; i < cap_enum->capture_device_count; i++) {
+    for (int i = 0; i < cap_enum->capture_device_count; i++) {
         jobjectArray resolutions_arr = (*env)->NewObjectArray(env, cap_dev_node->data->count_resolutions, BridgeCaptureDeviceResolutionClass, NULL);
         capture_device_resolution_node* resolution_node = cap_dev_node->data->resolutions;
 
@@ -489,7 +489,7 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_downloadVid
 (JNIEnv* env, jobject _, jobject j_buffer)
 {
     jbyte* data = (jbyte*)(*env)->GetDirectBufferAddress(env, j_buffer);
-    render_video_capture_download_preview(data);
+    render_video_capture_download_preview((int*)data);
 }
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setVideoCaptureEnabled
@@ -515,7 +515,7 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_shutdown(JN
 
     main_loop_terminate();
     shutdown_renders();
-    shutdown_monitors();
+    monitors_shutdown();
     window_capture_terminate();
     video_capture_terminate();
 

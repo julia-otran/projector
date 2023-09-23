@@ -64,7 +64,7 @@ float hueMultiplier(in float srcHue, in float tgtHue, in float q) {
         targetHue = targetHue - 1.0;
     }
 
-    float result = (-1.0 * q * pow(abs(targetHue - 0.18 - srcHue) - 0.5, 2)) + 1.0;
+    float result = (-1.0 * q * pow(abs(targetHue - 0.18 - srcHue) - 0.5, 2.0)) + 1.0;
     return clamp(result, 0.0, 1.0);
 }
 

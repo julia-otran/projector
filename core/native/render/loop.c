@@ -26,7 +26,7 @@ int loop(void *_) {
     int render_output_count;
 
     get_render_output(&output, &render_output_count);
-    monitors_init(output, render_output_count);
+    monitors_load_renders(output, render_output_count);
 
     monitors_config_hot_reload(pending_config_reload);
     pending_config_reload = NULL;

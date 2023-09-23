@@ -16,12 +16,18 @@
 
 static int monitors_count;
 static monitor *monitors;
+
+#define MAX_DISPLAYS 10
+
+static int display_window_count;
+static display_window display_windows[MAX_DISPLAYS];
+
 static GLFWwindow *gl_share_context = NULL;
 
 static render_output *render_output_config;
 static int render_output_config_count;
 
-void reload_monitors() {
+void monitors_reload() {
     int found_monitors_count;
 
     GLFWmonitor** gl_monitors = glfwGetMonitors(&found_monitors_count);
@@ -33,9 +39,6 @@ void reload_monitors() {
         found_monitors[i].mode = (GLFWvidmode *)glfwGetVideoMode(gl_monitors[i]);
         glfwGetMonitorPos(gl_monitors[i], &(found_monitors[i].xpos), &(found_monitors[i].ypos));
         found_monitors[i].is_primary = i == 0;
-        found_monitors[i].window = NULL;
-        found_monitors[i].config = NULL;
-        found_monitors[i].virtual_screen_data = NULL;
     }
 
     monitors_count = found_monitors_count;
@@ -49,8 +52,8 @@ int monitor_match_bounds(config_bounds *bounds, monitor *m) {
                        m->mode->height == bounds->h;
 }
 
-void create_window(monitor *m) {
-    if (m->window) {
+void create_window(monitor *m, display_window *dw) {
+    if (dw->window) {
         return;
     }
 
@@ -71,28 +74,26 @@ void create_window(monitor *m) {
 
     glfwWindowHint(GLFW_SAMPLES, 4);
 
-    m->window = glfwCreateWindow(mode->width, mode->height, "Projector", monitor, gl_share_context);
-    // glfwSetWindowMonitor(m->window, monitor, m->xpos, m->ypos, mode->width, mode->height, mode->refreshRate);
+    dw->window = glfwCreateWindow(mode->width, mode->height, "Projector", monitor, gl_share_context);
 
-    glfwSetInputMode(m->window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+    glfwSetInputMode(dw->window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
 #ifdef _WIN32
     BOOL exclude = 1;
-    HWND window_hwnd = glfwGetWin32Window(m->window);
+    HWND window_hwnd = glfwGetWin32Window(dw->window);
     DwmSetWindowAttribute(window_hwnd, DWMWA_EXCLUDED_FROM_PEEK, &exclude, sizeof(exclude));
 #endif
 
     if (gl_share_context == NULL) {
-        gl_share_context = m->window;
+        gl_share_context = dw->window;
     }
 }
 
-void create_non_fs_window(monitor* m) {
-    if (m->window) {
+void create_non_fs_window(monitor* m, display_window *dw) {
+    if (dw->window) {
         return;
     }
 
-    GLFWmonitor* monitor = m->gl_monitor;
     GLFWvidmode* mode = m->mode;
 
     glfwWindowHint(GLFW_RED_BITS, mode->redBits);
@@ -109,84 +110,86 @@ void create_non_fs_window(monitor* m) {
 
     glfwWindowHint(GLFW_SAMPLES, 4);
 
-    m->window = glfwCreateWindow(mode->width / 2, mode->height / 2, "Projector", NULL, gl_share_context);
+    dw->window = glfwCreateWindow(mode->width / 2, mode->height / 2, "Projector", NULL, gl_share_context);
 
-    glfwSetInputMode(m->window, GLFW_STICKY_KEYS, GL_TRUE);
-    glfwSetInputMode(m->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    glfwSetInputMode(dw->window, GLFW_STICKY_KEYS, GL_TRUE);
+    glfwSetInputMode(dw->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
     if (gl_share_context == NULL) {
-        gl_share_context = m->window;
+        gl_share_context = dw->window;
     }
 }
 
-int destroy_window(monitor *m) {
-    if (!m->window) {
-        return 0;
+void destroy_display_window(display_window *dw) {
+    if (!dw->window) {
+        return;
     }
 
-    int require_restart = 0;
-
-    if (gl_share_context == m->window) {
-        // If this happens, restart entire engine.
-        require_restart = 1;
+    if (gl_share_context == dw->window) {
         gl_share_context = NULL;
     }
 
-    glfwDestroyWindow(m->window);
-    m->window = NULL;
-
-    return require_restart;
+    glfwDestroyWindow(dw->window);
+    dw->window = NULL;
 }
 
-void shutdown_monitors() {
+void monitors_shutdown() {
     gl_share_context = NULL;
 
-    for (int i=0; i<monitors_count; i++) {
-        monitor *m = &monitors[i];
+    for (int i=0; i<display_window_count; i++) {
+        display_window *dw = &display_windows[i];
 
-        destroy_window(m);
+        destroy_display_window(dw);
 
-        if (m->virtual_screen_data) {
-            free(m->virtual_screen_data);
+        if (dw->virtual_screen_data) {
+            free(dw->virtual_screen_data);
         }
     }
 
     free(monitors);
+
+    display_window_count = 0;
+    monitors_count = 0;
 }
 
-int activate_monitors(projection_config *config) {
-    int any_found = 0;
-    int need_restart = 0;
+void monitors_create_windows(projection_config *config) {
+    display_window_count = config->count_display;
 
-    for (int i=0; i<monitors_count; i++) {
+    if (display_window_count > MAX_DISPLAYS) {
+        display_window_count = 0;
+        log_debug("Maximum number of displays exceeded. This is unsupported. System will crash soon.");
+        return;
+    }
+
+    for (int i=0; i<config->count_display; i++) {
         int found = 0;
-        monitor *m = &monitors[i];
 
-        for (int j=0; j<config->count_display; j++) {
-            config_display *dsp = &config->display[j];
+        config_display *dsp = &config->display[i];
+        display_window *dw = &display_windows[i];
+
+        for (int j=0; j<monitors_count; j++) {
+            monitor *m = &monitors[j];
 
             if (monitor_match_bounds(&dsp->monitor_bounds, m) && dsp->projection_enabled) {
                 found = 1;
-                any_found = 1;
-                m->config = dsp;
-                create_window(m);
+
+                create_window(m, dw);
+                dw->config = dsp;
+                dw->display_index = i;
             }
         }
 
         if (!found) {
-            if (destroy_window(m) && i != 0) {
-                need_restart = 1;
+            if (dsp->projection_enabled) {
+                create_non_fs_window(&monitors[0], dw);
+                dw->config = dsp;
+                dw->display_index = i;
+            } else {
+                dw->config = NULL;
+                dw->display_index = -1;
             }
-
-            m->config = NULL;
         }
     }
-
-    if (any_found == 0) {
-        create_non_fs_window(&monitors[0]);
-    }
-
-    return need_restart;
 }
 
 void get_default_projection_monitor_bounds(config_bounds *in, int *no_secondary_mon) {
@@ -217,8 +220,8 @@ GLFWwindow* get_gl_share_context() {
 }
 
 int window_should_close() {
-    for (int i=0; i<monitors_count; i++) {
-        if (monitors[i].window && glfwWindowShouldClose(monitors[i].window)) {
+    for (int i=0; i<display_window_count; i++) {
+        if (display_windows[i].window && glfwWindowShouldClose(display_windows[i].window)) {
             return 1;
         }
     }
@@ -251,57 +254,53 @@ void monitor_set_share_context() {
 }
 
 void monitors_config_hot_reload(projection_config *config) {
-    for (int i=0; i<monitors_count; i++) {
-        monitor *m = &monitors[i];
+    for (int i=0; i<display_window_count; i++) {
+        display_window *dw = &display_windows[i];
 
-        if (m->window) {
-            if (m->virtual_screen_data) {
-                for (int j=0; j<m->config->count_virtual_screen; j++) {
+        if (dw->window) {
+            if (dw->virtual_screen_data) {
+                for (int j=0; j<dw->config->count_virtual_screen; j++) {
                     monitor_set_share_context();
-                    virtual_screen_shared_stop(m->virtual_screen_data[j]);
+                    virtual_screen_shared_stop(dw->virtual_screen_data[j]);
 
-                    monitor_set_context_if_need(m->window);
-                    virtual_screen_monitor_stop(m->virtual_screen_data[j]);
+                    monitor_set_context_if_need(dw->window);
+                    virtual_screen_monitor_stop(dw->virtual_screen_data[j]);
                 }
 
-                free(m->virtual_screen_data);
-                m->virtual_screen_data = NULL;
+                free(dw->virtual_screen_data);
+                dw->virtual_screen_data = NULL;
             }
 
-            for (int j = 0; j < config->count_display; j++) {
-                config_display *dsp = &config->display[j];
+            config_display *dsp = &config->display[dw->display_index];
 
-                if (monitor_match_bounds(&dsp->monitor_bounds, m) && dsp->projection_enabled) {
-                    m->config = dsp;
-                    m->virtual_screen_data = (void**) calloc(dsp->count_virtual_screen, sizeof(void*));
+            dw->config = dsp;
+            dw->virtual_screen_data = (void**) calloc(dsp->count_virtual_screen, sizeof(void*));
 
-                    for (int k=0; k<m->config->count_virtual_screen; k++) {
-                        config_virtual_screen *config_vs = &m->config->virtual_screens[k];
-                        render_output *render = get_render_output_config(config_vs);
+            for (int k=0; k<dw->config->count_virtual_screen; k++) {
+                config_virtual_screen *config_vs = &dw->config->virtual_screens[k];
+                render_output *render = get_render_output_config(config_vs);
 
-                        monitor_set_share_context();
-                        virtual_screen_shared_start(dsp, render, config_vs, &m->virtual_screen_data[k]);
+                monitor_set_share_context();
+                virtual_screen_shared_start(dsp, render, config_vs, &dw->virtual_screen_data[k]);
 
-                        monitor_set_context_if_need(m->window);
-                        virtual_screen_monitor_start(dsp, render, config_vs, m->virtual_screen_data[k]);
-                    }
-                }
+                monitor_set_context_if_need(dw->window);
+                virtual_screen_monitor_start(dsp, render, config_vs, dw->virtual_screen_data[k]);
             }
         }
     }
 }
 
-void monitors_init(render_output *data, int render_output_count) {
+void monitors_load_renders(render_output *data, int render_output_count) {
     render_output_config = data;
     render_output_config_count = render_output_count;
 
-    for (int i=0; i<monitors_count; i++) {
-        monitor *m = &monitors[i];
+    for (int i=0; i<display_window_count; i++) {
+        display_window *dw = &display_windows[i];
 
-        if (m->window) {
-            monitor_set_context_if_need(m->window);
+        if (dw->window) {
+            monitor_set_context_if_need(dw->window);
 
-            if (m->window == gl_share_context) 
+            if (dw->window == gl_share_context)
             {
                 glfwSwapInterval(1);
             }
@@ -321,23 +320,23 @@ void monitors_init(render_output *data, int render_output_count) {
 }
 
 void monitors_terminate() {
-    for (int i=0; i<monitors_count; i++) {
-        monitor *m = &monitors[i];
+    for (int i=0; i<display_window_count; i++) {
+        display_window *dw = &display_windows[i];
 
-        if (m->window) {
-            if (m->virtual_screen_data) {
-                for (int j=0; j<m->config->count_virtual_screen; j++) {
+        if (dw->window) {
+            if (dw->virtual_screen_data) {
+                for (int j=0; j<dw->config->count_virtual_screen; j++) {
                     monitor_set_share_context();
-                    virtual_screen_shared_stop(m->virtual_screen_data[j]);
+                    virtual_screen_shared_stop(dw->virtual_screen_data[j]);
                     
-                    monitor_set_context_if_need(m->window);
-                    virtual_screen_monitor_stop(m->virtual_screen_data[j]);
+                    monitor_set_context_if_need(dw->window);
+                    virtual_screen_monitor_stop(dw->virtual_screen_data[j]);
 
-                    m->virtual_screen_data[j] = NULL;
+                    dw->virtual_screen_data[j] = NULL;
                 }
 
-                free(m->virtual_screen_data);
-                m->virtual_screen_data = NULL;
+                free(dw->virtual_screen_data);
+                dw->virtual_screen_data = NULL;
             }
         }
     }
@@ -348,36 +347,39 @@ void monitors_terminate() {
 }
 
 void monitors_cycle() {
-    for (int i = 0; i < monitors_count; i++) {
-        monitor* m = &monitors[i];
+    for (int i = 0; i < display_window_count; i++) {
+        display_window *dw = &display_windows[i];
 
-        if (m->window && m->config) {
-            for (int j = 0; j < m->config->count_virtual_screen; j++) {
-                void* vs_data = m->virtual_screen_data[j];
-                virtual_screen_shared_render(&m->config->virtual_screens[j], vs_data);
+        if (dw->window && dw->config) {
+            for (int j = 0; j < dw->config->count_virtual_screen; j++) {
+                void* vs_data = dw->virtual_screen_data[j];
+                virtual_screen_shared_render(&dw->config->virtual_screens[j], vs_data);
             }
         }
     }
 
-    for (int i=0; i<monitors_count; i++) {
-        monitor *m = &monitors[i];
+    for (int i=0; i<display_window_count; i++) {
+        display_window *dw = &display_windows[i];
 
-        if (m->window && m->config) {
-            monitor_set_context_if_need(m->window);
+        if (dw->window && dw->config) {
+            monitor_set_context_if_need(dw->window);
             glEnable(GL_TEXTURE_2D);
 
-            glViewport(0, 0, m->config->monitor_bounds.w, m->config->monitor_bounds.h);
+            int width, height;
+            glfwGetFramebufferSize(dw->window, &width, &height);
+            glViewport(0, 0, width, height);
 
             glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
             glPushMatrix();
             glLoadIdentity();
-            glOrtho(0.0, m->config->monitor_bounds.w, m->config->monitor_bounds.h, 0.0, 0.0, 1.0);
 
-            for (int j=0; j < m->config->count_virtual_screen; j++) {
-                void *vs_data = m->virtual_screen_data[j];
-                virtual_screen_monitor_print(&m->config->virtual_screens[j], vs_data);
+            glOrtho(0.0, dw->config->monitor_bounds.w, dw->config->monitor_bounds.h, 0.0, 0.0, 1.0);
+
+            for (int j=0; j < dw->config->count_virtual_screen; j++) {
+                void *vs_data = dw->virtual_screen_data[j];
+                virtual_screen_monitor_print(&dw->config->virtual_screens[j], vs_data);
             }
 
             glPopMatrix();
@@ -388,12 +390,12 @@ void monitors_cycle() {
 }
 
 void monitors_flip() {
-    for (int i = 0; i < monitors_count; i++) {
-        monitor* m = &monitors[i];
+    for (int i = 0; i < display_window_count; i++) {
+        display_window *dw = &display_windows[i];
 
-        if (m->window) {
-            monitor_set_context_if_need(m->window);
-            glfwSwapBuffers(m->window);
+        if (dw->window) {
+            monitor_set_context_if_need(dw->window);
+            glfwSwapBuffers(dw->window);
         }
     }
 }
