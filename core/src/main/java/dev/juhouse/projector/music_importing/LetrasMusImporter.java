@@ -29,9 +29,9 @@ public class LetrasMusImporter extends MusicUrlImporter {
         ImportingMusicDTO music = new ImportingMusicDTO();
 
         Document doc = Jsoup.parse(data);
-        Elements title = doc.select(".cnt-head_title h1");
-        Elements artist = doc.select(".cnt-head_title h2");
-        Elements stanzasElm = doc.select(".cnt-letra p");
+        Elements title = doc.select(".head.--lyric .head-title");
+        Elements artist = doc.select(".head.--lyric .head-subtitle ");
+        Elements stanzasElm = doc.select(".lyric .lyric-original p");
 
         music.setName(title.text());
         music.setArtist(artist.text());
