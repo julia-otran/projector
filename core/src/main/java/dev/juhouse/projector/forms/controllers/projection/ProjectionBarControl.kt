@@ -36,7 +36,7 @@ class ProjectionBarControl: VBox() {
     var projectable: Projectable? = null
         set(value) {
             field = value
-            renderFlagsBox.renderFlag = value?.renderFlagProperty?.get()
+            renderFlagsBox.renderFlag = value?.renderFlag
         }
 
     var callback: ProjectionBarControlCallbacks? = null

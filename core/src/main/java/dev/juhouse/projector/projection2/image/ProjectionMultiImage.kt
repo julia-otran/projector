@@ -16,11 +16,9 @@ class ProjectionMultiImage(private val delegate: CanvasDelegate): Projectable {
     private val presentUniqueImageMap = HashMap<Int, PresentUniqueImage>()
 
     private var render = false
-    private val renderFlagProperty = ReadOnlyObjectWrapper<BridgeRenderFlag>()
+    private val renderFlag = BridgeRenderFlag(delegate)
 
     override fun init() {
-        renderFlagProperty.set(BridgeRenderFlag(delegate))
-
         delegate.bridge.renderSettings.forEach {
             presentUniqueImageMap[it.renderId] = PresentUniqueImage(it.renderId, delegate.bridge)
         }
@@ -44,8 +42,8 @@ class ProjectionMultiImage(private val delegate: CanvasDelegate): Projectable {
         updateBridge()
     }
 
-    override fun getRenderFlagProperty(): ReadOnlyObjectProperty<BridgeRenderFlag> {
-        return renderFlagProperty.readOnlyProperty
+    override fun getRenderFlag(): BridgeRenderFlag {
+        return renderFlag
     }
 
     fun setImages(imagesMap: Map<Int, Image>) {
@@ -64,7 +62,7 @@ class ProjectionMultiImage(private val delegate: CanvasDelegate): Projectable {
                 val w = image.width.toInt()
                 val h = image.height.toInt()
 
-                renderFlagProperty.get().enableRenderId(renderId)
+                renderFlag.enableRenderId(renderId)
 
                 buffer?.let { buffer ->
                     image.pixelReader.getPixels(0, 0, w, h, PixelFormat.getIntArgbPreInstance(), buffer.array(), 0, w)
@@ -74,7 +72,7 @@ class ProjectionMultiImage(private val delegate: CanvasDelegate): Projectable {
                 true
             } ?: kotlin.run {
                 presentImage.update(null, 0, 0)
-                renderFlagProperty.get().disableRenderId(renderId)
+                renderFlag.disableRenderId(renderId)
             }
         }
     }

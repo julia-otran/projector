@@ -26,8 +26,16 @@ class PresentMultipleImage(private val renderFlag: BridgeRenderFlag, val bridge:
     }
 
     private fun updateImages() {
+        updateImages(false)
+    }
+
+    private fun updateImages(force: Boolean) {
         currentImages.forEach { (renderId, image) ->
-            if (renderFlag.isRenderEnabled(renderId) && render) {
+            val shouldPresent = renderFlag.isRenderEnabled(renderId) && render
+
+            if (force && shouldPresent == image.isPresenting()) {
+                image.update()
+            } else if (shouldPresent) {
                 image.present()
             } else {
                 image.hide()
@@ -50,10 +58,12 @@ class PresentMultipleImage(private val renderFlag: BridgeRenderFlag, val bridge:
     fun rebuild() {
         bridge.renderSettings.forEach {
             if (currentImages[it.renderId] == null) {
-                currentImages[it.renderId] = PresentUniqueImage(it.renderId, bridge)
+                currentImages.values.first().let { img ->
+                    currentImages[it.renderId] = img.cloneWithRenderId(it.renderId)
+                }
             }
         }
 
-        updateImages()
+        updateImages(true)
     }
 }

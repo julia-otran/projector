@@ -34,17 +34,17 @@ public class ProjectionVideo {
     @Getter
     private final BooleanProperty render = new SimpleBooleanProperty(false);
 
-    private final ReadOnlyObjectWrapper<BridgeRenderFlag> renderFlagProperty = new ReadOnlyObjectWrapper<>();
+    private final BridgeRenderFlag renderFlag;
 
     public ProjectionVideo(CanvasDelegate delegate) {
         this.delegate = delegate;
 
-        renderFlagProperty.set(new BridgeRenderFlag(delegate));
-        renderFlagProperty.get().getFlagValueProperty().addListener(observable -> updateRender());
+        renderFlag = new BridgeRenderFlag(delegate);
+        renderFlag.getFlagValueProperty().addListener(observable -> updateRender());
     }
 
-    public ReadOnlyObjectProperty<BridgeRenderFlag> getRenderFlagProperty() {
-        return renderFlagProperty.getReadOnlyProperty();
+    public BridgeRenderFlag getRenderFlag() {
+        return renderFlag;
     }
 
     public void init() {
@@ -68,7 +68,7 @@ public class ProjectionVideo {
 
     private void updateRender() {
         if (render.get()) {
-            this.delegate.getBridge().setVideoRenderFlag(this.player, this.cropVideo, renderFlagProperty.get().getFlagValue());
+            this.delegate.getBridge().setVideoRenderFlag(this.player, this.cropVideo, renderFlag.getFlagValue());
         } else {
             this.delegate.getBridge().setVideoRenderFlag(this.player, this.cropVideo, BridgeRenderFlag.NO_RENDER);
         }

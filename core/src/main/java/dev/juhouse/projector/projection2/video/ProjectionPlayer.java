@@ -54,7 +54,7 @@ public class ProjectionPlayer implements Projectable {
     }
 
     public void applyRenderFlag() {
-        video.getRenderFlagProperty().get().applyDefault(BridgeRender::getEnableRenderVideo);
+        video.getRenderFlag().applyDefault(BridgeRender::getEnableRenderVideo);
     }
 
     public boolean isCropVideo() {
@@ -74,8 +74,8 @@ public class ProjectionPlayer implements Projectable {
     }
 
     @Override
-    public ReadOnlyObjectProperty<BridgeRenderFlag> getRenderFlagProperty() {
-        return video.getRenderFlagProperty();
+    public BridgeRenderFlag getRenderFlag() {
+        return video.getRenderFlag();
     }
 
     @Override

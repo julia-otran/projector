@@ -29,11 +29,11 @@ class ProjectionCountdown(private val delegate: CanvasDelegate): Projectable {
     override fun init() {
         backgroundVideo.init()
 
-        renderFlagProperty.get().flagValueProperty.addListener { _, _, _ ->
+        renderFlag.flagValueProperty.addListener { _, _, _ ->
             var changed = false
 
             textRenders.forEach {
-                val enable = renderFlagProperty.get().isRenderEnabled(it.bounds.renderId)
+                val enable = renderFlag.isRenderEnabled(it.bounds.renderId)
 
                 if (it.enabled != enable) {
                     it.enabled = enable
@@ -66,7 +66,7 @@ class ProjectionCountdown(private val delegate: CanvasDelegate): Projectable {
 
             val render = TextRenderer(bounds, getFontFor(it))
 
-            render.enabled = renderFlagProperty.get().isRenderEnabled(it.renderId)
+            render.enabled = renderFlag.isRenderEnabled(it.renderId)
 
             textRenders.add(render)
         }
@@ -87,8 +87,8 @@ class ProjectionCountdown(private val delegate: CanvasDelegate): Projectable {
         this.render = render
     }
 
-    override fun getRenderFlagProperty(): ReadOnlyObjectProperty<BridgeRenderFlag> {
-        return backgroundVideo.renderFlagProperty
+    override fun getRenderFlag(): BridgeRenderFlag {
+        return backgroundVideo.renderFlag
     }
 
     fun setText(text: String?) {

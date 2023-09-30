@@ -24,7 +24,7 @@ import java.nio.IntBuffer;
 public class ProjectionImage implements Projectable {
 
     protected final CanvasDelegate canvasDelegate;
-    private final ReadOnlyObjectWrapper<BridgeRenderFlag> renderFlag;
+    private final BridgeRenderFlag renderFlag;
     private boolean cropBackground;
 
     private boolean render;
@@ -33,15 +33,15 @@ public class ProjectionImage implements Projectable {
     private PresentMultipleImage presentImage;
 
     public ProjectionImage(CanvasDelegate canvasDelegate) {
-        this.renderFlag = new ReadOnlyObjectWrapper<>(new BridgeRenderFlag(canvasDelegate));
+        this.renderFlag = new BridgeRenderFlag(canvasDelegate);
         this.canvasDelegate = canvasDelegate;
         this.render = false;
     }
 
     @Override
     public void init() {
-        renderFlag.get().applyDefault(BridgeRender::getEnableRenderImage);
-        presentImage = new PresentMultipleImage(renderFlag.get(), canvasDelegate.getBridge());
+        renderFlag.applyDefault(BridgeRender::getEnableRenderImage);
+        presentImage = new PresentMultipleImage(renderFlag, canvasDelegate.getBridge());
     }
 
     @Override
@@ -63,8 +63,8 @@ public class ProjectionImage implements Projectable {
     }
 
     @Override
-    public ReadOnlyObjectProperty<BridgeRenderFlag> getRenderFlagProperty() {
-        return renderFlag.getReadOnlyProperty();
+    public BridgeRenderFlag getRenderFlag() {
+        return renderFlag;
     }
 
     public boolean getCropBackground() {

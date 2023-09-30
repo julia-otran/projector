@@ -61,8 +61,8 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
     }
 
     override fun setText(current: WrappedText?, ahead: WrappedText?) {
-        concurrentProjectable.get()?.renderFlagProperty?.get()?.renderToNone()
-        label.renderFlagProperty.get().renderToAll()
+        concurrentProjectable.get()?.renderFlag?.renderToNone()
+        label.renderFlag.renderToAll()
         label.setText(current, ahead)
     }
 
@@ -158,11 +158,11 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
     }
 
     private fun setBackgroundExcludeFlag() {
-        val renderFlagProperty =
-            currentProjectable.get()?.renderFlagProperty ?:
-            concurrentProjectable.get()?.renderFlagProperty
+        val renderFlag =
+            currentProjectable.get()?.renderFlag ?:
+            concurrentProjectable.get()?.renderFlag
 
-        background.setExcludeRenderFlag(renderFlagProperty?.get())
+        background.setExcludeRenderFlag(renderFlag)
     }
 
     override fun setConcurrentProjectable(projectable: Projectable?) {

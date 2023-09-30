@@ -23,7 +23,7 @@ public class ProjectionWebView implements Projectable, Runnable {
     private final CanvasDelegate delegate;
     private WebView webView;
 
-    private final ReadOnlyObjectWrapper<BridgeRenderFlag> renderFlag;
+    private final BridgeRenderFlag renderFlag;
 
     private boolean render;
 
@@ -41,7 +41,7 @@ public class ProjectionWebView implements Projectable, Runnable {
     
     public ProjectionWebView(CanvasDelegate delegate) {
         this.delegate = delegate;
-        this.renderFlag = new ReadOnlyObjectWrapper<>(new BridgeRenderFlag(delegate));
+        this.renderFlag = new BridgeRenderFlag(delegate);
     }
 
     @Override
@@ -50,7 +50,7 @@ public class ProjectionWebView implements Projectable, Runnable {
             webView = new WebView();
         }
 
-        renderFlag.get().getFlagValueProperty().addListener((observableValue, number, t1) -> updateRenderFlag());
+        renderFlag.getFlagValueProperty().addListener((observableValue, number, t1) -> updateRenderFlag());
     }
 
     @Override
@@ -60,7 +60,7 @@ public class ProjectionWebView implements Projectable, Runnable {
 
     @Override
     public void rebuild() {
-        renderFlag.get().applyDefault(BridgeRender::getEnableRenderVideo);
+        renderFlag.applyDefault(BridgeRender::getEnableRenderVideo);
 
         boolean oldRender = render;
 
@@ -105,15 +105,15 @@ public class ProjectionWebView implements Projectable, Runnable {
 
     private void updateRenderFlag() {
         if (render) {
-            delegate.getBridge().setRenderWebViewBuffer(renderFlag.get().getFlagValue());
+            delegate.getBridge().setRenderWebViewBuffer(renderFlag.getFlagValue());
         } else {
             delegate.getBridge().setRenderWebViewBuffer(BridgeRenderFlag.NO_RENDER);
         }
     }
 
     @Override
-    public ReadOnlyObjectProperty<BridgeRenderFlag> getRenderFlagProperty() {
-        return renderFlag.getReadOnlyProperty();
+    public BridgeRenderFlag getRenderFlag() {
+        return renderFlag;
     }
 
     public WebView getWebView() {

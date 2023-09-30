@@ -18,7 +18,7 @@ import kotlin.collections.ArrayList
 
 class ProjectionClock(private val delegate: CanvasDelegate): Projectable {
     private var render: Boolean = false
-    private val renderFlagProperty = ReadOnlyObjectWrapper<BridgeRenderFlag>()
+    private val renderFlag = BridgeRenderFlag(delegate)
     private val textRenders: ArrayList<TextRenderer> = ArrayList()
     private var currentText: String? = null
 
@@ -28,13 +28,11 @@ class ProjectionClock(private val delegate: CanvasDelegate): Projectable {
     }
 
     override fun init() {
-        renderFlagProperty.value = BridgeRenderFlag(delegate)
-
-        renderFlagProperty.get().flagValueProperty.addListener { _, _, _ ->
+        renderFlag.flagValueProperty.addListener { _, _, _ ->
             var changed = false
 
             textRenders.forEach {
-                val enable = renderFlagProperty.get().isRenderEnabled(it.bounds.renderId)
+                val enable = renderFlag.isRenderEnabled(it.bounds.renderId)
 
                 if (it.enabled != enable) {
                     it.enabled = enable
@@ -67,7 +65,7 @@ class ProjectionClock(private val delegate: CanvasDelegate): Projectable {
             val render = TextRenderer(bounds, getFontFor(it))
 
             render.clearColor = Color(0.0f, 0.0f, 0.0f, 0.5f)
-            render.enabled = renderFlagProperty.get().isRenderEnabled(it.renderId)
+            render.enabled = renderFlag.isRenderEnabled(it.renderId)
 
             textRenders.add(render)
         }
@@ -81,8 +79,8 @@ class ProjectionClock(private val delegate: CanvasDelegate): Projectable {
         this.render = render
     }
 
-    override fun getRenderFlagProperty(): ReadOnlyObjectProperty<BridgeRenderFlag> {
-        return renderFlagProperty
+    override fun getRenderFlag(): BridgeRenderFlag {
+        return renderFlag
     }
 
     fun setText(text: String?) {
@@ -90,7 +88,7 @@ class ProjectionClock(private val delegate: CanvasDelegate): Projectable {
             return
         }
 
-        if (!renderFlagProperty.get().hasAnyRender()) {
+        if (!renderFlag.hasAnyRender()) {
             return
         }
 

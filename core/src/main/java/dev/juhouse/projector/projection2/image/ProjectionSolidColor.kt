@@ -18,7 +18,7 @@ class ProjectionSolidColor(private val delegate: CanvasDelegate): Projectable {
     private val presentUniqueImageMap = HashMap<Int, PresentUniqueImage>()
 
     private var render = false
-    private val renderFlagProperty = ReadOnlyObjectWrapper<BridgeRenderFlag>()
+    private val renderFlag = BridgeRenderFlag(delegate)
 
     private var colorRGBA = 0u
 
@@ -26,8 +26,6 @@ class ProjectionSolidColor(private val delegate: CanvasDelegate): Projectable {
     private val renderSettings: ArrayList<BridgeRender> = ArrayList()
 
     override fun init() {
-        renderFlagProperty.set(BridgeRenderFlag(delegate))
-
         delegate.bridge.renderSettings.forEach {
             presentUniqueImageMap[it.renderId] = PresentUniqueImage(it.renderId, delegate.bridge)
         }
@@ -60,8 +58,8 @@ class ProjectionSolidColor(private val delegate: CanvasDelegate): Projectable {
         updateBridge()
     }
 
-    override fun getRenderFlagProperty(): ReadOnlyObjectProperty<BridgeRenderFlag> {
-        return renderFlagProperty.readOnlyProperty
+    override fun getRenderFlag(): BridgeRenderFlag {
+        return renderFlag
     }
 
     fun setColor(rgb: DoubleArray) {
@@ -86,7 +84,7 @@ class ProjectionSolidColor(private val delegate: CanvasDelegate): Projectable {
         presentUniqueImageMap.forEach { (renderId, presentImage) ->
             arr?.let { data ->
                 renderSettings.find { it.renderId == renderId }?.let {
-                    if (renderFlagProperty.get().isRenderEnabled(renderId)) {
+                    if (renderFlag.isRenderEnabled(renderId)) {
                         presentImage.update(data, it.width, it.height)
                         true
                     } else {
@@ -95,7 +93,7 @@ class ProjectionSolidColor(private val delegate: CanvasDelegate): Projectable {
                 }
             } ?: kotlin.run {
                 presentImage.update(null, 0, 0)
-                renderFlagProperty.get().disableRenderId(renderId)
+                renderFlag.disableRenderId(renderId)
             }
         }
     }

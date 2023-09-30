@@ -21,5 +21,5 @@ public interface Projectable {
 
     void setRender(boolean render);
 
-    ReadOnlyObjectProperty<BridgeRenderFlag> getRenderFlagProperty();
+    BridgeRenderFlag getRenderFlag();
 }

@@ -6,8 +6,6 @@ import dev.juhouse.projector.projection2.video.PlayerPreviewCallback
 import dev.juhouse.projector.projection2.video.PlayerPreviewCallbackFrameSize
 import javafx.beans.Observable
 import javafx.beans.property.BooleanProperty
-import javafx.beans.property.ReadOnlyObjectProperty
-import javafx.beans.property.ReadOnlyObjectWrapper
 import javafx.beans.property.SimpleBooleanProperty
 import lombok.Getter
 import java.nio.ByteBuffer
@@ -16,7 +14,7 @@ import java.util.*
 class ProjectionVideoCapture(private val delegate: CanvasDelegate): Projectable {
     @Getter
     private val render: BooleanProperty = SimpleBooleanProperty(false)
-    private val renderFlagProperty = ReadOnlyObjectWrapper<BridgeRenderFlag>()
+    private val renderFlag = BridgeRenderFlag(delegate)
 
     private var width: Int = 0
     private var height: Int = 0
@@ -54,20 +52,19 @@ class ProjectionVideoCapture(private val delegate: CanvasDelegate): Projectable 
         }
 
     init {
-        renderFlagProperty.set(BridgeRenderFlag(delegate))
-        renderFlagProperty.get().flagValueProperty.addListener { _: Observable? -> updateRender() }
+        renderFlag.flagValueProperty.addListener { _: Observable? -> updateRender() }
     }
 
-    override fun getRenderFlagProperty(): ReadOnlyObjectProperty<BridgeRenderFlag> {
-        return renderFlagProperty.readOnlyProperty
+    override fun getRenderFlag(): BridgeRenderFlag {
+        return renderFlag
     }
 
     override fun init() {
-        renderFlagProperty.value.applyDefault(BridgeRender::enableRenderBackgroundAssets)
+        renderFlag.applyDefault(BridgeRender::enableRenderBackgroundAssets)
     }
 
     override fun rebuild() {
-        renderFlagProperty.value.applyDefault(BridgeRender::enableRenderBackgroundAssets)
+        renderFlag.applyDefault(BridgeRender::enableRenderBackgroundAssets)
     }
 
     override fun setRender(render: Boolean) {
@@ -79,7 +76,7 @@ class ProjectionVideoCapture(private val delegate: CanvasDelegate): Projectable 
 
     private fun updateRender() {
         if (render.get()) {
-            delegate.bridge.setVideoCaptureRender(renderFlagProperty.value.flagValue)
+            delegate.bridge.setVideoCaptureRender(renderFlag.flagValue)
         } else {
             delegate.bridge.setVideoCaptureRender(BridgeRenderFlag.NO_RENDER)
         }

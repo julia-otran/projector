@@ -35,7 +35,7 @@ public class ProjectionBackgroundVideo implements Projectable, MediaPlayerEventL
         videoProjector.init();
         videoProjector.setCropVideo(true);
         videoProjector.getPlayer().audio().setMute(true);
-        videoProjector.getRenderFlagProperty().get().applyDefault(BridgeRender::getEnableRenderBackgroundAssets);
+        videoProjector.getRenderFlag().applyDefault(BridgeRender::getEnableRenderBackgroundAssets);
         videoProjector.getPlayer().events().addMediaPlayerEventListener(this);
         loadMedia();
     }
@@ -47,7 +47,7 @@ public class ProjectionBackgroundVideo implements Projectable, MediaPlayerEventL
 
     @Override
     public void rebuild() {
-        videoProjector.getRenderFlagProperty().get().applyDefault(BridgeRender::getEnableRenderBackgroundAssets);
+        videoProjector.getRenderFlag().applyDefault(BridgeRender::getEnableRenderBackgroundAssets);
         videoProjector.rebuild();
     }
 
@@ -58,8 +58,8 @@ public class ProjectionBackgroundVideo implements Projectable, MediaPlayerEventL
     }
 
     @Override
-    public ReadOnlyObjectProperty<BridgeRenderFlag> getRenderFlagProperty() {
-        return videoProjector.getRenderFlagProperty();
+    public BridgeRenderFlag getRenderFlag() {
+        return videoProjector.getRenderFlag();
     }
 
     private void updateRender() {

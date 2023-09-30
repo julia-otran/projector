@@ -32,15 +32,15 @@ public class ProjectionLabel implements Projectable {
     private BridgeRender[] bridgeRenders;
     private final Map<Integer, TextRenderer> textRenders;
 
-    private final ReadOnlyObjectWrapper<BridgeRenderFlag> renderFlagProperty = new ReadOnlyObjectWrapper<>();
+    private final BridgeRenderFlag renderFlag;
 
     private MultipleWrappedText currentText;
 
     private boolean clear;
 
     public ProjectionLabel(CanvasDelegate canvasDelegate) {
-        renderFlagProperty.set(new BridgeRenderFlag(canvasDelegate));
-        renderFlagProperty.get().renderToAll();
+        renderFlag = new BridgeRenderFlag(canvasDelegate);
+        renderFlag.renderToAll();
 
         this.canvasDelegate = canvasDelegate;
         factoryChangeListeners = new ArrayList<>();
@@ -51,11 +51,11 @@ public class ProjectionLabel implements Projectable {
     public void init() {
         canvasDelegate.getFontProperty().addListener((prop, oldValue, newValue) -> updateFont());
 
-        renderFlagProperty.get().getFlagValueProperty().addListener((observableValue, number, t1) -> {
+        renderFlag.getFlagValueProperty().addListener((observableValue, number, t1) -> {
             boolean changed = false;
 
             for (TextRenderer textRender : textRenders.values()) {
-                boolean enable = renderFlagProperty.get().isRenderEnabled(textRender.getBounds().getRenderId());
+                boolean enable = renderFlag.isRenderEnabled(textRender.getBounds().getRenderId());
 
                 if (enable != textRender.getEnabled()) {
                     textRender.setEnabled(enable);
@@ -93,8 +93,7 @@ public class ProjectionLabel implements Projectable {
         }
 
         setClear(clear);
-        onFactoryChange();
-        doRender();
+        Platform.runLater(this::onFactoryChange);
     }
 
     @Override
@@ -103,14 +102,13 @@ public class ProjectionLabel implements Projectable {
     }
 
     @Override
-    public ReadOnlyObjectProperty<BridgeRenderFlag> getRenderFlagProperty() {
-        return renderFlagProperty.getReadOnlyProperty();
+    public BridgeRenderFlag getRenderFlag() {
+        return renderFlag;
     }
 
     private void updateFont() {
         this.textRenders.values().forEach(tr -> tr.setFont(getFontFor(tr.getBounds().getRenderId())));
-        onFactoryChange();
-        doRender();
+        Platform.runLater(this::onFactoryChange);
     }
 
     public Font getFontFor(int renderId) {
@@ -141,12 +139,12 @@ public class ProjectionLabel implements Projectable {
 
             if (clear) {
                 if (render.getEnableRenderTextBehindAndAhead()) {
-                    textRender.setEnabled(renderFlagProperty.get().isRenderEnabled(render.getRenderId()));
+                    textRender.setEnabled(renderFlag.isRenderEnabled(render.getRenderId()));
                 } else {
                     textRender.setEnabled(false);
                 }
             } else {
-                textRender.setEnabled(renderFlagProperty.get().isRenderEnabled(render.getRenderId()));
+                textRender.setEnabled(renderFlag.isRenderEnabled(render.getRenderId()));
             }
         }
 
@@ -197,7 +195,7 @@ public class ProjectionLabel implements Projectable {
     }
 
     private void onFactoryChange() {
-        Platform.runLater(() -> factoryChangeListeners.forEach(l -> l.onWrapperFactoryChanged(getWrapperFactory())));
+        factoryChangeListeners.forEach(l -> l.onWrapperFactoryChanged(getWrapperFactory()));
     }
 
     public void addWrapperChangeListener(TextWrapperFactoryChangeListener factoryChangeListener) {

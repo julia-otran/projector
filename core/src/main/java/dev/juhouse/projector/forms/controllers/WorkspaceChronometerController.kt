@@ -33,7 +33,7 @@ class WorkspaceChronometerController(val projectionManager: ProjectionManager, p
         projectable = projectionManager.createClock()
         projectionManager.addCallback(renderFlagBox)
 
-        renderFlagBox.renderFlag = projectable.renderFlagProperty.get()
+        renderFlagBox.renderFlag = projectable.renderFlag
 
         controlBarPane.children.add(renderFlagBox)
 
@@ -51,12 +51,12 @@ class WorkspaceChronometerController(val projectionManager: ProjectionManager, p
 
         projectionManager.concurrentProjectableProperty().addListener { _, _, newProjectable ->
             if (newProjectable != projectable) {
-                projectable.renderFlagProperty.get().renderToNone()
+                projectable.renderFlag.renderToNone()
             }
         }
 
-        projectable.renderFlagProperty.get().flagValueProperty.addListener { _ ->
-            if (projectable.renderFlagProperty.get().hasAnyRender()) {
+        projectable.renderFlag.flagValueProperty.addListener { _ ->
+            if (projectable.renderFlag.hasAnyRender()) {
                 projectionManager.setConcurrentProjectable(projectable)
 
                 if (!run) {
@@ -64,7 +64,7 @@ class WorkspaceChronometerController(val projectionManager: ProjectionManager, p
                 }
             }
 
-            if (!projectable.renderFlagProperty.get().hasAnyRender()) {
+            if (!projectable.renderFlag.hasAnyRender()) {
                 if (projectionManager.concurrentProjectableProperty().value == projectable) {
                     projectionManager.setConcurrentProjectable(null)
                 }

@@ -18,6 +18,15 @@ class PresentUniqueImage(val renderId: Int, val bridge: Bridge) {
         private val presentingImageMap = HashMap<Int, PresentUniqueImage>()
     }
 
+    fun cloneWithRenderId(newRenderId: Int): PresentUniqueImage {
+        val other = PresentUniqueImage(newRenderId, bridge)
+        other.data = this.data
+        other.crop = this.crop
+        other.width = this.width
+        other.height = this.height
+        return other
+    }
+
     fun update(data: IntArray?, width: Int, height: Int) {
         update(data, width, height, false)
     }
@@ -41,9 +50,10 @@ class PresentUniqueImage(val renderId: Int, val bridge: Bridge) {
         }
     }
 
-    private fun isPresenting(): Boolean {
+    fun isPresenting(): Boolean {
         return presentingImageMap[renderId] == this
     }
+
     fun present() {
         if (!isPresenting() && data != null) {
             presentingImageMap[renderId] = this

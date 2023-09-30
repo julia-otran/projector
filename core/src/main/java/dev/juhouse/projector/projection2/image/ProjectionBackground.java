@@ -46,9 +46,9 @@ public class ProjectionBackground extends ProjectionImage {
 
     private void updateRenderFlag() {
         if (exclusionFlag == null) {
-            getRenderFlagProperty().get().setFlagValue(availableFlag.getFlagValue());
+            getRenderFlag().setFlagValue(availableFlag.getFlagValue());
         } else {
-            getRenderFlagProperty().get().setFlagValue(availableFlag.exclude(exclusionFlag));
+            getRenderFlag().setFlagValue(availableFlag.exclude(exclusionFlag));
         }
     }
 
