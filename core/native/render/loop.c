@@ -14,7 +14,8 @@ static thrd_t thread_id;
 static mtx_t thread_mutex;
 static cnd_t thread_cond;
 
-static projection_config *pending_config_reload;
+static projection_config *config;
+static int pending_config_reload;
 
 int loop(void *_) {
     time_measure* tm0 = create_measure("Renders Update Assets");
@@ -28,18 +29,19 @@ int loop(void *_) {
     get_render_output(&output, &render_output_count);
     monitors_load_renders(output, render_output_count);
 
-    monitors_config_hot_reload(pending_config_reload);
-    pending_config_reload = NULL;
+    monitors_start(config);
 
-    monitor_set_share_context();
+    pending_config_reload = 0;
+
+    monitors_set_share_context();
     renders_init();
 
     while (run) {
         mtx_lock(&thread_mutex);
 
         if (pending_config_reload) {
-            monitors_config_hot_reload(pending_config_reload);
-            pending_config_reload = NULL;
+            monitors_config_hot_reload(config);
+            pending_config_reload = 0;
         }
 
         if (waiting) {
@@ -64,7 +66,7 @@ int loop(void *_) {
         monitors_flip();
         end_measure(tm3);
 
-        monitor_set_share_context();
+        monitors_set_share_context();
         renders_flush_buffers();
 
         if (window_should_close()) {
@@ -74,19 +76,21 @@ int loop(void *_) {
         register_monitor_frame();
     }
 
+    monitors_stop();
     renders_terminate();
     monitors_terminate();
 
     return 0;
 }
 
-void main_loop_schedule_config_reload(projection_config *config) {
+void main_loop_schedule_config_reload(projection_config *in_config) {
     if (run) {
         mtx_lock(&thread_mutex);
         waiting = 1;
     }
 
-    pending_config_reload = config;
+    config = in_config;
+    pending_config_reload = 1;
 
     if (run) {
         cnd_wait(&thread_cond, &thread_mutex);
@@ -117,4 +121,6 @@ void main_loop_terminate() {
     thrd_join(thread_id, NULL);
     cnd_destroy(&thread_cond);
     mtx_destroy(&thread_mutex);
+
+    config = NULL;
 }

@@ -46,7 +46,7 @@ public class Bridge {
 
     public native void shutdown();
 
-    public native void pollEvents();
+    public native void runOnMainThreadLoop();
 
     public native void loadConfig(String fileName);
 

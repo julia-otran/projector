@@ -32,7 +32,7 @@ public class GraphicsDeviceHelper {
                 return new Task<Void>() {
                     @Override
                     protected Void call() {
-                        windowManager.getBridge().pollEvents();
+                        windowManager.getBridge().runOnMainThreadLoop();
 
                         return null;
                     }

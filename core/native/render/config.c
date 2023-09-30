@@ -217,7 +217,7 @@ int config_change_requires_restart(projection_config *config1, projection_config
     return 0;
 }
 
-void prepare_default_config(config_bounds *default_monitor_bounds, int no_display) {
+void prepare_default_config(config_bounds *default_monitor_bounds) {
     default_config.count_renders = 1;
 
     default_config.renders = (config_render*) calloc(1, sizeof(config_render));
@@ -250,12 +250,6 @@ void prepare_default_config(config_bounds *default_monitor_bounds, int no_displa
     default_config.renders[0].text_color.r = 1.0;
     default_config.renders[0].text_color.g = 1.0;
     default_config.renders[0].text_color.b = 0.0;
-
-    if (no_display) {
-        default_config.count_display = 0;
-        default_config.display = NULL;
-        return;
-    }
 
     default_config.display = (config_display*) calloc(1, sizeof(config_display));
     default_config.display[0].virtual_screens = (config_virtual_screen*) calloc(1, sizeof(config_virtual_screen));

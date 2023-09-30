@@ -16,7 +16,7 @@
 #endif
 
 
-void prepare_default_config(config_bounds *default_monitor_bounds, int no_display);
+void prepare_default_config(config_bounds *default_monitor_bounds);
 
 projection_config* load_config(const char *file_path);
 void generate_config(const char *file_path);
