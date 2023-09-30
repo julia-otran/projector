@@ -105,6 +105,7 @@ typedef struct {
     double text_scale;
 
     int enable_render_background_blur;
+    int enable_render_background_image;
     int enable_render_background_assets;
     int enable_render_text_behind_and_ahead;
     int enable_render_image;

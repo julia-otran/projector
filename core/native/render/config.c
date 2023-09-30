@@ -236,6 +236,7 @@ void prepare_default_config(config_bounds *default_monitor_bounds) {
     // Maybe we should have an easy way to set this blur config.
     // However I guess many computers won't be capable
     default_config.renders[0].enable_render_background_blur = 0;
+    default_config.renders[0].enable_render_background_image = 1;
     default_config.renders[0].enable_render_background_assets = 1;
     default_config.renders[0].enable_render_image = 1;
     default_config.renders[0].enable_render_video = 1;

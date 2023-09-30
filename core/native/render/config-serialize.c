@@ -225,6 +225,7 @@ cJSON* serialize_config_render(config_render *in) {
 
     cJSON_AddItemToObject(config_render_json, "enable_render_background_blur", cJSON_CreateNumber(in->enable_render_background_blur));
     cJSON_AddItemToObject(config_render_json, "enable_render_background_assets", cJSON_CreateNumber(in->enable_render_background_assets));
+    cJSON_AddItemToObject(config_render_json, "enable_render_background_image", cJSON_CreateNumber(in->enable_render_background_image));
     cJSON_AddItemToObject(config_render_json, "enable_render_text_behind_and_ahead", cJSON_CreateNumber(in->enable_render_text_behind_and_ahead));
     cJSON_AddItemToObject(config_render_json, "enable_render_image", cJSON_CreateNumber(in->enable_render_image));
     cJSON_AddItemToObject(config_render_json, "enable_render_video", cJSON_CreateNumber(in->enable_render_video));

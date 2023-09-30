@@ -55,7 +55,7 @@ public class ProjectionBackground extends ProjectionBaseImage {
 
     @Override
     public void rebuild() {
-        availableFlag.applyDefault(BridgeRender::getEnableRenderBackgroundAssets);
+        availableFlag.applyDefault(BridgeRender::getEnableRenderBackgroundImage);
         super.rebuild();
     }
 
