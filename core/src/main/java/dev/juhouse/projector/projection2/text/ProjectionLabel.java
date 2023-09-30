@@ -3,13 +3,9 @@ package dev.juhouse.projector.projection2.text;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import dev.juhouse.projector.projection2.*;
-import dev.juhouse.projector.projection2.text.*;
 import javafx.application.Platform;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.ReadOnlyObjectWrapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -51,7 +47,7 @@ public class ProjectionLabel implements Projectable {
     public void init() {
         canvasDelegate.getFontProperty().addListener((prop, oldValue, newValue) -> updateFont());
 
-        renderFlag.getFlagValueProperty().addListener((observableValue, number, t1) -> {
+        renderFlag.getProperty().addListener((observableValue, number, t1) -> {
             boolean changed = false;
 
             for (TextRenderer textRender : textRenders.values()) {

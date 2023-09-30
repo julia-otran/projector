@@ -88,7 +88,7 @@ class MultiImageController: ProjectionController(), SingleImageControl.Callbacks
                             val control = createSingleControl()
                             control.callback = null
 
-                            control.renderFlag?.flagValue = renderFlagValue
+                            control.renderFlag?.value = renderFlagValue
 
                             if (control.loadImage(file)) {
                                 imageControls.add(control)
@@ -127,7 +127,7 @@ class MultiImageController: ProjectionController(), SingleImageControl.Callbacks
         observer.beginPropertiesUpdate()
 
         for ((fileIndex, imageControl) in imageControls.withIndex()) {
-            observer.updateProperty("RENDER_FLAG[$fileIndex]", imageControl.renderFlag?.flagValue?.toString())
+            observer.updateProperty("RENDER_FLAG[$fileIndex]", imageControl.renderFlag?.value?.toString())
         }
 
         observer.finishPropertiesUpdate()

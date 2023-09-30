@@ -8,7 +8,6 @@ package dev.juhouse.projector.projection2.image;
 import dev.juhouse.projector.projection2.BridgeRender;
 import dev.juhouse.projector.projection2.BridgeRenderFlag;
 import dev.juhouse.projector.projection2.CanvasDelegate;
-import dev.juhouse.projector.projection2.image.ProjectionImage;
 import dev.juhouse.projector.projection2.models.BackgroundModel;
 import dev.juhouse.projector.other.ProjectorPreferences;
 import javafx.beans.value.ChangeListener;
@@ -17,7 +16,7 @@ import javafx.beans.value.ChangeListener;
  *
  * @author Julia Otranto Aulicino julia.otranto@outlook.com
  */
-public class ProjectionBackground extends ProjectionImage {
+public class ProjectionBackground extends ProjectionBaseImage {
     private BridgeRenderFlag exclusionFlag;
     private BridgeRenderFlag availableFlag;
 
@@ -27,28 +26,30 @@ public class ProjectionBackground extends ProjectionImage {
 
     public ProjectionBackground(CanvasDelegate canvasDelegate) {
         super(canvasDelegate);
-        this.setCropBackground(ProjectorPreferences.getCropBackground());
     }
 
     @Override
     public void init() {
         super.init();
 
-        availableFlag = new BridgeRenderFlag(canvasDelegate);
+        this.setCropBackground(ProjectorPreferences.getCropBackground());
+
+        availableFlag = new BridgeRenderFlag(getCanvasDelegate());
+        availableFlag.getProperty().addListener(exclusionFlagListener);
 
         this.setCropBackground(ProjectorPreferences.getCropBackground());
         this.setModel(getCanvasDelegate().getSettingsService().getLastBackground());
-        availableFlag.applyDefault(BridgeRender::getEnableRenderBackgroundAssets);
-        this.setRender(true);
 
-        availableFlag.getFlagValueProperty().addListener(exclusionFlagListener);
+        getRenderFlag().renderToNone();
+
+        this.setRender(true);
     }
 
     private void updateRenderFlag() {
         if (exclusionFlag == null) {
-            getRenderFlag().setFlagValue(availableFlag.getFlagValue());
+            getRenderFlag().setValue(availableFlag.getValue());
         } else {
-            getRenderFlag().setFlagValue(availableFlag.exclude(exclusionFlag));
+            getRenderFlag().setValue(availableFlag.exclude(exclusionFlag));
         }
     }
 
@@ -58,10 +59,6 @@ public class ProjectionBackground extends ProjectionImage {
         super.rebuild();
     }
 
-    private CanvasDelegate getCanvasDelegate() {
-        return canvasDelegate;
-    }
-
     public void setModel(BackgroundModel model) {
         super.setModel(model);
         getCanvasDelegate().getSettingsService().storeLastBackground(model);
@@ -69,13 +66,13 @@ public class ProjectionBackground extends ProjectionImage {
 
     public void setExcludeRenderFlag(BridgeRenderFlag exclude) {
         if (this.exclusionFlag != null) {
-            this.exclusionFlag.getFlagValueProperty().removeListener(exclusionFlagListener);
+            this.exclusionFlag.getProperty().removeListener(exclusionFlagListener);
         }
 
         this.exclusionFlag = exclude;
 
         if (exclude != null) {
-            this.exclusionFlag.getFlagValueProperty().addListener(exclusionFlagListener);
+            this.exclusionFlag.getProperty().addListener(exclusionFlagListener);
         }
 
         updateRenderFlag();

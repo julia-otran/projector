@@ -22,7 +22,7 @@ class PresentMultipleImage(private val renderFlag: BridgeRenderFlag, val bridge:
             updateImages()
         }
 
-        renderFlag.flagValueProperty.addListener(changeListener);
+        renderFlag.property.addListener(changeListener);
     }
 
     private fun updateImages() {

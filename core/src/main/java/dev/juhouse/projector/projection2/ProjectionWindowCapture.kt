@@ -1,8 +1,5 @@
 package dev.juhouse.projector.projection2
 
-import javafx.beans.property.ReadOnlyObjectProperty
-import javafx.beans.property.ReadOnlyObjectWrapper
-
 class ProjectionWindowCapture(private val delegate: CanvasDelegate): Projectable {
     private val renderFlag = BridgeRenderFlag(delegate)
     private var windowName: String? = null
@@ -35,7 +32,7 @@ class ProjectionWindowCapture(private val delegate: CanvasDelegate): Projectable
     private fun updateRender() {
         if (render && !windowName.isNullOrBlank()) {
             delegate.bridge.setWindowCaptureWindowName(windowName)
-            delegate.bridge.setWindowCaptureRender(renderFlag.flagValue);
+            delegate.bridge.setWindowCaptureRender(renderFlag.value);
         } else {
             delegate.bridge.setWindowCaptureRender(BridgeRenderFlag.NO_RENDER);
         }

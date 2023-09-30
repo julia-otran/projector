@@ -52,7 +52,7 @@ class ProjectionVideoCapture(private val delegate: CanvasDelegate): Projectable 
         }
 
     init {
-        renderFlag.flagValueProperty.addListener { _: Observable? -> updateRender() }
+        renderFlag.property.addListener { _: Observable? -> updateRender() }
     }
 
     override fun getRenderFlag(): BridgeRenderFlag {
@@ -76,7 +76,7 @@ class ProjectionVideoCapture(private val delegate: CanvasDelegate): Projectable 
 
     private fun updateRender() {
         if (render.get()) {
-            delegate.bridge.setVideoCaptureRender(renderFlag.flagValue)
+            delegate.bridge.setVideoCaptureRender(renderFlag.value)
         } else {
             delegate.bridge.setVideoCaptureRender(BridgeRenderFlag.NO_RENDER)
         }

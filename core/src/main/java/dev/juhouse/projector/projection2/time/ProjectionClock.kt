@@ -6,11 +6,7 @@ import dev.juhouse.projector.projection2.CanvasDelegate
 import dev.juhouse.projector.projection2.Projectable
 import dev.juhouse.projector.projection2.text.TextRenderer
 import dev.juhouse.projector.projection2.text.TextRendererBounds
-import dev.juhouse.projector.projection2.video.ProjectionBackgroundVideo
-import dev.juhouse.projector.projection2.video.ProjectionVideo
 import dev.juhouse.projector.utils.FontCreatorUtil
-import javafx.beans.property.ReadOnlyObjectProperty
-import javafx.beans.property.ReadOnlyObjectWrapper
 import java.awt.Color
 import java.awt.Font
 import java.util.*
@@ -28,7 +24,7 @@ class ProjectionClock(private val delegate: CanvasDelegate): Projectable {
     }
 
     override fun init() {
-        renderFlag.flagValueProperty.addListener { _, _, _ ->
+        renderFlag.property.addListener { _, _, _ ->
             var changed = false
 
             textRenders.forEach {

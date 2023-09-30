@@ -8,7 +8,6 @@ import dev.juhouse.projector.projection2.text.TextRenderer
 import dev.juhouse.projector.projection2.text.TextRendererBounds
 import dev.juhouse.projector.projection2.video.ProjectionBackgroundVideo
 import dev.juhouse.projector.projection2.video.ProjectionVideo
-import javafx.beans.property.ReadOnlyObjectProperty
 import java.awt.Font
 import java.util.Collections
 
@@ -29,7 +28,7 @@ class ProjectionCountdown(private val delegate: CanvasDelegate): Projectable {
     override fun init() {
         backgroundVideo.init()
 
-        renderFlag.flagValueProperty.addListener { _, _, _ ->
+        renderFlag.property.addListener { _, _, _ ->
             var changed = false
 
             textRenders.forEach {

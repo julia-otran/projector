@@ -19,9 +19,9 @@ class RenderFlagBox: HBox(), ProjectionManagerCallbacks {
 
     var renderFlag: BridgeRenderFlag? = null
         set(value) {
-            field?.flagValueProperty?.removeListener(renderFlagListener)
+            field?.property?.removeListener(renderFlagListener)
             field = value
-            value?.flagValueProperty?.addListener(renderFlagListener)
+            value?.property?.addListener(renderFlagListener)
         }
 
     private fun attachCheckBox(checkBox: CheckBox, renderId: Int) {

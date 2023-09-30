@@ -2,22 +2,12 @@ package dev.juhouse.projector.projection2.video;
 
 import dev.juhouse.projector.projection2.BridgeRenderFlag;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import lombok.Getter;
 import lombok.Setter;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
-import uk.co.caprica.vlcj.player.embedded.videosurface.CallbackVideoSurface;
-import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormat;
-import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormatCallback;
-import uk.co.caprica.vlcj.player.embedded.videosurface.callback.RenderCallback;
-import uk.co.caprica.vlcj.player.embedded.videosurface.callback.format.RV32BufferFormat;
 import dev.juhouse.projector.projection2.CanvasDelegate;
 import dev.juhouse.projector.utils.VlcPlayerFactory;
-
-import java.nio.ByteBuffer;
-import java.util.HashMap;
 
 public class ProjectionVideo {
     private final CanvasDelegate delegate;
@@ -40,7 +30,7 @@ public class ProjectionVideo {
         this.delegate = delegate;
 
         renderFlag = new BridgeRenderFlag(delegate);
-        renderFlag.getFlagValueProperty().addListener(observable -> updateRender());
+        renderFlag.getProperty().addListener(observable -> updateRender());
     }
 
     public BridgeRenderFlag getRenderFlag() {
@@ -68,7 +58,7 @@ public class ProjectionVideo {
 
     private void updateRender() {
         if (render.get()) {
-            this.delegate.getBridge().setVideoRenderFlag(this.player, this.cropVideo, renderFlag.getFlagValue());
+            this.delegate.getBridge().setVideoRenderFlag(this.player, this.cropVideo, renderFlag.getValue());
         } else {
             this.delegate.getBridge().setVideoRenderFlag(this.player, this.cropVideo, BridgeRenderFlag.NO_RENDER);
         }

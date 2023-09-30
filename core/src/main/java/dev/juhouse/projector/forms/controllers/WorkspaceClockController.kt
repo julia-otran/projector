@@ -30,7 +30,7 @@ class WorkspaceClockController(val projectionManager: ProjectionManager, private
             }
         }
 
-        projectable.renderFlag.flagValueProperty.addListener { _ ->
+        projectable.renderFlag.property.addListener { _ ->
             if (projectable.renderFlag.hasAnyRender()) {
                 projectionManager.setConcurrentProjectable(projectable)
             } else {

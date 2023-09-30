@@ -7,10 +7,6 @@ package dev.juhouse.projector.projection2;
 
 import java.nio.ByteBuffer;
 import javafx.application.Platform;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.image.PixelFormat;
 import javafx.scene.image.WritableImage;
 import javafx.scene.web.WebView;
@@ -50,7 +46,7 @@ public class ProjectionWebView implements Projectable, Runnable {
             webView = new WebView();
         }
 
-        renderFlag.getFlagValueProperty().addListener((observableValue, number, t1) -> updateRenderFlag());
+        renderFlag.getProperty().addListener((observableValue, number, t1) -> updateRenderFlag());
     }
 
     @Override
@@ -105,7 +101,7 @@ public class ProjectionWebView implements Projectable, Runnable {
 
     private void updateRenderFlag() {
         if (render) {
-            delegate.getBridge().setRenderWebViewBuffer(renderFlag.getFlagValue());
+            delegate.getBridge().setRenderWebViewBuffer(renderFlag.getValue());
         } else {
             delegate.getBridge().setRenderWebViewBuffer(BridgeRenderFlag.NO_RENDER);
         }

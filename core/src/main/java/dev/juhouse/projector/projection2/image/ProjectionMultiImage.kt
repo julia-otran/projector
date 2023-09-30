@@ -67,9 +67,9 @@ class ProjectionMultiImage(private val delegate: CanvasDelegate): Projectable {
                 buffer?.let { buffer ->
                     image.pixelReader.getPixels(0, 0, w, h, PixelFormat.getIntArgbPreInstance(), buffer.array(), 0, w)
                     presentImage.update(buffer.array(), w, h)
-                }
 
-                true
+                    true
+                }
             } ?: kotlin.run {
                 presentImage.update(null, 0, 0)
                 renderFlag.disableRenderId(renderId)

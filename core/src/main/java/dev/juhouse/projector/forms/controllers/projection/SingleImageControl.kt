@@ -43,7 +43,7 @@ class SingleImageControl: BorderPane() {
             if (renderFlagBox.renderFlag == null) {
                 renderFlag = value?.createRenderFlag()
 
-                renderFlag?.flagValueProperty?.addListener { _, _, _ -> callback?.onRenderingChanged() }
+                renderFlag?.property?.addListener { _, _, _ -> callback?.onRenderingChanged() }
 
                 renderFlagBox.renderFlag = renderFlag
             }
