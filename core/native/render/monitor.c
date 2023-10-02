@@ -346,10 +346,6 @@ void monitors_config_hot_reload(projection_config *config) {
 void monitors_load_renders(render_output *data, int render_output_count) {
     render_output_config = data;
     render_output_config_count = render_output_count;
-
-    monitors_set_share_context();
-    virtual_screen_shared_initialize();
-    virtual_screen_monitor_initialize();
 }
 
 void monitors_start(projection_config* config) {
@@ -373,7 +369,17 @@ void monitors_start(projection_config* config) {
 
             glewInit();
             glEnable(GL_BLEND);
+        }
+    }
 
+    monitors_set_share_context();
+    virtual_screen_shared_initialize();
+    virtual_screen_monitor_initialize();
+
+    for (int i = 0; i < display_window_count; i++) {
+        display_window* dw = &display_windows[i];
+
+        if (dw->window) {
             internal_monitors_reload_vs(config, dw);
             dw->active = 1;
         }

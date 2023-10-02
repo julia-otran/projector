@@ -91,13 +91,16 @@ void internal_lib_render_startup() {
     log_debug("Will load config:\n");
     print_projection_config(config);
 
-    log_debug("Reinitialize renders...\n");
+    log_debug("Initialize renders...\n");
     initialize_renders();
 
-    log_debug("Staring engine...\n");
-
+    log_debug("Creating windows...\n");
     monitors_create_windows(config);
+
+    log_debug("Initializing async transfer windows...\n");
     activate_renders(monitors_get_shared_window(), config);
+
+    log_debug("Starting main loop...\n")
     main_loop_schedule_config_reload(config);
     main_loop_start();
 }
@@ -139,6 +142,8 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_initialize(
         return;
     }
 
+    config = NULL;
+
     glfwSetErrorCallback(glfwIntErrorCallback);
     glfwSetMonitorCallback(glfwIntMonitorCallback);
 
@@ -173,9 +178,6 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_loadConfig(
     } else {
         new_config = load_config(NULL);
     }
-
-    log_debug("Will load config:\n");
-    print_projection_config(new_config);
 
     if (config) {
         if (!config_change_requires_restart(new_config, config)) {

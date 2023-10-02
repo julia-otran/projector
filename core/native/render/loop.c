@@ -7,8 +7,8 @@
 #include "render.h"
 #include "clock.h"
 
-static int run;
-static int waiting;
+static int run = 0;
+static int waiting = 0;
 
 static thrd_t thread_id;
 static mtx_t thread_mutex;
@@ -29,12 +29,18 @@ int loop(void *_) {
     get_render_output(&output, &render_output_count);
     monitors_load_renders(output, render_output_count);
 
+    log_debug("Monitors ready to connect to renders.\n");
+
     monitors_start(config);
+
+    log_debug("Monitors started.\n");
 
     pending_config_reload = 0;
 
     monitors_set_share_context();
     renders_init();
+
+    log_debug("Main loop initalized.\n");
 
     while (run) {
         mtx_lock(&thread_mutex);
