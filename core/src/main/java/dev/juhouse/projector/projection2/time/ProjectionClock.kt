@@ -60,7 +60,7 @@ class ProjectionClock(private val delegate: CanvasDelegate): Projectable {
 
             val render = TextRenderer(bounds, getFontFor(it))
 
-            render.clearColor = Color(0.0f, 0.0f, 0.0f, 0.5f)
+            render.darkenBackground = true
             render.enabled = renderFlag.isRenderEnabled(it.renderId)
 
             textRenders.add(render)

@@ -17,6 +17,7 @@ class TextRenderer(val bounds: TextRendererBounds, var font: Font) {
     private val graphics2D: Graphics2D = image.createGraphics()
 
     var enabled: Boolean = true
+    var darkenBackground: Boolean = false
 
     private val fontMetrics: FontMetrics get() {
         return graphics2D.getFontMetrics(font)
@@ -44,7 +45,8 @@ class TextRenderer(val bounds: TextRendererBounds, var font: Font) {
                     bounds.x.toDouble(),
                     bounds.y.toDouble(),
                     bounds.w.toDouble(),
-                    bounds.h.toDouble()
+                    bounds.h.toDouble(),
+                    false
             )
         }
 
@@ -61,7 +63,8 @@ class TextRenderer(val bounds: TextRendererBounds, var font: Font) {
                     linePositions.maxOf { it.x }.toDouble(),
                     linePositions.maxOf { it.y }.toDouble(),
                     linePositions.maxOf { it.w }.toDouble(),
-                    linePositions.maxOf { it.y + it.h }.toDouble()
+                    linePositions.maxOf { it.y + it.h }.toDouble(),
+                    darkenBackground
         )
     }
 

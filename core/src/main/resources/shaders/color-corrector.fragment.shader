@@ -83,11 +83,16 @@ void main(void) {
         lumaMult = (1.0 - (abs(hsl.b - 0.5) * 2.0)) * hueMult;
 
         hslResult.r = hslResult.r + (dstHueMap[i] * hueMult);
+
+        if (hslResult.r > 1.0) {
+            hslResult.r = hslResult.r - 1.0;
+        }
+
         hslResult.g = hslResult.g * (dstSatMap[i] + ((1.0 - dstSatMap[i]) * (1.0 - satMult)));
         hslResult.b = hslResult.b * (dstLumMap[i] + ((1.0 - dstLumMap[i]) * (1.0 - lumaMult)));
     }
 
-    vec3 correctedRGB = hsl2rgb(clamp(hsl, 0.0, 1.0));
+    vec3 correctedRGB = hsl2rgb(clamp(hslResult, 0.0, 1.0));
 
     vec3 maxLevels = 1.0 / (redMatrix + greenMatrix + blueMatrix);
 

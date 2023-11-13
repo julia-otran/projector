@@ -25,7 +25,7 @@ static render_fader_instance **fader_instances;
 static render_pixel_unpack_buffer_instance **buffer_instances;
 
 typedef struct {
-    int x, y, w, h;
+    int x, y, w, h, dark_background;
 } render_text_extra_data;
 
 void render_text_initialize() {
@@ -119,6 +119,7 @@ void render_text_update_buffers() {
             extra_data->y = text_datum[i].position_y;
             extra_data->w = width;
             extra_data->h = height;
+            extra_data->dark_background = text_datum[i].dark_background;
 
             glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
 
@@ -224,6 +225,40 @@ void render_text_render(render_layer *layer) {
 
     for (int i = 0; i < renders_count; i++) {
         if (renders[i].config.render_id == layer->config.render_id) {
+            float max_darken_bg = 0.0;
+
+            render_fader_for_each(fader_instances[i]) {
+                if (node->fade_id) {
+                    render_text_extra_data* extra_data = (render_text_extra_data*)node->extra_data;
+                    if (extra_data->dark_background) {
+                        float light_amount = render_fader_get_alpha_with_time(node, &spec);
+                        max_darken_bg += light_amount;
+                    }
+                }
+            }
+
+            if (max_darken_bg > 1.0) {
+                max_darken_bg = 1.0;
+            }
+
+            if (max_darken_bg > 0.01) {
+                glColor4f(
+                    .0f,
+                    .0f,
+                    .0f,
+                    max_darken_bg * 0.75f
+                );
+
+                glBegin(GL_QUADS);
+
+                glTexCoord2i(0, 0); glVertex2d(0, 0);
+                glTexCoord2i(0, 1); glVertex2d(0, layer->config.h);
+                glTexCoord2i(1, 1); glVertex2d(layer->config.w, layer->config.h);
+                glTexCoord2i(1, 0); glVertex2d(layer->config.w, 0);
+
+                glEnd();
+            }
+
             render_fader_for_each(fader_instances[i]) {
                 if (node->fade_id) {
                     render_text_extra_data *extra_data = (render_text_extra_data*) node->extra_data;

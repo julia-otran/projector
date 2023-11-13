@@ -292,6 +292,7 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setTextData
     jfieldID position_y_field = (*env)->GetFieldID(env, BridgeTextDataClass, "positionY", "I");
     jfieldID image_w_field = (*env)->GetFieldID(env, BridgeTextDataClass, "imageWidth", "I");
     jfieldID image_h_field = (*env)->GetFieldID(env, BridgeTextDataClass, "imageHeight", "I");
+    jfieldID darken_background_field = (*env)->GetFieldID(env, BridgeTextDataClass, "darkenBackground", "Z");
 
     jfieldID x_field = (*env)->GetFieldID(env, BridgeTextDataClass, "x", "D");
     jfieldID y_field = (*env)->GetFieldID(env, BridgeTextDataClass, "y", "D");
@@ -311,6 +312,7 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setTextData
         data->position_y = (*env)->GetIntField(env, obj, position_y_field);
         data->image_w = (*env)->GetIntField(env, obj, image_w_field);
         data->image_h = (*env)->GetIntField(env, obj, image_h_field);
+        data->dark_background = (*env)->GetBooleanField(env, obj, darken_background_field);
 
         jintArray j_img_data = (*env)->GetObjectField(env, obj, image_data_field);
         jint *img_data = (*env)->GetIntArrayElements(env, j_img_data, NULL);

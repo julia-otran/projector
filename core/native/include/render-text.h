@@ -9,6 +9,7 @@ typedef struct {
     void *image_data;
     int position_x, position_y;
     int image_w, image_h;
+    int dark_background;
 
     double x, y, w, h;
 } render_text_data;

@@ -10,5 +10,6 @@ data class BridgeTextData(
     val x: Double,
     val y: Double,
     val w: Double,
-    val h: Double
+    val h: Double,
+    val darkenBackground: Boolean
 )
