@@ -55,14 +55,18 @@
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <VcpkgTriplet>x64-windows-static</VcpkgTriplet>
     <VcpkgHostTriplet>x64-windows-static</VcpkgHostTriplet>
-    <VcpkgInstalledDir>$(SolutionDir)vcpkg</VcpkgInstalledDir>
-    <VcpkgAdditionalInstallOptions>-x-install-root=$(SolutionDir)vcpkg\vcpkg_installed\</VcpkgAdditionalInstallOptions>
+    <VcpkgInstalledDir>
+    </VcpkgInstalledDir>
+    <VcpkgAdditionalInstallOptions>
+    </VcpkgAdditionalInstallOptions>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <VcpkgTriplet>x64-windows-static</VcpkgTriplet>
     <VcpkgHostTriplet>x64-windows-static</VcpkgHostTriplet>
-    <VcpkgInstalledDir>$(SolutionDir)vcpkg</VcpkgInstalledDir>
-    <VcpkgAdditionalInstallOptions>-x-install-root=$(SolutionDir)vcpkg\vcpkg_installed\</VcpkgAdditionalInstallOptions>
+    <VcpkgInstalledDir>
+    </VcpkgInstalledDir>
+    <VcpkgAdditionalInstallOptions>
+    </VcpkgAdditionalInstallOptions>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
