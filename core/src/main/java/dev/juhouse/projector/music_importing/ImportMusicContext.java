@@ -6,6 +6,7 @@
 package dev.juhouse.projector.music_importing;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,7 +27,7 @@ public class ImportMusicContext {
 
     public MusicUrlImporter getImporter(String urlSpec) {
         try {
-            URL url = new URL(urlSpec);
+            URL url = URI.create(urlSpec).toURL();
             if (url.getHost().contains("letras.mus.br")) {
                 return new LetrasMusImporter(urlSpec);
             }

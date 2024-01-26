@@ -20,7 +20,7 @@ There's only support to pt-BR right now.
 
 Build
 =====
-- Java 19 recommended
+- Java 21 required
 
 ## Building Windows
 
@@ -80,7 +80,7 @@ Install
 
 ## Windows
 
-1. Install Java 19
+1. Install Java 21
 2. Install Microsoft Visual C++ Redistributable
 3. Install VLC Player (version 3.x)
    ### Beware
@@ -89,7 +89,7 @@ Install
 
 ## Linux
 
-1. Install Java 19
+1. Install Java 21
 2. Install Vlc Player from Ubuntu Software, or from your package manager
 
 Window Configurations

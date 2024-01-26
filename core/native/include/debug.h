@@ -23,5 +23,6 @@ void end_measure(time_measure* tm);
 
 void register_render_frame();
 void register_monitor_frame();
+void register_stream_frame();
 
 #endif

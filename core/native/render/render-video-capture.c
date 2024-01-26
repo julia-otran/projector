@@ -219,7 +219,7 @@ void render_video_capture_render(render_layer* layer)
     double w_sz = layer->config.h * w_scale;
     double h_sz = layer->config.w * h_scale;
 
-    if (w_sz > layer->config.w == src_crop)
+    if ((w_sz > layer->config.w) == src_crop)
     {
         w = w_sz;
         h = layer->config.h;

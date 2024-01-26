@@ -5,9 +5,8 @@
  */
 package dev.juhouse.projector;
 
-import com.mashape.unirest.http.Unirest;
+import kong.unirest.Unirest;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.channels.FileChannel;
@@ -143,12 +142,7 @@ public class Projector extends Application implements Runnable {
         primaryStage.setOnCloseRequest(event -> {
             controller.stop();
             VlcPlayerFactory.finish();
-
-            try {
-                Unirest.shutdown();
-            } catch (IOException ex) {
-                Logger.getLogger(Projector.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            Unirest.shutDown();
 
             try {
                 lockFileChannel.close();

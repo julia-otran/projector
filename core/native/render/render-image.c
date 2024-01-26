@@ -19,7 +19,6 @@ typedef struct {
 } simple_image_info;
 
 static int initialized = 0;
-static int src_crop;
 
 static mtx_t thread_mutex;
 
