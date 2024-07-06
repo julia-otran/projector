@@ -14,6 +14,7 @@ typedef struct {
     void *extra_data;
 
     GLuint gl_buffer;
+    int gl_alloc_size;
 } render_pixel_unpack_buffer_node;
 
 typedef struct {

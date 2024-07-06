@@ -43,9 +43,10 @@ static int should_clear;
 
 typedef struct {
     struct libvlc_media_player_t* player;
-    int width, height, buffer_size, glew_initialized;
+    int width, height, buffer_size;
     void* buffer;
     void* raw_buffer;
+    thrd_t glew_init_thrd;
 } render_video_opaque;
 
 typedef struct {
@@ -77,11 +78,6 @@ void render_video_destroy_window() {
     mtx_lock(&window_thread_mutex);
     glfwDestroyWindow(transfer_window);
     transfer_window = NULL;
-
-    for (render_video_opaque_node* node = opaque_list; node; node = node->next) {
-        node->data->glew_initialized = 0;
-    }
-
     mtx_unlock(&window_thread_mutex);
 }
 
@@ -121,7 +117,6 @@ unsigned render_video_format_callback_alloc(
 
     data->raw_buffer = malloc(data->buffer_size);
     data->buffer = (void*) (((unsigned long long)data->raw_buffer + 255) & ~255);
-    data->glew_initialized = 0;
 
     mtx_unlock(&opaque_thread_mutex);
 
@@ -180,33 +175,35 @@ static void* render_video_lock(void* opaque, void** p_pixels)
 
         return NULL;
     }
-
+    
     glfwMakeContextCurrent(transfer_window);
 
-    if (data->glew_initialized == 0) {
+    if (thrd_current() != data->glew_init_thrd) {
         glewInit();
-        data->glew_initialized = 1;
+        data->glew_init_thrd = thrd_current();
     }
 
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
 
-    if (buffer->width != data->width || buffer->height != data->height) {
+    if (buffer->gl_alloc_size < data->width * data->height * BYTES_PER_PIXEL) {
         glBufferData(GL_PIXEL_UNPACK_BUFFER, data->width * data->height * BYTES_PER_PIXEL, 0, GL_DYNAMIC_DRAW);
-        buffer->width = data->width;
-        buffer->height = data->height;
+        buffer->gl_alloc_size = data->width * data->height * BYTES_PER_PIXEL;
     }
 
+    buffer->width = data->width;
+    buffer->height = data->height;
+
     // void *pdata = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
-    void *pdata = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, data->width * data->height * BYTES_PER_PIXEL, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
+    void *pdata = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, data->width * data->height * BYTES_PER_PIXEL, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
 
     if (pdata == NULL) {
         (*p_pixels) = data->buffer;
 
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-        glfwMakeContextCurrent(NULL);
 
         render_pixel_unpack_buffer_enqueue_for_write(buffer_instance, buffer);
 
+        glfwMakeContextCurrent(NULL);
         mtx_unlock(&window_thread_mutex);
 
         return NULL;
@@ -222,7 +219,6 @@ static void render_video_unlock(void* opaque, void* id, void* const* p_pixels)
     if (id != NULL) {
         glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-        glFinish();
         glfwMakeContextCurrent(NULL);
         mtx_unlock(&window_thread_mutex);
     }

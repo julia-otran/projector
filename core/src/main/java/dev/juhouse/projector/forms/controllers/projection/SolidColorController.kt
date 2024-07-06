@@ -55,9 +55,9 @@ class SolidColorController : ProjectionController(), ProjectionBarControlCallbac
     private var changing = false
 
     private val rgbTextChangeListener: ChangeListener<String> = ChangeListener { _, _, _ ->
-        val r = redTextField.text.toDouble()
-        val g = greenTextField.text.toDouble()
-        val b = blueTextField.text.toDouble()
+        val r = runCatching { redTextField.text.toDouble() }.getOrDefault(0.0)
+        val g = runCatching { greenTextField.text.toDouble() }.getOrDefault(0.0)
+        val b = runCatching { blueTextField.text.toDouble() }.getOrDefault(0.0)
         setRGB(doubleArrayOf(r, g, b))
     }
 
@@ -69,9 +69,9 @@ class SolidColorController : ProjectionController(), ProjectionBarControlCallbac
     }
 
     private val hslTextChangeListener: ChangeListener<String> = ChangeListener { _, _, _ ->
-        val h = hueTextField.text.toDouble()
-        val s = satTextField.text.toDouble()
-        val l = lumaTextField.text.toDouble()
+        val h = runCatching { hueTextField.text.toDouble() }.getOrDefault(0.0)
+        val s = runCatching { satTextField.text.toDouble() }.getOrDefault(0.0)
+        val l = runCatching { lumaTextField.text.toDouble() }.getOrDefault(0.0)
         setHSL(doubleArrayOf(h, s, l))
     }
 
