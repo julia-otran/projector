@@ -259,12 +259,12 @@ void parse_config_color_corrector_single(cJSON* config_color_corrector_json, con
 }
 
 void parse_config_color_corrector(cJSON* config_color_corrector_multi_json, config_color_corrector* out) {
+    for (int i = 0; i < CONFIG_COLOR_CORRECTOR_LENGTH; i++) {
+        parse_config_color_corrector_single(NULL, &out[i]);
+    }
+
     if (cJSON_IsObject(config_color_corrector_multi_json)) {
         parse_config_color_corrector_single(config_color_corrector_multi_json, out);
-
-        for (int i = 1; i < CONFIG_COLOR_CORRECTOR_LENGTH; i++) {
-            parse_config_color_corrector_single(NULL, &out[i]);
-        }
 
         return;
     }
