@@ -193,7 +193,6 @@ static void* render_video_lock(void* opaque, void** p_pixels)
     buffer->width = data->width;
     buffer->height = data->height;
 
-    // void *pdata = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
     void *pdata = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, data->width * data->height * BYTES_PER_PIXEL, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
 
     if (pdata == NULL) {

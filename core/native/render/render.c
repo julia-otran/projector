@@ -237,6 +237,7 @@ void renders_flush_buffers() {
     render_window_capture_flush_buffers();
     render_image_flush_buffers();
     render_video_capture_flush_buffers();
+    render_preview_flush_buffers();
 }
 
 void renders_terminate() {

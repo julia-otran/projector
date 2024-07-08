@@ -97,6 +97,8 @@ void render_preview_create_buffers() {
     }
 }
 
+void render_preview_flush_buffers() {}
+
 void render_preview_update_buffers() {
     if (mtx_trylock(&thread_mutex) == thrd_success) {
 
@@ -110,12 +112,16 @@ void render_preview_update_buffers() {
 
             glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer->buffer);
             void* data = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
-            memcpy(preview->data_buffer_aligned, data, preview->width * preview->height * BYTES_PER_PIXEL);
-            glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
-            glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
             
-            buffer->readed = 1;
-            preview->buffer_read = 0;
+            if (data) {
+                memcpy(preview->data_buffer_aligned, data, preview->width * preview->height * BYTES_PER_PIXEL);
+                glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+
+                buffer->readed = 1;
+                preview->buffer_read = 0;
+            }
+
+            glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
         }
 
         mtx_unlock(&thread_mutex);

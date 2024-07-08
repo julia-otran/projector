@@ -27,6 +27,7 @@ void render_preview_download_buffer(int render_id, void *buffer);
 
 void render_preview_create_buffers();
 void render_preview_update_buffers();
+void render_preview_flush_buffers();
 void render_preview_deallocate_buffers();
 
 void render_preview_create_assets();
