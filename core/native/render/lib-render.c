@@ -69,6 +69,19 @@ static projection_config *config;
 
 #endif
 
+#ifdef __APPLE_CC__
+
+#define jni_jstringToCharArr(env, jstr, char_out_arr) \
+    char_out_arr = (char*) (*env)->GetStringUTFChars(env, jstr, 0);
+
+#define jni_releaseCharArr(env, jstr, char_out_arr) \
+    (*env)->ReleaseStringUTFChars(env, jstr, char_out_arr); \
+
+#define jni_charArrToJString(env, jstring_out, char_arr_in) \
+    jstring_out = (*env)->NewStringUTF(env, char_arr_in);
+
+#endif
+
 void internal_lib_render_shutdown() {
     log_debug("Shutting down main loop...\n");
     main_loop_terminate();

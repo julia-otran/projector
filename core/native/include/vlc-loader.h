@@ -1,3 +1,7 @@
+#ifdef __APPLE_CC__
+#include <Foundation/Foundation.h>
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
@@ -23,6 +27,10 @@
 
 #ifdef __gnu_linux__
 #define ssize_t size_t
+#endif
+
+#ifdef __APPLE_CC__
+#include "VLCKit/VLCKit.h"
 #endif
 
 #include "vlc/vlc.h"

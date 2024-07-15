@@ -1,4 +1,5 @@
 #include "vs-help-lines.h"
+#include "ogl-loader.h"
 
 void vs_help_lines_render(config_virtual_screen *config) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

@@ -69,6 +69,7 @@
             <activation>
                 <os>
                     <family>unix</family>
+                    <name>Linux</name>
                     <arch>amd64</arch>
                 </os>
             </activation>
@@ -76,6 +77,50 @@
             <modules>
                 <module>core</module>
                 <module>linux</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>osx-debug</id>
+            <activation>
+                <property>
+                    <name>debug</name>
+                    <value>true</value>
+                </property>
+                <os>
+                    <family>mac</family>
+                </os>
+            </activation>
+
+            <properties>
+                <librender.buildDir>native/LibRender/x64/Debug</librender.buildDir>
+            </properties>
+
+            <modules>
+                <module>core</module>
+                <module>osx</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>osx-release</id>
+            <activation>
+                <property>
+                    <name>debug</name>
+                    <value>!true</value>
+                </property>
+                <os>
+                    <family>mac</family>
+                </os>
+            </activation>
+
+            <properties>
+                <librender.buildDir>native/LibRender/x64/Debug</librender.buildDir>
+            </properties>
+
+            <modules>
+                <module>core</module>
+                <module>osx</module>
             </modules>
         </profile>
     </profiles>

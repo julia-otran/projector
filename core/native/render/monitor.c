@@ -367,7 +367,10 @@ void monitors_start(projection_config* config) {
                 glfwSwapInterval(0);
             }
 
+#ifdef _GLEW_ENABLED_
             glewInit();
+#endif
+            
             glEnable(GL_BLEND);
         }
     }

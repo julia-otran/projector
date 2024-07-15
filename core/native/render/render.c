@@ -255,8 +255,11 @@ int transfer_window_loop(void *_) {
     };
 
     glfwMakeContextCurrent(transfer_window);
+    
+#ifdef _GLEW_ENABLED_
     glewInit();
-
+#endif
+    
     render_text_create_buffers();
     render_video_create_buffers();
     render_web_view_create_buffers();

@@ -35,3 +35,6 @@ out/*
 /linux/src/main/resources/librender.so
 
 .ccls-cache
+
+.DS_Store
+

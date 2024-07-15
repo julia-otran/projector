@@ -179,7 +179,9 @@ static void* render_video_lock(void* opaque, void** p_pixels)
     glfwMakeContextCurrent(transfer_window);
 
     if (thrd_current() != data->glew_init_thrd) {
+#ifdef _GLEW_ENABLED_
         glewInit();
+#endif
         data->glew_init_thrd = thrd_current();
     }
 
@@ -238,7 +240,7 @@ void render_video_attach_player(void *player) {
     render_video_opaque* data = (render_video_opaque*)calloc(1, sizeof(render_video_opaque));
     data->player = player;
     data->buffer = 0;
-
+    
     libvlc_video_set_callbacks(data->player, render_video_lock, render_video_unlock, render_video_display, (void*)data);
     libvlc_video_set_format_callbacks(data->player, render_video_format_callback_alloc, render_video_format_callback_dealoc);
 

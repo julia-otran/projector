@@ -5,7 +5,14 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #endif
 
+#ifdef __APPLE_CC__
+#include <OpenGL/gl3.h>
+#include <OpenGL/gl.h>
+#else
 #include <GL/glew.h>
+#define _GLEW_ENABLED_
+#endif
+
 #include <GLFW/glfw3.h>
 
 typedef struct {
