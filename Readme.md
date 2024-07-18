@@ -57,7 +57,25 @@ mvn clean package -pl core,linux
 ```
 
 ## Building OSX
-There's no support to OSX right now. Feel free to create a XCode project so building lib render could be possible
+1. Install VLC Player App
+2. Install GLFW via Brew
+   ```
+   brew install glfw
+   ```
+3. Generate the lib render JNI headers: (You may use the `Generate Headers` IntelliJ Run Config)
+    ```
+    mvn compile -pl core
+    ```
+4. Open the XCode project and compile the libProjector
+5. Package the OSx jar (You may run the `Package MacOs` IntelliJ Run Config)
+    ```
+    mvn clean package -pl core,osx
+    ```
+
+   The OSx `jar` should be created at `osx/target/projector-osx-x.x-jar-with-dependencies.jar`
+
+
+_Note: The OSx project is not done yet. There are missing platform dependent features: Video Device capture and Window capture_
 
 Minimum Requirements
 ====================
