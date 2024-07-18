@@ -12,11 +12,15 @@ import java.nio.file.Files;
 public class ResourceManager {
     private static File tmpDirectory = null;
 
-    public static File unpackResource(String resouce) {
-        return unpackResource(resouce, resouce);
+    public static File unpackResource(String resource) {
+        return unpackResource(resource, null, resource);
     }
 
-    public static File unpackResource(String resouce, String outputName) {
+    public static File unpackResource(String resource, String outputName) {
+        return unpackResource(resource, null, outputName);
+    }
+
+    public static File unpackResource(String resource, String directory, String outputName) {
         if (tmpDirectory == null) {
             try {
                 tmpDirectory = Files.createTempDirectory("projector-resources").toFile();
@@ -27,13 +31,22 @@ public class ResourceManager {
             tmpDirectory.deleteOnExit();
         }
 
-        InputStream libInputStream = ResourceManager.class.getResourceAsStream(resouce);
+        File directoryFile = tmpDirectory;
+
+        if (directory != null) {
+            directoryFile = new File(tmpDirectory, directory);
+            if (!directoryFile.isDirectory() && !directoryFile.mkdirs()) {
+                throw new RuntimeException("Cannot mkdir " + directory);
+            }
+        }
+
+        InputStream libInputStream = ResourceManager.class.getResourceAsStream(resource);
 
         if (libInputStream != null) {
             File libExportFile;
 
             try {
-                libExportFile = new File(tmpDirectory, outputName);
+                libExportFile = new File(directoryFile, outputName);
                 libExportFile.deleteOnExit();
 
                 OutputStream output = FileUtils.openOutputStream(libExportFile);
@@ -47,7 +60,7 @@ public class ResourceManager {
             }
         }
 
-        System.out.println("Resource not found: " + resouce);
+        System.out.println("Resource not found: " + resource);
 
         return null;
     }

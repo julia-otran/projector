@@ -9,6 +9,7 @@ import dev.juhouse.projector.projection2.ProjectionManager;
 import dev.juhouse.projector.projection2.WindowManager;
 import dev.juhouse.projector.services.SettingsService;
 import dev.juhouse.projector.utils.WindowConfigsLoaderProperty;
+import javafx.application.Platform;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.scene.layout.VBox;
@@ -26,14 +27,17 @@ public class GraphicsDeviceHelper {
         SettingsService settingsService = new SettingsService();
         windowManager = new WindowManager(settingsService);
 
+
+
         pollEventsService = new ScheduledService<Void>() {
             @Override
             protected Task<Void> createTask() {
                 return new Task<Void>() {
                     @Override
                     protected Void call() {
-                        windowManager.getBridge().runOnMainThreadLoop();
-
+                        Platform.runLater(() -> {
+                            windowManager.getBridge().runOnMainThreadLoop();
+                        });
                         return null;
                     }
                 };
@@ -47,7 +51,7 @@ public class GraphicsDeviceHelper {
 
     public void start() {
         windowManager.startEngine();
-        pollEventsService.setPeriod(Duration.millis(100));
+        pollEventsService.setPeriod(Duration.millis(200));
         pollEventsService.start();
     }
 

@@ -116,7 +116,7 @@ void render_image_update_buffers() {
 
         image_info *info = &input_images[i];
 
-        if (info->updated > 0) {
+        if (info->updated > 0 && buffer != NULL) {
             int width = info->width;
             int height = info->height;
 

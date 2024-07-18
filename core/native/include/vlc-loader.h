@@ -29,10 +29,6 @@
 #define ssize_t size_t
 #endif
 
-#ifdef __APPLE_CC__
-#include "VLCKit/VLCKit.h"
-#endif
-
 #include "vlc/vlc.h"
 
 #endif

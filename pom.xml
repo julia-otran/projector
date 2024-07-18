@@ -93,7 +93,7 @@
             </activation>
 
             <properties>
-                <librender.buildDir>native/LibRender/x64/Debug</librender.buildDir>
+                <librender.buildDir>native/Projector/DerivedData/Build/Products/Debug</librender.buildDir>
             </properties>
 
             <modules>
@@ -115,7 +115,7 @@
             </activation>
 
             <properties>
-                <librender.buildDir>native/LibRender/x64/Debug</librender.buildDir>
+                <librender.buildDir>native/Projector/DerivedData/Build/Products/Debug</librender.buildDir>
             </properties>
 
             <modules>
