@@ -93,6 +93,9 @@ void virtual_screen_monitor_load_vertexes(config_display *display, config_virtua
     memset(&out, 0, sizeof(struct triangulateio));
 
     GLuint vertexarray;
+    
+    glUseProgram(program);
+    
     glGenVertexArrays(1, &vertexarray);
     glBindVertexArray(vertexarray);
 
@@ -183,6 +186,7 @@ void virtual_screen_monitor_load_vertexes(config_display *display, config_virtua
     data->uvbuffer = uvbuffer;
 
     glBindVertexArray(0);
+    glUseProgram(0);
 }
 
 void virtual_screen_monitor_start(config_display* display, render_output* render, config_virtual_screen* config, void* data) {

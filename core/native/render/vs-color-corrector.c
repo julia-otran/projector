@@ -60,6 +60,8 @@ void vs_color_corrector_init() {
 
 void vs_color_corrector_start(config_virtual_screen *config, render_output *render, vs_color_corrector *data) {
     GLuint vertexarray;
+    glUseProgram(program);
+    
     glGenVertexArrays(1, &vertexarray);
     glBindVertexArray(vertexarray);
 
@@ -132,6 +134,7 @@ void vs_color_corrector_start(config_virtual_screen *config, render_output *rend
     free(indexed_uvs);
 
     glBindVertexArray(0);
+    glUseProgram(0);
 }
 
 void vs_color_corrector_set_uniforms(config_virtual_screen *config) {

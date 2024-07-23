@@ -43,6 +43,8 @@ void render_tex_blur_deallocate_assets() {
 render_tex_blur_instance* render_tex_blur_create() {
     render_tex_blur_instance* instance = (render_tex_blur_instance*) calloc(1, sizeof(render_tex_blur_instance));
 
+    glUseProgram(program);
+    
     GLuint vertexarray;
     glGenVertexArrays(1, &vertexarray);
 
@@ -52,6 +54,8 @@ render_tex_blur_instance* render_tex_blur_create() {
     GLuint uvbuffer;
     glGenBuffers(1, &uvbuffer);
 
+    glUseProgram(0);
+    
     instance->vertexarray = vertexarray;
     instance->vertexbuffer = vertexbuffer;
     instance->uvbuffer = uvbuffer;
@@ -79,6 +83,8 @@ void render_tex_blur_set_uv(render_tex_blur_instance* instance, float x, float y
     indexed_vertices[6] = x + w;
     indexed_vertices[7] = y;
 
+    glUseProgram(program);
+    
     glBindVertexArray(instance->vertexarray);
 
     glBindBuffer(GL_ARRAY_BUFFER, instance->uvbuffer);
@@ -89,6 +95,8 @@ void render_tex_blur_set_uv(render_tex_blur_instance* instance, float x, float y
 
     glBindVertexArray(0);
 
+    glUseProgram(0);
+    
     free(indexed_vertices);
 }
 
@@ -114,7 +122,8 @@ void render_tex_blur_set_position(render_tex_blur_instance* instance, float x, f
     indexed_vertices[13] = y + h;
     indexed_vertices[14] = 0.0;
     indexed_vertices[15] = 1.0;
-
+    
+    glUseProgram(program);
     glBindVertexArray(instance->vertexarray);
 
     glBindBuffer(GL_ARRAY_BUFFER, instance->vertexbuffer);
@@ -125,6 +134,8 @@ void render_tex_blur_set_position(render_tex_blur_instance* instance, float x, f
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glBindVertexArray(0);
+    glUseProgram(0);
+    
     free(indexed_vertices);
 }
 

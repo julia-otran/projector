@@ -51,7 +51,7 @@ public class GraphicsDeviceHelper {
 
     public void start() {
         windowManager.startEngine();
-        pollEventsService.setPeriod(Duration.millis(200));
+        pollEventsService.setPeriod(Duration.millis(2000));
         pollEventsService.start();
     }
 

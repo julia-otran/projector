@@ -8,6 +8,10 @@
 #ifdef __APPLE_CC__
 #include <OpenGL/gl3.h>
 #include <OpenGL/gl.h>
+
+#define glGenVertexArrays glGenVertexArraysAPPLE
+#define glBindVertexArray glBindVertexArrayAPPLE
+
 #else
 #include <GL/glew.h>
 #define _GLEW_ENABLED_

@@ -5,66 +5,74 @@
 #include <dirent.h>
 #include <stdio.h>
 #include <string.h>
+#import <Foundation/Foundation.h>
+#import <AVFoundation/AVFoundation.h>
 
 #include "debug.h"
 #include "device-capture.h"
 
-#define DEVICE_PATH_PREFIX "/dev/%s"
-
-capture_device_node* capture_device_get_device_node(char *dev) {
+capture_device_node* capture_device_get_device_node(AVCaptureDevice *dev) {
     capture_device_node* result = (capture_device_node*) calloc(1, sizeof(capture_device_node));
     capture_device* device = (capture_device*) calloc(1, sizeof(capture_device));
 
-    device->name = calloc(strlen(dev) + 1, sizeof(char));
-    memcpy(device->name, dev, strlen(dev));
-
+    const char *deviceName = [dev.localizedName UTF8String];
+    
+    device->name = calloc(strlen(deviceName) + 1, sizeof(char));
+    memcpy(device->name, deviceName, strlen(deviceName));
+    
     result->data = device;
 
     return result;
 }
 
+capture_device_resolution_node* capture_device_get_resolution_node(AVCaptureDeviceFormat *fmt) {
+    capture_device_resolution_node* resolution_node = (capture_device_resolution_node*) calloc(1, sizeof(capture_device_resolution_node));
+    capture_device_resolution* resolution = (capture_device_resolution*) calloc(1, sizeof(capture_device_resolution));
 
-void capture_device_find_resolutions(capture_device* cap_dev) {
-    char* device_path;
+    resolution_node->data = resolution;
+    resolution->width = (int) CMVideoFormatDescriptionGetDimensions(fmt.formatDescription).width;
+    resolution->height = (int) CMVideoFormatDescriptionGetDimensions(fmt.formatDescription).height;
+    
+    return resolution_node;
+}
 
-    int result = asprintf(&device_path, DEVICE_PATH_PREFIX, cap_dev->name);
-
-    if (result == -1 || device_path == NULL) {
-        return;
+void capture_device_find_resolutions(AVCaptureDevice *dev, capture_device* cap_dev) {
+    for (AVCaptureDeviceFormat *fmt in dev.formats) {
+        CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions(fmt.formatDescription);
+        bool alreadyAdd = false;
+        
+        for (capture_device_resolution_node* resolution_node = cap_dev->resolutions; resolution_node != NULL; resolution_node = resolution_node->next)  {
+            if (resolution_node->data->width == dimensions.width && resolution_node->data->height == dimensions.height) {
+                alreadyAdd = true;
+                break;
+            }
+        }
+        
+        if (alreadyAdd == false) {
+            capture_device_resolution_node* res_node = capture_device_get_resolution_node(fmt);
+            res_node->next = cap_dev->resolutions;
+            cap_dev->resolutions = res_node;
+            cap_dev->count_resolutions++;
+        }
     }
-
-    log_debug("Opening device %s\n", device_path);
-
-    int device_ptr = open(device_path, O_RDWR);
-
-    if (device_ptr == -1) {
-        return;
-    }
-
-
-    close(device_ptr);
 }
 
 void capture_device_enumerate_devices(capture_device_enum* dev_enum) {
-    DIR *d;
-    struct dirent *dir;
+    
+    NSArray<AVCaptureDeviceType> *deviceTypes = [
+        [NSArray alloc]
+        initWithObjects:AVCaptureDeviceTypeExternalUnknown, AVCaptureDeviceTypeBuiltInWideAngleCamera, nil];
+    
+    AVCaptureDeviceDiscoverySession *ds = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes:deviceTypes mediaType:AVMediaTypeVideo position: AVCaptureDevicePositionUnspecified];
+    
+    for (AVCaptureDevice *dev in ds.devices) {
+        capture_device_node* new_device = capture_device_get_device_node(dev);
+        
+        dev_enum->capture_device_count++;
+        new_device->next = dev_enum->capture_device_list;
+        dev_enum->capture_device_list = new_device;
 
-    d = opendir("/dev");
-
-    if (d) {
-        while ((dir = readdir(d)) != NULL) {
-            if (strstr(dir->d_name, "video") != NULL) {
-                capture_device_node* new_device = capture_device_get_device_node(dir->d_name);
-
-                dev_enum->capture_device_count++;
-                new_device->next = dev_enum->capture_device_list;
-                dev_enum->capture_device_list = new_device;
-
-                capture_device_find_resolutions(new_device->data);
-            }
-        }
-
-        closedir(d);
+        capture_device_find_resolutions(dev, new_device->data);
     }
 }
 

@@ -63,6 +63,9 @@ void vs_blend_initialize() {
 
 void vs_blend_load_coordinates(config_virtual_screen *virtual_screen, config_blend *config, vs_blend_info* data) {
     GLuint vertexarray;
+    
+    glUseProgram(program);
+    
     glGenVertexArrays(1, &vertexarray);
     glBindVertexArray(vertexarray);
 
@@ -124,6 +127,7 @@ void vs_blend_load_coordinates(config_virtual_screen *virtual_screen, config_ble
     data->uvbuffer = uvbuffer;
 
     glBindVertexArray(0);
+    glUseProgram(0);
 
     data->curve_exponent = config->curve_exponent;
 }
