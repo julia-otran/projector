@@ -103,7 +103,7 @@ public class Bridge {
 
     public native void downloadPreviewData(int renderId, ByteBuffer buffer);
 
-    public native String[] getWindowList();
+    public native void getWindowList(BridgeWindowCaptureCallbacks callback);
 
     public native void setWindowCaptureWindowName(String name);
 

@@ -150,7 +150,41 @@ void glfwIntMonitorCallback(GLFWmonitor* monitor, int event) {
     }
 }
 
+static JavaVM *jvm;
+static jobject window_capture_jobject;
+
+void notify_window_capture_windows(char** window_names, int count) {
+    if (window_capture_jobject == NULL) {
+        return;
+    }
+    
+    JNIEnv *env;
+    
+    (*jvm)->AttachCurrentThread(jvm, (void**)&env, NULL);
+    
+    jclass class = (*env)->GetObjectClass(env, window_capture_jobject);
+    jmethodID method_id = (*env)->GetMethodID(env, class, "onWindowListDone", "([Ljava/lang/String;)V");
+    
+    jclass string_class = (*env)->FindClass(env, "java/lang/String");
+    jobjectArray result = (*env)->NewObjectArray(env, count, string_class, NULL);
+    jstring window_name;
+
+    for (unsigned int i = 0; i < count; i++) {
+        jni_charArrToJString(env, window_name, window_names[i]);
+        (*env)->SetObjectArrayElement(env, result, i, window_name);
+    }
+    
+    (*env)->CallObjectMethod(env, window_capture_jobject, method_id, result);
+    
+    (*env)->DeleteGlobalRef(env, window_capture_jobject);
+    window_capture_jobject = NULL;
+    
+    (*jvm)->DetachCurrentThread(jvm);
+}
+
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_initialize(JNIEnv *env, jobject _) {
+    (*env)->GetJavaVM(env, &jvm);
+    
     if (!glfwInit()) {
         return;
     }
@@ -162,7 +196,7 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_initialize(
 
     render_video_create_mtx();
 
-    window_capture_init();
+    window_capture_init(&notify_window_capture_windows);
     video_capture_init();
 
     initialized = 1;
@@ -410,20 +444,9 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_downloadPre
     render_preview_download_buffer(render_id, (void*) data);
 }
 
-JNIEXPORT jobjectArray JNICALL Java_dev_juhouse_projector_projection2_Bridge_getWindowList(JNIEnv *env, jobject _) {
-    window_node_list *list = window_capture_get_window_list();
-
-    jclass string_class = (*env)->FindClass(env, "java/lang/String");
-    jobjectArray result = (*env)->NewObjectArray(env, list->list_size, string_class, NULL);
-    jstring window_name;
-
-    for (unsigned int i = 0; i < list->list_size; i++) {
-        jni_charArrToJString(env, window_name, list->list[i].window_name);
-        (*env)->SetObjectArrayElement(env, result, i, window_name);
-    }
-
-    window_capture_free_window_list(list);
-    return result;
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_getWindowList(JNIEnv *env, jobject _, jobject callback) {
+    window_capture_jobject = (*env)->NewGlobalRef(env, callback);
+    window_capture_get_window_list();
 }
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setWindowCaptureWindowName(JNIEnv *env, jobject _, jstring j_window_name) {

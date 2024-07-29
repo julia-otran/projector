@@ -2,6 +2,8 @@ package dev.juhouse.projector.forms.controllers.projection
 
 import dev.juhouse.projector.projection2.ProjectionManager
 import dev.juhouse.projector.projection2.ProjectionWindowCapture
+import dev.juhouse.projector.utils.promise.JavaFxExecutor
+import dev.juhouse.projector.utils.promise.Task
 import javafx.fxml.FXML
 import javafx.scene.control.CheckBox
 import javafx.scene.control.ChoiceBox
@@ -75,6 +77,10 @@ class WindowCaptureController : ProjectionController(), ProjectionBarControlCall
         controlBar.canProject = false
         windowListChoiceBox.selectionModel.clearSelection()
         windowListChoiceBox.items.clear()
-        windowListChoiceBox.items.addAll(projectable.getWindowList())
+
+        projectable.getWindowList().then(Task<List<String>, Void>{ list, _ ->
+            windowListChoiceBox.items.addAll(list)
+        }, JavaFxExecutor()).execute()
+
     }
 }

@@ -1,5 +1,9 @@
 package dev.juhouse.projector.projection2
 
+import dev.juhouse.projector.utils.promise.JavaFxExecutor
+import dev.juhouse.projector.utils.promise.Promise
+import dev.juhouse.projector.utils.promise.Task
+
 class ProjectionWindowCapture(private val delegate: CanvasDelegate): Projectable {
     private val renderFlag = BridgeRenderFlag(delegate)
     private var windowName: String? = null
@@ -32,14 +36,20 @@ class ProjectionWindowCapture(private val delegate: CanvasDelegate): Projectable
     private fun updateRender() {
         if (render && !windowName.isNullOrBlank()) {
             delegate.bridge.setWindowCaptureWindowName(windowName)
-            delegate.bridge.setWindowCaptureRender(renderFlag.value);
+            delegate.bridge.setWindowCaptureRender(renderFlag.value)
         } else {
-            delegate.bridge.setWindowCaptureRender(BridgeRenderFlag.NO_RENDER);
+            delegate.bridge.setWindowCaptureRender(BridgeRenderFlag.NO_RENDER)
         }
     }
 
-    fun getWindowList(): List<String> {
-        return delegate.bridge.windowList.toList()
+    fun getWindowList(): Promise<List<String>> {
+        return Promise.create(Task { _, callback ->
+            delegate.bridge.getWindowList(object: BridgeWindowCaptureCallbacks {
+                override fun onWindowListDone(windowList: Array<String>) {
+                    callback.success(windowList.toList())
+                }
+            })
+        }, JavaFxExecutor())
     }
 
     fun setCrop(newVal: Boolean) {
