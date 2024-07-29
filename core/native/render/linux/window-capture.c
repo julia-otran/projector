@@ -13,17 +13,32 @@
 
 typedef struct {
     Window window;
+    char* name;
 } window_capture_extra_data;
+
+static window_capture_extra_data *window_capture_extra_datum = NULL;
+static unsigned int window_capture_extra_datum_count = 0;
 
 static Display *display;
 static Window root_window;
 
-void window_capture_init() {
+static window_capture_list_callback window_capture_callback_function;
+
+void window_capture_init(window_capture_list_callback fn) {
+    window_capture_callback_function = fn;
     display = XOpenDisplay(NULL);
     root_window = RootWindow(display, DefaultScreen(display));
 }
 
-window_node_list* window_capture_get_window_list() {
+void window_capture_get_window_list() {
+    for (unsigned int i = 0; i < window_capture_extra_datum_count; i++) {
+        window_capture_extra_data *extra_data = &window_capture_extra_datum[i];
+        free(extra_data->name);
+    }
+
+    free(window_capture_extra_datum);
+    window_capture_extra_datum_count = 0;
+
     Atom atom = XInternAtom(display, ACTIVE_WINDOWS, 1);
 
     Atom actualType;
@@ -44,76 +59,48 @@ window_node_list* window_capture_get_window_list() {
     unsigned int valid_item_count = 0;
 
     char **names = NULL;
-    window_capture_extra_data *extra_datum = NULL;
 
     if (status >= Success && numItems) {
         names = (char**) calloc(numItems, sizeof(char*));
-        extra_datum = (window_capture_extra_data*) calloc(numItems, sizeof(window_capture_extra_data));
+        window_capture_extra_datum = (window_capture_extra_data*) calloc(numItems, sizeof(window_capture_extra_data));
 
         for (unsigned int i = 0; i < numItems; ++i) {
             status = XFetchName(display, list[i], &windowName);
 
             if (status >= Success && windowName) {
-                valid_item_count++;
-
-                window_capture_extra_data *extra_data = &extra_datum[i];
+                window_capture_extra_data *extra_data = &window_capture_extra_datum[valid_item_count];
                 extra_data->window = list[i];
 
                 unsigned int window_name_size = strlen(windowName);
-                names[i] = (char*) calloc(1, window_name_size + 1);
-                memcpy(names[i], windowName, window_name_size);
+                names[valid_item_count] = (char*) calloc(1, window_name_size + 1);
+                memcpy(names[valid_item_count], windowName, window_name_size);
+
+                extra_data->name = names[valid_item_count];
+                valid_item_count++;
             }
 
             XFree(windowName);
         }
+
+        window_capture_extra_datum_count = valid_item_count;
     }
 
     XFree(data);
 
-    window_node_list *result = calloc(1, sizeof(window_node_list));
-    window_node *window_nodes = calloc(valid_item_count, sizeof(window_node));
-
-    int valid_index = 0;
-
-    for (unsigned int i = 0; i < numItems; i++) {
-        if (names && names[i] && extra_datum) {
-            window_nodes[valid_index].window_name = names[i];
-
-            window_nodes[valid_index].extra_data = (window_capture_extra_data*) calloc(1, sizeof(window_capture_extra_data));
-            memcpy(window_nodes[valid_index].extra_data, &extra_datum[i], sizeof(window_capture_extra_data));
-            valid_index++;
-        }
-    }
-
-    result->list = window_nodes;
-    result->list_size = valid_item_count;
+    window_capture_callback_function(names, valid_item_count);
 
     free(names);
-    free(extra_datum);
-
-    return result;
-}
-
-void window_capture_free_window_list(window_node_list* list) {
-    for (unsigned int i = 0; i < list->list_size; i++) {
-        window_node *window_node_instance = &list->list[i];
-
-        free(window_node_instance->extra_data);
-        free(window_node_instance->window_name);
-    }
-
-    free(list->list);
-    free(list);
 }
 
 void* window_capture_get_handler(char *window_name) {
-    window_node_list* list = window_capture_get_window_list();
     void *handle = NULL;
     void *handle_copy = NULL;
 
-    for (unsigned int i = 0; i < list->list_size; i++) {
-        if (strcmp(list->list[i].window_name, window_name) == 0) {
-            handle = list->list[i].extra_data;
+    for (unsigned int i = 0; i < window_capture_extra_datum_count; i++) {
+        window_capture_extra_data *extra_data = &window_capture_extra_datum[i];
+
+        if (strcmp(extra_data->name, window_name) == 0) {
+            handle = extra_data;
             break;
         }
     }
@@ -122,8 +109,6 @@ void* window_capture_get_handler(char *window_name) {
         handle_copy = (void*) calloc(1, sizeof(window_capture_extra_data));
         memcpy(handle_copy, handle, sizeof(window_capture_extra_data));
     }
-
-    window_capture_free_window_list(list);
 
     return handle_copy;
 }
