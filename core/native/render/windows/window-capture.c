@@ -5,6 +5,16 @@
 #include "window-capture.h"
 
 typedef struct {
+    char* window_name;
+    void* extra_data;
+} window_node;
+
+typedef struct {
+    window_node* list;
+    unsigned int list_size;
+} window_node_list;
+
+typedef struct {
     HWND window_handle;
     HDC hdc_source;
     HDC hdc_memory;
@@ -19,6 +29,7 @@ typedef struct {
 
 static window_capture_node* window_capture_node_list;
 static unsigned int window_capture_node_list_size;
+static window_capture_list_callback window_capture_get_list_callback;
 
 void window_capture_clear_list() {
     window_capture_node* node = window_capture_node_list;
@@ -37,7 +48,8 @@ void window_capture_clear_list() {
     window_capture_node_list_size = 0;
 }
 
-void window_capture_init() {
+void window_capture_init(window_capture_list_callback fn) {
+    window_capture_get_list_callback = fn;
 }
 
 BOOL window_capture_enum_windows_callback(HWND handle, LPARAM _) {
@@ -125,7 +137,9 @@ BOOL window_capture_enum_windows_callback(HWND handle, LPARAM _) {
     return TRUE;
 }
 
-window_node_list* window_capture_get_window_list() {
+
+
+window_node_list* window_capture_get_window_list_int() {
     window_capture_clear_list();
 
     EnumWindows(window_capture_enum_windows_callback, NULL);
@@ -166,8 +180,26 @@ void window_capture_free_window_list(window_node_list* list) {
     free(list);
 }
 
+void window_capture_get_window_list() {
+    window_node_list* node_list = window_capture_get_window_list_int();
+
+    if (node_list == NULL) {
+        return NULL;
+    }
+
+    char** names = calloc(node_list->list_size, sizeof(char*));
+
+    for (unsigned int i = 0; i < node_list->list_size; i++) {
+        names[i] = node_list->list[i].window_name;
+    }
+
+    window_capture_get_list_callback(names, node_list->list_size);
+
+    window_capture_free_window_list(node_list);
+}
+
 void* window_capture_get_handler(char* window_name) {
-    window_node_list* node_list = window_capture_get_window_list();
+    window_node_list* node_list = window_capture_get_window_list_int();
     window_capture_extra_data* src_extra_data = NULL;
     window_capture_extra_data* dst_extra_data = NULL;
 
