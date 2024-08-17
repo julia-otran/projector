@@ -117,7 +117,7 @@ cJSON* serialize_config_color_matrix(config_color_matrix* in) {
 cJSON* serialize_config_color_corrector_single(config_color_corrector* in) {
     cJSON* config_color_corrector_json = cJSON_CreateObject();
 
-    cJSON_AddItemToObject(config_color_corrector_json, "src_hue", cJSON_CreateNumber(in->src_hue));
+    cJSON_AddItemToObject(config_color_corrector_json, "src_lum", cJSON_CreateNumber(in->src_lum));
     cJSON_AddItemToObject(config_color_corrector_json, "src_q", cJSON_CreateNumber(in->src_q));
     cJSON_AddItemToObject(config_color_corrector_json, "dst_hue", cJSON_CreateNumber(in->dst_hue));
     cJSON_AddItemToObject(config_color_corrector_json, "dst_sat", cJSON_CreateNumber(in->dst_sat));

@@ -17,8 +17,8 @@ static GLuint blueMatrixUniform;
 static GLuint exposureMatrixUniform;
 static GLuint brightMatrixUniform;
 
-static GLuint hueSrcMapUniform;
-static GLuint hueQSrcMapUniform;
+static GLuint lumSrcMapUniform;
+static GLuint lumQSrcMapUniform;
 static GLuint hueDstMapUniform;
 static GLuint satDstMapUniform;
 static GLuint lumDstMapUniform;
@@ -47,8 +47,8 @@ void vs_color_corrector_init() {
     exposureMatrixUniform = glGetUniformLocation(program, "exposureMatrix");
     brightMatrixUniform = glGetUniformLocation(program, "brightMatrix");
 
-    hueSrcMapUniform = glGetUniformLocation(program, "srcHueMap");
-    hueQSrcMapUniform = glGetUniformLocation(program, "srcHueQMap");
+    lumSrcMapUniform = glGetUniformLocation(program, "srcLumMap");
+    lumQSrcMapUniform = glGetUniformLocation(program, "srcLumQMap");
     hueDstMapUniform = glGetUniformLocation(program, "dstHueMap");
     satDstMapUniform = glGetUniformLocation(program, "dstSatMap");
     lumDstMapUniform = glGetUniformLocation(program, "dstLumMap");
@@ -175,16 +175,16 @@ void vs_color_corrector_set_uniforms(config_virtual_screen *config) {
 
 
     for (int i = 0; i < CONFIG_COLOR_CORRECTOR_LENGTH; i++) {
-        colorMapData[i] = config->color_corrector[i].src_hue;
+        colorMapData[i] = config->color_corrector[i].src_lum;
     }
 
-    glUniform1fv(hueSrcMapUniform, CONFIG_COLOR_CORRECTOR_LENGTH, colorMapData);
+    glUniform1fv(lumSrcMapUniform, CONFIG_COLOR_CORRECTOR_LENGTH, colorMapData);
 
     for (int i = 0; i < CONFIG_COLOR_CORRECTOR_LENGTH; i++) {
         colorMapData[i] = config->color_corrector[i].src_q;
     }
 
-    glUniform1fv(hueQSrcMapUniform, CONFIG_COLOR_CORRECTOR_LENGTH, colorMapData);
+    glUniform1fv(lumQSrcMapUniform, CONFIG_COLOR_CORRECTOR_LENGTH, colorMapData);
     
     for (int i = 0; i < CONFIG_COLOR_CORRECTOR_LENGTH; i++) {
         colorMapData[i] = config->color_corrector[i].dst_hue;

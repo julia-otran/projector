@@ -8,8 +8,8 @@ uniform vec3 blueMatrix;
 uniform vec3 exposureMatrix;
 uniform vec3 brightMatrix;
 
-uniform float srcHueMap[16];
-uniform float srcHueQMap[16];
+uniform float srcLumMap[16];
+uniform float srcLumQMap[16];
 uniform float dstHueMap[16];
 uniform float dstSatMap[16];
 uniform float dstLumMap[16];
@@ -56,15 +56,10 @@ vec3 rgb2hsl(in vec3 c) {
 }
 
 // -1.0 * q * (|targetHue - 0.18 - x| - 0.5)^2 + 1.0
-float hueMultiplier(in float srcHue, in float tgtHue, in float q) {
-    float targetHue = tgtHue + 0.7;
-
-    if (targetHue > 1.0) {
-        targetHue = targetHue - 1.0;
-    }
-
-    float result = (-1.0 * q * pow(abs(targetHue - 0.18 - srcHue) - 0.5, 2.0)) + 1.0;
-    return clamp(result, 0.0, 1.0);
+float lumaCurveMultiplier(in float luma, in float targetLuma, in float q) {
+    float q_inv = -1.0 * q;
+    float x = luma - targetLuma;
+    return clamp((q_inv * x * x) + 1.0, 0.0, 1.0);
 }
 
 void main(void) {
@@ -73,23 +68,23 @@ void main(void) {
     vec3 hsl = rgb2hsl(texel.rgb);
     vec3 hslResult = vec3(hsl);
 
-    float hueMult = 0.0;
-    float satMult = 0.0;
-    float lumaMult = 0.0;
+    float multiply;
 
     for (int i = 0; i < 16; i++) {
-        hueMult = hueMultiplier(hsl.r, srcHueMap[i], srcHueQMap[i]);
-        satMult = hsl.g * hueMult;
-        lumaMult = (1.0 - (abs(hsl.b - 0.5) * 2.0)) * hueMult;
+        multiply = lumaCurveMultiplier(hsl.b, srcLumMap[i], srcLumQMap[i]);
 
-        hslResult.r = hslResult.r + (dstHueMap[i] * hueMult);
+        hslResult.r = hslResult.r + (dstHueMap[i] * multiply);
 
         if (hslResult.r > 1.0) {
             hslResult.r = hslResult.r - 1.0;
         }
 
-        hslResult.g = hslResult.g * (dstSatMap[i] + ((1.0 - dstSatMap[i]) * (1.0 - satMult)));
-        hslResult.b = hslResult.b * (dstLumMap[i] + ((1.0 - dstLumMap[i]) * (1.0 - lumaMult)));
+        if (hslResult.r < 0.0) {
+            hslResult.r = 1.0 - hslResult.r;
+        }
+
+        hslResult.g = hslResult.g + (dstSatMap[i] * multiply);
+        hslResult.b = hslResult.b + (dstLumMap[i] * multiply);
     }
 
     vec3 correctedRGB = hsl2rgb(clamp(hslResult, 0.0, 1.0));

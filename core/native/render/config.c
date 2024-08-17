@@ -323,9 +323,4 @@ void prepare_default_config(config_bounds *default_monitor_bounds) {
 
     default_config.display[0].virtual_screens[0].color_matrix.b_to_b = 1.0;
     default_config.display[0].virtual_screens[0].color_matrix.b_exposure = 1.0;
-    
-    for (int i = 0; i < CONFIG_COLOR_CORRECTOR_LENGTH; i++) {
-        default_config.display[0].virtual_screens[0].color_corrector[i].dst_lum = 1.0;
-        default_config.display[0].virtual_screens[0].color_corrector[i].dst_sat = 1.0;
-    }
 }
