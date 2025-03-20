@@ -1,23 +1,39 @@
-# makefile for programs foo and bar.
-
-targets = app-render
-
-TOCLEAN = $(TARGETS)  # this variable stores what should be erased on clean target.  Here we store the programs to erase.
-
-SOURCEDIR += render
-SOURCEDIR += cJSON
-SOURCEDIR += tinycthread/source
-SOURCES = $(wildcard $(SOURCEDIR)/*.c) triangle/triangle.c
-
 BUILDDIR = output
 
-app-render_objs = $(patsubst $(SOURCEDIR)/%.c,$(BUILDDIR)/%.o,$(SOURCES))
-TOCLEAN += $(app-render_objs)  # here, we add the objects of foo
+RENDER_SOURCEDIR = render
+RENDER_SOURCES = $(filter-out render/lib-render.c, $(wildcard $(RENDER_SOURCEDIR)/*.c))
 
-CFLAGS = -Iinclude -IcJSON -Itinycthread/source -Itriangle
+RENDER_LINUX_SOURCEDIR = render/linux
+RENDER_LINUX_SOURCES = $(filter-out render/lib-render.c, $(wildcard $(RENDER_LINUX_SOURCEDIR)/*.c))
 
-app-render: $(app-render_objs)
-	$(CC) $(LDFLAGS) -o $@ $(app-render_objs)
+CJSON_SOURCEDIR = cJSON
+CJSON_SOURCES = cJSON/cJSON.c cJSON/cJSON_Utils.c
+
+TINYCTHREAD_SOURCEDIR = tinycthread/source
+TINYCTHREAD_SOURCES = tinycthread/source/tinycthread.c
+
+TRIANGLE_SOURCEDIR = triangle
+TRIANGLE_SOURCES = triangle/triangle.c
+
+triangle_objs = $(patsubst $(TRIANGLE_SOURCEDIR)/%.c,$(BUILDDIR)/%.o,$(TRIANGLE_SOURCES))
+
+CFLAGS = -Iinclude -IcJSON -Itinycthread/source -Itriangle -fPIC -DENABLE_LOCALES -DTRILIBRARY -DANSI_DECLARATORS -I/usr/include
+
+LDFLAGS = -L/usr/lib/x86_64-linux-gnu -L/usr/lib -lGLEW -lGL -lX11 -lvlc -lglfw -lm -m64
+
+EXECUTABLE = app-render
+
+OBJECTS = output/app-render
+
+CC=gcc
+
+all: dir $(BUILDDIR)/$(EXECUTABLE)
+
+dir:
+	mkdir -p $(BUILDDIR)
+
+$(OBJECTS):
+	$(CC) $(CFLAGS) -o output/app-render $(RENDER_SOURCES) $(RENDER_LINUX_SOURCES) $(CJSON_SOURCES) $(TINYCTHREAD_SOURCES) $(TRIANGLE_SOURCES) $(LDFLAGS)
 
 clean:
-	rm -f $(TOCLEAN)
+	rm -rf $(BUILDDIR)
