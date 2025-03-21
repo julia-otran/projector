@@ -19,7 +19,7 @@ triangle_objs = $(patsubst $(TRIANGLE_SOURCEDIR)/%.c,$(BUILDDIR)/%.o,$(TRIANGLE_
 
 CFLAGS = -Iinclude -IcJSON -Itinycthread/source -Itriangle -fPIC -DENABLE_LOCALES -DTRILIBRARY -DANSI_DECLARATORS -I/usr/include
 
-LDFLAGS = -L/usr/lib/x86_64-linux-gnu -L/usr/lib -lGLEW -lGL -lX11 -lvlc -lglfw -lm -m64
+LDFLAGS = -L/usr/lib/x86_64-linux-gnu -L/usr/lib -lGLEW -lGL -lX11 -lvlc -lglfw -lm -m64 -lturbojpeg
 
 EXECUTABLE = app-render
 
@@ -36,4 +36,4 @@ $(OBJECTS):
 	$(CC) $(CFLAGS) -o output/app-render $(RENDER_SOURCES) $(RENDER_LINUX_SOURCES) $(CJSON_SOURCES) $(TINYCTHREAD_SOURCES) $(TRIANGLE_SOURCES) $(LDFLAGS)
 
 clean:
-	rm -rf $(BUILDDIR)
+	rm -f output/app-render

@@ -316,7 +316,7 @@ void video_capture_preview_frame(void* buffer) {
 
 void video_capture_print_frame(void* buffer) {
     video_capture_print_frame_int(buffer, TJPF_RGBA);
-}
+} 
 
 void video_capture_close() {
     source_reader->lpVtbl->Release(source_reader);

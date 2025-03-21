@@ -184,7 +184,6 @@ int main(int argc, char** argv) {
     log_debug("app-render invoked");
 
     initialize();
-    loadConfig();
 
     capture_device_enum* cap_enum = get_capture_devices();
 
@@ -218,22 +217,27 @@ int main(int argc, char** argv) {
     fgets(device_id_str, sizeof(device_id_str), stdin);
 
     uintmax_t num = strtoumax(device_id_str, NULL, 10);
+    
     device_id = 1;
+    cap_dev_node = cap_enum->capture_device_list;
 
     for (int i = 0; i < cap_enum->capture_device_count; i++) {
         resolution_node = cap_dev_node->data->resolutions;
 
         for (int j = 0; j < cap_dev_node->data->count_resolutions; j++) {
-            resolution_node = resolution_node->next;
-
             if (device_id == num) { break; }
+
+            resolution_node = resolution_node->next;
             device_id++;
         }
 
         if (device_id == num) { break; }
-
         cap_dev_node = cap_dev_node->next;
     }
+
+    log_debug("Chosen Device: '%s' (%ix%i)\n", cap_dev_node->data->name, resolution_node->data->width, resolution_node->data->height);
+
+    loadConfig();
 
     render_video_capture_set_device(cap_dev_node->data->name, resolution_node->data->width, resolution_node->data->height);
     render_video_capture_set_enabled(1);
