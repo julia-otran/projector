@@ -80,13 +80,18 @@ void free_projection_config(projection_config *in) {
 
 projection_config* load_config(const char *filePath) {
     if (filePath == NULL) {
-        log_debug("Config file null or cannot access.\nReturning default\n.");
+        log_debug("Config file null.\nReturning default\n.");
         return &default_config;
     }
 
     FILE* config_file;
     
     open_file(&config_file, filePath, "rb");
+
+    if (config_file == NULL) {
+        log_debug("Fail to access config file\nReturning default\n.");
+        return &default_config;
+    }
 
     fseek(config_file, 0L, SEEK_END);
 

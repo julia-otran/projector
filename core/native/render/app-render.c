@@ -126,7 +126,7 @@ void runOnMainThreadLoop() {
     glfwPollEvents();
 }
 
-void loadConfig() {
+void loadConfig(char *path) {
     CHECK_INITIALIZE
     configured = 0;
 
@@ -135,7 +135,7 @@ void loadConfig() {
 
     projection_config *new_config;
 
-    new_config = load_config(NULL);
+    new_config = load_config(path);
 
     if (config) {
         if (!config_change_requires_restart(new_config, config)) {
@@ -180,8 +180,23 @@ void shutdown() {
     glfwTerminate();
 }
 
+char* get_config_path_from_args(int argc, char** argv) {
+    for (int i = 0; i < argc - 1; i++) {
+        if (argv[i][0] == '-' && argv[i][1] == 'c') {
+            return argv[i+1];
+        }
+    }
+}
+
+void print_options() {
+    log_debug("Press 'h' to hot reload configs;\n");
+    log_debug("Press 'r' to restart the engine;\n");
+    log_debug("Press 'g' to save default configs to the config file;\n");
+    log_debug("Press 'q' to quit;\n");
+}
+
 int main(int argc, char** argv) {
-    log_debug("app-render invoked");
+    log_debug("app-render invoked\n");
 
     initialize();
 
@@ -237,7 +252,8 @@ int main(int argc, char** argv) {
 
     log_debug("Chosen Device: '%s' (%ix%i)\n", cap_dev_node->data->name, resolution_node->data->width, resolution_node->data->height);
 
-    loadConfig();
+
+    loadConfig(get_config_path_from_args(argc, argv));
 
     render_video_capture_set_device(cap_dev_node->data->name, resolution_node->data->width, resolution_node->data->height);
     render_video_capture_set_enabled(1);
@@ -249,26 +265,31 @@ int main(int argc, char** argv) {
     fd_set rfds;
     struct timeval tv;
     int retval, len;
-    char buff[255] = {0};
+    char buff[100] = {0};
 
-    FD_ZERO(&rfds);
-    FD_SET(0, &rfds);
-
-    tv.tv_sec = 0;
-    tv.tv_usec = 1000 * 100;
+    tv.tv_sec = 2;
+    tv.tv_usec = 0;
 
     while (1) {
+        FD_ZERO(&rfds);
+        FD_SET(0, &rfds);
+
         runOnMainThreadLoop();
 
         retval = select(1, &rfds, NULL, NULL, &tv);
 
-        if (retval > 0) {
+        if (FD_ISSET(0, &rfds)) {
             fgets(buff, sizeof(buff), stdin);
 
             if (buff[0] == 'r') {
                 reload();
             } else if (buff[0] == 'q') {
                 goto terminate;
+            } else if (buff[0] == 'g') {
+                generate_config(get_config_path_from_args(argc, argv));
+                log_debug("Config generated\n");
+            } else if (buff[0] == 'h') {
+                loadConfig(get_config_path_from_args(argc, argv));
             }
         }
     }

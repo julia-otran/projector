@@ -99,6 +99,10 @@ void video_capture_open_device() {
 }
 
 void video_capture_print_frame_int(void* buffer, enum TJPF color) {
+    if (video_fd == NULL) {
+        return;
+    }
+
     if (ioctl(video_fd, VIDIOC_DQBUF, &buf) == -1) {
         return;
     }
@@ -122,8 +126,16 @@ void video_capture_print_frame(void* buffer) {
 
 void video_capture_close() {
     if (video_fd) {
+        int local_video_fd = video_fd;
+        video_fd = 0;
+        
+        munmap(video_buffer_mmap[0], buf.length);
+        munmap(video_buffer_mmap[1], buf.length);
+        munmap(video_buffer_mmap[2], buf.length);
+        ioctl(video_fd, VIDIOC_STREAMOFF, &buf.type);
         close(video_fd);
     }
+
 }
 
 void video_capture_terminate() {
