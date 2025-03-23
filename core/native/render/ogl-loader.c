@@ -5,7 +5,7 @@
 
 static shader_data_node *shaders;
 
-void add_shader_data(char *name, char *data) {
+void add_shader_data_len(char *name, char *data, unsigned int data_len) {
     shader_data_node *shader_node = (shader_data_node*) malloc(sizeof(shader_data_node));
 
     size_t len = strlen(name);
@@ -14,7 +14,7 @@ void add_shader_data(char *name, char *data) {
 
     shader_node->shader_name[len] = 0;
 
-    len = strlen(data);
+    len = data_len;
     shader_node->shader_code = malloc(len + 1);
     memcpy(shader_node->shader_code, data, len);
 
@@ -24,6 +24,10 @@ void add_shader_data(char *name, char *data) {
     shaders = shader_node;
 
     log_debug("Shader data added: %s\n", name);
+}
+
+void add_shader_data(char *name, char *data) {
+    add_shader_data_len(name, data, strlen(data));
 }
 
 GLuint loadShader(GLuint type, char *name) {

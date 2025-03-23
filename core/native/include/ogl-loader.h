@@ -26,6 +26,7 @@ typedef struct {
     void *next;
 } shader_data_node;
 
+void add_shader_data_len(char *name, char *data, unsigned int size);
 void add_shader_data(char *name, char *data);
 
 GLuint loadShader(GLuint type, char *name);

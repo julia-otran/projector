@@ -22,6 +22,15 @@
 #include "video-capture.h"
 #include "render-video-capture.h"
 
+#include "blend.fragment.shader.h"
+#include "blend.vertex.shader.h"
+#include "blur.fragment.shader.h"
+#include "blur.vertex.shader.h"
+#include "color-corrector.fragment.shader.h"
+#include "color-corrector.vertex.shader.h"
+#include "direct.fragment.shader.h"
+#include "direct.vertex.shader.h"
+
 static int initialized = 0;
 static int configured = 0;
 static projection_config *config;
@@ -87,7 +96,14 @@ void internal_lib_render_restart() {
 }
 
 void loadShaders() {
-    // add_shader_data(name, data);
+    add_shader_data_len("blend.fragment.shader", blend_fragment_shader, blend_fragment_shader_len);
+    add_shader_data_len("blend.vertex.shader", blend_vertex_shader, blend_vertex_shader_len);
+    add_shader_data_len("blur.fragment.shader", blur_fragment_shader, blur_fragment_shader_len);
+    add_shader_data_len("blur.vertex.shader", blur_vertex_shader, blur_vertex_shader_len);
+    add_shader_data_len("color-corrector.fragment.shader", color_corrector_fragment_shader, color_corrector_fragment_shader_len);
+    add_shader_data_len("color-corrector.vertex.shader", color_corrector_vertex_shader, color_corrector_vertex_shader_len);
+    add_shader_data_len("direct.fragment.shader", direct_fragment_shader, direct_fragment_shader_len);
+    add_shader_data_len("direct.vertex.shader", direct_vertex_shader, direct_vertex_shader_len);
 }
 
 void glfwIntErrorCallback(GLint _, const GLchar *error_string) {
@@ -197,7 +213,8 @@ void print_options() {
 
 int main(int argc, char** argv) {
     log_debug("app-render invoked\n");
-
+    
+    loadShaders();
     initialize();
 
     capture_device_enum* cap_enum = get_capture_devices();

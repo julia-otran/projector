@@ -17,7 +17,7 @@ TRIANGLE_SOURCES = triangle/triangle.c
 
 triangle_objs = $(patsubst $(TRIANGLE_SOURCEDIR)/%.c,$(BUILDDIR)/%.o,$(TRIANGLE_SOURCES))
 
-CFLAGS = -Iinclude -IcJSON -Itinycthread/source -Itriangle -fPIC -DENABLE_LOCALES -DTRILIBRARY -DANSI_DECLARATORS -I/usr/include
+CFLAGS = -Iinclude -IcJSON -Itinycthread/source -Itriangle -Ishaders -fPIC -DENABLE_LOCALES -DTRILIBRARY -DANSI_DECLARATORS -I/usr/include
 
 LDFLAGS = -L/usr/lib/x86_64-linux-gnu -L/usr/lib -lGLEW -lGL -lX11 -lvlc -lglfw -lm -m64 -lturbojpeg
 
