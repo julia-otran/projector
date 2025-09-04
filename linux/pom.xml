@@ -169,7 +169,7 @@
                         <compilerStartOption>-I${project.basedir}/../core/native/cJSON</compilerStartOption>
                         <compilerStartOption>-I${project.basedir}/../core/native/tinycthread/source</compilerStartOption>
                         <compilerStartOption>-I${project.basedir}/../core/native/triangle</compilerStartOption>
-                        <compilerStartOption>-I${project.basedir}/LibNDI/include</compilerStartOption>
+                        <compilerStartOption>-I${project.basedir}/native/LibNDI/include</compilerStartOption>
                         <compilerStartOption>-I/usr/include</compilerStartOption>
                         <compilerStartOption>-I${java.home}/include</compilerStartOption>
                         <compilerStartOption>-I${java.home}/include/linux</compilerStartOption>
@@ -197,7 +197,7 @@
                         <linkerEndOption>
                             -lglfw
                         </linkerEndOption>
-                        <linkerEndOption>-LLibNDI/lib</linkerEndOption>
+                        <linkerEndOption>-Lnative/LibNDI/lib/x86_64-linux-gnu</linkerEndOption>
                         <linkerEndOption>-lndi</linkerEndOption>
                         <linkerEndOption>
                             -o ${project.build.outputDirectory}/lib${lib_name}.so

@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <Processing.NDI.Lib.h>
 
 #include "debug.h"
 #include "ogl-loader.h"
@@ -20,6 +21,8 @@
 #include "device-capture.h"
 #include "video-capture.h"
 #include "render-video-capture.h"
+#include "ndi-inputs.h"
+
 
 static int initialized = 0;
 static int configured = 0;
@@ -152,6 +155,9 @@ void glfwIntMonitorCallback(GLFWmonitor* monitor, int event) {
 
 static JavaVM *jvm;
 static jobject window_capture_jobject;
+typedef struct {
+    jobject obj;
+} jobject_container;
 
 void notify_window_capture_windows(char** window_names, int count) {
     if (window_capture_jobject == NULL) {
@@ -182,6 +188,46 @@ void notify_window_capture_windows(char** window_names, int count) {
     (*jvm)->DetachCurrentThread(jvm);
 }
 
+void notify_ndi_device_change(ndi_inputs_device_list *input_list, ndi_inputs_callback_node_list *node_list) {
+    JNIEnv *env;
+    
+    (*jvm)->AttachCurrentThread(jvm, (void**)&env, NULL);
+
+    jclass device_class = (*env)->FindClass(env, "dev/juhouse/projector/projection2/BridgeNDIDevice");
+    jfieldID device_name_field = (*env)->GetFieldID(env, device_class, "name", "Ljava/lang/String;");
+    jfieldID device_url_field = (*env)->GetFieldID(env, device_class, "url", "Ljava/lang/String;");
+
+    jobjectArray devices_array = (*env)->NewObjectArray(env, input_list->count, device_class, NULL);
+
+    for (uint32_t i = 0; i < input_list->count; i++) {
+        jobject device_object = (*env)->AllocObject(env, device_class);
+
+        jstring device_name;
+        jni_charArrToJString(env, device_name, input_list->devices[i].name);
+        (*env)->SetObjectField(env, device_object, device_name_field, device_name);
+
+        jstring device_url;
+        jni_charArrToJString(env, device_url, input_list->devices[i].url_address);
+        (*env)->SetObjectField(env, device_object, device_url_field, device_url);
+
+        (*env)->SetObjectArrayElement(env, devices_array, i, device_object);
+    }
+
+    jclass callback_class = (*env)->FindClass(env, "dev/juhouse/projector/projection2/BridgeNDIDeviceFindCallback");
+    jmethodID callback_method_id = (*env)->GetMethodID(env, callback_class, "onDevicesChanged", "([Ldev/juhouse/projector/projection2/BridgeNDIDevice;)V");
+
+    for (
+        ndi_inputs_callback_node_list *callback_node = node_list;
+        callback_node != NULL;
+        callback_node = callback_node->next
+    ) {
+        jobject_container *objc = (jobject_container*) callback_node->data;
+        (*env)->CallObjectMethod(env, objc->obj, callback_method_id, devices_array);
+    }
+
+    (*jvm)->DetachCurrentThread(jvm);
+}
+
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_initialize(JNIEnv *env, jobject _) {
     (*env)->GetJavaVM(env, &jvm);
     
@@ -198,6 +244,10 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_initialize(
 
     window_capture_init(&notify_window_capture_windows);
     video_capture_init();
+    ndi_inputs_init();
+    ndi_inputs_set_callback(&notify_ndi_device_change);
+
+    NDIlib_initialize();
 
     initialized = 1;
 }
@@ -553,6 +603,36 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setVideoCap
     render_video_capture_set_crop(crop);
 }
 
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_addNDIDeviceFindCallback
+(JNIEnv *env, jobject this, jobject callback)
+{
+    jobject callback_ref = (*env)->NewGlobalRef(env, callback);
+    jobject_container *cont = calloc(1, sizeof(jobject_container));
+    cont->obj = callback_ref;
+    ndi_inputs_add_callback_node((void*) cont);
+}
+
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_removeNDIDeviceFindCallback
+  (JNIEnv *env, jobject this, jobject callback) 
+{
+    ndi_inputs_callback_node_list *list = ndi_inputs_get_callback_node_list();
+
+    for (ndi_inputs_callback_node_list *node = list; node != NULL; node = node->next) {
+        jobject_container *cont = (jobject_container*)node->data;
+
+        if ((*env)->IsSameObject(env, callback, cont->obj)) {
+            ndi_inputs_remove_callback_node(cont);
+            (*env)->DeleteGlobalRef(env, cont->obj);
+        }
+    }
+}
+
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_searchNDIDevices
+  (JNIEnv *env, jobject this) 
+{
+    ndi_inputs_find_devices();
+}
+
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_shutdown(JNIEnv *env, jobject _) {
     CHECK_INITIALIZE
 
@@ -561,6 +641,9 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_shutdown(JN
     monitors_destroy_windows();
     window_capture_terminate();
     video_capture_terminate();
+    ndi_inputs_terminate();
+
+    NDIlib_destroy();
 
     glfwTerminate();
 }

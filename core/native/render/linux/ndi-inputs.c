@@ -8,14 +8,10 @@
 #include "debug.h"
 #include "ndi-inputs.h"
 #include "tinycthread.h"
-#include <Processing.NDI.Lib.h>
+#include "Processing.NDI.Lib.h"
 
-typedef struct {
-    ndi_inputs_devices_callback callback;
-    ndi_input_devices_callback_list_node *next;
-} ndi_input_devices_callback_list_node;
-
-static ndi_input_devices_callback_list_node *callback_list;
+static ndi_inputs_devices_callback_fn callback_fn;
+static ndi_inputs_callback_node_list *callback_list;
 
 static int running_find;
 static thrd_t find_thread;
@@ -26,22 +22,26 @@ void ndi_inputs_init() {
     mtx_init(&thread_mutex, 0);
 }
 
-void ndi_inputs_add_callback(ndi_inputs_devices_callback fn) {
-    ndi_input_devices_callback_list_node *current = calloc(1, sizeof(ndi_input_devices_callback_list_node));
-    current->callback = fn;
+void ndi_inputs_set_callback(ndi_inputs_devices_callback_fn fn) {
+    callback_fn = fn;
+}
+
+void ndi_inputs_add_callback_node(void *data) {
+    ndi_inputs_callback_node_list *current = calloc(1, sizeof(ndi_inputs_callback_node_list));
+    current->data = data;
     current->next = callback_list;
     callback_list = current;
 }
 
-void ndi_inputs_remove_callback(ndi_inputs_devices_callback fn) {
-    ndi_input_devices_callback_list_node **current = &callback_list;
+void ndi_inputs_remove_callback_node(void *data) {
+    ndi_inputs_callback_node_list **current = &callback_list;
 
     mtx_lock(&thread_mutex);
 
     while (current != NULL) {
-        ndi_input_devices_callback_list_node *aux = (*current);
+        ndi_inputs_callback_node_list *aux = (*current);
         
-        if (aux->callback == fn) {
+        if (aux->data == data) {
             (*current) = (*current)->next;
             free(aux);
         } else {
@@ -50,6 +50,10 @@ void ndi_inputs_remove_callback(ndi_inputs_devices_callback fn) {
     }
 
     mtx_unlock(&thread_mutex);
+}
+
+ndi_inputs_callback_node_list* ndi_inputs_get_callback_node_list() {
+    return callback_list;
 }
 
 void ndi_inputs_free_devices(ndi_inputs_device_list* devices) {
@@ -79,17 +83,15 @@ void ndi_inputs_notify(NDIlib_find_instance_t pNDI_find) {
 
     mtx_lock(&thread_mutex);
 
-    for (ndi_input_devices_callback_list_node *current; current != NULL; current = current->next) {
-        current->callback(list);
-    }
+    callback_fn(list, callback_list);
 
     mtx_unlock(&thread_mutex);
 
     ndi_inputs_free_devices(list);
 }
 
-void ndi_inputs_find_devices_internal() {
-    NDIlib_find_instance_t pNDI_find = NDIlib_find_create_v2();
+int ndi_inputs_find_devices_internal(void* _) {
+    NDIlib_find_instance_t pNDI_find = NDIlib_find_create_v2(NULL);
 
     while (NDIlib_find_wait_for_sources(pNDI_find, 5000)) {
         ndi_inputs_notify(pNDI_find);
@@ -113,8 +115,9 @@ void ndi_inputs_terminate() {
     mtx_destroy(&thread_mutex);
 
     while (callback_list != NULL) {
-        ndi_input_devices_callback_list_node *current = callback_list;
+        ndi_inputs_callback_node_list *current = callback_list;
         callback_list = current->next;
+        free(current->data);
         free(current);
     }
 }

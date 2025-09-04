@@ -138,4 +138,10 @@ public class Bridge {
     public native void setVideoCaptureRender(int render);
 
     public native void setVideoCaptureCrop(boolean crop);
+
+    public native void addNDIDeviceFindCallback(BridgeNDIDeviceFindCallback callback);
+
+    public native void removeNDIDeviceFindCallback(BridgeNDIDeviceFindCallback callback);
+
+    public native void searchNDIDevices();
 }
