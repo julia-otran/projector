@@ -119,6 +119,7 @@
                                 <fileName>window-capture.c</fileName>
                                 <fileName>device-capture.c</fileName>
                                 <fileName>video-capture.c</fileName>
+                                <fileName>ndi-inputs.c</fileName>
                             </fileNames>
                         </source>
 
@@ -168,6 +169,7 @@
                         <compilerStartOption>-I${project.basedir}/../core/native/cJSON</compilerStartOption>
                         <compilerStartOption>-I${project.basedir}/../core/native/tinycthread/source</compilerStartOption>
                         <compilerStartOption>-I${project.basedir}/../core/native/triangle</compilerStartOption>
+                        <compilerStartOption>-I${project.basedir}/LibNDI/include</compilerStartOption>
                         <compilerStartOption>-I/usr/include</compilerStartOption>
                         <compilerStartOption>-I${java.home}/include</compilerStartOption>
                         <compilerStartOption>-I${java.home}/include/linux</compilerStartOption>
@@ -195,6 +197,8 @@
                         <linkerEndOption>
                             -lglfw
                         </linkerEndOption>
+                        <linkerEndOption>-LLibNDI/lib</linkerEndOption>
+                        <linkerEndOption>-lndi</linkerEndOption>
                         <linkerEndOption>
                             -o ${project.build.outputDirectory}/lib${lib_name}.so
                         </linkerEndOption>

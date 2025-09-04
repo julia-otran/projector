@@ -34,4 +34,4 @@ src/render/vs-color-corrector.c
 src/render/vs-help-lines.c
 )
 
-target_include_directories(projector PRIVATE src/include src/cJSON src/tinycthread/source src/triangle)
+target_include_directories(projector PRIVATE src/include src/cJSON src/tinycthread/source src/triangle LibNDI/include)
