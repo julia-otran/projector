@@ -715,6 +715,16 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     }
 
     @FXML
+    public void onAddNDICapture() {
+        try {
+            listRepository.createItem(projectionList, "Entrada NDI", ProjectionListItemType.NDI_CAPTURE);
+            reloadProjectables();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
     public void onAddTimer() {
         try {
             listRepository.createItem(projectionList, "Timer", ProjectionListItemType.TIMER);

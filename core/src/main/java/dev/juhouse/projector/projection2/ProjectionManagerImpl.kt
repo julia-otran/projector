@@ -146,6 +146,17 @@ class ProjectionManagerImpl(private val delegate: CanvasDelegate):
         return videoCapturePlayer
     }
 
+    override fun createNDICapture(): ProjectionNDICapture {
+        val videoCapturePlayer = ProjectionNDICapture(delegate)
+
+        projectablesList.add(videoCapturePlayer)
+
+        videoCapturePlayer.init()
+        videoCapturePlayer.rebuild()
+
+        return videoCapturePlayer
+    }
+
     override fun createClock(): ProjectionClock {
         val clock = ProjectionClock(delegate)
 

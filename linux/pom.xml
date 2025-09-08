@@ -82,6 +82,17 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>
+                    ${project.basedir}/native/LibNDI/lib/x86_64-linux-gnu
+                </directory>
+
+                <includes>
+                    <include>libndi.so.6.2.1</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>

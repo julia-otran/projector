@@ -56,6 +56,8 @@ public interface ProjectionManager {
 
     ProjectionVideoCapture createVideoCapture();
 
+    ProjectionNDICapture createNDICapture();
+
     ProjectionClock createClock();
 
     void setConcurrentProjectable(Projectable projectable);

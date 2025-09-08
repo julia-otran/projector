@@ -11,7 +11,7 @@ import lombok.Getter
 import java.nio.ByteBuffer
 import java.util.*
 
-class ProjectionVideoCapture(private val delegate: CanvasDelegate): Projectable {
+class ProjectionNDICapture(private val delegate: CanvasDelegate): Projectable {
     @Getter
     private val render: BooleanProperty = SimpleBooleanProperty(false)
     private val renderFlag = BridgeRenderFlag(delegate)
@@ -82,8 +82,16 @@ class ProjectionVideoCapture(private val delegate: CanvasDelegate): Projectable 
         }
     }
 
-    fun getDevices(): List<BridgeCaptureDevice> {
-        return delegate.bridge.videoCaptureDevices?.asList() ?: Collections.emptyList()
+    fun getDevices() {
+        delegate.bridge.searchNDIDevices()
+    }
+
+    fun addDeviceChangeCallback(callback: BridgeNDIDeviceFindCallback) {
+        delegate.bridge.addNDIDeviceFindCallback(callback)
+    }
+
+    fun removeDeviceChangeCallback(callback: BridgeNDIDeviceFindCallback) {
+        delegate.bridge.removeNDIDeviceFindCallback(callback)
     }
 
     fun setDevice(name: String, width: Int, height: Int) {

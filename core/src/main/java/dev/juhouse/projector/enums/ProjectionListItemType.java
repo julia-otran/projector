@@ -5,7 +5,7 @@ import dev.juhouse.projector.scenes.*;
 import java.io.IOException;
 
 public enum ProjectionListItemType {
-    MUSIC, VIDEO, IMAGE, MULTI_IMAGE, WEB_SITE, TEXT, TIMER, WINDOW_CAPTURE, DEVICE_CAPTURE, SOLID_COLOR;
+    MUSIC, VIDEO, IMAGE, MULTI_IMAGE, WEB_SITE, TEXT, TIMER, WINDOW_CAPTURE, DEVICE_CAPTURE, NDI_CAPTURE, SOLID_COLOR;
 
     public ProjectionItemSubScene createSubScene(double width, double height) throws IOException {
         return switch (this) {
@@ -18,6 +18,7 @@ public enum ProjectionListItemType {
             case VIDEO -> PlayerSubScene.createScene(width, height);
             case MUSIC -> MusicProjectionScene.createScene(width, height);
             case TEXT -> TextSubScene.createScene(width, height);
+            case NDI_CAPTURE -> NDICaptureSubScene.Companion.createScene(width, height);
             case SOLID_COLOR -> SolidColorSubScene.Companion.createScene(width, height);
         };
     }
