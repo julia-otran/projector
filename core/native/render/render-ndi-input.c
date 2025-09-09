@@ -4,14 +4,13 @@
 
 #include "ogl-loader.h"
 #include "render.h"
-#include "render-video-capture.h"
-#include "video-capture.h"
+#include "render-ndi-input.h"
 #include "render-pixel-unpack-buffer.h"
 #include "render-fader.h"
-#include "tinycthread.h"
+#include "ndi-input.h"
+#include "Processing.NDI.Lib.h"
 
-static int src_render, src_width, src_height, src_enabled, src_crop;
-static char* src_device_name;
+static int src_render, src_enabled, src_crop;
 
 static int dst_width, dst_height, dst_enabled, dst_render;
 
@@ -22,49 +21,41 @@ static GLuint texture_id;
 
 static mtx_t thread_mutex;
 
-void render_video_capture_initialize() {
-    src_device_name = NULL;
+typedef struct {
+    int bytesPerPixel;
+    GLuint pixelFormat;
+} render_pixel_unpack_buffer_ndi_extra_data;
+
+void render_ndi_input_initialize() {
     mtx_init(&thread_mutex, 0);
 }
 
-void render_video_capture_set_device(char* device, int width, int height) {
-    if (src_device_name) {
-        free(src_device_name);
-    }
-
-    size_t len = strlen(device);
-
-    src_device_name = (char*) calloc(1, len + 1);
-    memcpy(src_device_name, device, len);
-
-	video_capture_set_device(src_device_name, width, height);
-
-    src_width = width;
-    src_height = height;
+void render_ndi_input_set_device(void* device) {
+    ndi_input_set_device(device);
 }
 
-void render_video_capture_set_enabled(int enabled) {
+void render_ndi_input_set_enabled(int enabled) {
     mtx_lock(&thread_mutex);
 
 	if (enabled) 
 	{
-		video_capture_open_device();
         src_enabled = 1;
+        ndi_input_start_downstream();
 	}
 	else 
 	{
         src_enabled = 0;
-		video_capture_close();
+        ndi_input_stop_downstream();
 	}
 
     mtx_unlock(&thread_mutex);
 }
 
-void render_video_capture_set_render(int render) {
+void render_ndi_input_set_render(int render) {
 	src_render = render;
 }
 
-void render_video_capture_download_preview(int* data)
+void render_ndi_input_download_preview(int* data, int dataMaxSize, int* width, int* height, int *bytesPerPixel, GLuint *pixelFormat)
 {
     if (dst_render != 0 || dst_enabled == 0 || src_enabled == 0)
     {
@@ -79,23 +70,33 @@ void render_video_capture_download_preview(int* data)
         return;
     }
 
-    video_capture_preview_frame(data);
+    void* data;
+
+    ndi_input_lock();
+    ndi_input_get_frame_size(width, height, bytesPerPixel, pixelFormat);
+    
+    if ((*width) * (*height) * (*bytesPerPixel) <= dataMaxSize) {
+        ndi_input_download_frame(data);
+    }
+
+    ndi_input_unlock();
 
     mtx_unlock(&thread_mutex);
 }
 
-void render_video_capture_set_crop(int crop)
+void render_ndi_input_set_crop(int crop)
 {
     src_crop = crop;
 }
 
-void render_video_capture_create_buffers()
+void render_ndi_input_create_buffers()
 {
 	render_pixel_unpack_buffer_create(&buffer_instance);
+    render_pixel_unpack_buffer_allocate_extra_data(buffer_instance, sizeof(render_pixel_unpack_buffer_ndi_extra_data));
     render_fader_init(&fader_instance);
 }
 
-void render_video_capture_update_buffers()
+void render_ndi_input_update_buffers()
 {
     mtx_lock(&thread_mutex);
 
@@ -117,15 +118,29 @@ void render_video_capture_update_buffers()
     if (buffer) {
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
 
-        if (buffer->width != src_width || buffer->height != src_height) {
-            glBufferData(GL_PIXEL_UNPACK_BUFFER, src_width * src_height * 4, 0, GL_DYNAMIC_DRAW);
+        render_pixel_unpack_buffer_ndi_extra_data *extra_data = (render_pixel_unpack_buffer_ndi_extra_data*) buffer->extra_data;
+
+        ndi_input_lock();
+
+        int src_width, src_height, bytesPerPixel;
+        GLuint pixelFormat;
+
+        ndi_input_get_frame_size(&src_width, &src_height, &bytesPerPixel, &pixelFormat);
+
+        if (buffer->width != src_width || buffer->height != src_height || extra_data->bytesPerPixel != bytesPerPixel) {
+            glBufferData(GL_PIXEL_UNPACK_BUFFER, src_width * src_height * extra_data->bytesPerPixel, 0, GL_DYNAMIC_DRAW);
             buffer->width = src_width;
             buffer->height = src_height;
+            extra_data->bytesPerPixel = bytesPerPixel;
         }
 
+        extra_data->pixelFormat = pixelFormat;
+
         void* data = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
-        video_capture_print_frame(data);
+        ndi_input_download_frame(data);
         glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+
+        ndi_input_unlock();
 
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     }
@@ -134,13 +149,14 @@ void render_video_capture_update_buffers()
     mtx_unlock(&thread_mutex);
 }
 
-void render_video_capture_flush_buffers()
+void render_ndi_input_flush_buffers()
 {
 	render_pixel_unpack_buffer_flush(buffer_instance);
 }
 
-void render_video_capture_deallocate_buffers()
+void render_ndi_input_deallocate_buffers()
 {
+    render_pixel_unpack_buffer_free_extra_data(buffer_instance);
 	render_pixel_unpack_buffer_deallocate(buffer_instance);
 	buffer_instance = NULL;
 
@@ -148,12 +164,12 @@ void render_video_capture_deallocate_buffers()
     fader_instance = NULL;
 }
 
-void render_video_capture_create_assets()
+void render_ndi_input_create_assets()
 {
     glGenTextures(1, &texture_id);
 }
 
-void render_video_capture_update_assets()
+void render_ndi_input_update_assets()
 {
     render_pixel_unpack_buffer_node* buffer = render_pixel_unpack_buffer_dequeue_for_read(buffer_instance);
 
@@ -161,10 +177,12 @@ void render_video_capture_update_assets()
         dst_width = buffer->width;
         dst_height = buffer->height;
 
+        render_pixel_unpack_buffer_ndi_extra_data *extra_data = (render_pixel_unpack_buffer_ndi_extra_data*) buffer->extra_data;
+
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->gl_buffer);
         glBindTexture(GL_TEXTURE_2D, texture_id);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dst_width, dst_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dst_width, dst_height, 0, extra_data->pixelFormat, GL_UNSIGNED_BYTE, 0);
         tex_set_default_params();
 
         glBindTexture(GL_TEXTURE_2D, 0);
@@ -193,12 +211,12 @@ void render_video_capture_update_assets()
     }
 }
 
-void render_video_capture_deallocate_assets()
+void render_ndi_input_deallocate_assets()
 {
     glDeleteTextures(1, &texture_id);
 }
 
-void render_video_capture_render(render_layer* layer)
+void render_ndi_input_render(render_layer* layer)
 {
     if (dst_enabled == 0) {
         return;
@@ -248,7 +266,7 @@ void render_video_capture_render(render_layer* layer)
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void render_video_capture_shutdown()
+void render_ndi_input_shutdown()
 {
     mtx_destroy(&thread_mutex);
 }

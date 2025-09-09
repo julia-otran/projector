@@ -15,6 +15,7 @@
 #include "render-preview.h"
 #include "render-tex-blur.h"
 #include "render-video-capture.h"
+#include "render-ndi-input.h"
 
 static int count_renders;
 static render_layer *renders;
@@ -61,6 +62,7 @@ void initialize_renders() {
     render_image_initialize();
     render_preview_initialize();
     render_video_capture_initialize();
+    render_ndi_input_initialize();
 }
 
 void shutdown_renders() {
@@ -76,6 +78,7 @@ void shutdown_renders() {
     render_image_shutdown();
     render_preview_shutdown();
     render_video_capture_shutdown();
+    render_ndi_input_shutdown();
 
     free(output);
     free(renders);
@@ -127,6 +130,7 @@ void render_init(render_layer *render) {
         render_preview_create_assets();
         render_tex_blur_create_assets();
         render_video_capture_create_assets();
+        render_ndi_input_create_assets();
     }
 
     render_text_start(render);
@@ -160,6 +164,7 @@ void render_cycle(render_layer *render) {
     render_web_view_render(render);
     render_window_capture_render(render);
     render_video_capture_render(render);
+    render_ndi_input_render(render);
     render_text_render(render);
 
     render_preview_cycle(render);
@@ -181,6 +186,7 @@ void render_terminate(render_layer *render) {
         render_preview_deallocate_assets();
         render_tex_blur_deallocate_assets();
         render_video_capture_deallocate_assets();
+        render_ndi_input_deallocate_assets();
     }
 
     for (int i=0; i < count_renders; i++) {
@@ -213,6 +219,7 @@ void renders_update_assets()
     render_image_update_assets();
     render_preview_update_assets();
     render_video_capture_update_assets();
+    render_ndi_input_update_assets();
 }
 
 void renders_cycle() {
@@ -237,6 +244,7 @@ void renders_flush_buffers() {
     render_window_capture_flush_buffers();
     render_image_flush_buffers();
     render_video_capture_flush_buffers();
+    render_ndi_input_flush_buffers();
     render_preview_flush_buffers();
 }
 
@@ -267,6 +275,7 @@ int transfer_window_loop(void *_) {
     render_image_create_buffers();
     render_preview_create_buffers();
     render_video_capture_create_buffers();
+    render_ndi_input_create_buffers();
 
     transfer_window_initialized = 1;
 
@@ -284,6 +293,7 @@ int transfer_window_loop(void *_) {
         render_image_update_buffers();
         render_preview_update_buffers();
         render_video_capture_update_buffers();
+        render_ndi_input_update_buffers();
 
         glFinish();
         
@@ -307,6 +317,7 @@ int transfer_window_loop(void *_) {
     render_image_deallocate_buffers();
     render_preview_deallocate_buffers();
     render_video_capture_deallocate_buffers();
+    render_ndi_input_deallocate_buffers();
 
     return 0;
 }

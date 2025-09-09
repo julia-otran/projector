@@ -130,7 +130,6 @@
                                 <fileName>window-capture.c</fileName>
                                 <fileName>device-capture.c</fileName>
                                 <fileName>video-capture.c</fileName>
-                                <fileName>ndi-inputs.c</fileName>
                             </fileNames>
                         </source>
 
@@ -146,6 +145,7 @@
                                 <fileName>lib-render.c</fileName>
                                 <fileName>loop.c</fileName>
                                 <fileName>monitor.c</fileName>
+                                <fileName>ndi-inputs.c</fileName>
                                 <fileName>ogl-loader.c</fileName>
                                 <fileName>render.c</fileName>
                                 <fileName>render-fader.c</fileName>

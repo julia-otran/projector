@@ -22,6 +22,7 @@
 #include "video-capture.h"
 #include "render-video-capture.h"
 #include "ndi-inputs.h"
+#include "ndi-input.h"
 
 
 static int initialized = 0;
@@ -244,10 +245,11 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_initialize(
 
     window_capture_init(&notify_window_capture_windows);
     video_capture_init();
-    ndi_inputs_init();
-    ndi_inputs_set_callback(&notify_ndi_device_change);
 
     NDIlib_initialize();
+    ndi_inputs_init();
+    ndi_inputs_set_callback(&notify_ndi_device_change);
+    ndi_input_initialize();
 
     initialized = 1;
 }
@@ -642,6 +644,7 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_shutdown(JN
     window_capture_terminate();
     video_capture_terminate();
     ndi_inputs_terminate();
+    ndi_input_terminate();
 
     NDIlib_destroy();
 

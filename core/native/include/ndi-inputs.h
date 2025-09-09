@@ -24,6 +24,8 @@ void ndi_inputs_set_callback(ndi_inputs_devices_callback_fn fn);
 
 void ndi_inputs_find_devices();
 
+void ndi_inputs_connect(char* device_name, void* pNDI_recv, unsigned int* success);
+
 void ndi_inputs_add_callback_node(void *node);
 void ndi_inputs_remove_callback_node(void *node);
 ndi_inputs_callback_node_list* ndi_inputs_get_callback_node_list();

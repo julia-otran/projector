@@ -144,4 +144,14 @@ public class Bridge {
     public native void removeNDIDeviceFindCallback(BridgeNDIDeviceFindCallback callback);
 
     public native void searchNDIDevices();
+
+    public native void connectNDIDevice(String name);
+
+    public native BridgeNDIPreviewInfo downloadNDIPreview(ByteBuffer buffer);
+
+    public native void setNDIEnabled(boolean enabled);
+
+    public native void setNDIRender(int render);
+
+    public native void setNDICrop(boolean crop);
 }
