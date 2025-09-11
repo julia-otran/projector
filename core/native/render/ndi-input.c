@@ -28,10 +28,10 @@ int ndi_input_downstream_loop(void *pNDI_recv_void) {
     log_debug("NDI: Downstream loop init\n");
 
     while (running) {
-        switch (NDIlib_recv_capture_v2(pNDI_recv_local, &video_frame_tmp, NULL, NULL, 1000)) {
+        NDIlib_frame_type_e frame_type = NDIlib_recv_capture_v3(pNDI_recv_local, &video_frame_tmp, NULL, NULL, 1000);
+        switch (frame_type) {
             // Video data
             case NDIlib_frame_type_video:
-                log_debug("NDI: Frame received\n");
                 mtx_lock(&downstream_thread_mtx);
                 NDIlib_recv_free_video_v2(pNDI_recv_local, &video_frame);
                 memcpy(&video_frame, &video_frame_tmp, sizeof(NDIlib_video_frame_v2_t));
@@ -44,7 +44,7 @@ int ndi_input_downstream_loop(void *pNDI_recv_void) {
                 break;
 
             default:
-                log_debug("NDI: Received other frame type\n");
+                log_debug("NDI: Received other frame type: %i\n", frame_type);
                 break;
         }
     }
