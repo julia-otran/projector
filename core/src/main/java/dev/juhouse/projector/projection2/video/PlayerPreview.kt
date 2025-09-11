@@ -1,5 +1,6 @@
 package dev.juhouse.projector.projection2.video
 
+import dev.juhouse.projector.projection2.Bridge.VideoPreviewNoOutputData
 import dev.juhouse.projector.projection2.Bridge.VideoPreviewOutputBufferTooSmall
 import dev.juhouse.projector.projection2.CanvasDelegate
 import javafx.application.Platform
@@ -17,24 +18,37 @@ import java.nio.ByteBuffer
 import java.nio.IntBuffer
 import kotlin.jvm.Throws
 
-data class PlayerPreviewCallbackFrameSize(val width: Int, val height: Int)
+enum class PlayerPreviewCallbackFramePixelFormat {
+    GL_RGBA;
+
+    companion object {
+        fun fromGL(gluintPixelFormat: UInt): PlayerPreviewCallbackFramePixelFormat {
+            return when (gluintPixelFormat) {
+                6408U -> GL_RGBA
+                else -> GL_RGBA
+            }
+        }
+    }
+}
+
+data class PlayerPreviewCallbackFrameSize(val width: Int, val height: Int, val pixelFormat: PlayerPreviewCallbackFramePixelFormat = PlayerPreviewCallbackFramePixelFormat.GL_RGBA)
 
 interface PlayerPreviewCallback {
     fun isRender(): Boolean
-    @Throws(VideoPreviewOutputBufferTooSmall::class)
+    @Throws(VideoPreviewOutputBufferTooSmall::class, VideoPreviewNoOutputData::class)
     fun getFrame(buffer: ByteBuffer): PlayerPreviewCallbackFrameSize
 }
 
 class PlayerPreview(private val previewCallback: PlayerPreviewCallback, delegate: CanvasDelegate) : AnchorPane(), Runnable {
     private var running = false
-    private var previewImagePixelBuffer: PixelBuffer<IntBuffer?>? = null
+    private var previewImagePixelBuffer: PixelBuffer<IntBuffer>? = null
     private val previewImageBuffer: ByteBuffer
     private val previewImageBufferInt: IntBuffer
     private val delegate: CanvasDelegate
     private val previewImageView: ImageView = ImageView()
     private val previewErrorLabel: Label
     private val updateCallback =
-        Callback<PixelBuffer<IntBuffer?>, Rectangle2D?> { _: PixelBuffer<IntBuffer?>? ->
+        Callback<PixelBuffer<IntBuffer>, Rectangle2D> { _ ->
             updating = false
             null
         }
@@ -83,7 +97,7 @@ class PlayerPreview(private val previewCallback: PlayerPreviewCallback, delegate
         updating = true
 
         try {
-            val (width, height) = previewCallback.getFrame(previewImageBuffer)
+            val (width, height, pixelFormat) = previewCallback.getFrame(previewImageBuffer)
 
             Platform.runLater {
                 if (!running) {
@@ -93,26 +107,32 @@ class PlayerPreview(private val previewCallback: PlayerPreviewCallback, delegate
                     children.clear()
                     children.add(previewImageView)
                 }
-                if (width == 0) {
+                if (width == 0 || height == 0) {
                     updating = false
                     return@runLater
                 }
-                if (previewImagePixelBuffer == null || previewImagePixelBuffer!!.width != width || previewImagePixelBuffer!!.height != height
-                ) {
-                    previewImagePixelBuffer = PixelBuffer(
-                        width,
-                        height,
-                        previewImageBufferInt,
-                        PixelFormat.getIntArgbPreInstance()
-                    )
+                if (previewImagePixelBuffer == null || previewImagePixelBuffer!!.width != width || previewImagePixelBuffer!!.height != height) {
+                    previewImagePixelBuffer = when (pixelFormat) {
+                        PlayerPreviewCallbackFramePixelFormat.GL_RGBA -> PixelBuffer(
+                            width,
+                            height,
+                            previewImageBufferInt,
+                            PixelFormat.getIntArgbPreInstance()
+                        )
+                    }
+
                     previewImageView.image = WritableImage(previewImagePixelBuffer)
                     updating = false
                 } else {
                     previewImagePixelBuffer!!.updateBuffer(updateCallback)
+
                 }
             }
         } catch (e: VideoPreviewOutputBufferTooSmall) {
             showError("[Preview Indisponível] Resolução do video muito alta (max 1920x1080)....")
+            updating = false
+        } catch (e: VideoPreviewNoOutputData) {
+            showError("[Preview Indisponível] Sem dados para exibir....")
             updating = false
         }
     }

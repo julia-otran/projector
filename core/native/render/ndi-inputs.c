@@ -78,7 +78,7 @@ void ndi_inputs_connect(char* device_name, void* pNDI_recv_in, unsigned int* suc
     
     if (p_sources && p_sources_count) {
         for (uint32_t i = 0; i < p_sources_count; i++) {
-            if (strcmp(p_sources[i].p_ndi_name, device_name)) {
+            if (strcmp(p_sources[i].p_ndi_name, device_name) == 0) {
                 NDIlib_recv_instance_t pNDI_recv = (NDIlib_recv_instance_t)pNDI_recv_in;
                 NDIlib_recv_connect(pNDI_recv, &p_sources[i]);
                 (*success) = 1;

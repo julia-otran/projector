@@ -46,7 +46,7 @@ public class ProjectionPlayer implements Projectable {
             @Override
             public PlayerPreviewCallbackFrameSize getFrame(@NotNull ByteBuffer buffer) throws Bridge.VideoPreviewOutputBufferTooSmall {
                 BridgeVideoPreviewSize previewSize = delegate.getBridge().downloadPlayerPreview(getPlayer(), buffer);
-                return new PlayerPreviewCallbackFrameSize(previewSize.getWidth(), previewSize.getHeight());
+                return new PlayerPreviewCallbackFrameSize(previewSize.getWidth(), previewSize.getHeight(), PlayerPreviewCallbackFramePixelFormat.GL_RGBA);
             }
         }, delegate);
 

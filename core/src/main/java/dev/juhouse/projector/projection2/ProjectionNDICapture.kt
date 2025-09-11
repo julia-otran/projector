@@ -1,33 +1,37 @@
 package dev.juhouse.projector.projection2
 
+import dev.juhouse.projector.projection2.Bridge.VideoPreviewNoOutputData
 import dev.juhouse.projector.projection2.Bridge.VideoPreviewOutputBufferTooSmall
 import dev.juhouse.projector.projection2.video.PlayerPreview
 import dev.juhouse.projector.projection2.video.PlayerPreviewCallback
+import dev.juhouse.projector.projection2.video.PlayerPreviewCallbackFramePixelFormat
 import dev.juhouse.projector.projection2.video.PlayerPreviewCallbackFrameSize
 import javafx.beans.Observable
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.SimpleBooleanProperty
 import lombok.Getter
 import java.nio.ByteBuffer
-import java.util.*
 
 class ProjectionNDICapture(private val delegate: CanvasDelegate): Projectable {
     @Getter
     private val render: BooleanProperty = SimpleBooleanProperty(false)
     private val renderFlag = BridgeRenderFlag(delegate)
 
-    private var width: Int = 0
-    private var height: Int = 0
+    private var previewInfo = BridgeNDIPreviewInfo(0, 0, 0, 0U)
 
     private val previewCallback = object : PlayerPreviewCallback {
         override fun getFrame(buffer: ByteBuffer): PlayerPreviewCallbackFrameSize {
-            if (buffer.capacity() < width * height * 4) {
+            delegate.bridge.downloadNDIPreview(buffer, previewInfo)
+
+            if (buffer.capacity() < previewInfo.width * previewInfo.height * previewInfo.bytesPerPixel) {
                 throw VideoPreviewOutputBufferTooSmall()
             }
 
-            delegate.bridge.downloadVideoCapturePreview(buffer)
+            if (previewInfo.width * previewInfo.height <= 0) {
+                throw VideoPreviewNoOutputData()
+            }
 
-            return PlayerPreviewCallbackFrameSize(width, height)
+            return PlayerPreviewCallbackFrameSize(previewInfo.width, previewInfo.height, PlayerPreviewCallbackFramePixelFormat.fromGL(previewInfo.pixelFormat))
         }
 
         override fun isRender(): Boolean {
@@ -41,14 +45,14 @@ class ProjectionNDICapture(private val delegate: CanvasDelegate): Projectable {
         set(value) {
             if (field != value) {
                 field = value
-                delegate.bridge.setVideoCaptureEnabled(value)
+                delegate.bridge.setNDIEnabled(value)
             }
         }
 
     var cropVideo = false
         set(value) {
             field = value
-            delegate.bridge.setVideoCaptureCrop(value)
+            delegate.bridge.setNDICrop(value)
         }
 
     init {
@@ -76,9 +80,9 @@ class ProjectionNDICapture(private val delegate: CanvasDelegate): Projectable {
 
     private fun updateRender() {
         if (render.get()) {
-            delegate.bridge.setVideoCaptureRender(renderFlag.value)
+            delegate.bridge.setNDIRender(renderFlag.value)
         } else {
-            delegate.bridge.setVideoCaptureRender(BridgeRenderFlag.NO_RENDER)
+            delegate.bridge.setNDIRender(BridgeRenderFlag.NO_RENDER)
         }
     }
 
@@ -94,10 +98,8 @@ class ProjectionNDICapture(private val delegate: CanvasDelegate): Projectable {
         delegate.bridge.removeNDIDeviceFindCallback(callback)
     }
 
-    fun setDevice(name: String, width: Int, height: Int) {
-        this.width = width
-        this.height = height
-        delegate.bridge.setVideoCaptureDevice(name, width, height)
+    fun setDevice(name: String) {
+        delegate.bridge.connectNDIDevice(name)
     }
 
     override fun finish() {

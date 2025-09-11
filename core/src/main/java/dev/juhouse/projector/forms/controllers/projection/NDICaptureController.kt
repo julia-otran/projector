@@ -25,9 +25,6 @@ class NDICaptureController: ProjectionController(),
     private lateinit var devicesComboBox: ComboBox<String>
 
     @FXML
-    private lateinit var resolutionsComboBox: ComboBox<BridgeCaptureDeviceResolution>
-
-    @FXML
     private lateinit var activateCheckBox: CheckBox
 
     // Controls
@@ -50,13 +47,6 @@ class NDICaptureController: ProjectionController(),
 
     override fun onProjectionEnd() {
         getProjectionManager().setProjectable(null)
-    }
-
-    private fun getRecommendedResolution(): BridgeCaptureDeviceResolution? {
-        return resolutionsComboBox.items
-            .filter { it.width <= 1920 }
-            .filter { it.height <= 1080 }
-            .maxByOrNull { it.width * it.height }
     }
 
     override fun initWithProjectionManager(projectionManager: ProjectionManager) {
@@ -83,17 +73,7 @@ class NDICaptureController: ProjectionController(),
         controlBar.manager = projectionManager
         controlBar.attach(projectionControlPane)
 
-        devicesComboBox.selectionModel.selectedItemProperty().addListener { _, _, newValue ->
-            activateCheckBox.isSelected = false
-            resolutionsComboBox.selectionModel.clearSelection()
-            resolutionsComboBox.items.clear()
-            devices.find { it.deviceName == newValue }?.let {
-                resolutionsComboBox.items.addAll(it.resolutions)
-                getRecommendedResolution()?.let { r -> resolutionsComboBox.selectionModel.select(r) }
-            }
-        }
-
-        resolutionsComboBox.selectionModel.selectedItemProperty().addListener { _, _, _ ->
+        devicesComboBox.selectionModel.selectedItemProperty().addListener { _, _, _ ->
             activateCheckBox.isSelected = false
         }
 
@@ -102,18 +82,10 @@ class NDICaptureController: ProjectionController(),
         onRefreshDevices()
 
         val deviceName = observer.getProperty("VIDEO_DEVICE")
-        val deviceWidth = observer.getProperty("VIDEO_DEVICE_WIDTH").map { it.toInt() }.orElse(null)
-        val deviceHeight = observer.getProperty("VIDEO_DEVICE_HEIGHT").map { it.toInt() }.orElse(null)
 
         deviceName.ifPresent {
             if (devicesComboBox.items.contains(it)) {
                 devicesComboBox.selectionModel.select(it)
-
-                val resolution = resolutionsComboBox.items.find { r -> r.width == deviceWidth && r.height == deviceHeight }
-
-                resolution?.let {
-                    resolutionsComboBox.selectionModel.select(resolution)
-                }
             }
         }
     }
@@ -134,13 +106,10 @@ class NDICaptureController: ProjectionController(),
 
     private fun activateReproduction() {
         val deviceName = devicesComboBox.selectionModel.selectedItem
-        val resolution = resolutionsComboBox.selectionModel.selectedItem
 
         observer.updateProperty("VIDEO_DEVICE", deviceName)
-        observer.updateProperty("VIDEO_DEVICE_WIDTH", resolution.width.toString())
-        observer.updateProperty("VIDEO_DEVICE_HEIGHT", resolution.height.toString())
 
-        projectionNDICapture.setDevice(deviceName, resolution.width, resolution.height)
+        projectionNDICapture.setDevice(deviceName)
         projectionNDICapture.enabled = true
     }
 
@@ -159,9 +128,6 @@ class NDICaptureController: ProjectionController(),
     fun onChangeActivate() {
         if (activateCheckBox.isSelected) {
             if (devicesComboBox.selectionModel.selectedItem.isNullOrBlank()) {
-                activateCheckBox.isSelected = false
-                projectionNDICapture.enabled = false
-            } else if (resolutionsComboBox.selectionModel.selectedItem == null) {
                 activateCheckBox.isSelected = false
                 projectionNDICapture.enabled = false
             } else {
@@ -184,11 +150,7 @@ class NDICaptureController: ProjectionController(),
     override fun onDevicesChanged(devices: Array<BridgeNDIDevice>) {
         Platform.runLater {
             devicesComboBox.selectionModel.clearSelection()
-            resolutionsComboBox.selectionModel.clearSelection()
-
             devicesComboBox.items.clear()
-            resolutionsComboBox.items.clear()
-
             devicesComboBox.items.addAll(devices.map { it.name })
         }
     }

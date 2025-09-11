@@ -145,11 +145,13 @@
                                 <fileName>lib-render.c</fileName>
                                 <fileName>loop.c</fileName>
                                 <fileName>monitor.c</fileName>
+                                <fileName>ndi-input.c</fileName>
                                 <fileName>ndi-inputs.c</fileName>
                                 <fileName>ogl-loader.c</fileName>
                                 <fileName>render.c</fileName>
                                 <fileName>render-fader.c</fileName>
                                 <fileName>render-image.c</fileName>
+                                <fileName>render-ndi-input.c</fileName>
                                 <fileName>render-pixel-unpack-buffer.c</fileName>
                                 <fileName>render-preview.c</fileName>
                                 <fileName>render-tex-blur.c</fileName>
@@ -202,6 +204,7 @@
                         <linkerEndOption>-lGL</linkerEndOption>
                         <linkerEndOption>-lX11</linkerEndOption>
                         <linkerEndOption>-lvlc</linkerEndOption>
+                        <linkerEndOption>-lturbojpeg</linkerEndOption>
                         <linkerEndOption>
                             -L/usr/lib
                         </linkerEndOption>

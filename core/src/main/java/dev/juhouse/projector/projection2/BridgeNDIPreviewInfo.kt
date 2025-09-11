@@ -1,3 +1,3 @@
 package dev.juhouse.projector.projection2
 
-data class BridgeNDIPreviewInfo(val width: Int, val height: Int, val bytesPerPixel: Int, val pixelFormat: Int)
+data class BridgeNDIPreviewInfo(var width: Int, var height: Int, var bytesPerPixel: Int, var pixelFormat: UInt)

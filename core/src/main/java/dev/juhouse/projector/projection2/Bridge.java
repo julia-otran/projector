@@ -66,6 +66,8 @@ public class Bridge {
 
     public static class VideoPreviewOutputBufferTooSmall extends Exception {}
 
+    public static class VideoPreviewNoOutputData extends Exception {}
+
     public BridgeVideoPreviewSize downloadPlayerPreview(MediaPlayer player, ByteBuffer buffer) throws VideoPreviewOutputBufferTooSmall {
         BridgeVideoPreviewSize result = downloadPlayerPreviewPtr(
                 Pointer.nativeValue(player.mediaPlayerInstance().getPointer()),
@@ -147,7 +149,7 @@ public class Bridge {
 
     public native void connectNDIDevice(String name);
 
-    public native BridgeNDIPreviewInfo downloadNDIPreview(ByteBuffer buffer);
+    public native void downloadNDIPreview(ByteBuffer buffer, BridgeNDIPreviewInfo previewInfo);
 
     public native void setNDIEnabled(boolean enabled);
 

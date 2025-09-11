@@ -30,22 +30,16 @@ void render_ndi_input_initialize() {
     mtx_init(&thread_mutex, 0);
 }
 
-void render_ndi_input_set_device(void* device) {
-    ndi_input_set_device(device);
-}
-
 void render_ndi_input_set_enabled(int enabled) {
     mtx_lock(&thread_mutex);
 
 	if (enabled) 
 	{
         src_enabled = 1;
-        ndi_input_start_downstream();
 	}
 	else 
 	{
         src_enabled = 0;
-        ndi_input_stop_downstream();
 	}
 
     mtx_unlock(&thread_mutex);
@@ -70,13 +64,11 @@ void render_ndi_input_download_preview(int* data, int dataMaxSize, int* width, i
         return;
     }
 
-    void* data;
-
     ndi_input_lock();
     ndi_input_get_frame_size(width, height, bytesPerPixel, pixelFormat);
     
     if ((*width) * (*height) * (*bytesPerPixel) <= dataMaxSize) {
-        ndi_input_download_frame(data);
+        ndi_input_download_frame((void*)data);
     }
 
     ndi_input_unlock();

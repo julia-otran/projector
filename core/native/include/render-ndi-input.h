@@ -6,7 +6,6 @@
 
 void render_ndi_input_initialize();
 
-void render_ndi_input_set_device(void* pNDI_recv);
 void render_ndi_input_set_enabled(int enabled);
 void render_ndi_input_set_render(int render);
 void render_ndi_input_set_crop(int crop);

@@ -23,6 +23,7 @@
 #include "render-video-capture.h"
 #include "ndi-inputs.h"
 #include "ndi-input.h"
+#include "render-ndi-input.h"
 
 
 static int initialized = 0;
@@ -176,7 +177,7 @@ void notify_window_capture_windows(char** window_names, int count) {
     jobjectArray result = (*env)->NewObjectArray(env, count, string_class, NULL);
     jstring window_name;
 
-    for (unsigned int i = 0; i < count; i++) {
+    for (int i = 0; i < count; i++) {
         jni_charArrToJString(env, window_name, window_names[i]);
         (*env)->SetObjectArrayElement(env, result, i, window_name);
     }
@@ -634,6 +635,85 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_searchNDIDe
 {
     ndi_inputs_find_devices();
 }
+
+static NDIlib_recv_instance_t pNDI_recv;
+
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_connectNDIDevice
+  (JNIEnv *env, jobject this, jstring j_device_name)
+{
+    char* device_name;
+    jni_jstringToCharArr(env, j_device_name, device_name);
+
+    if (pNDI_recv != NULL) {
+        NDIlib_recv_destroy(pNDI_recv);
+        pNDI_recv = NULL;
+    }
+
+    pNDI_recv = NDIlib_recv_create_v3(NULL);
+
+    unsigned int success = 0;
+    ndi_inputs_connect(device_name, pNDI_recv, &success);
+
+    if (success == 0) {
+        log_debug("Failed to connect to NDI device %s.\n", device_name);
+        NDIlib_recv_destroy(pNDI_recv);
+        pNDI_recv = NULL;
+    }
+}
+
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_downloadNDIPreview
+  (JNIEnv *env, jobject this, jobject j_buffer, jobject j_preview_info_object)
+{
+    jbyte* data = (jbyte*)(*env)->GetDirectBufferAddress(env, j_buffer);
+    jlong capacity = (*env)->GetDirectBufferCapacity(env, j_buffer);
+
+    int width = 0, height = 0, bytesPerPixel = 0;
+    GLuint pixelFormat = 0;
+
+    render_ndi_input_download_preview((int*)data, capacity, &width, &height, &bytesPerPixel, &pixelFormat);
+
+    jclass j_preview_info_class = (*env)->FindClass(env, "dev/juhouse/projector/projection2/BridgeNDIPreviewInfo");
+
+    jfieldID j_width_fieldID = (*env)->GetFieldID(env, j_preview_info_class, "width", "I");
+    jfieldID j_height_fieldID = (*env)->GetFieldID(env, j_preview_info_class, "height", "I");
+    jfieldID j_bytesPerPixel_fieldID = (*env)->GetFieldID(env, j_preview_info_class, "bytesPerPixel", "I");
+    jfieldID j_pixelFormat_fieldID = (*env)->GetFieldID(env, j_preview_info_class, "pixelFormat", "I");
+
+    // Better recycle objects in this case
+    // jobject j_preview_info_object = (*env)->AllocObject(env, j_preview_info_class);
+    (*env)->SetIntField(env, j_preview_info_object, j_width_fieldID, width);
+    (*env)->SetIntField(env, j_preview_info_object, j_height_fieldID, height);
+    (*env)->SetIntField(env, j_preview_info_object, j_bytesPerPixel_fieldID, bytesPerPixel);
+    (*env)->SetIntField(env, j_preview_info_object, j_pixelFormat_fieldID, pixelFormat);
+}
+
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setNDIEnabled
+  (JNIEnv *env, jobject this, jboolean enable) 
+{
+    if (enable) {
+        if (pNDI_recv) {
+            ndi_input_start_downstream((void*)pNDI_recv);
+            pNDI_recv = NULL;
+        }
+    } else {
+        ndi_input_stop_downstream();
+    }
+
+    render_ndi_input_set_enabled(enable);
+}
+
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setNDIRender
+  (JNIEnv *env, jobject this, jint renderFlag)
+{
+    render_ndi_input_set_render(renderFlag);
+}
+
+JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setNDICrop
+  (JNIEnv *env, jobject this, jboolean crop)
+{
+    render_ndi_input_set_crop(crop);
+}
+
 
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_shutdown(JNIEnv *env, jobject _) {
     CHECK_INITIALIZE
