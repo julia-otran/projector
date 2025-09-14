@@ -119,18 +119,20 @@ void render_ndi_input_update_buffers()
 
         ndi_input_get_frame_size(&src_width, &src_height, &bytesPerPixel, &pixelFormat);
 
-        if (buffer->width != src_width || buffer->height != src_height || extra_data->bytesPerPixel != bytesPerPixel) {
-            glBufferData(GL_PIXEL_UNPACK_BUFFER, src_width * src_height * extra_data->bytesPerPixel, 0, GL_DYNAMIC_DRAW);
-            buffer->width = src_width;
-            buffer->height = src_height;
-            extra_data->bytesPerPixel = bytesPerPixel;
+        if (src_width > 0 && src_height > 0) {
+            if (buffer->width != src_width || buffer->height != src_height || extra_data->bytesPerPixel != bytesPerPixel) {
+                glBufferData(GL_PIXEL_UNPACK_BUFFER, src_width * src_height * bytesPerPixel, 0, GL_DYNAMIC_DRAW);
+                buffer->width = src_width;
+                buffer->height = src_height;
+                extra_data->bytesPerPixel = bytesPerPixel;
+            }
+
+            extra_data->pixelFormat = pixelFormat;
+
+            void* data = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+            ndi_input_download_frame(data);
+            glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
         }
-
-        extra_data->pixelFormat = pixelFormat;
-
-        void* data = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
-        ndi_input_download_frame(data);
-        glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
         ndi_input_unlock();
 

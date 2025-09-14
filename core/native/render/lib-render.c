@@ -705,6 +705,7 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setNDIEnabl
 JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_setNDIRender
   (JNIEnv *env, jobject this, jint renderFlag)
 {
+    ndi_input_set_render(renderFlag);
     render_ndi_input_set_render(renderFlag);
 }
 

@@ -6,6 +6,7 @@
 void ndi_input_initialize();
 void ndi_input_start_downstream(void *pNDI_recv);
 void ndi_input_stop_downstream();
+void ndi_input_set_render(int render);
 void ndi_input_lock();
 void ndi_input_get_frame_size(int *width, int *height, int *bytesPerPixel, GLuint *pixelFormat);
 void ndi_input_download_frame(void *data);
