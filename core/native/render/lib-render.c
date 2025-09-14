@@ -626,6 +626,7 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_removeNDIDe
         if ((*env)->IsSameObject(env, callback, cont->obj)) {
             ndi_inputs_remove_callback_node(cont);
             (*env)->DeleteGlobalRef(env, cont->obj);
+            return;
         }
     }
 }
@@ -650,7 +651,7 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_connectNDID
     }
 
     unsigned int success = 0;
-    ndi_inputs_connect(device_name, &pNDI_recv, &success);
+    ndi_inputs_connect(device_name, (void**)&pNDI_recv, &success);
 
     if (success == 0) {
         log_debug("Failed to connect to NDI device %s.\n", device_name);

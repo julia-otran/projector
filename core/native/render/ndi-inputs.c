@@ -45,7 +45,7 @@ void ndi_inputs_remove_callback_node(void *data) {
 
     mtx_lock(&thread_mutex);
 
-    while (current != NULL) {
+    while ((*current) != NULL) {
         ndi_inputs_callback_node_list *aux = (*current);
         
         if (aux->data == data) {
