@@ -72,15 +72,30 @@ void ndi_inputs_free_devices(ndi_inputs_device_list* devices) {
     free(devices);
 }
 
-void ndi_inputs_connect(char* device_name, void* pNDI_recv_in, unsigned int* success) {
+void ndi_inputs_connect(char* device_name, void** pNDI_recv_in, unsigned int* success) {
+    NDIlib_recv_instance_t *recvPP = (NDIlib_recv_instance_t*) pNDI_recv_in;
+    NDIlib_recv_create_v3_t create_options;
+
     mtx_lock(&find_thread_mutex);
+
     (*success) = 0;
-    
+
     if (p_sources && p_sources_count) {
         for (uint32_t i = 0; i < p_sources_count; i++) {
             if (strcmp(p_sources[i].p_ndi_name, device_name) == 0) {
-                NDIlib_recv_instance_t pNDI_recv = (NDIlib_recv_instance_t)pNDI_recv_in;
-                NDIlib_recv_connect(pNDI_recv, &p_sources[i]);
+                NDIlib_source_t *src = &p_sources[i];
+
+                create_options.source_to_connect_to = (*src);
+                // create_options.bandwidth = NDIlib_recv_bandwidth_highest;
+                create_options.bandwidth = NDIlib_recv_bandwidth_lowest;
+                create_options.color_format = NDIlib_recv_color_format_UYVY_RGBA;
+                create_options.allow_video_fields = true;
+                create_options.p_ndi_recv_name = "Projector";
+
+                (*recvPP) = NDIlib_recv_create_v3(&create_options);
+
+                NDIlib_recv_instance_t pNDI_recv = (*recvPP);
+                NDIlib_recv_connect(pNDI_recv, src);
                 (*success) = 1;
             }
         }
@@ -121,6 +136,8 @@ int ndi_inputs_find_devices_internal(void* _) {
     }
 
     running_find = 0;
+
+    return 0;
 }
 
 void ndi_inputs_find_devices() {

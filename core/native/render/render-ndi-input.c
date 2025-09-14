@@ -68,7 +68,7 @@ void render_ndi_input_download_preview(int* data, int dataMaxSize, int* width, i
     ndi_input_get_frame_size(width, height, bytesPerPixel, pixelFormat);
     
     if ((*width) * (*height) * (*bytesPerPixel) <= dataMaxSize) {
-        ndi_input_download_frame((void*)data);
+        ndi_input_download_frame_preview((void*)data);
     }
 
     ndi_input_unlock();

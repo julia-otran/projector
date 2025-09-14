@@ -137,6 +137,7 @@
                             <directory>../core/native/render</directory>
                             <fileNames>
                                 <fileName>clock.c</fileName>
+                                <fileName>color.c</fileName>
                                 <fileName>config.c</fileName>
                                 <fileName>config-debug.c</fileName>
                                 <fileName>config-parse.c</fileName>

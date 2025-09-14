@@ -6,6 +6,7 @@
 #include "tinycthread.h"
 #include "Processing.NDI.Lib.h"
 #include "turbojpeg.h"
+#include "color.h"
 
 static NDIlib_recv_instance_t pNDI_recv;
 static NDIlib_framesync_instance_t pNDI_framesync;
@@ -118,13 +119,15 @@ void ndi_input_get_frame_size(int *width, int *height, int *bytesPerPixel, GLuin
     }
 }
 
-void ndi_input_download_frame(void *data) {
+void ndi_input_download_frame_int(void *data, enum TJPF colorFormat, int enableConversion) {
     if (!running) { 
         return;
     }
 
     int u_plane;
     int v_plane;
+    int uv_plane;
+    int alpha_plane;
 
     unsigned char* planes[3];
     int strides[3];
@@ -132,14 +135,28 @@ void ndi_input_download_frame(void *data) {
     switch (video_frame.FourCC) {
         case NDIlib_FourCC_video_type_RGBA:
         case NDIlib_FourCC_video_type_RGBX:
+            if (enableConversion && colorFormat == TJPF_BGRA) {
+                color_from_rgba_to_bgra((uint32_t*)data, (uint32_t*)video_frame.p_data, video_frame.xres * video_frame.yres);
+                break;
+            }
+        
+
         case NDIlib_FourCC_video_type_BGRA:
         case NDIlib_FourCC_video_type_BGRX:
-        memcpy(data, video_frame.p_data, video_frame.xres * video_frame.yres * 4);
-        break;
+            memcpy(data, video_frame.p_data, video_frame.xres * video_frame.yres * 4);
+            break;
 
         case NDIlib_FourCC_video_type_UYVY:
-        tjDecodeYUV(turbo_jpeg_decompress, video_frame.p_data, 1, TJSAMP_422, data, video_frame.xres, video_frame.xres * 4, video_frame.yres, TJPF_RGBA, 0);
-        break;
+            tjDecodeYUV(turbo_jpeg_decompress, video_frame.p_data, 1, TJSAMP_422, data, video_frame.xres, video_frame.xres * 4, video_frame.yres, colorFormat, 0);
+            break;
+
+        case NDIlib_FourCC_video_type_UYVA:
+            uv_plane = video_frame.xres * video_frame.yres;
+            alpha_plane = uv_plane * 2;
+
+            tjDecodeYUV(turbo_jpeg_decompress, video_frame.p_data, 1, TJSAMP_422, data, video_frame.xres, video_frame.xres * 4, video_frame.yres, colorFormat, 0);
+            color_copy_alpha_to_rgba(data, (uint8_t*) &video_frame.p_data[alpha_plane], uv_plane);
+            break;
 
         case NDIlib_FourCC_video_type_I420:
             u_plane = video_frame.xres * video_frame.yres;
@@ -153,7 +170,7 @@ void ndi_input_download_frame(void *data) {
             strides[1] = u_plane / 4;
             strides[2] = u_plane / 4;
 
-            tjDecodeYUVPlanes(turbo_jpeg_decompress, (const unsigned char**)planes, strides, TJSAMP_420, data, video_frame.xres, video_frame.xres * 4, video_frame.yres, TJPF_RGBA, 0);        
+            tjDecodeYUVPlanes(turbo_jpeg_decompress, (const unsigned char**)planes, strides, TJSAMP_420, data, video_frame.xres, video_frame.xres * 4, video_frame.yres, colorFormat, 0);        
             break;
 
         case NDIlib_FourCC_video_type_YV12:
@@ -168,9 +185,17 @@ void ndi_input_download_frame(void *data) {
             strides[1] = u_plane / 4;
             strides[2] = u_plane / 4;
 
-            tjDecodeYUVPlanes(turbo_jpeg_decompress, (const unsigned char**)planes, strides, TJSAMP_420, data, video_frame.xres, video_frame.xres * 4, video_frame.yres, TJPF_RGBA, 0);
+            tjDecodeYUVPlanes(turbo_jpeg_decompress, (const unsigned char**)planes, strides, TJSAMP_420, data, video_frame.xres, video_frame.xres * 4, video_frame.yres, colorFormat, 0);
             break;
     }
+}
+
+void ndi_input_download_frame_preview(void *data) {
+    ndi_input_download_frame_int(data, TJPF_BGRA, 1);
+}
+
+void ndi_input_download_frame(void *data) {
+    ndi_input_download_frame_int(data, TJPF_RGBA, 0);
 }
 
 void ndi_input_unlock() {

@@ -649,15 +649,11 @@ JNIEXPORT void JNICALL Java_dev_juhouse_projector_projection2_Bridge_connectNDID
         pNDI_recv = NULL;
     }
 
-    pNDI_recv = NDIlib_recv_create_v3(NULL);
-
     unsigned int success = 0;
-    ndi_inputs_connect(device_name, pNDI_recv, &success);
+    ndi_inputs_connect(device_name, &pNDI_recv, &success);
 
     if (success == 0) {
         log_debug("Failed to connect to NDI device %s.\n", device_name);
-        NDIlib_recv_destroy(pNDI_recv);
-        pNDI_recv = NULL;
     }
 }
 
