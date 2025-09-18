@@ -2,12 +2,14 @@
 #include <string.h>
 #include <stdlib.h>
 #include "ogl-loader.h"
+#include "ndi-output.h"
 #include "render-preview.h"
 #include "render-pixel-unpack-buffer.h"
 
 #define BYTES_PER_PIXEL 4
 
 static mtx_t thread_mutex;
+static mtx_t download_thread_mutex;
 static render_preview* previews;
 static int count_previews;
 
@@ -16,6 +18,7 @@ static int count_buffers;
 
 void render_preview_initialize() {
     mtx_init(&thread_mutex, 0);
+    mtx_init(&download_thread_mutex, 0);
 
     previews = NULL;
     count_previews = 0;
@@ -36,10 +39,13 @@ void render_preview_free() {
 
 void render_preview_set_renders(render_layer* renders, int count_renders) {
     mtx_lock(&thread_mutex);
+    mtx_lock(&download_thread_mutex);
 
     if (previews) {
         render_preview_free();
     }
+
+	ndi_output_set_renders(renders, count_renders);
 
     count_previews = count_renders;
     previews = (render_preview*) calloc(count_previews, sizeof(render_preview));
@@ -57,11 +63,12 @@ void render_preview_set_renders(render_layer* renders, int count_renders) {
         preview->data_buffer_aligned = (void*)(((unsigned long long)preview->data_buffer + 255) & ~255);
     }
 
+    mtx_unlock(&download_thread_mutex);
     mtx_unlock(&thread_mutex);
 }
 
 void render_preview_download_buffer(int render_id, void* buffer) {
-    mtx_lock(&thread_mutex);
+    mtx_lock(&download_thread_mutex);
 
     for (int i = 0; i < count_previews; i++) {
         render_preview* preview = &previews[i];
@@ -72,7 +79,7 @@ void render_preview_download_buffer(int render_id, void* buffer) {
         }
     }
     
-    mtx_unlock(&thread_mutex);
+	mtx_unlock(&download_thread_mutex);
 }
 
 void render_preview_create_buffers() {
@@ -100,32 +107,36 @@ void render_preview_create_buffers() {
 void render_preview_flush_buffers() {}
 
 void render_preview_update_buffers() {
-    if (mtx_trylock(&thread_mutex) == thrd_success) {
+    mtx_lock(&thread_mutex);
+    
+    for (int i = 0; i < count_previews; i++) {
+        render_preview* preview = &previews[i];
+        render_preview_buffer* buffer = &buffers[i];
 
-        for (int i = 0; i < count_previews; i++) {
-            render_preview* preview = &previews[i];
-            render_preview_buffer* buffer = &buffers[i];
-
-            if (preview->buffer_read == 0) {
-                continue;
-            }
-
-            glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer->buffer);
-            void* data = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
-            
-            if (data) {
-                memcpy(preview->data_buffer_aligned, data, preview->width * preview->height * BYTES_PER_PIXEL);
-                glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
-
-                buffer->readed = 1;
-                preview->buffer_read = 0;
-            }
-
-            glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+        if (preview->buffer_read == 0) {
+            continue;
         }
 
-        mtx_unlock(&thread_mutex);
+        glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer->buffer);
+        void* data = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
+            
+        if (data) {
+            if (mtx_trylock(&download_thread_mutex) == thrd_success) {
+                memcpy(preview->data_buffer_aligned, data, preview->width * preview->height * BYTES_PER_PIXEL);
+				mtx_unlock(&download_thread_mutex);
+            }
+
+			ndi_output_send_frame(preview->render_id, preview->data_buffer_aligned, preview->width, preview->height);
+            glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+
+            buffer->readed = 1;
+            preview->buffer_read = 0;
+        }
+
+        glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
     }
+
+    mtx_unlock(&thread_mutex);
 }
 
 void render_preview_deallocate_buffers() {
@@ -165,5 +176,7 @@ void render_preview_cycle(render_layer* render) {
 
 void render_preview_shutdown() {
     render_preview_free();
+    ndi_output_free();
     mtx_destroy(&thread_mutex);
+	mtx_destroy(&download_thread_mutex);
 }

@@ -141,6 +141,9 @@
     <ClInclude Include="..\..\..\..\core\native\include\color.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\core\native\include\ndi-output.h">
+      <Filter>Arquivos de Cabeçalho</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\cJSON\cJSON.c">
@@ -252,6 +255,9 @@
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\core\native\render\color.c">
+      <Filter>Arquivos de Origem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\core\native\render\ndi-output.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
   </ItemGroup>

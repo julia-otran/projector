@@ -19,6 +19,7 @@ typedef struct {
     config_display *config;
     void **virtual_screen_data;
     int active;
+    int refresh_rate;
 } display_window;
 
 typedef struct {

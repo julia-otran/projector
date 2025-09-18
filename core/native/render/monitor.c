@@ -13,6 +13,7 @@
 #include "ogl-loader.h"
 #include "monitor.h"
 #include "virtual-screen.h"
+#include "ndi-output.h"
 
 static int monitors_count;
 static monitor *monitors;
@@ -126,6 +127,8 @@ void create_window(monitor *m, display_window *dw) {
     glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
     glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 
+	dw->refresh_rate = mode->refreshRate;
+
     glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
     glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
@@ -152,6 +155,8 @@ void create_non_fs_window(monitor* m, display_window *dw, config_display* dsp) {
     glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
     glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
     glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+
+    dw->refresh_rate = mode->refreshRate;
 
     glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
     glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
@@ -360,6 +365,7 @@ void monitors_start(projection_config* config) {
             if (first)
             {
                 glfwSwapInterval(1);
+				ndi_output_set_frame_rate(dw->refresh_rate);
                 first = 0;
             }
             else

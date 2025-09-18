@@ -126,6 +126,7 @@
     <ClInclude Include="..\..\..\..\core\native\include\ndi-input.h" />
     <ClInclude Include="..\..\..\..\core\native\include\ndi-inputs.h" />
     <ClInclude Include="..\..\..\..\core\native\include\ndi-loader.h" />
+    <ClInclude Include="..\..\..\..\core\native\include\ndi-output.h" />
     <ClInclude Include="..\..\..\..\core\native\include\render-ndi-input.h" />
     <ClInclude Include="src\cJSON\cJSON.h" />
     <ClInclude Include="src\cJSON\cJSON_Utils.h" />
@@ -169,6 +170,7 @@
     <ClCompile Include="..\..\..\..\core\native\render\color.c" />
     <ClCompile Include="..\..\..\..\core\native\render\ndi-input.c" />
     <ClCompile Include="..\..\..\..\core\native\render\ndi-inputs.c" />
+    <ClCompile Include="..\..\..\..\core\native\render\ndi-output.c" />
     <ClCompile Include="..\..\..\..\core\native\render\render-ndi-input.c" />
     <ClCompile Include="src\cJSON\cJSON.c" />
     <ClCompile Include="src\cJSON\cJSON_Utils.c" />
