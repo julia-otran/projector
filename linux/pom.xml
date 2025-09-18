@@ -148,6 +148,7 @@
                                 <fileName>monitor.c</fileName>
                                 <fileName>ndi-input.c</fileName>
                                 <fileName>ndi-inputs.c</fileName>
+                                <fileName>ndi-output.c</fileName>
                                 <fileName>ogl-loader.c</fileName>
                                 <fileName>render.c</fileName>
                                 <fileName>render-fader.c</fileName>
