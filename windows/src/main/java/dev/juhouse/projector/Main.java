@@ -17,6 +17,9 @@ public class Main {
         unpackResource("/LibRender.pdb", "LibRender.pdb");
         unpackResource("/LibRender.map", "LibRender.map");
 
+        File ndiLib = unpackResource("/Processing.NDI.Lib.x64.dll", "Processing.NDI.Lib.x64.dll");
+        System.load(ndiLib.toString());
+
         File libExportFile = unpackResource("/LibRender.dll", "LibRender.dll");
         System.load(libExportFile.toString());
     }

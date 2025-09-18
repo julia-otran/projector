@@ -108,6 +108,7 @@
                     <include>LibRender.lib</include>
                     <include>LibRender.map</include>
                     <include>LibRender.pdb</include>
+                    <include>Processing.NDI.Lib.x64.dll</include>
                 </includes>
             </resource>
         </resources>

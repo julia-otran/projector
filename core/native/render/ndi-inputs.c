@@ -1,14 +1,11 @@
-#define _GNU_SOURCE
-
 #include <stdio.h>
-#include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
 
 #include "debug.h"
 #include "ndi-inputs.h"
 #include "tinycthread.h"
-#include "Processing.NDI.Lib.h"
+#include "ndi-loader.h"
 
 static ndi_inputs_devices_callback_fn callback_fn;
 static ndi_inputs_callback_node_list *callback_list;
@@ -114,10 +111,10 @@ void ndi_inputs_notify(NDIlib_find_instance_t pNDI_find) {
     list->devices = calloc(p_sources_count, sizeof(ndi_inputs_device));
 
     for (uint32_t i = 0; i < p_sources_count; i++) {
-        list->devices[i].name = calloc(1, strlen(p_sources[i].p_ndi_name));
+        list->devices[i].name = calloc(1, strlen(p_sources[i].p_ndi_name) + 1);
         memcpy(list->devices[i].name, p_sources[i].p_ndi_name, strlen(p_sources[i].p_ndi_name));
 
-        list->devices[i].url_address = calloc(1, strlen(p_sources[i].p_url_address));
+        list->devices[i].url_address = calloc(1, strlen(p_sources[i].p_url_address) + 1);
         memcpy(list->devices[i].url_address, p_sources[i].p_url_address, strlen(p_sources[i].p_url_address));
     }
 

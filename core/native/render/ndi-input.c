@@ -1,12 +1,11 @@
-#include <unistd.h>
 #include <string.h>
 #include "debug.h"
 #include "ogl-loader.h"
 #include "ndi-input.h"
 #include "tinycthread.h"
-#include "Processing.NDI.Lib.h"
 #include "turbojpeg.h"
 #include "color.h"
+#include "ndi-loader.h"
 
 static NDIlib_recv_instance_t pNDI_recv;
 static NDIlib_framesync_instance_t pNDI_framesync;

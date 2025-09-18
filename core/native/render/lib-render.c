@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <string.h>
-#include <Processing.NDI.Lib.h>
 
 #include "debug.h"
 #include "ogl-loader.h"
@@ -24,7 +23,7 @@
 #include "ndi-inputs.h"
 #include "ndi-input.h"
 #include "render-ndi-input.h"
-
+#include "ndi-loader.h"
 
 static int initialized = 0;
 static int configured = 0;
@@ -39,6 +38,12 @@ static projection_config *config;
 #ifdef _WIN32
 
 #include <windows.h>
+
+#ifdef _WIN64
+#pragma comment(lib, "Processing.NDI.Lib.x64.lib")
+#else // _WIN64
+#pragma comment(lib, "Processing.NDI.Lib.x86.lib")
+#endif // _WIN64
 
 #define jni_jstringToCharArr(env, jstr, char_out_arr) \
 	const jchar *internal_jchar = (*env)->GetStringChars(env, jstr, 0); \
@@ -190,6 +195,12 @@ void notify_window_capture_windows(char** window_names, int count) {
     (*jvm)->DetachCurrentThread(jvm);
 }
 
+void set_device_url_address(JNIEnv *env, jobject obj, jfieldID field_id, char* url_address) {
+    jstring device_url;
+    jni_charArrToJString(env, device_url, url_address);
+    (*env)->SetObjectField(env, obj, field_id, device_url);
+}
+
 void notify_ndi_device_change(ndi_inputs_device_list *input_list, ndi_inputs_callback_node_list *node_list) {
     JNIEnv *env;
     
@@ -208,9 +219,7 @@ void notify_ndi_device_change(ndi_inputs_device_list *input_list, ndi_inputs_cal
         jni_charArrToJString(env, device_name, input_list->devices[i].name);
         (*env)->SetObjectField(env, device_object, device_name_field, device_name);
 
-        jstring device_url;
-        jni_charArrToJString(env, device_url, input_list->devices[i].url_address);
-        (*env)->SetObjectField(env, device_object, device_url_field, device_url);
+        set_device_url_address(env, device_object, device_url_field, input_list->devices[i].url_address);
 
         (*env)->SetObjectArrayElement(env, devices_array, i, device_object);
     }
