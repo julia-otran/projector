@@ -23,6 +23,7 @@ void ndi_inputs_init() {
     callback_list = NULL;
     mtx_init(&thread_mutex, 0);
     mtx_init(&find_thread_mutex, 0);
+
     pNDI_find = NDIlib_find_create_v2(NULL);
 }
 
@@ -33,8 +34,11 @@ void ndi_inputs_set_callback(ndi_inputs_devices_callback_fn fn) {
 void ndi_inputs_add_callback_node(void *data) {
     ndi_inputs_callback_node_list *current = calloc(1, sizeof(ndi_inputs_callback_node_list));
     current->data = data;
+    
+    mtx_lock(&thread_mutex);
     current->next = callback_list;
     callback_list = current;
+    mtx_unlock(&thread_mutex);
 }
 
 void ndi_inputs_remove_callback_node(void *data) {
@@ -62,8 +66,8 @@ ndi_inputs_callback_node_list* ndi_inputs_get_callback_node_list() {
 
 void ndi_inputs_free_devices(ndi_inputs_device_list* devices) {
     for (uint32_t i = 0; i < devices->count; i++) {
-        free(devices->devices->name);
-        free(devices->devices->url_address);
+        free(devices->devices[i].name);
+        free(devices->devices[i].url_address);
     }
     free(devices->devices);
     free(devices);
