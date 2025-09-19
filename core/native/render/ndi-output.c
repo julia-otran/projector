@@ -45,6 +45,9 @@ void ndi_output_set_renders(render_layer* renders, int count_layers) {
 		NDIlib_send_create_t NDI_send_create_desc;
 		char name_buffer[256] = "Projector Output: ";
 		NDI_send_create_desc.p_ndi_name = strncat(name_buffer, render->config.render_name, 150);
+		NDI_send_create_desc.p_groups = NULL;
+		NDI_send_create_desc.clock_video = false;
+		NDI_send_create_desc.clock_audio = false;
 
 		output->pNDI_send = NDIlib_send_create(&NDI_send_create_desc);
 	}
@@ -67,6 +70,8 @@ void ndi_output_send_frame(int render_id, void* data, int width, int height) {
 		}
 
 		NDIlib_video_frame_v2_t NDI_video_frame;
+		memset(&NDI_video_frame, 0, sizeof(NDI_video_frame));
+
 		NDI_video_frame.xres = width;
 		NDI_video_frame.yres = height;
 		NDI_video_frame.FourCC = NDIlib_FourCC_type_BGRA;
