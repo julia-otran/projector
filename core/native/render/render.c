@@ -152,7 +152,7 @@ void render_cycle(render_layer *render) {
 
     glPushMatrix();
     glLoadIdentity();
-    glOrtho(0.0, width, height, 0.0, 0.0, 1.0);
+    glOrtho(0.0, width, 0.0, height, 0.0, 1.0);
 
     glClearColor(background_clear_color->r, background_clear_color->g, background_clear_color->b, background_clear_color->a);
     glClear(GL_COLOR_BUFFER_BIT);

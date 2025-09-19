@@ -455,7 +455,7 @@ void monitors_cycle() {
             glPushMatrix();
             glLoadIdentity();
 
-            glOrtho(0.0, dw->config->monitor_bounds.w, dw->config->monitor_bounds.h, 0.0, 0.0, 1.0);
+            glOrtho(0.0, dw->config->monitor_bounds.w, 0.0, dw->config->monitor_bounds.h, 0.0, 1.0);
 
             for (int j=0; j < dw->config->count_virtual_screen; j++) {
                 void *vs_data = dw->virtual_screen_data[j];

@@ -52,7 +52,6 @@ public class PreviewPane extends TitledPane {
         imageView.fitWidthProperty().bind(widthProperty());
 
         imageView.setPreserveRatio(true);
-        imageView.setScaleY(-1);
 
         setContent(imageView);
         setCollapsible(false);

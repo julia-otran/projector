@@ -1,6 +1,7 @@
 package dev.juhouse.projector.repositories;
 
 import dev.juhouse.projector.enums.ProjectionListItemType;
+import dev.juhouse.projector.forms.controllers.WorkspaceController;
 import dev.juhouse.projector.models.ProjectionListItem;
 import dev.juhouse.projector.models.SimpleProjectionList;
 import dev.juhouse.projector.other.SQLiteJDBCDriverConnection;
@@ -8,10 +9,13 @@ import dev.juhouse.projector.other.SQLiteJDBCDriverConnection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ProjectionListRepository {
     public List<SimpleProjectionList> activeLists() throws SQLException {
@@ -121,7 +125,7 @@ public class ProjectionListRepository {
 
         PreparedStatement stmt = SQLiteJDBCDriverConnection
                 .getConn()
-                .prepareStatement(sql);
+                .prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
         try (stmt) {
             stmt.setString(1, item.getTitle());
@@ -129,11 +133,18 @@ public class ProjectionListRepository {
             stmt.setInt(3, list.getId());
             stmt.setInt(4, item.getOrder());
             stmt.execute();
+        } catch (SQLException ex) {
+            Logger.getLogger(ProjectionListRepository.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        ResultSet keys = stmt.getGeneratedKeys();
-        keys.next();
-        item.setId(keys.getInt(1));
+        String getIdSQL = "SELECT last_insert_rowid()";
+
+        try (PreparedStatement orderStmt = SQLiteJDBCDriverConnection
+                .getConn()
+                .prepareStatement(getIdSQL)) {
+            ResultSet rs = orderStmt.executeQuery();
+            item.setId(rs.getInt(1));
+        }
 
         return item;
     }

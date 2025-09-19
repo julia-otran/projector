@@ -133,7 +133,7 @@ void virtual_screen_monitor_load_vertexes(config_display *display, config_virtua
         y = 1.0 - (y * 2.0 / display->monitor_bounds.h);
 
         vertexes[i * 4] = x;
-        vertexes[(i * 4) + 1] = y;
+        vertexes[(i * 4) + 1] = (float) y;
         vertexes[(i * 4) + 2] = (float) 0.0;
         vertexes[(i * 4) + 3] = (float) 1.0;
     }
@@ -165,7 +165,7 @@ void virtual_screen_monitor_load_vertexes(config_display *display, config_virtua
         y = y / (GLfloat) config->h;
         
         vertexes[i * 2] = CLAMP(x, 0.0, 1.0);
-        vertexes[(i * 2) + 1] = CLAMP(1.0 - y, 0, 1);
+        vertexes[(i * 2) + 1] = CLAMP(y, 0, 1);
     }
 
     GLuint uvbuffer;
@@ -245,7 +245,7 @@ void virtual_screen_shared_render(config_virtual_screen *config, void *data) {
 
     glPushMatrix();
     glLoadIdentity();
-    glOrtho(0.0, config->w, config->h, 0.0, 0.0, 1.0);
+    glOrtho(0.0, config->w, 0.0, config->h, 0.0, 1.0);
 
     vs_color_corrector_render(config, vs->render_output, &vs->color_corrector);
     vs_blend_render(&vs->blend);
