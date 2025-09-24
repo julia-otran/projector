@@ -1,7 +1,7 @@
 Projector
 =========
 
-Software for media (lyrics, images, videos, countdown, window capture) projection
+Software for media (lyrics, images, videos, countdown, window capture, NDI®) projection
 
 Usage Tutorials
 ===============
@@ -21,6 +21,7 @@ There's only support to pt-BR right now.
 Build
 =====
 - Java 21 required
+- NDI® SDK required
 
 ## Building Windows
 
@@ -33,13 +34,16 @@ Build
    mklink /d src ..\..\..\..\core\native
    ```
     
-2. First, generate the lib render JNI headers: (You may use the `Generate Headers` IntelliJ Run Config)
+2. Install the NDI ® SDK (currently Version 6) in the default location. (You may change the default location, 
+however if changed, adjusts should be made to the Visual Studio solution) 
+
+3. Generate the lib render JNI headers: (You may use the `Generate Headers` IntelliJ Run Config)
     ```
     mvn compile -pl core
     ```
-3. Open `windows\native\LibRender\LibRender.sln` on Visual Studio
-4. On Visual Studio, compile LibRender dynamic library
-5. Package the Windows jar (You may run the `Package Windows` IntelliJ Run Config)
+4. Open `windows\native\LibRender\LibRender.sln` on Visual Studio
+5. On Visual Studio, compile LibRender dynamic library
+6. Package the Windows jar (You may run the `Package Windows` IntelliJ Run Config)
     ```
     mvn clean package -pl core,windows
     ```
@@ -48,7 +52,11 @@ Build
 
 ## Building Linux
 
-*Be sure to have gcc installed and also the opengl library development headers*
+*Be sure to have installed: *
+- gcc 
+- opengl library development headers
+
+1. Unpack the NDI ® SDK inside `linux/native/LibNDI` directory.
 
 Just run (Or, use the `Package Linux` IntelliJ Run Config)
 
@@ -85,15 +93,7 @@ To execute projector software you will need:
 - GPU with OpenGL 3.2 and GLSL 1.0 support (you can even use mesa, however performance may be degraded)
 - 2GB free ram for running the software
 
-## Windows
-
-No special requirements
-
-## Linux
-
-- This software only works with X11. 
-
-Install
+Preparing the system to run the built jar directly
 ==========
 
 ## Windows
@@ -117,6 +117,7 @@ The default window config will create a projection window at the first non-prima
 
 This can be changed, and there's also a wonderful world of possibilities:
 
+- Support for NDI® Inputs and also Outputs
 - Support for blending projectors (Blending, advanced color matching, black level adjust)
 - Support for live broadcast lyrics output (with green background)
 - Support for stage monitors
@@ -124,3 +125,5 @@ This can be changed, and there's also a wonderful world of possibilities:
 - Splitting screen support (you may use a 2x2 HDMI Wall Controller and split 1 video output into 4 independent outputs)
 
 See: [Window Configuration Docs](https://github.com/julia-otran/projector/tree/master/docs/window-configurations)
+
+Also See [NDI®](https://ndi.video)

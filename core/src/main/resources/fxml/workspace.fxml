@@ -18,6 +18,8 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
@@ -25,7 +27,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="RootBox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="1000.0" prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dev.juhouse.projector.forms.controllers.WorkspaceController">
+<AnchorPane id="RootBox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="1000.0" prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dev.juhouse.projector.forms.controllers.WorkspaceController">
    <BorderPane fx:id="loadingPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
       <center>
     <Label alignment="CENTER" contentDisplay="CENTER" text="Iniciando, por favor aguarde...." textAlignment="CENTER" BorderPane.alignment="CENTER">
@@ -34,8 +36,24 @@
       </font>
     </Label>
       </center>
+      <bottom>
+         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="100.0" BorderPane.alignment="CENTER">
+            <children>
+               <ImageView fitHeight="150.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true">
+                  <image>
+                     <Image url="@../icons/OpenGL_100px_June16.png" />
+                  </image>
+               </ImageView>
+               <ImageView fitHeight="150.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true">
+                  <image>
+                     <Image url="@../icons/NDI_Logo_Master.png" />
+                  </image>
+               </ImageView>
+            </children>
+         </HBox>
+      </bottom>
    </BorderPane>
-<VBox fx:id="workspaceVBox" prefHeight="600.0" prefWidth="1000.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+<VBox fx:id="workspaceVBox" prefHeight="600.0" prefWidth="1000.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
   <MenuBar VBox.vgrow="NEVER">
     <Menu mnemonicParsing="false" text="Gerenciar Letras">
       <MenuItem mnemonicParsing="false" onAction="#onOpenMusicList" text="Lista De Letras" />
@@ -72,6 +90,7 @@
     </Menu>
     <Menu mnemonicParsing="false" text="Ajuda">
       <MenuItem mnemonicParsing="false" onAction="#onHelpAbout" text="Sobre" />
+        <MenuItem mnemonicParsing="false" onAction="#onHelpAboutNDI" text="Sobre o NDI®" />
       <SeparatorMenuItem mnemonicParsing="false" />
       <MenuItem mnemonicParsing="false" onAction="#onHelpManual" text="Manual de Instruções" />
     </Menu>

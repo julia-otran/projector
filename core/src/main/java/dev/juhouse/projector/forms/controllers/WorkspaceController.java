@@ -270,6 +270,11 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     }
 
     @FXML
+    public void onHelpAboutNDI() {
+        sceneManager.getHostServices().showDocument("https://ndi.video");
+    }
+
+    @FXML
     public void onReloadScreens() {
         graphicsHelper.reloadDevices();
     }
@@ -717,7 +722,7 @@ public class WorkspaceController implements Initializable, SceneObserver, AddMus
     @FXML
     public void onAddNDICapture() {
         try {
-            listRepository.createItem(projectionList, "Entrada NDI", ProjectionListItemType.NDI_CAPTURE);
+            listRepository.createItem(projectionList, "Entrada NDI®", ProjectionListItemType.NDI_CAPTURE);
             reloadProjectables();
         } catch (SQLException e) {
             e.printStackTrace();
