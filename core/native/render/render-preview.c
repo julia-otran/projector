@@ -117,21 +117,34 @@ void render_preview_update_buffers() {
             continue;
         }
 
+		int should_process_ndi = ndi_output_has_connection(preview->render_id);
+        int should_process_preview = mtx_trylock(&download_thread_mutex) == thrd_success;
+
+        if (!should_process_ndi && !should_process_preview) {
+            continue;
+		}
+
         glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer->buffer);
         void* data = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
             
         if (data) {
-            if (mtx_trylock(&download_thread_mutex) == thrd_success) {
+            if (should_process_preview) {
                 memcpy(preview->data_buffer_aligned, data, preview->width * preview->height * BYTES_PER_PIXEL);
-				mtx_unlock(&download_thread_mutex);
             }
 
-			ndi_output_send_frame(preview->render_id, preview->data_buffer_aligned, preview->width, preview->height);
+            if (should_process_ndi) {
+                ndi_output_send_frame(preview->render_id, preview->data_buffer_aligned, preview->width, preview->height);
+            }
+			
             glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
 
             buffer->readed = 1;
             preview->buffer_read = 0;
         }
+
+        if (should_process_preview) {
+            mtx_unlock(&download_thread_mutex);
+		}
 
         glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
     }

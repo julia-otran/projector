@@ -53,7 +53,7 @@
          </HBox>
       </bottom>
    </BorderPane>
-<VBox fx:id="workspaceVBox" prefHeight="600.0" prefWidth="1000.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+<VBox fx:id="workspaceVBox" prefHeight="600.0" prefWidth="1000.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
   <MenuBar VBox.vgrow="NEVER">
     <Menu mnemonicParsing="false" text="Gerenciar Letras">
       <MenuItem mnemonicParsing="false" onAction="#onOpenMusicList" text="Lista De Letras" />
@@ -134,7 +134,7 @@
                 <MenuItem mnemonicParsing="false" onAction="#onAddYouTube" text="YouTube" />
                 <MenuItem mnemonicParsing="false" onAction="#onAddBrowser" text="Site WEB" />
                 <MenuItem mnemonicParsing="false" onAction="#onAddDeviceCapture" text="Captura de Vídeo" />
-                <MenuItem mnemonicParsing="false" onAction="#onAddNDICapture" text="Entrada NDI" />
+                <MenuItem mnemonicParsing="false" onAction="#onAddNDICapture" text="Entrada NDI®" />
                 <MenuItem mnemonicParsing="false" onAction="#onAddSolidColor" text="Cor Sólida" />
             </items>
           </MenuButton>

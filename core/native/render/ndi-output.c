@@ -7,6 +7,8 @@
 typedef struct {
 	int render_id;
 	NDIlib_send_instance_t pNDI_send;
+	int connections_number;
+	int last_check_count;
 } ndi_output_int;
 
 static ndi_output_int* outputs = NULL;
@@ -53,6 +55,33 @@ void ndi_output_set_renders(render_layer* renders, int count_layers) {
 	}
 }
 
+int ndi_output_has_connection(int render_id) {
+	for (int i = 0; i < count_outputs; i++) {
+		ndi_output_int* output = &outputs[i];
+		if (output->render_id != render_id) {
+			continue;
+		}
+
+		if (!output->pNDI_send) {
+			return 0;
+		}
+
+		if (output->last_check_count == 0) {
+			output->connections_number = NDIlib_send_get_no_connections(output->pNDI_send, 0);
+		}
+
+		output->last_check_count++;
+
+		if (output->last_check_count >= frame_rate) {
+			output->last_check_count = 0;
+		}
+		
+		return output->connections_number;
+	}
+
+	return 0;
+}
+
 void ndi_output_send_frame(int render_id, void* data, int width, int height) {
 
 	for (int i = 0; i < count_outputs; i++) {
@@ -62,10 +91,6 @@ void ndi_output_send_frame(int render_id, void* data, int width, int height) {
 			continue;
 		}
 		if (!output->pNDI_send) {
-			return;
-		}
-
-		if (NDIlib_send_get_no_connections(output->pNDI_send, 0) == 0) {
 			return;
 		}
 
