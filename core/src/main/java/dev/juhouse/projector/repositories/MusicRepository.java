@@ -82,8 +82,12 @@ public class MusicRepository {
 
         stmt.setString(3, phrases);
         stmt.execute();
-        
-        ResultSet keys = stmt.getGeneratedKeys();
+
+        PreparedStatement idQueryStmt = SQLiteJDBCDriverConnection
+                .getConn()
+                .prepareStatement("SELECT last_insert_rowid();");
+
+        ResultSet keys = idQueryStmt.executeQuery();
         keys.next();
         music.setId(keys.getInt(1));
         saveTheme(music.getId(), music.getTheme());

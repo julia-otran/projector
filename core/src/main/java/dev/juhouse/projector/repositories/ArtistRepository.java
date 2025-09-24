@@ -80,10 +80,15 @@ public class ArtistRepository {
             stmt.setString(1, name);
             stmt.execute();
 
-            ResultSet generated = stmt.getGeneratedKeys();
+            PreparedStatement idQueryStmt = SQLiteJDBCDriverConnection
+                    .getConn()
+                    .prepareStatement("SELECT last_insert_rowid();");
 
-            if (generated.next()) {
-                a.getIdProperty().setValue(generated.getInt(1));
+            ResultSet keys = idQueryStmt.executeQuery();
+            keys.next();
+
+            if (keys.next()) {
+                a.getIdProperty().setValue(keys.getInt(1));
                 a.getNameProperty().setValue(name);
                 return a;
             }
