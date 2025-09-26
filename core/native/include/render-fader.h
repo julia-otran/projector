@@ -14,6 +14,7 @@
 #define RENDER_FADER_MODE_DELETE 3
 
 #define RENDER_FADER_DEFAULT_TIME_MS 300
+#define RENDER_FADER_TEXT_TIME_MS 150
 
 typedef struct {
     int fade_id;
