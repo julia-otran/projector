@@ -85,7 +85,6 @@ public class ArtistRepository {
                     .prepareStatement("SELECT last_insert_rowid();");
 
             ResultSet keys = idQueryStmt.executeQuery();
-            keys.next();
 
             if (keys.next()) {
                 a.getIdProperty().setValue(keys.getInt(1));
